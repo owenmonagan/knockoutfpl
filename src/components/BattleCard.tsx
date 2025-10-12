@@ -8,17 +8,17 @@ interface BattleCardProps {
   teamAName: string;
   teamBName: string;
   battleRank: number;
+  maxPointsGlobal: number;
 }
 
-export function BattleCard({ battle, teamAName, teamBName, battleRank }: BattleCardProps) {
+export function BattleCard({ battle, teamAName, teamBName, battleRank, maxPointsGlobal }: BattleCardProps) {
   const { playerA, playerB, swing, winner } = battle;
 
   const pointsA = playerA ? playerA.points * playerA.multiplier : 0;
   const pointsB = playerB ? playerB.points * playerB.multiplier : 0;
-  const maxPoints = Math.max(pointsA, pointsB, 1);
 
-  const progressA = (pointsA / maxPoints) * 100;
-  const progressB = (pointsB / maxPoints) * 100;
+  const progressA = (pointsA / maxPointsGlobal) * 100;
+  const progressB = (pointsB / maxPointsGlobal) * 100;
 
   const getPositionBadge = (elementType: number) => {
     switch(elementType) {
@@ -36,9 +36,9 @@ export function BattleCard({ battle, teamAName, teamBName, battleRank }: BattleC
       ${winner === 'B' ? 'border-r-4 border-r-purple-500' : ''}
       ${winner === 'draw' ? 'border-t-2 border-t-muted' : ''}
     `}>
-      <CardContent className="py-3 px-4">
+      <CardContent className="py-2 px-3">
         {/* Header: Battle number and swing */}
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-1">
           <span className="text-xs text-muted-foreground">Battle #{battleRank}</span>
           <Badge variant={swing > 10 ? 'default' : 'secondary'} className="text-xs h-5">
             {swing > 0 ? `+${swing}pt swing` : 'Draw'}
@@ -46,13 +46,13 @@ export function BattleCard({ battle, teamAName, teamBName, battleRank }: BattleC
         </div>
 
         {/* Battle Layout */}
-        <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
+        <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
           
           {/* Left Player (Team A) */}
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {playerA ? (
               <>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1">
                   <Badge variant="outline" className="text-[10px] h-4 px-1">{getPositionBadge(playerA.player.element_type)}</Badge>
                   <span className={`text-sm font-medium truncate ${winner === 'A' ? 'text-blue-600' : ''}`}>
                     {playerA.player.web_name}
@@ -76,10 +76,10 @@ export function BattleCard({ battle, teamAName, teamBName, battleRank }: BattleC
           <div className="text-[10px] font-bold text-muted-foreground px-1">VS</div>
 
           {/* Right Player (Team B) */}
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {playerB ? (
               <>
-                <div className="flex items-center gap-1.5 justify-end">
+                <div className="flex items-center gap-1 justify-end">
                   {playerB.isCaptain && <Badge className="text-[10px] h-4 px-1 bg-purple-500">C</Badge>}
                   <span className={`text-sm font-medium truncate ${winner === 'B' ? 'text-purple-600' : ''}`}>
                     {playerB.player.web_name}
@@ -99,20 +99,6 @@ export function BattleCard({ battle, teamAName, teamBName, battleRank }: BattleC
             )}
           </div>
         </div>
-
-        {/* Winner Badge - smaller and inline */}
-        {winner !== 'draw' && (
-          <div className="mt-2 text-center">
-            <Badge className={`text-[10px] h-5 ${winner === 'A' ? 'bg-blue-500' : 'bg-purple-500'}`}>
-              {winner === 'A' ? teamAName : teamBName} won
-            </Badge>
-          </div>
-        )}
-        {winner === 'draw' && (
-          <div className="mt-2 text-center">
-            <Badge variant="secondary" className="text-[10px] h-5">Draw</Badge>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
