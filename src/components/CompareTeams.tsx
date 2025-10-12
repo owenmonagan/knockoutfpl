@@ -83,6 +83,22 @@ export function CompareTeams() {
     setGameweek('7');
   };
 
+  const loadRandomExample = () => {
+    const randomTeam1 = Math.floor(Math.random() * 1000000) + 1;
+    let randomTeam2 = Math.floor(Math.random() * 1000000) + 1;
+
+    // Ensure team2 is different from team1
+    while (randomTeam2 === randomTeam1) {
+      randomTeam2 = Math.floor(Math.random() * 1000000) + 1;
+    }
+
+    const randomGameweek = Math.floor(Math.random() * 7) + 1;
+
+    setTeam1Id(String(randomTeam1));
+    setTeam2Id(String(randomTeam2));
+    setGameweek(String(randomGameweek));
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -156,6 +172,9 @@ export function CompareTeams() {
           <Button type="submit" form="compare-form">Compare Teams</Button>
           <Button type="button" variant="outline" onClick={loadExample}>
             Try Example
+          </Button>
+          <Button type="button" variant="outline" onClick={loadRandomExample}>
+            Try Random
           </Button>
         </ButtonGroup>
       </CardFooter>

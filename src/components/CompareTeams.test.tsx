@@ -98,4 +98,31 @@ describe('CompareTeams', () => {
     expect(screen.getByLabelText(/team 2 id/i)).toHaveValue(71631);
     expect(screen.getByLabelText(/gameweek/i)).toHaveValue(7);
   });
+
+  it('should populate form with random data when random button is clicked', async () => {
+    const user = userEvent.setup();
+
+    render(<CompareTeams />);
+
+    await user.click(screen.getByRole('button', { name: /try random/i }));
+
+    const team1Input = screen.getByLabelText(/team 1 id/i) as HTMLInputElement;
+    const team2Input = screen.getByLabelText(/team 2 id/i) as HTMLInputElement;
+    const gameweekInput = screen.getByLabelText(/gameweek/i) as HTMLInputElement;
+
+    const team1Value = Number(team1Input.value);
+    const team2Value = Number(team2Input.value);
+    const gameweekValue = Number(gameweekInput.value);
+
+    // Check that values are within expected ranges
+    expect(team1Value).toBeGreaterThanOrEqual(1);
+    expect(team1Value).toBeLessThanOrEqual(1000000);
+    expect(team2Value).toBeGreaterThanOrEqual(1);
+    expect(team2Value).toBeLessThanOrEqual(1000000);
+    expect(gameweekValue).toBeGreaterThanOrEqual(1);
+    expect(gameweekValue).toBeLessThanOrEqual(7);
+
+    // Check that team IDs are different
+    expect(team1Value).not.toBe(team2Value);
+  });
 });
