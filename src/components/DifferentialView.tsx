@@ -29,6 +29,13 @@ export function DifferentialView({
   // Create battle matchups
   const battles = createBattleMatchups(differentials);
 
+  // Calculate global max points across all battles for relative progress bars
+  const maxPointsGlobal = battles.reduce((max, battle) => {
+    const pointsA = battle.playerA ? battle.playerA.points * battle.playerA.multiplier : 0;
+    const pointsB = battle.playerB ? battle.playerB.points * battle.playerB.multiplier : 0;
+    return Math.max(max, pointsA, pointsB);
+  }, 1);
+
   // Group common players by position
   const commonByPosition: Record<string, CommonPlayer[]> = {
     GK: [],
@@ -81,9 +88,9 @@ export function DifferentialView({
         </CardContent>
       </Card>
 
-      {/* All Battle Cards - Condensed */}
+      {/* All Battle Cards - Ultra Condensed */}
       {battles.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {battles.map((battle, idx) => (
             <BattleCard
               key={idx}
@@ -91,6 +98,7 @@ export function DifferentialView({
               teamAName={teamAName}
               teamBName={teamBName}
               battleRank={idx + 1}
+              maxPointsGlobal={maxPointsGlobal}
             />
           ))}
         </div>
