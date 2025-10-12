@@ -270,6 +270,7 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
 
     // Match players within the same position
     const maxMatches = Math.max(teamAPlayers.length, teamBPlayers.length);
+    const positionBattles: Battle[] = [];
 
     for (let i = 0; i < maxMatches; i++) {
       const playerA = teamAPlayers[i]?.diff.teamA || null;
@@ -288,13 +289,29 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
         winner = 'draw';
       }
 
-      battles.push({
+      positionBattles.push({
         playerA,
         playerB,
         swing,
         winner,
       });
     }
+
+    // Sort battles within this position by max price (highest first)
+    positionBattles.sort((a, b) => {
+      const maxPriceA = Math.max(
+        a.playerA?.player.now_cost || 0,
+        a.playerB?.player.now_cost || 0
+      );
+      const maxPriceB = Math.max(
+        b.playerA?.player.now_cost || 0,
+        b.playerB?.player.now_cost || 0
+      );
+      return maxPriceB - maxPriceA;
+    });
+
+    // Add sorted position battles to main battles array
+    battles.push(...positionBattles);
   }
 
   return battles;
