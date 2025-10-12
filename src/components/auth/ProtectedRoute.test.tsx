@@ -26,4 +26,22 @@ describe('ProtectedRoute', () => {
 
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
   });
+
+  it('should redirect to login when user is not authenticated', () => {
+    vi.mocked(AuthContext.useAuth).mockReturnValue({
+      user: null,
+      loading: false,
+      isAuthenticated: false,
+    });
+
+    render(
+      <BrowserRouter>
+        <ProtectedRoute>
+          <div>Protected Content</div>
+        </ProtectedRoute>
+      </BrowserRouter>
+    );
+
+    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+  });
 });
