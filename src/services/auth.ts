@@ -2,6 +2,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  User,
   UserCredential,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
@@ -30,7 +31,6 @@ export async function signOut(): Promise<void> {
 /**
  * Get the current authenticated user
  */
-export function getCurrentUser(): any {
-  // Minimal implementation to pass test
-  return null;
+export function getCurrentUser(): User | null {
+  return auth.currentUser;
 }

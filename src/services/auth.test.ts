@@ -103,4 +103,22 @@ describe('Authentication Service', () => {
       expect(firebaseAuth.signOut).toHaveBeenCalledWith(expect.anything());
     });
   });
+
+  describe('getCurrentUser', () => {
+    it('should return the current user from auth.currentUser', async () => {
+      const { auth } = await import('../lib/firebase');
+      const { getCurrentUser } = await import('./auth');
+
+      const mockUser = { uid: 'test-uid', email: 'test@example.com' } as User;
+      Object.defineProperty(auth, 'currentUser', {
+        value: mockUser,
+        writable: true,
+      });
+
+      const result = getCurrentUser();
+
+      expect(result).toBe(mockUser);
+      expect(result?.uid).toBe('test-uid');
+    });
+  });
 });
