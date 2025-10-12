@@ -1,5 +1,6 @@
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
+import { Button } from '../ui/button';
 
 export function LoginForm() {
   return (
@@ -12,6 +13,7 @@ export function LoginForm() {
         <Label htmlFor="password">Password</Label>
         <Input id="password" type="password" />
       </div>
+      <Button type="submit">Log In</Button>
     </form>
   );
 }

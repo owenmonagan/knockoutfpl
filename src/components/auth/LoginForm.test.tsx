@@ -9,4 +9,10 @@ describe('LoginForm', () => {
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
   });
+
+  it('should render a submit button', () => {
+    render(<LoginForm />);
+
+    expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
+  });
 });
