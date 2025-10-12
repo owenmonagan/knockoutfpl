@@ -26,4 +26,21 @@ describe('User Service', () => {
     expect(createUserProfile).toBeDefined();
     expect(typeof createUserProfile).toBe('function');
   });
+
+  describe('createUserProfile', () => {
+    it('should create a user document in Firestore', async () => {
+      const { setDoc } = await import('firebase/firestore');
+      const { createUserProfile } = await import('./user');
+
+      const userData: CreateUserData = {
+        userId: 'test-uid',
+        email: 'test@example.com',
+        displayName: 'Test User',
+      };
+
+      await createUserProfile(userData);
+
+      expect(setDoc).toHaveBeenCalled();
+    });
+  });
 });
