@@ -33,7 +33,8 @@
       "WebFetch(domain:playwright.dev)",
       "WebFetch(domain:www.kyrre.dev)",
       "WebFetch(domain:autify.com)",
-      "WebFetch(domain:testquality.com)"
+      "WebFetch(domain:testquality.com)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []
