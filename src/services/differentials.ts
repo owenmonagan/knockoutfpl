@@ -297,9 +297,6 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
     }
   }
 
-  // Sort all battles by swing (biggest impact first)
-  battles.sort((a, b) => b.swing - a.swing);
-
   return battles;
 }
 
