@@ -3,8 +3,13 @@ import { render, screen } from '@testing-library/react';
 import App from './App';
 
 describe('App', () => {
-  it('renders without crashing', () => {
+  it('renders FPL Knockout title', () => {
     render(<App />);
-    expect(screen.getByText(/Vite \+ React/i)).toBeInTheDocument();
+    expect(screen.getByText(/FPL Head-to-Head/i)).toBeInTheDocument();
+  });
+
+  it('renders CompareTeams component', () => {
+    render(<App />);
+    expect(screen.getByLabelText(/team 1 id/i)).toBeInTheDocument();
   });
 });

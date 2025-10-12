@@ -1,215 +1,72 @@
-# Fantasy Premier League Knockout MVP Plan
+# Knockout FPL - Development Guide
 
-## Project Overview
+> **Note:** For product vision, features, and roadmap, see [PRODUCT.md](./PRODUCT.md)
 
-A web application that allows fantasy premier league users to challenge each other to head to head matches using their classic fantasy premier league team.
-
-For example: https://fantasy.premierleague.com/entry/158256/event/7 vs https://fantasy.premierleague.com/entry/71631/event/7, where entry 158256 got 78 points, which beats entry 71631 76 points.
-
-There is an informal but existing fantasy premier league API. Eventually, we will expand this product into full knockout tournaments.
-
-**Core Value Proposition:** Provide an exciting way to compete against other players without worrying about your season and league standings.
+This document describes our development process, technical stack, and implementation guidelines.
 
 ---
 
-## 🎯 MVP Core Features
+## 🛠️ Tech Stack
 
-**Scope:** Two FPL managers challenge each other to a head-to-head match for a specific gameweek. Winner is determined by total points scored.
+- **Frontend:** React 18 + Vite + TypeScript + shadcn/ui + Tailwind CSS
+- **Backend:** Firebase (Auth, Firestore, Cloud Functions)
+- **FPL API:** Unofficial public endpoints (proxied via Cloud Functions)
+- **Hosting:** Firebase Hosting
+- **Testing:** Playwright MCP for automated browser testing
+- **Development:** TDD Guard for test-driven development workflow
 
-**Core User Flow:**
-1. **Sign Up/Login** → Email/password via Firebase Auth
-2. **Connect FPL Team** → User enters their FPL Team ID (e.g., 158256)
-3. **Create Challenge** → Select gameweek, get shareable link
-4. **Share & Accept** → Opponent clicks link, connects their FPL ID, accepts
-5. **Wait for Gameweek** → Challenge locks at gameweek deadline
-6. **View Results** → After gameweek ends, system fetches points and shows winner
+---
 
-**Features:**
-- ✅ Create 1v1 challenges for any gameweek
-- ✅ Share challenge via URL
-- ✅ Automatic score fetching after gameweek ends
-- ✅ Challenge history (upcoming, active, completed)
-- ✅ Simple win/loss record
-- ✅ User profile with FPL ID verification
-- ✅ Manual score refresh button
+## 🧪 Development Methodology
 
-**What's OUT (Phase 2+):**
-- ❌ Live scoring during matches
-- ❌ Tournaments/brackets
-- ❌ In-app messaging
-- ❌ Push notifications
-- ❌ Prizes/payments
-- ❌ Mini-leagues
+### Test-Driven Development (TDD)
+
+We use **TDD Guard** to maintain a test-driven workflow:
+
+- **TDD Guard Integration:** Automatically runs tests on file changes
+- **Configuration:** See `.tdd-guard.json` for setup
+- **Workflow:**
+  1. Write failing test
+  2. Implement minimal code to pass
+  3. Refactor and improve
+  4. Repeat
+
+### Testing Approach
+
+**Playwright MCP Integration:**
+- Configured Playwright MCP server for automated browser testing
+- Setup command: `claude mcp add playwright npx @playwright/mcp@latest`
+- Enables autonomous testing via Claude Code with browser automation
+- Screenshots saved to `.playwright-mcp/`
+
+**Quality Standards:**
+- All critical user flows must be validated
+- No console errors in production
+- Performance: Page loads < 500ms
 
 ---
 
 ## 🏗️ Technical Architecture
 
-**Tech Stack:**
-- **Frontend:** React 18 + Vite + TypeScript + shadcn/ui + Tailwind CSS
-- **Backend:** Firebase (Auth, Firestore, Cloud Functions)
-- **FPL API:** Unofficial public endpoints (proxied via Cloud Functions)
-- **Hosting:** Firebase Hosting
+### Frontend Structure
 
-### Frontend (React + Vite + TypeScript + shadcn/ui)
+**Component Library:**
+- Using **shadcn/ui** for consistent, accessible UI components
+- Tailwind CSS for utility-first styling
+- TypeScript for type safety
 
-**Pages:**
-- `/` - Landing page with auth
-- `/dashboard` - User's challenges overview
-- `/create` - Create new challenge
-- `/challenge/:id` - Challenge detail/accept page
-- `/profile` - User profile with FPL ID
-
-**Key Components:**
-- `ChallengeCard` - Display challenge status
-- `FPLTeamConnect` - Input/verify FPL Team ID
-- `ScoreDisplay` - Show both teams' points
-- `ChallengeStatus` - Upcoming/Active/Complete badges
+**Key Design Patterns:**
+- Component composition over inheritance
+- Custom hooks for shared logic
+- Context API for state management (where appropriate)
 
 ### Backend (Firebase)
 
-**Firestore Collections:**
-
-```typescript
-users/
-  {userId}/
-    - fplTeamId: number
-    - fplTeamName: string
-    - email: string
-    - displayName: string
-    - wins: number
-    - losses: number
-    - createdAt: timestamp
-    - updatedAt: timestamp
-
-challenges/
-  {challengeId}/
-    - gameweek: number
-    - status: 'pending' | 'accepted' | 'active' | 'completed'
-    - creatorUserId: string
-    - creatorFplId: number
-    - creatorFplTeamName: string
-    - creatorScore: number | null
-    - opponentUserId: string | null
-    - opponentFplId: number | null
-    - opponentFplTeamName: string | null
-    - opponentScore: number | null
-    - winnerId: string | null
-    - isDraw: boolean
-    - gameweekDeadline: timestamp
-    - gameweekFinished: boolean
-    - completedAt: timestamp | null
-    - createdAt: timestamp
-```
-
-**Cloud Functions:**
-
-```javascript
-// Proxy to avoid CORS issues
-functions.https.onCall('getFPLTeamData', async (data) => {
-  const { teamId, gameweek } = data;
-  // Fetch from fantasy.premierleague.com/api/entry/{teamId}/event/{gameweek}/picks/
-  // Return entry_history.points and team name
-});
-
-functions.https.onCall('getCurrentGameweek', async () => {
-  // Fetch from bootstrap-static/, find is_current: true
-  // Return current gameweek number and deadline
-});
-
-// Scheduled function to update completed gameweeks
-functions.pubsub.schedule('every 2 hours').onRun(async () => {
-  // Find active challenges where gameweek has finished
-  // Fetch both teams' scores
-  // Update challenge with scores and winner
-  // Update user win/loss records
-});
-```
-
----
-
-## 🔑 FPL API Integration
-
-**Key Endpoints (via Cloud Functions):**
-
-1. **Bootstrap Static:** `https://fantasy.premierleague.com/api/bootstrap-static/`
-   - Get current gameweek (events array, filter `is_current: true`)
-
-2. **Team Picks:** `https://fantasy.premierleague.com/api/entry/{teamId}/event/{gameweek}/picks/`
-   - Get `entry_history.points` for final gameweek score
-   - Use after gameweek `finished: true`
-
-3. **Team Info:** `https://fantasy.premierleague.com/api/entry/{teamId}/`
-   - Verify team exists, get team name
-
-**Important API Considerations:**
-- ⚠️ **CORS:** Must proxy through Cloud Functions
-- ⚠️ **No Auth Needed:** Public endpoints work without login
-- ⚠️ **Bonus Points:** Use final scores only (not live) for MVP
-- ⚠️ **Rate Limits:** Not officially documented, implement basic caching
-
----
-
-## 🚀 Longer-Term Roadmap
-
-### Phase 2: Enhanced Experience
-- Live scoring during gameweeks (provisional points)
-- Rich FPL team display (players, formations, captain)
-- Challenge reminders via email
-- Head-to-head statistics and analytics
-- Challenge activity feed
-
-### Phase 3: Social Features
-- Friend system for easy challenging
-- Challenge activity feed
-- Mini-leagues for 3+ users (round robin)
-- Trash talk comments on challenges
-- User profiles with stats and badges
-
-### Phase 4: Tournaments
-- Knockout brackets (4, 8, 16 players)
-- Automatic bracket progression each gameweek
-- Tournament leaderboards and prizes
-- Custom tournament rules (chips allowed/banned)
-- Entry fees (if legal/approved)
-
----
-
-
-## 📝 Implementation Steps
-
-### Setup (1 day)
-- Initialize Vite + React + TypeScript
-- Setup Firebase project (Auth, Firestore, Functions)
-- Install shadcn/ui, configure Tailwind
-
-### Auth & Profile (1 day)
-- Firebase Auth integration
-- FPL Team ID connection flow
-- Profile page with win/loss record
-
-### Cloud Functions (1 day)
-- FPL API proxy functions
-- Score fetching logic
-- Scheduled gameweek completion checker
-
-### Challenge Flow (2 days)
-- Create challenge page
-- Challenge accept page (shareable link)
-- Challenge detail view with scores
-
-### Dashboard (1 day)
-- List challenges (upcoming, active, completed)
-- Manual refresh scores button
-- Basic stats display
-
-### Polish (1 day)
-- Error handling
-- Loading states
-- Responsive design
-- Deploy to Firebase Hosting
-
-**Total Estimate:** 7 days for functional MVP
+**Services:**
+- **Firebase Auth:** Email/password authentication
+- **Firestore:** NoSQL database for users and challenges
+- **Cloud Functions:** API proxying and scheduled tasks
+- **Firebase Hosting:** Static site deployment
 
 ---
 
@@ -277,43 +134,129 @@ functions.pubsub.schedule('every 2 hours').onRun(async () => {
 - Only the opponent can update a pending challenge to accept
 - Only Cloud Functions can update scores and status to completed
 
-## 🧪 Testing & Quality Assurance
+---
 
-### Automated Testing Setup
+## 🔑 FPL API Integration
 
-**Playwright MCP Integration:**
-- Configured Playwright MCP server for automated browser testing
-- Setup command: `claude mcp add playwright npx @playwright/mcp@latest`
-- Enables autonomous testing via Claude Code with browser automation
+### Cloud Functions
 
-**Test Artifacts:**
-- Screenshots saved to `.playwright-mcp/`
-- All critical user flows validated
-- No console errors (after bug fix)
-- Performance: Page loads < 500ms
+**Proxy Functions:**
+
+```javascript
+// Proxy to avoid CORS issues
+functions.https.onCall('getFPLTeamData', async (data) => {
+  const { teamId, gameweek } = data;
+  // Fetch from fantasy.premierleague.com/api/entry/{teamId}/event/{gameweek}/picks/
+  // Return entry_history.points and team name
+});
+
+functions.https.onCall('getCurrentGameweek', async () => {
+  // Fetch from bootstrap-static/, find is_current: true
+  // Return current gameweek number and deadline
+});
+
+// Scheduled function to update completed gameweeks
+functions.pubsub.schedule('every 2 hours').onRun(async () => {
+  // Find active challenges where gameweek has finished
+  // Fetch both teams' scores
+  // Update challenge with scores and winner
+  // Update user win/loss records
+});
+```
+
+### Key Endpoints
+
+**1. Bootstrap Static:** `https://fantasy.premierleague.com/api/bootstrap-static/`
+- Get current gameweek (events array, filter `is_current: true`)
+
+**2. Team Picks:** `https://fantasy.premierleague.com/api/entry/{teamId}/event/{gameweek}/picks/`
+- Get `entry_history.points` for final gameweek score
+- Use after gameweek `finished: true`
+
+**3. Team Info:** `https://fantasy.premierleague.com/api/entry/{teamId}/`
+- Verify team exists, get team name
+
+### API Considerations
+- ⚠️ **CORS:** Must proxy through Cloud Functions
+- ⚠️ **No Auth Needed:** Public endpoints work without login
+- ⚠️ **Bonus Points:** Use final scores only (not live) for MVP
+- ⚠️ **Rate Limits:** Not officially documented, implement basic caching
 
 ---
 
-## 🚀 Future Enhancements (Post-MVP)
+## 📁 Project Structure
 
-### Phase 2: Enhanced Experience
-- Live scoring during gameweeks
-- Rich FPL team display (players, formations)
-- Challenge reminders via email
-- Head-to-head statistics
-
-### Phase 3: Social Features
-- Friend system
-- Challenge activity feed
-- Mini-leagues for multiple users
-- Trash talk comments
-
-### Phase 4: Tournaments
-- Knockout brackets (4, 8, 16 players)
-- Automatic bracket progression
-- Tournament leaderboards
-- Entry fees (if legal/approved)
+```
+knockoutfpl/
+├── src/
+│   ├── components/      # Reusable UI components (shadcn/ui)
+│   ├── services/        # Firebase and API services
+│   ├── lib/             # Utilities and helpers
+│   ├── App.tsx          # Main application component
+│   └── index.css        # Global styles (Tailwind)
+├── functions/           # Firebase Cloud Functions
+├── .playwright-mcp/     # Playwright test artifacts
+├── CLAUDE.md           # This file (development guide)
+└── PRODUCT.md          # Product vision and roadmap
+```
 
 ---
 
-**This MVP focuses on the absolute core: two people, one gameweek, winner takes glory. Simple, testable, and expandable.**
+## 🚀 Development Workflow
+
+1. **Start Dev Server:**
+   ```bash
+   npm run dev
+   ```
+
+2. **Run Tests:**
+   ```bash
+   npm test
+   ```
+
+3. **TDD Guard (Auto-test on changes):**
+   ```bash
+   tdd-guard
+   ```
+
+4. **Build for Production:**
+   ```bash
+   npm run build
+   ```
+
+5. **Deploy to Firebase:**
+   ```bash
+   firebase deploy
+   ```
+
+---
+
+## 💡 Best Practices
+
+### Code Style
+- Use TypeScript strict mode
+- Prefer functional components with hooks
+- Keep components small and focused
+- Use descriptive variable and function names
+
+### Component Development
+- Build components with shadcn/ui when possible
+- Use Tailwind utility classes for styling
+- Keep state as local as possible
+- Extract shared logic into custom hooks
+
+### Testing
+- Test critical user flows end-to-end
+- Use Playwright MCP for browser automation
+- Validate accessibility standards
+- Check for console errors
+
+### Firebase
+- Always validate user permissions in security rules
+- Use Cloud Functions for sensitive operations
+- Implement proper error handling
+- Cache external API calls appropriately
+
+---
+
+For product features, implementation timeline, and roadmap, see [PRODUCT.md](./PRODUCT.md)
