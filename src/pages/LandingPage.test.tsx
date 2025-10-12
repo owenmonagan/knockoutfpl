@@ -13,4 +13,15 @@ describe('LandingPage', () => {
 
     expect(screen.getByText(/knockout fpl/i)).toBeInTheDocument();
   });
+
+  it('should render sign up and log in links', () => {
+    render(
+      <BrowserRouter>
+        <LandingPage />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByRole('link', { name: /sign up/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /log in/i })).toBeInTheDocument();
+  });
 });
