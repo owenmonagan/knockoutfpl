@@ -12,4 +12,10 @@ describe('Firebase Configuration', () => {
     expect(db).toBeDefined();
     expect(db).not.toBeNull();
   });
+
+  it('should export functions instance', async () => {
+    const { functions } = await import('./firebase');
+    expect(functions).toBeDefined();
+    expect(functions).not.toBeNull();
+  });
 });
