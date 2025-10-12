@@ -1,6 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
   UserCredential,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
@@ -23,7 +24,7 @@ export async function signInWithEmail(email: string, password: string): Promise<
  * Sign out the current user
  */
 export async function signOut(): Promise<void> {
-  // Minimal implementation to pass test
+  return firebaseSignOut(auth);
 }
 
 /**

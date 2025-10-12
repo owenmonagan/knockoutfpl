@@ -90,4 +90,17 @@ describe('Authentication Service', () => {
       expect(result.user.uid).toBe('test-uid');
     });
   });
+
+  describe('signOut', () => {
+    it('should call Firebase signOut', async () => {
+      const firebaseAuth = await import('firebase/auth');
+      const { signOut: authSignOut } = await import('./auth');
+
+      vi.mocked(firebaseAuth.signOut).mockResolvedValue();
+
+      await authSignOut();
+
+      expect(firebaseAuth.signOut).toHaveBeenCalledWith(expect.anything());
+    });
+  });
 });
