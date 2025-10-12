@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { signUpWithEmail, signInWithEmail, signOut } from './auth';
+import { signUpWithEmail, signInWithEmail, signOut, getCurrentUser } from './auth';
 
 describe('Authentication Service', () => {
   it('should export signUpWithEmail function', () => {
@@ -15,5 +15,10 @@ describe('Authentication Service', () => {
   it('should export signOut function', () => {
     expect(signOut).toBeDefined();
     expect(typeof signOut).toBe('function');
+  });
+
+  it('should export getCurrentUser function', () => {
+    expect(getCurrentUser).toBeDefined();
+    expect(typeof getCurrentUser).toBe('function');
   });
 });
