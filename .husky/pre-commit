@@ -1,1 +1,3 @@
-npm test
+#!/bin/sh
+echo "🧪 Running pre-commit tests (unit + smoke E2E)..."
+npm run test:critical

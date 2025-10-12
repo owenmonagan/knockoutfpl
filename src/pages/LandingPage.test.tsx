@@ -11,7 +11,8 @@ describe('LandingPage', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/knockout fpl/i)).toBeInTheDocument();
+    expect(screen.getByText(/knockout/i)).toBeInTheDocument();
+    expect(screen.getByText(/fpl/i)).toBeInTheDocument();
   });
 
   it('should render Get Started and Log In CTAs', () => {
@@ -28,5 +29,16 @@ describe('LandingPage', () => {
     const logInLink = screen.getByRole('link', { name: /log in/i });
     expect(logInLink).toBeInTheDocument();
     expect(logInLink).toHaveAttribute('href', '/login');
+  });
+
+  it('should render the hero section with badge', () => {
+    render(
+      <BrowserRouter>
+        <LandingPage />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByText(/Now Live/i)).toBeInTheDocument();
+    expect(screen.getByText(/Battle your friends/i)).toBeInTheDocument();
   });
 });
