@@ -88,4 +88,23 @@ describe('SignUpForm', () => {
     expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
     expect(signUpWithEmail).not.toHaveBeenCalled();
   });
+
+  it('should handle signup errors', async () => {
+    const { signUpWithEmail } = await import('../../services/auth');
+
+    vi.mocked(signUpWithEmail).mockRejectedValue(new Error('Email already in use'));
+
+    const user = userEvent.setup();
+
+    render(<SignUpForm />);
+
+    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/display name/i), 'Test User');
+    await user.type(screen.getByLabelText(/^password$/i), 'password123');
+    await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+
+    await user.click(screen.getByRole('button', { name: /sign up/i }));
+
+    expect(await screen.findByText(/email already in use/i)).toBeInTheDocument();
+  });
 });

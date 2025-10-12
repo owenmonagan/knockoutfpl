@@ -21,12 +21,16 @@ export function SignUpForm() {
       return;
     }
 
-    const userCredential = await signUpWithEmail(email, password);
-    await createUserProfile({
-      userId: userCredential.user.uid,
-      email: userCredential.user.email || email,
-      displayName,
-    });
+    try {
+      const userCredential = await signUpWithEmail(email, password);
+      await createUserProfile({
+        userId: userCredential.user.uid,
+        email: userCredential.user.email || email,
+        displayName,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred during sign up');
+    }
   };
 
   return (
