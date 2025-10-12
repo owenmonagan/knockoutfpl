@@ -17,4 +17,11 @@ describe('Hero', () => {
     expect(screen.getByText(/Knockout/i)).toBeInTheDocument();
     expect(screen.getByText(/FPL/i)).toBeInTheDocument();
   });
+
+  it('renders the value proposition subheading', () => {
+    renderHero();
+    expect(
+      screen.getByText(/Head-to-head Fantasy Premier League challenges/i)
+    ).toBeInTheDocument();
+  });
 });
