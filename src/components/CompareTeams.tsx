@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers } from '../services/fpl';
+import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers, getFPLLiveScores } from '../services/fpl';
 import { calculateDifferentials } from '../services/differentials';
 import { DifferentialView } from './DifferentialView';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './ui/card';
@@ -45,16 +45,12 @@ export function CompareTeams() {
 
       // If detailed view, fetch differential data
       if (viewMode === 'detailed') {
-        const [team1Picks, team2Picks, playerMap] = await Promise.all([
+        const [team1Picks, team2Picks, playerMap, liveScores] = await Promise.all([
           getFPLTeamPicks(Number(team1Id), Number(gameweek)),
           getFPLTeamPicks(Number(team2Id), Number(gameweek)),
           getFPLPlayers(),
+          getFPLLiveScores(Number(gameweek)),
         ]);
-
-        // For now, use base points as "live scores" (in production, fetch from live endpoint)
-        // Mock live scores based on team picks
-        const liveScores = new Map<number, number>();
-        // You would fetch this from /api/event/{gameweek}/live/ in production
 
         const differentials = calculateDifferentials(
           team1Picks,
