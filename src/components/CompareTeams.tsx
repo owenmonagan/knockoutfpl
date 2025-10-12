@@ -1,13 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { getFPLTeamInfo, getFPLGameweekScore } from '../services/fpl';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './ui/card';
-import { Input } from './ui/input';
 import { InputGroup, InputGroupInput, InputGroupAddon } from './ui/input-group';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
 import { ButtonGroup } from './ui/button-group';
 import { Badge } from './ui/badge';
-import { Skeleton } from './ui/skeleton';
 import { Spinner } from './ui/spinner';
 import { Users, Calendar } from 'lucide-react';
 
@@ -61,44 +59,54 @@ export function CompareTeams() {
       <CardContent>
         <form onSubmit={handleSubmit} id="compare-form">
           <Label htmlFor="team1">Team 1 ID</Label>
-          <Input
-            id="team1"
-            type="number"
-            value={team1Id}
-            onChange={(e) => setTeam1Id(e.target.value)}
-          />
+          <InputGroup>
+            <InputGroupAddon>
+              <Users />
+            </InputGroupAddon>
+            <InputGroupInput
+              id="team1"
+              type="number"
+              value={team1Id}
+              onChange={(e) => setTeam1Id(e.target.value)}
+            />
+          </InputGroup>
           <Label htmlFor="team2">Team 2 ID</Label>
-          <Input
-            id="team2"
-            type="number"
-            value={team2Id}
-            onChange={(e) => setTeam2Id(e.target.value)}
-          />
+          <InputGroup>
+            <InputGroupAddon>
+              <Users />
+            </InputGroupAddon>
+            <InputGroupInput
+              id="team2"
+              type="number"
+              value={team2Id}
+              onChange={(e) => setTeam2Id(e.target.value)}
+            />
+          </InputGroup>
           <Label htmlFor="gameweek">Gameweek</Label>
-          <Input
-            id="gameweek"
-            type="number"
-            value={gameweek}
-            onChange={(e) => setGameweek(e.target.value)}
-          />
+          <InputGroup>
+            <InputGroupAddon>
+              <Calendar />
+            </InputGroupAddon>
+            <InputGroupInput
+              id="gameweek"
+              type="number"
+              value={gameweek}
+              onChange={(e) => setGameweek(e.target.value)}
+            />
+          </InputGroup>
         </form>
       </CardContent>
       <CardFooter>
-        <Button type="submit" form="compare-form">Compare Teams</Button>
-        <Button type="button" variant="outline" onClick={loadExample}>
-          Try Example
-        </Button>
+        <ButtonGroup>
+          <Button type="submit" form="compare-form">Compare Teams</Button>
+          <Button type="button" variant="outline" onClick={loadExample}>
+            Try Example
+          </Button>
+        </ButtonGroup>
       </CardFooter>
       <CardContent>
 
-        {isLoading && (
-          <>
-            <p>Loading...</p>
-            <Skeleton />
-            <Skeleton />
-            <Skeleton />
-          </>
-        )}
+        {isLoading && <Spinner />}
 
         {result && !isLoading && (
           <>

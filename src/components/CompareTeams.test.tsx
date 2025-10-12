@@ -82,7 +82,7 @@ describe('CompareTeams', () => {
     await user.type(screen.getByLabelText(/gameweek/i), '7');
     await user.click(screen.getByRole('button', { name: /compare teams/i }));
 
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument();
 
     resolveTeamInfo({ teamId: 158256, teamName: "Owen's XI", managerName: 'Owen Test' });
   });
