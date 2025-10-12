@@ -24,4 +24,9 @@ describe('Hero', () => {
       screen.getByText(/Head-to-head Fantasy Premier League challenges/i)
     ).toBeInTheDocument();
   });
+
+  it('renders a badge with status message', () => {
+    renderHero();
+    expect(screen.getByText(/Now Live/i)).toBeInTheDocument();
+  });
 });
