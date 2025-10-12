@@ -13,8 +13,8 @@ import { Users, Calendar } from 'lucide-react';
 import type { Differential, CommonPlayer } from '../services/differentials';
 
 interface ComparisonResult {
-  team1: { name: string; points: number };
-  team2: { name: string; points: number };
+  team1: { name: string; points: number; activeChip?: string | null };
+  team2: { name: string; points: number; activeChip?: string | null };
   differentials?: Differential[];
   commonPlayers?: CommonPlayer[];
 }
@@ -69,6 +69,8 @@ export function CompareTeams() {
 
         basicResult.differentials = differentials;
         basicResult.commonPlayers = commonPlayers;
+        basicResult.team1.activeChip = team1Picks.activeChip;
+        basicResult.team2.activeChip = team2Picks.activeChip;
       }
 
       setResult(basicResult);
@@ -220,6 +222,8 @@ export function CompareTeams() {
             teamBName={result.team2.name}
             teamAScore={result.team1.points}
             teamBScore={result.team2.points}
+            teamAChip={result.team1.activeChip}
+            teamBChip={result.team2.activeChip}
           />
         )}
       </CardContent>
