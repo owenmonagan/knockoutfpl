@@ -14,14 +14,19 @@ describe('LandingPage', () => {
     expect(screen.getByText(/knockout fpl/i)).toBeInTheDocument();
   });
 
-  it('should render sign up and log in links', () => {
+  it('should render Get Started and Log In CTAs', () => {
     render(
       <BrowserRouter>
         <LandingPage />
       </BrowserRouter>
     );
 
-    expect(screen.getByRole('link', { name: /sign up/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /log in/i })).toBeInTheDocument();
+    const getStartedLink = screen.getByRole('link', { name: /get started/i });
+    expect(getStartedLink).toBeInTheDocument();
+    expect(getStartedLink).toHaveAttribute('href', '/signup');
+
+    const logInLink = screen.getByRole('link', { name: /log in/i });
+    expect(logInLink).toBeInTheDocument();
+    expect(logInLink).toHaveAttribute('href', '/login');
   });
 });

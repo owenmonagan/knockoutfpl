@@ -4,7 +4,7 @@ export function LandingPage() {
   return (
     <div>
       Knockout FPL
-      <Link to="/signup">Sign Up</Link>
+      <Link to="/signup">Get Started</Link>
       <Link to="/login">Log In</Link>
     </div>
   );
