@@ -36,4 +36,11 @@ describe('Hero', () => {
     expect(getStartedButton).toBeInTheDocument();
     expect(getStartedButton).toHaveAttribute('href', '/signup');
   });
+
+  it('renders Log In button linking to login', () => {
+    renderHero();
+    const loginButton = screen.getByRole('link', { name: /Log In/i });
+    expect(loginButton).toBeInTheDocument();
+    expect(loginButton).toHaveAttribute('href', '/login');
+  });
 });
