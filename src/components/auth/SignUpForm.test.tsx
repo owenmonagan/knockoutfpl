@@ -15,4 +15,12 @@ describe('SignUpForm', () => {
     render(<SignUpForm />);
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
   });
+
+  it('should render all required form fields', () => {
+    render(<SignUpForm />);
+    expect(screen.getByLabelText(/display name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
+  });
 });
