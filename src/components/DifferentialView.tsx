@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import type { Differential, CommonPlayer } from '../services/differentials';
+import { createBattleMatchups, type Differential, type CommonPlayer } from '../services/differentials';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+import { Button } from './ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { BattleCard } from './BattleCard';
 
 interface DifferentialViewProps {
   differentials: Differential[];
@@ -24,18 +26,10 @@ export function DifferentialView({
   teamBScore,
 }: DifferentialViewProps) {
   const [isCommonOpen, setIsCommonOpen] = useState(false);
+  const [showAllBattles, setShowAllBattles] = useState(false);
 
-  // Group differentials by position
-  const byPosition: Record<string, Differential[]> = {
-    GK: [],
-    DEF: [],
-    MID: [],
-    FWD: [],
-  };
-
-  for (const diff of differentials) {
-    byPosition[diff.position].push(diff);
-  }
+  // Create battle matchups
+  const battles = createBattleMatchups(differentials);
 
   // Group common players by position
   const commonByPosition: Record<string, CommonPlayer[]> = {
@@ -51,12 +45,15 @@ export function DifferentialView({
 
   // Calculate summary stats
   const totalDifferentials = differentials.length;
+  const battlesWonA = battles.filter((b) => b.winner === 'A').length;
+  const battlesWonB = battles.filter((b) => b.winner === 'B').length;
   const teamAAdvantage = differentials.reduce((sum, d) => sum + Math.max(0, d.pointDifference), 0);
   const teamBAdvantage = differentials.reduce((sum, d) => sum + Math.max(0, -d.pointDifference), 0);
-  const biggestDiff = differentials.reduce(
-    (max, d) => (Math.abs(d.pointDifference) > Math.abs(max.pointDifference) ? d : max),
-    differentials[0]
-  );
+  
+  const biggestSwing = battles.length > 0 ? battles[0] : null;
+  const closestBattle = battles.length > 0 
+    ? battles.reduce((min, b) => b.swing < min.swing ? b : min, battles[0])
+    : null;
 
   const winnerName = teamAScore > teamBScore ? teamAName : teamBName;
   const scoreDiff = Math.abs(teamAScore - teamBScore);
@@ -68,110 +65,68 @@ export function DifferentialView({
     commonPlayers[0]
   );
 
+  // Show top 5 battles by default, rest in collapsible
+  const topBattles = battles.slice(0, 5);
+  const remainingBattles = battles.slice(5);
+
   return (
     <div className="space-y-4">
       {/* Header Card with Match Summary */}
       <Card>
         <CardHeader>
           <CardTitle className="text-center">
-            {teamAName} vs {teamBName} - Gameweek Differentials
+            {teamAName} vs {teamBName} - Battle Results
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex justify-center items-center gap-4 text-lg font-semibold">
-            <span className={teamAScore > teamBScore ? 'text-green-600' : ''}>{teamAScore}</span>
+            <span className={teamAScore > teamBScore ? 'text-blue-600' : ''}>{teamAScore}</span>
             <span className="text-muted-foreground">-</span>
-            <span className={teamBScore > teamAScore ? 'text-green-600' : ''}>{teamBScore}</span>
+            <span className={teamBScore > teamAScore ? 'text-purple-600' : ''}>{teamBScore}</span>
           </div>
         </CardContent>
       </Card>
 
-      {/* Split-screen differential layout */}
-      <div className="grid lg:grid-cols-2 gap-4">
-        {/* Team A Panel */}
-        <Card className="border-l-4 border-l-blue-500">
-          <CardHeader>
-            <CardTitle className="text-blue-600">{teamAName} Differentials</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {Object.entries(byPosition).map(([position, diffs]) => {
-              const teamADiffs = diffs.filter((d) => d.teamA !== null);
-              if (teamADiffs.length === 0) return null;
+      {/* Battle Cards */}
+      {topBattles.length > 0 && (
+        <div className="space-y-3">
+          {topBattles.map((battle, idx) => (
+            <BattleCard
+              key={idx}
+              battle={battle}
+              teamAName={teamAName}
+              teamBName={teamBName}
+              battleRank={idx + 1}
+            />
+          ))}
+        </div>
+      )}
 
-              return (
-                <div key={position}>
-                  <Badge variant="secondary" className="mb-2">
-                    {position}
-                  </Badge>
-                  <div className="space-y-2">
-                    {teamADiffs.map((diff, idx) => (
-                      <div key={idx} className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{diff.teamA!.player.web_name}</span>
-                          {diff.teamA!.isCaptain && (
-                            <Badge className="text-xs">C</Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">
-                            {diff.teamA!.points} × {diff.teamA!.multiplier}
-                          </span>
-                          <span className="font-semibold">
-                            {diff.teamA!.points * diff.teamA!.multiplier} pts
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <Separator className="mt-4" />
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-
-        {/* Team B Panel */}
-        <Card className="border-l-4 border-l-purple-500">
-          <CardHeader>
-            <CardTitle className="text-purple-600">{teamBName} Differentials</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {Object.entries(byPosition).map(([position, diffs]) => {
-              const teamBDiffs = diffs.filter((d) => d.teamB !== null);
-              if (teamBDiffs.length === 0) return null;
-
-              return (
-                <div key={position}>
-                  <Badge variant="secondary" className="mb-2">
-                    {position}
-                  </Badge>
-                  <div className="space-y-2">
-                    {teamBDiffs.map((diff, idx) => (
-                      <div key={idx} className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{diff.teamB!.player.web_name}</span>
-                          {diff.teamB!.isCaptain && (
-                            <Badge className="text-xs">C</Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">
-                            {diff.teamB!.points} × {diff.teamB!.multiplier}
-                          </span>
-                          <span className="font-semibold">
-                            {diff.teamB!.points * diff.teamB!.multiplier} pts
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <Separator className="mt-4" />
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-      </div>
+      {/* Show More Battles */}
+      {remainingBattles.length > 0 && (
+        <Collapsible open={showAllBattles} onOpenChange={setShowAllBattles}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full">
+              {showAllBattles ? (
+                <>Show Less {remainingBattles.length === 1 ? 'Battle' : 'Battles'}</>
+              ) : (
+                <>Show {remainingBattles.length} More {remainingBattles.length === 1 ? 'Battle' : 'Battles'}</>
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 mt-3">
+            {remainingBattles.map((battle, idx) => (
+              <BattleCard
+                key={idx + 5}
+                battle={battle}
+                teamAName={teamAName}
+                teamBName={teamBName}
+                battleRank={idx + 6}
+              />
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
+      )}
 
       {/* Collapsible Common Players Section */}
       {commonPlayers.length > 0 && (
@@ -229,10 +184,10 @@ export function DifferentialView({
         </Collapsible>
       )}
 
-      {/* Summary Panel */}
+      {/* Battle Summary Panel */}
       <Card>
         <CardHeader>
-          <CardTitle>Differential Summary</CardTitle>
+          <CardTitle>Battle Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex justify-between">
@@ -240,8 +195,16 @@ export function DifferentialView({
             <span className="font-semibold">{winnerName} by {scoreDiff} points</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Total Differentials:</span>
-            <span className="font-semibold">{totalDifferentials} players</span>
+            <span className="text-muted-foreground">Battles Won:</span>
+            <span className="font-semibold">
+              <span className="text-blue-600">{teamAName}: {battlesWonA}</span>
+              {' | '}
+              <span className="text-purple-600">{teamBName}: {battlesWonB}</span>
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Total Battles:</span>
+            <span className="font-semibold">{battles.length}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">{teamAName} differential points:</span>
@@ -251,6 +214,24 @@ export function DifferentialView({
             <span className="text-muted-foreground">{teamBName} differential points:</span>
             <span className="font-semibold text-purple-600">+{teamBAdvantage}</span>
           </div>
+          {biggestSwing && (
+            <div className="flex justify-between pt-2 border-t">
+              <span className="text-muted-foreground">Biggest swing:</span>
+              <span className="font-semibold">
+                {biggestSwing.playerA?.player.web_name || biggestSwing.playerB?.player.web_name}{' '}
+                ({biggestSwing.swing} pts)
+              </span>
+            </div>
+          )}
+          {closestBattle && closestBattle.swing > 0 && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Closest battle:</span>
+              <span className="font-semibold">
+                {closestBattle.playerA?.player.web_name || closestBattle.playerB?.player.web_name}{' '}
+                ({closestBattle.swing} pts)
+              </span>
+            </div>
+          )}
           {commonPlayers.length > 0 && (
             <>
               <Separator className="my-2" />
@@ -267,15 +248,6 @@ export function DifferentialView({
                 </div>
               )}
             </>
-          )}
-          {biggestDiff && (
-            <div className="flex justify-between pt-2 border-t">
-              <span className="text-muted-foreground">Biggest swing:</span>
-              <span className="font-semibold">
-                {biggestDiff.teamA?.player.web_name || biggestDiff.teamB?.player.web_name}{' '}
-                ({Math.abs(biggestDiff.pointDifference)} pts)
-              </span>
-            </div>
           )}
         </CardContent>
       </Card>
