@@ -55,73 +55,75 @@ export function CompareTeams() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <Label htmlFor="team1">Team 1 ID</Label>
-            <Input
-              id="team1"
-              type="number"
-              value={team1Id}
-              onChange={(e) => setTeam1Id(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="team2">Team 2 ID</Label>
-            <Input
-              id="team2"
-              type="number"
-              value={team2Id}
-              onChange={(e) => setTeam2Id(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="gameweek">Gameweek</Label>
-            <Input
-              id="gameweek"
-              type="number"
-              value={gameweek}
-              onChange={(e) => setGameweek(e.target.value)}
-            />
-          </div>
-          <CardFooter>
-            <Button type="submit">Compare Teams</Button>
-            <Button type="button" variant="outline" onClick={loadExample}>
-              Try Example
-            </Button>
-          </CardFooter>
+        <form onSubmit={handleSubmit} id="compare-form">
+          <Label htmlFor="team1">Team 1 ID</Label>
+          <Input
+            id="team1"
+            type="number"
+            value={team1Id}
+            onChange={(e) => setTeam1Id(e.target.value)}
+          />
+          <Label htmlFor="team2">Team 2 ID</Label>
+          <Input
+            id="team2"
+            type="number"
+            value={team2Id}
+            onChange={(e) => setTeam2Id(e.target.value)}
+          />
+          <Label htmlFor="gameweek">Gameweek</Label>
+          <Input
+            id="gameweek"
+            type="number"
+            value={gameweek}
+            onChange={(e) => setGameweek(e.target.value)}
+          />
         </form>
+      </CardContent>
+      <CardFooter>
+        <Button type="submit" form="compare-form">Compare Teams</Button>
+        <Button type="button" variant="outline" onClick={loadExample}>
+          Try Example
+        </Button>
+      </CardFooter>
+      <CardContent>
 
         {isLoading && (
-          <div role="status">
-            <div>Loading...</div>
+          <>
+            <p>Loading...</p>
             <Skeleton />
             <Skeleton />
             <Skeleton />
-          </div>
+          </>
         )}
 
         {result && !isLoading && (
-          <div>
-            <div>
-              <span>{result.team1.name}</span>
-              <span>{result.team1.points}</span>
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle>{result.team1.name}</CardTitle>
+                <CardDescription>{result.team1.points} points</CardDescription>
+              </CardHeader>
               {result.team1.points > result.team2.points && (
-                <Badge>Winner</Badge>
+                <CardContent>
+                  <Badge>Winner</Badge>
+                </CardContent>
               )}
-            </div>
-            <div>
-              <span>{result.team2.name}</span>
-              <span>{result.team2.points}</span>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>{result.team2.name}</CardTitle>
+                <CardDescription>{result.team2.points} points</CardDescription>
+              </CardHeader>
               {result.team2.points > result.team1.points && (
-                <Badge>Winner</Badge>
+                <CardContent>
+                  <Badge>Winner</Badge>
+                </CardContent>
               )}
-            </div>
+            </Card>
             {result.team1.points === result.team2.points && (
-              <div>
-                <Badge variant="secondary">Draw!</Badge>
-              </div>
+              <Badge variant="secondary">Draw!</Badge>
             )}
-          </div>
+          </>
         )}
       </CardContent>
     </Card>

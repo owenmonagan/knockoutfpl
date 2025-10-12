@@ -34,9 +34,9 @@ describe('CompareTeams', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Owen's XI/i)).toBeInTheDocument();
-      expect(screen.getByText('78')).toBeInTheDocument();
+      expect(screen.getByText(/78/)).toBeInTheDocument();
       expect(screen.getByText(/Rival Team/i)).toBeInTheDocument();
-      expect(screen.getByText('76')).toBeInTheDocument();
+      expect(screen.getByText(/76/)).toBeInTheDocument();
     });
   });
 
