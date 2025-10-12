@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks } from './fpl';
+import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers } from './fpl';
 
 describe('FPL Service', () => {
   describe('getFPLTeamInfo', () => {
@@ -87,6 +87,42 @@ describe('FPL Service', () => {
           totalPoints: 500,
         },
         activeChip: null,
+      });
+    });
+  });
+
+  describe('getFPLPlayers', () => {
+    it('should fetch and return player data map', async () => {
+      const mockBootstrapData = {
+        elements: [
+          { id: 1, web_name: 'Pope', element_type: 1, team: 1, now_cost: 50 },
+          { id: 234, web_name: 'Salah', element_type: 3, team: 2, now_cost: 130 },
+          { id: 567, web_name: 'Haaland', element_type: 4, team: 3, now_cost: 145 },
+        ],
+      };
+
+      global.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockBootstrapData,
+      });
+
+      const result = await getFPLPlayers();
+
+      expect(global.fetch).toHaveBeenCalledWith('/api/fpl/bootstrap-static/');
+      expect(result.size).toBe(3);
+      expect(result.get(1)).toEqual({
+        id: 1,
+        web_name: 'Pope',
+        element_type: 1,
+        team: 1,
+        now_cost: 50,
+      });
+      expect(result.get(234)).toEqual({
+        id: 234,
+        web_name: 'Salah',
+        element_type: 3,
+        team: 2,
+        now_cost: 130,
       });
     });
   });

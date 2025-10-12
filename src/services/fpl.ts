@@ -77,3 +77,28 @@ export async function getFPLTeamPicks(teamId: number, gameweek: number): Promise
     activeChip: data.active_chip,
   };
 }
+
+export interface FPLPlayer {
+  id: number;
+  web_name: string;
+  element_type: number;
+  team: number;
+  now_cost: number;
+}
+
+export async function getFPLPlayers(): Promise<Map<number, FPLPlayer>> {
+  const response = await fetch('/api/fpl/bootstrap-static/');
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch player data');
+  }
+
+  const data = await response.json();
+  const playerMap = new Map<number, FPLPlayer>();
+
+  for (const element of data.elements) {
+    playerMap.set(element.id, element);
+  }
+
+  return playerMap;
+}
