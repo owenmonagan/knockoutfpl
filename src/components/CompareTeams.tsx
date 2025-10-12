@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers, getFPLLiveScores } from '../services/fpl';
-import { calculateDifferentials } from '../services/differentials';
+import { calculateDifferentials, calculateCommonPlayers } from '../services/differentials';
 import { DifferentialView } from './DifferentialView';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './ui/card';
 import { InputGroup, InputGroupInput, InputGroupAddon } from './ui/input-group';
@@ -10,7 +10,7 @@ import { ButtonGroup } from './ui/button-group';
 import { Badge } from './ui/badge';
 import { Spinner } from './ui/spinner';
 import { Users, Calendar } from 'lucide-react';
-import type { Differential } from '../services/differentials';
+import type { Differential, CommonPlayer } from '../services/differentials';
 
 interface ComparisonResult {
   team1: { name: string; points: number };
