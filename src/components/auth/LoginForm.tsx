@@ -7,14 +7,22 @@ import { signInWithEmail } from '../../services/auth';
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signInWithEmail(email, password);
+    setError('');
+
+    try {
+      await signInWithEmail(email, password);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred during login');
+    }
   };
 
   return (
     <form onSubmit={handleSubmit}>
+      {error && <div className="text-red-500">{error}</div>}
       <div>
         <Label htmlFor="email">Email</Label>
         <Input

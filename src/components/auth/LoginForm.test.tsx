@@ -30,4 +30,18 @@ describe('LoginForm', () => {
 
     expect(signInSpy).toHaveBeenCalledWith('test@example.com', 'password123');
   });
+
+  it('should display error message on login failure', async () => {
+    const signInSpy = vi.spyOn(authService, 'signInWithEmail');
+    signInSpy.mockRejectedValue(new Error('Invalid credentials'));
+    const user = userEvent.setup();
+
+    render(<LoginForm />);
+
+    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/password/i), 'wrongpassword');
+    await user.click(screen.getByRole('button', { name: /log in/i }));
+
+    expect(await screen.findByText(/invalid credentials/i)).toBeInTheDocument();
+  });
 });
