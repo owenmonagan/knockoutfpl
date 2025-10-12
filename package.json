@@ -21,6 +21,7 @@
     "test:e2e:navigation": "playwright test --grep @navigation",
     "test:e2e:dashboard": "playwright test --grep @dashboard",
     "test:e2e:critical": "playwright test --grep @critical",
+    "test:e2e:selective": "node scripts/e2e-watch.js",
     "test:all": "npm test -- --run && npm run test:e2e",
     "test:critical": "npm test -- --run && npm run test:e2e:smoke",
     "emulators": "firebase emulators:start",

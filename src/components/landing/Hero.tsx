@@ -11,6 +11,9 @@ export function Hero() {
       <Button asChild>
         <Link to="/signup">Get Started</Link>
       </Button>
+      <Button asChild variant="outline">
+        <Link to="/login">Log In</Link>
+      </Button>
     </div>
   );
 }
