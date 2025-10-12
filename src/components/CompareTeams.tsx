@@ -2,10 +2,14 @@ import { useState, type FormEvent } from 'react';
 import { getFPLTeamInfo, getFPLGameweekScore } from '../services/fpl';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './ui/card';
 import { Input } from './ui/input';
+import { InputGroup, InputGroupInput, InputGroupAddon } from './ui/input-group';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
+import { ButtonGroup } from './ui/button-group';
 import { Badge } from './ui/badge';
 import { Skeleton } from './ui/skeleton';
+import { Spinner } from './ui/spinner';
+import { Users, Calendar } from 'lucide-react';
 
 interface ComparisonResult {
   team1: { name: string; points: number };
