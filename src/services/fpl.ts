@@ -102,3 +102,27 @@ export async function getFPLPlayers(): Promise<Map<number, FPLPlayer>> {
 
   return playerMap;
 }
+
+export interface FPLLiveElement {
+  id: number;
+  stats: {
+    total_points: number;
+  };
+}
+
+export async function getFPLLiveScores(gameweek: number): Promise<Map<number, number>> {
+  const response = await fetch(`/api/fpl/event/${gameweek}/live/`);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch live scores');
+  }
+
+  const data = await response.json();
+  const scoresMap = new Map<number, number>();
+
+  for (const element of data.elements) {
+    scoresMap.set(element.id, element.stats.total_points);
+  }
+
+  return scoresMap;
+}

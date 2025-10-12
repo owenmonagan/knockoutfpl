@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers } from './fpl';
+import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers, getFPLLiveScores } from './fpl';
 
 describe('FPL Service', () => {
   describe('getFPLTeamInfo', () => {
@@ -124,6 +124,31 @@ describe('FPL Service', () => {
         team: 2,
         now_cost: 130,
       });
+    });
+  });
+
+  describe('getFPLLiveScores', () => {
+    it('should fetch and return live player scores as a Map', async () => {
+      const mockLiveData = {
+        elements: [
+          { id: 1, stats: { total_points: 7 } },
+          { id: 234, stats: { total_points: 12 } },
+          { id: 567, stats: { total_points: 15 } },
+        ],
+      };
+
+      global.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockLiveData,
+      });
+
+      const result = await getFPLLiveScores(7);
+
+      expect(global.fetch).toHaveBeenCalledWith('/api/fpl/event/7/live/');
+      expect(result.size).toBe(3);
+      expect(result.get(1)).toBe(7);
+      expect(result.get(234)).toBe(12);
+      expect(result.get(567)).toBe(15);
     });
   });
 });

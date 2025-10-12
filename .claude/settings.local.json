@@ -26,7 +26,10 @@
       "mcp__shadcn__list_items_in_registries",
       "mcp__shadcn__view_items_in_registries",
       "mcp__shadcn__get_add_command_for_items",
-      "WebFetch(domain:www.fantasyfootballfix.com)"
+      "WebFetch(domain:www.fantasyfootballfix.com)",
+      "WebFetch(domain:fantasy.premierleague.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:www.oliverlooney.com)"
     ],
     "deny": [],
     "ask": []
