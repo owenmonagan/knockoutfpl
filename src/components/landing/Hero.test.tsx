@@ -29,4 +29,11 @@ describe('Hero', () => {
     renderHero();
     expect(screen.getByText(/Now Live/i)).toBeInTheDocument();
   });
+
+  it('renders Get Started CTA button linking to signup', () => {
+    renderHero();
+    const getStartedButton = screen.getByRole('link', { name: /Get Started/i });
+    expect(getStartedButton).toBeInTheDocument();
+    expect(getStartedButton).toHaveAttribute('href', '/signup');
+  });
 });

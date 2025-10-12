@@ -1,0 +1,51 @@
+{
+  "description": "Maps source files to E2E test tags for selective test running",
+  "mappings": [
+    {
+      "pattern": "src/components/auth/**",
+      "tags": ["@auth"],
+      "description": "Authentication components trigger auth E2E tests"
+    },
+    {
+      "pattern": "src/pages/{LoginPage,SignUpPage}.*",
+      "tags": ["@auth"],
+      "description": "Auth pages trigger auth E2E tests"
+    },
+    {
+      "pattern": "src/services/auth.*",
+      "tags": ["@auth"],
+      "description": "Auth service triggers auth E2E tests"
+    },
+    {
+      "pattern": "src/pages/DashboardPage.*",
+      "tags": ["@dashboard"],
+      "description": "Dashboard page triggers dashboard E2E tests"
+    },
+    {
+      "pattern": "src/services/{fpl,user,differentials}.*",
+      "tags": ["@dashboard"],
+      "description": "FPL and user services trigger dashboard E2E tests"
+    },
+    {
+      "pattern": "src/router.*",
+      "tags": ["@navigation"],
+      "description": "Router changes trigger navigation E2E tests"
+    },
+    {
+      "pattern": "src/components/auth/ProtectedRoute.*",
+      "tags": ["@navigation", "@auth"],
+      "description": "Protected route changes trigger both navigation and auth tests"
+    },
+    {
+      "pattern": "src/pages/LandingPage.*",
+      "tags": ["@navigation"],
+      "description": "Landing page triggers navigation E2E tests"
+    }
+  ],
+  "defaultTags": ["@smoke"],
+  "notes": [
+    "When a file matches multiple patterns, all tags are combined",
+    "If no pattern matches, defaultTags are used",
+    "Smoke tests should always be lightweight and fast"
+  ]
+}
