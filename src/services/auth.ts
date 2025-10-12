@@ -2,9 +2,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
-  User,
-  UserCredential,
 } from 'firebase/auth';
+import type { User, UserCredential } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
 /**
