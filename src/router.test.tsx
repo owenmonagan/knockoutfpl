@@ -21,4 +21,13 @@ describe('Router', () => {
     render(<RouterProvider router={testRouter} />);
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
   });
+
+  it('should render signup page at /signup', () => {
+    const testRouter = createMemoryRouter(router, {
+      initialEntries: ['/signup'],
+    });
+
+    render(<RouterProvider router={testRouter} />);
+    expect(screen.getByLabelText(/display name/i)).toBeInTheDocument();
+  });
 });
