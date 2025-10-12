@@ -145,7 +145,9 @@ This establishes a rich, engaging comparison experience that goes beyond simple 
 - ✅ Configure Firebase Auth (SDK initialized with auth, db, functions)
 - ✅ Setup Firestore database (schema defined, security rules created)
 - ✅ Authentication service implemented (signUp, signIn, signOut, getCurrentUser)
-- ✅ Test coverage for Firebase initialization and auth service (39 tests passing)
+- ✅ LoginForm component with TDD (email/password inputs, form submission)
+- ✅ E2E verification with Playwright MCP (form interaction, no console errors)
+- ✅ Test coverage: 42 tests passing (3 Firebase init, 4 auth service, 3 LoginForm, 32 existing)
 - ⬜ Initialize Cloud Functions project structure
 - ⬜ Migrate FPL API calls to Cloud Functions
 - ⬜ Deploy initial Firebase setup
