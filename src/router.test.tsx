@@ -10,4 +10,12 @@ describe('Router', () => {
 
     expect(testRouter.state.location.pathname).toBe('/');
   });
+
+  it('should have a route for the login page', () => {
+    const testRouter = createMemoryRouter(router, {
+      initialEntries: ['/login'],
+    });
+
+    expect(testRouter.state.location.pathname).toBe('/login');
+  });
 });
