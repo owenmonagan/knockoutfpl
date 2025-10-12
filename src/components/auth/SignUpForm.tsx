@@ -10,9 +10,17 @@ export function SignUpForm() {
   const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     const userCredential = await signUpWithEmail(email, password);
     await createUserProfile({
       userId: userCredential.user.uid,
@@ -23,6 +31,7 @@ export function SignUpForm() {
 
   return (
     <form onSubmit={handleSubmit}>
+      {error && <div className="text-red-500">{error}</div>}
       <div>
         <Label htmlFor="email">Email</Label>
         <Input

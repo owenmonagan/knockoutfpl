@@ -71,4 +71,21 @@ describe('SignUpForm', () => {
       displayName: 'Test User',
     });
   });
+
+  it('should show error when passwords do not match', async () => {
+    const { signUpWithEmail } = await import('../../services/auth');
+    const user = userEvent.setup();
+
+    render(<SignUpForm />);
+
+    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/display name/i), 'Test User');
+    await user.type(screen.getByLabelText(/^password$/i), 'password123');
+    await user.type(screen.getByLabelText(/confirm password/i), 'different123');
+
+    await user.click(screen.getByRole('button', { name: /sign up/i }));
+
+    expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
+    expect(signUpWithEmail).not.toHaveBeenCalled();
+  });
 });
