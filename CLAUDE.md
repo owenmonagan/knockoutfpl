@@ -44,6 +44,159 @@ We use **TDD Guard** to maintain a test-driven workflow:
 - No console errors in production
 - Performance: Page loads < 500ms
 
+### E2E Testing Strategy
+
+**Follow the Testing Pyramid:**
+
+```
+        /\
+       /  \  ← 5-10% E2E Tests (Playwright MCP)
+      /____\    Slow, strategic, milestone-based
+     /      \
+    /        \ ← 15-20% Integration Tests
+   /__________\   Test component interactions
+  /            \
+ /              \ ← 70-80% Unit Tests (Vitest)
+/________________\  Fast, constant during TDD
+```
+
+**Philosophy:**
+- **Unit tests (Vitest)**: Run constantly during TDD Red-Green-Refactor cycle
+- **E2E tests (Playwright MCP)**: Run at feature completion milestones
+- **DO NOT** run E2E tests on every code change (too slow, breaks TDD flow)
+- **DO** run E2E tests before committing user-facing features
+
+#### When to Use Playwright MCP
+
+**ALWAYS verify with Playwright MCP after:**
+
+1. **Forms Implementation**
+   - Login/signup forms
+   - Challenge creation forms
+   - FPL team ID input
+   - Form validation and submission flows
+
+2. **Authentication Flows**
+   - User registration complete flow
+   - Login → Dashboard navigation
+   - Logout and session handling
+   - Protected route access
+
+3. **Navigation & Routing**
+   - New pages or route additions
+   - Navigation menu changes
+   - Conditional rendering based on auth state
+   - Deep linking and URL parameters
+
+4. **API Integration**
+   - FPL API data fetching and display
+   - Firebase API operations (read/write)
+   - Error handling for API failures
+   - Loading states during async operations
+
+5. **Critical User Journeys**
+   - Signup → FPL connection → Dashboard
+   - Create challenge → Opponent accepts → View results
+   - Dashboard data loading and real-time updates
+
+**OPTIONAL for Playwright MCP:**
+- Pure utility functions (no UI)
+- Styling/CSS changes (unless affecting usability)
+- Refactoring with no behavior changes
+- Type definitions or configuration
+
+#### E2E Verification Workflow
+
+**Recommended flow:**
+
+```bash
+# 1. TDD Cycle (Unit Tests)
+Write test (Red) → Implement (Green) → Refactor (Green) → Repeat
+
+# 2. Feature Complete Milestone
+All unit tests passing ✓
+
+# 3. E2E Verification
+npm run dev  # Start dev server
+# Use Playwright MCP tools to verify user flow
+# Check console for errors
+# Verify expected behavior
+
+# 4. Commit
+git add . && git commit -m "Feature: ..."
+```
+
+**E2E Verification Checklist:**
+- [ ] Navigate to feature page/component
+- [ ] Interact with UI (click, type, submit)
+- [ ] Verify expected behavior (navigation, data display, state changes)
+- [ ] Test error cases (invalid input, network failures)
+- [ ] Check console for errors: `mcp__playwright__browser_console_messages`
+- [ ] Verify loading states appear/disappear correctly
+- [ ] Test mobile viewport if applicable
+
+#### Available Playwright MCP Tools
+
+```typescript
+// Navigation
+mcp__playwright__browser_navigate({ url: 'http://localhost:5173/login' })
+
+// Page state capture (better than screenshots)
+mcp__playwright__browser_snapshot()
+
+// User interactions
+mcp__playwright__browser_click({ element: 'Submit button', ref: '...' })
+mcp__playwright__browser_type({ element: 'Email input', text: 'user@example.com' })
+mcp__playwright__browser_fill_form({ fields: [...] })
+
+// Verification
+mcp__playwright__browser_console_messages({ onlyErrors: true })
+mcp__playwright__browser_evaluate({ function: '() => document.title' })
+
+// Visual verification
+mcp__playwright__browser_take_screenshot({ filename: 'feature-test.png' })
+```
+
+#### Example: Login Form E2E Verification
+
+```typescript
+// After unit tests pass for LoginForm component:
+
+// 1. Start dev server
+npm run dev
+
+// 2. Use Playwright MCP
+await browser_navigate('http://localhost:5173/login')
+await browser_snapshot()  // Capture initial state
+
+// 3. Fill form
+await browser_fill_form([
+  { name: 'email', type: 'textbox', ref: '[data-testid="email"]', value: 'test@example.com' },
+  { name: 'password', type: 'textbox', ref: '[data-testid="password"]', value: 'password123' }
+])
+
+// 4. Submit and verify
+await browser_click({ element: 'Login button', ref: 'button[type="submit"]' })
+await browser_wait_for({ text: 'Dashboard' })  // Wait for navigation
+
+// 5. Check console
+const messages = await browser_console_messages({ onlyErrors: true })
+// Verify no errors
+
+// ✓ E2E verification complete!
+```
+
+#### Quick Reference
+
+**Use `/e2e-verify` command** for guided E2E verification workflow.
+
+**Smart E2E Reminder Hook:**
+A hook automatically suggests E2E verification when:
+- Unit tests are passing ✓
+- Critical files modified (forms, auth, navigation, services)
+
+**When in doubt:** Run unit tests constantly, run E2E tests at milestones.
+
 ---
 
 ## 🏗️ Technical Architecture
