@@ -6,4 +6,10 @@ describe('Firebase Configuration', () => {
     expect(auth).toBeDefined();
     expect(auth).not.toBeNull();
   });
+
+  it('should export firestore instance', async () => {
+    const { db } = await import('./firebase');
+    expect(db).toBeDefined();
+    expect(db).not.toBeNull();
+  });
 });
