@@ -4,7 +4,6 @@ import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
-import { Button } from './ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { BattleCard } from './BattleCard';
 
@@ -26,7 +25,6 @@ export function DifferentialView({
   teamBScore,
 }: DifferentialViewProps) {
   const [isCommonOpen, setIsCommonOpen] = useState(false);
-  const [showAllBattles, setShowAllBattles] = useState(false);
 
   // Create battle matchups
   const battles = createBattleMatchups(differentials);
@@ -65,10 +63,6 @@ export function DifferentialView({
     commonPlayers[0]
   );
 
-  // Show top 5 battles by default, rest in collapsible
-  const topBattles = battles.slice(0, 5);
-  const remainingBattles = battles.slice(5);
-
   return (
     <div className="space-y-4">
       {/* Header Card with Match Summary */}
@@ -87,10 +81,10 @@ export function DifferentialView({
         </CardContent>
       </Card>
 
-      {/* Battle Cards */}
-      {topBattles.length > 0 && (
-        <div className="space-y-3">
-          {topBattles.map((battle, idx) => (
+      {/* All Battle Cards - Condensed */}
+      {battles.length > 0 && (
+        <div className="space-y-2">
+          {battles.map((battle, idx) => (
             <BattleCard
               key={idx}
               battle={battle}
@@ -100,32 +94,6 @@ export function DifferentialView({
             />
           ))}
         </div>
-      )}
-
-      {/* Show More Battles */}
-      {remainingBattles.length > 0 && (
-        <Collapsible open={showAllBattles} onOpenChange={setShowAllBattles}>
-          <CollapsibleTrigger asChild>
-            <Button variant="outline" className="w-full">
-              {showAllBattles ? (
-                <>Show Less {remainingBattles.length === 1 ? 'Battle' : 'Battles'}</>
-              ) : (
-                <>Show {remainingBattles.length} More {remainingBattles.length === 1 ? 'Battle' : 'Battles'}</>
-              )}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-3 mt-3">
-            {remainingBattles.map((battle, idx) => (
-              <BattleCard
-                key={idx + 5}
-                battle={battle}
-                teamAName={teamAName}
-                teamBName={teamBName}
-                battleRank={idx + 6}
-              />
-            ))}
-          </CollapsibleContent>
-        </Collapsible>
       )}
 
       {/* Collapsible Common Players Section */}
