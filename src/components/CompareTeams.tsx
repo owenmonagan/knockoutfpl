@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react';
-import { getFPLTeamInfo, getFPLGameweekScore } from '../services/fpl';
+import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers } from '../services/fpl';
+import { calculateDifferentials } from '../services/differentials';
+import { DifferentialView } from './DifferentialView';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './ui/card';
 import { InputGroup, InputGroupInput, InputGroupAddon } from './ui/input-group';
 import { Label } from './ui/label';
@@ -8,10 +10,12 @@ import { ButtonGroup } from './ui/button-group';
 import { Badge } from './ui/badge';
 import { Spinner } from './ui/spinner';
 import { Users, Calendar } from 'lucide-react';
+import type { Differential } from '../services/differentials';
 
 interface ComparisonResult {
   team1: { name: string; points: number };
   team2: { name: string; points: number };
+  differentials?: Differential[];
 }
 
 export function CompareTeams() {
@@ -20,6 +24,7 @@ export function CompareTeams() {
   const [gameweek, setGameweek] = useState('');
   const [result, setResult] = useState<ComparisonResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<'simple' | 'detailed'>('simple');
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -33,10 +38,35 @@ export function CompareTeams() {
         getFPLGameweekScore(Number(team2Id), Number(gameweek)),
       ]);
 
-      setResult({
+      const basicResult: ComparisonResult = {
         team1: { name: team1Info.teamName, points: team1Score.points },
         team2: { name: team2Info.teamName, points: team2Score.points },
-      });
+      };
+
+      // If detailed view, fetch differential data
+      if (viewMode === 'detailed') {
+        const [team1Picks, team2Picks, playerMap] = await Promise.all([
+          getFPLTeamPicks(Number(team1Id), Number(gameweek)),
+          getFPLTeamPicks(Number(team2Id), Number(gameweek)),
+          getFPLPlayers(),
+        ]);
+
+        // For now, use base points as "live scores" (in production, fetch from live endpoint)
+        // Mock live scores based on team picks
+        const liveScores = new Map<number, number>();
+        // You would fetch this from /api/event/{gameweek}/live/ in production
+
+        const differentials = calculateDifferentials(
+          team1Picks,
+          team2Picks,
+          playerMap,
+          liveScores
+        );
+
+        basicResult.differentials = differentials;
+      }
+
+      setResult(basicResult);
     } finally {
       setIsLoading(false);
     }
@@ -94,6 +124,26 @@ export function CompareTeams() {
               onChange={(e) => setGameweek(e.target.value)}
             />
           </InputGroup>
+
+          <div className="mt-4">
+            <Label>View Mode</Label>
+            <ButtonGroup>
+              <Button
+                type="button"
+                variant={viewMode === 'simple' ? 'default' : 'outline'}
+                onClick={() => setViewMode('simple')}
+              >
+                Simple
+              </Button>
+              <Button
+                type="button"
+                variant={viewMode === 'detailed' ? 'default' : 'outline'}
+                onClick={() => setViewMode('detailed')}
+              >
+                Detailed
+              </Button>
+            </ButtonGroup>
+          </div>
         </form>
       </CardContent>
       <CardFooter>
@@ -108,7 +158,7 @@ export function CompareTeams() {
 
         {isLoading && <Spinner />}
 
-        {result && !isLoading && (
+        {result && !isLoading && viewMode === 'simple' && (
           <>
             <Card>
               <CardHeader>
@@ -136,6 +186,16 @@ export function CompareTeams() {
               <Badge variant="secondary">Draw!</Badge>
             )}
           </>
+        )}
+
+        {result && !isLoading && viewMode === 'detailed' && result.differentials && (
+          <DifferentialView
+            differentials={result.differentials}
+            teamAName={result.team1.name}
+            teamBName={result.team2.name}
+            teamAScore={result.team1.points}
+            teamBScore={result.team2.points}
+          />
         )}
       </CardContent>
     </Card>
