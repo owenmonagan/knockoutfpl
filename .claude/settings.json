@@ -9,6 +9,16 @@
             "command": "tdd-guard"
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/shadcn-reminder.sh",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PostToolUse": [
