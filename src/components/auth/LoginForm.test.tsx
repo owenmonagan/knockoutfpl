@@ -1,8 +1,18 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { LoginForm } from './LoginForm';
 import * as authService from '../../services/auth';
+
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
 
 describe('LoginForm', () => {
   it('should render email and password inputs', () => {
@@ -43,5 +53,21 @@ describe('LoginForm', () => {
     await user.click(screen.getByRole('button', { name: /log in/i }));
 
     expect(await screen.findByText(/invalid credentials/i)).toBeInTheDocument();
+  });
+
+  it('should navigate to dashboard on successful login', async () => {
+    const signInSpy = vi.spyOn(authService, 'signInWithEmail');
+    signInSpy.mockResolvedValue({} as any);
+    const user = userEvent.setup();
+
+    render(<LoginForm />);
+
+    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/password/i), 'password123');
+    await user.click(screen.getByRole('button', { name: /log in/i }));
+
+    await vi.waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+    });
   });
 });
