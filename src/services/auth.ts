@@ -1,4 +1,8 @@
-import { createUserWithEmailAndPassword, UserCredential } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  UserCredential,
+} from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
 /**
@@ -11,9 +15,8 @@ export async function signUpWithEmail(email: string, password: string): Promise<
 /**
  * Sign in an existing user with email and password
  */
-export async function signInWithEmail(email: string, password: string): Promise<any> {
-  // Minimal implementation to pass test
-  return null;
+export async function signInWithEmail(email: string, password: string): Promise<UserCredential> {
+  return signInWithEmailAndPassword(auth, email, password);
 }
 
 /**

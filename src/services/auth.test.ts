@@ -66,4 +66,28 @@ describe('Authentication Service', () => {
       expect(result.user.email).toBe('test@example.com');
     });
   });
+
+  describe('signInWithEmail', () => {
+    it('should call signInWithEmailAndPassword and return UserCredential', async () => {
+      const { signInWithEmailAndPassword } = await import('firebase/auth');
+      const { signInWithEmail } = await import('./auth');
+
+      const mockUser = { uid: 'test-uid', email: 'test@example.com' } as User;
+      const mockUserCredential: UserCredential = {
+        user: mockUser,
+      } as UserCredential;
+
+      vi.mocked(signInWithEmailAndPassword).mockResolvedValue(mockUserCredential);
+
+      const result = await signInWithEmail('test@example.com', 'password123');
+
+      expect(signInWithEmailAndPassword).toHaveBeenCalledWith(
+        expect.anything(),
+        'test@example.com',
+        'password123'
+      );
+      expect(result).toBeDefined();
+      expect(result.user.uid).toBe('test-uid');
+    });
+  });
 });
