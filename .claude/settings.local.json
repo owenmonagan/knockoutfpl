@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Read(//Users/owen/work/**)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(tdd-guard init:*)",
+      "Bash(npm test:*)",
+      "Bash(timeout:*)",
+      "Bash(gtimeout:*)",
+      "Bash(cat:*)",
+      "Bash(tdd-guard:*)",
+      "Read(//opt/homebrew/Cellar/tdd-guard/1.1.0/libexec/lib/node_modules/tdd-guard/**)",
+      "Bash(npx playwright install:*)",
+      "Bash(npm run test:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
