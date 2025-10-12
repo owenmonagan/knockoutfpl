@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateDifferentials, calculateCommonPlayers } from './differentials';
+import { calculateDifferentials, calculateCommonPlayers, createBattleMatchups } from './differentials';
 import type { FPLTeamPicks, FPLPlayer } from './fpl';
 
 describe('calculateDifferentials', () => {
@@ -152,5 +152,75 @@ describe('calculateCommonPlayers', () => {
 
     // Benched player should NOT be included (multiplier = 0)
     expect(result.find((p) => p.player.id === 5)).toBeUndefined();
+  });
+});
+
+describe('createBattleMatchups', () => {
+  it('should match differentials by impact and return battles sorted by swing', () => {
+    const playerMap = new Map<number, FPLPlayer>([
+      [1, { id: 1, web_name: 'Pope', element_type: 1, team: 1, now_cost: 50 }],
+      [2, { id: 2, web_name: 'Saliba', element_type: 2, team: 2, now_cost: 60 }],
+      [3, { id: 3, web_name: 'Salah', element_type: 3, team: 3, now_cost: 130 }],
+      [4, { id: 4, web_name: 'Haaland', element_type: 4, team: 4, now_cost: 145 }],
+      [5, { id: 5, web_name: 'Kane', element_type: 4, team: 6, now_cost: 110 }],
+    ]);
+
+    const liveScores = new Map<number, number>([
+      [1, 7],   // Pope: 7 points
+      [2, 6],   // Saliba: 6 points
+      [3, 12],  // Salah: 12 points (Team A captained = 24)
+      [4, 2],   // Haaland: 2 points (Team A only)
+      [5, 10],  // Kane: 10 points (Team B only)
+    ]);
+
+    const teamA: FPLTeamPicks = {
+      picks: [
+        { element: 1, position: 1, multiplier: 1, is_captain: false, is_vice_captain: false }, // Pope - 7pts
+        { element: 3, position: 3, multiplier: 2, is_captain: true, is_vice_captain: false },  // Salah (C) - 24pts
+        { element: 4, position: 4, multiplier: 1, is_captain: false, is_vice_captain: false }, // Haaland - 2pts
+      ],
+      entryHistory: { event: 2, points: 33, totalPoints: 100 },
+      activeChip: null,
+    };
+
+    const teamB: FPLTeamPicks = {
+      picks: [
+        { element: 2, position: 2, multiplier: 1, is_captain: false, is_vice_captain: false }, // Saliba - 6pts
+        { element: 3, position: 3, multiplier: 1, is_captain: false, is_vice_captain: false }, // Salah - 12pts
+        { element: 5, position: 4, multiplier: 1, is_captain: false, is_vice_captain: false }, // Kane - 10pts
+      ],
+      entryHistory: { event: 2, points: 28, totalPoints: 95 },
+      activeChip: null,
+    };
+
+    const differentials = calculateDifferentials(teamA, teamB, playerMap, liveScores);
+    const battles = createBattleMatchups(differentials);
+
+    // Should create 3 battles (matching MVP with MVP based on impact)
+    expect(battles).toHaveLength(3);
+
+    // Battle #1: Highest swing - Salah (C) 24pts vs Salah 12pts = 12pt swing
+    // (Salah has different multipliers, so appears in both teams)
+    expect(battles[0].swing).toBe(12);
+    expect(battles[0].playerA?.player.web_name).toBe('Salah');
+    expect(battles[0].playerA?.points).toBe(12);
+    expect(battles[0].playerA?.multiplier).toBe(2);
+    expect(battles[0].playerA?.isCaptain).toBe(true);
+    expect(battles[0].playerB?.player.web_name).toBe('Salah');
+    expect(battles[0].playerB?.points).toBe(12);
+    expect(battles[0].playerB?.multiplier).toBe(1);
+    expect(battles[0].winner).toBe('A');
+
+    // Battle #2: Haaland (2pts) vs Saliba (6pts) = 4pt swing
+    expect(battles[1].swing).toBe(4);
+    expect(battles[1].playerA?.player.web_name).toBe('Haaland');
+    expect(battles[1].playerB?.player.web_name).toBe('Saliba');
+    expect(battles[1].winner).toBe('B');
+
+    // Battle #3: Pope (7pts) vs Kane (10pts) = 3pt swing
+    expect(battles[2].swing).toBe(3);
+    expect(battles[2].playerA?.player.web_name).toBe('Pope');
+    expect(battles[2].playerB?.player.web_name).toBe('Kane');
+    expect(battles[2].winner).toBe('B');
   });
 });

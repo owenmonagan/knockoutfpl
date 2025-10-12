@@ -148,3 +148,66 @@ export function calculateCommonPlayers(
 
   return commonPlayers;
 }
+
+export interface Battle {
+  playerA: DifferentialPlayer | null;
+  playerB: DifferentialPlayer | null;
+  swing: number;
+  winner: 'A' | 'B' | 'draw';
+}
+
+export function createBattleMatchups(differentials: Differential[]): Battle[] {
+  const battles: Battle[] = [];
+
+  // Separate Team A and Team B differentials, calculate impact for each
+  const teamADiffs: Array<{ diff: Differential; impact: number }> = [];
+  const teamBDiffs: Array<{ diff: Differential; impact: number }> = [];
+
+  for (const diff of differentials) {
+    if (diff.teamA !== null) {
+      const impact = Math.abs(diff.teamA.points * diff.teamA.multiplier);
+      teamADiffs.push({ diff, impact });
+    }
+    if (diff.teamB !== null) {
+      const impact = Math.abs(diff.teamB.points * diff.teamB.multiplier);
+      teamBDiffs.push({ diff, impact });
+    }
+  }
+
+  // Sort by impact (highest first)
+  teamADiffs.sort((a, b) => b.impact - a.impact);
+  teamBDiffs.sort((a, b) => b.impact - a.impact);
+
+  // Create matchups: MVP vs MVP, #2 vs #2, etc.
+  const maxBattles = Math.max(teamADiffs.length, teamBDiffs.length);
+
+  for (let i = 0; i < maxBattles; i++) {
+    const playerA = teamADiffs[i]?.diff.teamA || null;
+    const playerB = teamBDiffs[i]?.diff.teamB || null;
+
+    const pointsA = playerA ? playerA.points * playerA.multiplier : 0;
+    const pointsB = playerB ? playerB.points * playerB.multiplier : 0;
+    const swing = Math.abs(pointsA - pointsB);
+
+    let winner: 'A' | 'B' | 'draw';
+    if (pointsA > pointsB) {
+      winner = 'A';
+    } else if (pointsB > pointsA) {
+      winner = 'B';
+    } else {
+      winner = 'draw';
+    }
+
+    battles.push({
+      playerA,
+      playerB,
+      swing,
+      winner,
+    });
+  }
+
+  // Sort battles by swing (biggest impact first)
+  battles.sort((a, b) => b.swing - a.swing);
+
+  return battles;
+}
