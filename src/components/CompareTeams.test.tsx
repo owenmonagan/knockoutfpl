@@ -25,6 +25,16 @@ describe('CompareTeams', () => {
       .mockResolvedValueOnce({ gameweek: 7, points: 78 })
       .mockResolvedValueOnce({ gameweek: 7, points: 76 });
 
+    vi.spyOn(fplService, 'getFPLTeamPicks')
+      .mockResolvedValueOnce({ picks: [], entryHistory: { event: 7, points: 78, totalPoints: 500 }, activeChip: null })
+      .mockResolvedValueOnce({ picks: [], entryHistory: { event: 7, points: 76, totalPoints: 495 }, activeChip: null });
+
+    vi.spyOn(fplService, 'getFPLPlayers')
+      .mockResolvedValue(new Map());
+
+    vi.spyOn(fplService, 'getFPLLiveScores')
+      .mockResolvedValue(new Map());
+
     render(<CompareTeams />);
 
     await user.type(screen.getByLabelText(/team 1 id/i), '158256');
@@ -33,10 +43,10 @@ describe('CompareTeams', () => {
     await user.click(screen.getByRole('button', { name: /compare teams/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/Owen's XI/i)).toBeInTheDocument();
-      expect(screen.getByText(/78/)).toBeInTheDocument();
-      expect(screen.getByText(/Rival Team/i)).toBeInTheDocument();
-      expect(screen.getByText(/76/)).toBeInTheDocument();
+      expect(screen.getAllByText(/Owen's XI/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/78/).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Rival Team/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/76/).length).toBeGreaterThan(0);
     });
   });
 
@@ -50,6 +60,16 @@ describe('CompareTeams', () => {
     vi.spyOn(fplService, 'getFPLGameweekScore')
       .mockResolvedValueOnce({ gameweek: 7, points: 78 })
       .mockResolvedValueOnce({ gameweek: 7, points: 76 });
+
+    vi.spyOn(fplService, 'getFPLTeamPicks')
+      .mockResolvedValueOnce({ picks: [], entryHistory: { event: 7, points: 78, totalPoints: 500 }, activeChip: null })
+      .mockResolvedValueOnce({ picks: [], entryHistory: { event: 7, points: 76, totalPoints: 495 }, activeChip: null });
+
+    vi.spyOn(fplService, 'getFPLPlayers')
+      .mockResolvedValue(new Map());
+
+    vi.spyOn(fplService, 'getFPLLiveScores')
+      .mockResolvedValue(new Map());
 
     render(<CompareTeams />);
 
@@ -74,6 +94,9 @@ describe('CompareTeams', () => {
 
     vi.spyOn(fplService, 'getFPLTeamInfo').mockReturnValue(teamInfoPromise as any);
     vi.spyOn(fplService, 'getFPLGameweekScore').mockResolvedValue({ gameweek: 7, points: 78 });
+    vi.spyOn(fplService, 'getFPLTeamPicks').mockResolvedValue({ picks: [], entryHistory: { event: 7, points: 78, totalPoints: 500 }, activeChip: null });
+    vi.spyOn(fplService, 'getFPLPlayers').mockResolvedValue(new Map());
+    vi.spyOn(fplService, 'getFPLLiveScores').mockResolvedValue(new Map());
 
     render(<CompareTeams />);
 

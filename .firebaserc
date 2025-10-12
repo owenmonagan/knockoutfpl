@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "dev": "knockoutfpl-dev",
+    "default": "knockoutfpl-dev"
+  }
+}

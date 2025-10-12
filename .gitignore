@@ -22,6 +22,7 @@ coverage
 /playwright/.cache/
 /test-results/
 *.trace.zip
+.playwright-mcp/
 
 # TDD Guard
 .claude/tdd-guard/

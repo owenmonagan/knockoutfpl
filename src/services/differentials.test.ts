@@ -196,31 +196,49 @@ describe('createMatchups', () => {
     const differentials = calculateDifferentials(teamA, teamB, playerMap, liveScores);
     const matchups = createMatchups(differentials);
 
-    // Should create 3 matchups (matching MVP with MVP based on impact)
-    expect(matchups).toHaveLength(3);
+    // Should create 5 matchups:
+    // 1. Captain differential (Salah C vs null)
+    // 2-5. Position-based (FWD, MID, DEF, GK sorted by price)
+    expect(matchups).toHaveLength(5);
 
-    // Matchup #1: Highest swing - Salah (C) 24pts vs Salah 12pts = 12pt swing
-    // (Salah has different multipliers, so appears in both teams)
-    expect(matchups[0].swing).toBe(12);
+    // Matchup #1: Salah (C) 24pts vs null (captain differential, Team A only)
+    expect(matchups[0].swing).toBe(24);
     expect(matchups[0].playerA?.player.web_name).toBe('Salah');
     expect(matchups[0].playerA?.points).toBe(12);
     expect(matchups[0].playerA?.multiplier).toBe(2);
     expect(matchups[0].playerA?.isCaptain).toBe(true);
-    expect(matchups[0].playerB?.player.web_name).toBe('Salah');
-    expect(matchups[0].playerB?.points).toBe(12);
-    expect(matchups[0].playerB?.multiplier).toBe(1);
+    expect(matchups[0].playerB).toBeNull();
     expect(matchups[0].winner).toBe('A');
 
-    // Matchup #2: Haaland (2pts) vs Saliba (6pts) = 4pt swing
-    expect(matchups[1].swing).toBe(4);
+    // Matchup #2: Haaland (2pts) vs Kane (10pts) - FWD position (sorted by price)
+    expect(matchups[1].swing).toBe(8);
     expect(matchups[1].playerA?.player.web_name).toBe('Haaland');
-    expect(matchups[1].playerB?.player.web_name).toBe('Saliba');
+    expect(matchups[1].playerA?.points).toBe(2);
+    expect(matchups[1].playerB?.player.web_name).toBe('Kane');
+    expect(matchups[1].playerB?.points).toBe(10);
     expect(matchups[1].winner).toBe('B');
 
-    // Matchup #3: Pope (7pts) vs Kane (10pts) = 3pt swing
-    expect(matchups[2].swing).toBe(3);
-    expect(matchups[2].playerA?.player.web_name).toBe('Pope');
-    expect(matchups[2].playerB?.player.web_name).toBe('Kane');
+    // Matchup #3: null vs Salah (12pts) - MID position (Team B only, non-captain)
+    expect(matchups[2].swing).toBe(12);
+    expect(matchups[2].playerA).toBeNull();
+    expect(matchups[2].playerB?.player.web_name).toBe('Salah');
+    expect(matchups[2].playerB?.points).toBe(12);
+    expect(matchups[2].playerB?.multiplier).toBe(1);
+    expect(matchups[2].playerB?.isCaptain).toBe(false);
     expect(matchups[2].winner).toBe('B');
+
+    // Matchup #4: null vs Saliba (6pts) - DEF position (Team B only)
+    expect(matchups[3].swing).toBe(6);
+    expect(matchups[3].playerA).toBeNull();
+    expect(matchups[3].playerB?.player.web_name).toBe('Saliba');
+    expect(matchups[3].playerB?.points).toBe(6);
+    expect(matchups[3].winner).toBe('B');
+
+    // Matchup #5: Pope (7pts) vs null - GK position (Team A only)
+    expect(matchups[4].swing).toBe(7);
+    expect(matchups[4].playerA?.player.web_name).toBe('Pope');
+    expect(matchups[4].playerA?.points).toBe(7);
+    expect(matchups[4].playerB).toBeNull();
+    expect(matchups[4].winner).toBe('A');
   });
 });
