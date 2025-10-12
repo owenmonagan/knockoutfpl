@@ -240,10 +240,43 @@ knockoutfpl/
 - Use descriptive variable and function names
 
 ### Component Development
-- Build components with shadcn/ui when possible
-- Use Tailwind utility classes for styling
+
+**shadcn/ui First Approach:**
+- **ALWAYS** look for a shadcn/ui component BEFORE using raw HTML elements
+- We should **almost NEVER use `<div>`** - find the correct shadcn component first
+- Only use `<div>` for truly custom concepts that don't have a shadcn equivalent
+- Use the default style from [shadcn/ui docs](https://ui.shadcn.com/docs)
+
+**Adding Components:**
+```bash
+npx shadcn@latest add label
+npx shadcn@latest add button
+npx shadcn@latest add card
+# etc.
+```
+
+**Usage Examples:**
+```tsx
+// Labels
+<Label htmlFor="email">Your email address</Label>
+
+// Buttons
+<Button variant="outline">Button</Button>
+<Button variant="default">Submit</Button>
+
+// Cards
+<Card>
+  <CardHeader>
+    <CardTitle>Title</CardTitle>
+  </CardHeader>
+  <CardContent>Content here</CardContent>
+</Card>
+```
+
+**Other Guidelines:**
 - Keep state as local as possible
 - Extract shared logic into custom hooks
+- Use Tailwind utility classes only for spacing and layout tweaks
 
 ### Testing
 - Test critical user flows end-to-end
