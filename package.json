@@ -15,7 +15,13 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report",
-    "test:all": "npm test -- --run && npm run test:e2e"
+    "test:all": "npm test -- --run && npm run test:e2e",
+    "emulators": "firebase emulators:start",
+    "emulators:ui": "firebase emulators:start --import=./firebase-data --export-on-exit",
+    "deploy": "npm run build && firebase deploy",
+    "deploy:hosting": "npm run build && firebase deploy --only hosting",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:firestore": "firebase deploy --only firestore"
   },
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.1.12",
