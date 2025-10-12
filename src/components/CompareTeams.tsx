@@ -16,6 +16,7 @@ interface ComparisonResult {
   team1: { name: string; points: number };
   team2: { name: string; points: number };
   differentials?: Differential[];
+  commonPlayers?: CommonPlayer[];
 }
 
 export function CompareTeams() {
@@ -59,7 +60,15 @@ export function CompareTeams() {
           liveScores
         );
 
+        const commonPlayers = calculateCommonPlayers(
+          team1Picks,
+          team2Picks,
+          playerMap,
+          liveScores
+        );
+
         basicResult.differentials = differentials;
+        basicResult.commonPlayers = commonPlayers;
       }
 
       setResult(basicResult);
@@ -187,6 +196,7 @@ export function CompareTeams() {
         {result && !isLoading && viewMode === 'detailed' && result.differentials && (
           <DifferentialView
             differentials={result.differentials}
+            commonPlayers={result.commonPlayers}
             teamAName={result.team1.name}
             teamBName={result.team2.name}
             teamAScore={result.team1.points}
