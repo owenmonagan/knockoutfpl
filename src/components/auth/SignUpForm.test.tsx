@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { SignUpForm } from './SignUpForm';
 
 // Mock auth and user services
@@ -22,5 +23,21 @@ describe('SignUpForm', () => {
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
+  });
+
+  it('should call signUpWithEmail when form is submitted', async () => {
+    const { signUpWithEmail } = await import('../../services/auth');
+    const user = userEvent.setup();
+
+    render(<SignUpForm />);
+
+    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/display name/i), 'Test User');
+    await user.type(screen.getByLabelText(/^password$/i), 'password123');
+    await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+
+    await user.click(screen.getByRole('button', { name: /sign up/i }));
+
+    expect(signUpWithEmail).toHaveBeenCalledWith('test@example.com', 'password123');
   });
 });
