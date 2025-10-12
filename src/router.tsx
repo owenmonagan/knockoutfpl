@@ -3,6 +3,7 @@ import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 export const router: RouteObject[] = [
   {
@@ -19,6 +20,10 @@ export const router: RouteObject[] = [
   },
   {
     path: '/dashboard',
-    element: <DashboardPage />,
+    element: (
+      <ProtectedRoute>
+        <DashboardPage />
+      </ProtectedRoute>
+    ),
   },
 ];

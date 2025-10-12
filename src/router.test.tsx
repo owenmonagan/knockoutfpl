@@ -1,7 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { router } from './router';
+import { AuthProvider } from './contexts/AuthContext';
+
+vi.mock('./lib/firebase', () => ({
+  auth: {},
+  db: {},
+}));
 
 describe('Router', () => {
   it('should render landing page at /', () => {
@@ -31,12 +37,28 @@ describe('Router', () => {
     expect(screen.getByLabelText(/display name/i)).toBeInTheDocument();
   });
 
-  it('should render dashboard page at /dashboard', () => {
+  it('should render dashboard page at /dashboard when authenticated', () => {
     const testRouter = createMemoryRouter(router, {
       initialEntries: ['/dashboard'],
     });
 
-    render(<RouterProvider router={testRouter} />);
+    // Mock Firebase onAuthStateChanged to provide authenticated user
+    vi.mock('firebase/auth', async () => {
+      const actual = await vi.importActual('firebase/auth');
+      return {
+        ...actual,
+        onAuthStateChanged: (auth: any, callback: any) => {
+          callback({ uid: 'test-uid', email: 'test@example.com' });
+          return () => {};
+        },
+      };
+    });
+
+    render(
+      <AuthProvider>
+        <RouterProvider router={testRouter} />
+      </AuthProvider>
+    );
     expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
   });
 });
