@@ -6,8 +6,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { InputGroup, InputGroupInput, InputGroupAddon } from './ui/input-group';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
-import { ButtonGroup } from './ui/button-group';
-import { Badge } from './ui/badge';
 import { Spinner } from './ui/spinner';
 import { Users, Calendar } from 'lucide-react';
 import type { Differential, CommonPlayer } from '../services/differentials';
@@ -15,8 +13,8 @@ import type { Differential, CommonPlayer } from '../services/differentials';
 interface ComparisonResult {
   team1: { name: string; points: number; activeChip?: string | null };
   team2: { name: string; points: number; activeChip?: string | null };
-  differentials?: Differential[];
-  commonPlayers?: CommonPlayer[];
+  differentials: Differential[];
+  commonPlayers: CommonPlayer[];
 }
 
 export function CompareTeams() {
@@ -25,67 +23,73 @@ export function CompareTeams() {
   const [gameweek, setGameweek] = useState('');
   const [result, setResult] = useState<ComparisonResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [viewMode, setViewMode] = useState<'simple' | 'detailed'>('simple');
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const compareTeams = async (t1Id: string, t2Id: string, gw: string) => {
     setIsLoading(true);
 
     try {
-      const [team1Info, team2Info, team1Score, team2Score] = await Promise.all([
-        getFPLTeamInfo(Number(team1Id)),
-        getFPLTeamInfo(Number(team2Id)),
-        getFPLGameweekScore(Number(team1Id), Number(gameweek)),
-        getFPLGameweekScore(Number(team2Id), Number(gameweek)),
+      const [team1Info, team2Info, team1Score, team2Score, team1Picks, team2Picks, playerMap, liveScores] = await Promise.all([
+        getFPLTeamInfo(Number(t1Id)),
+        getFPLTeamInfo(Number(t2Id)),
+        getFPLGameweekScore(Number(t1Id), Number(gw)),
+        getFPLGameweekScore(Number(t2Id), Number(gw)),
+        getFPLTeamPicks(Number(t1Id), Number(gw)),
+        getFPLTeamPicks(Number(t2Id), Number(gw)),
+        getFPLPlayers(),
+        getFPLLiveScores(Number(gw)),
       ]);
 
-      const basicResult: ComparisonResult = {
-        team1: { name: team1Info.teamName, points: team1Score.points },
-        team2: { name: team2Info.teamName, points: team2Score.points },
-      };
+      const differentials = calculateDifferentials(
+        team1Picks,
+        team2Picks,
+        playerMap,
+        liveScores
+      );
 
-      // If detailed view, fetch differential data
-      if (viewMode === 'detailed') {
-        const [team1Picks, team2Picks, playerMap, liveScores] = await Promise.all([
-          getFPLTeamPicks(Number(team1Id), Number(gameweek)),
-          getFPLTeamPicks(Number(team2Id), Number(gameweek)),
-          getFPLPlayers(),
-          getFPLLiveScores(Number(gameweek)),
-        ]);
+      const commonPlayers = calculateCommonPlayers(
+        team1Picks,
+        team2Picks,
+        playerMap,
+        liveScores
+      );
 
-        const differentials = calculateDifferentials(
-          team1Picks,
-          team2Picks,
-          playerMap,
-          liveScores
-        );
-
-        const commonPlayers = calculateCommonPlayers(
-          team1Picks,
-          team2Picks,
-          playerMap,
-          liveScores
-        );
-
-        basicResult.differentials = differentials;
-        basicResult.commonPlayers = commonPlayers;
-        basicResult.team1.activeChip = team1Picks.activeChip;
-        basicResult.team2.activeChip = team2Picks.activeChip;
-      }
-
-      setResult(basicResult);
+      setResult({
+        team1: { 
+          name: team1Info.teamName, 
+          points: team1Score.points,
+          activeChip: team1Picks.activeChip,
+        },
+        team2: { 
+          name: team2Info.teamName, 
+          points: team2Score.points,
+          activeChip: team2Picks.activeChip,
+        },
+        differentials,
+        commonPlayers,
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const loadExample = () => {
-    setTeam1Id('158256');
-    setTeam2Id('71631');
-    setGameweek('7');
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    await compareTeams(team1Id, team2Id, gameweek);
   };
 
-  const loadRandomExample = () => {
+  const loadExample = async () => {
+    const exampleTeam1 = '158256';
+    const exampleTeam2 = '71631';
+    const exampleGameweek = '7';
+    
+    setTeam1Id(exampleTeam1);
+    setTeam2Id(exampleTeam2);
+    setGameweek(exampleGameweek);
+    
+    await compareTeams(exampleTeam1, exampleTeam2, exampleGameweek);
+  };
+
+  const loadRandomExample = async () => {
     const randomTeam1 = Math.floor(Math.random() * 1000000) + 1;
     let randomTeam2 = Math.floor(Math.random() * 1000000) + 1;
 
@@ -96,9 +100,15 @@ export function CompareTeams() {
 
     const randomGameweek = Math.floor(Math.random() * 7) + 1;
 
-    setTeam1Id(String(randomTeam1));
-    setTeam2Id(String(randomTeam2));
-    setGameweek(String(randomGameweek));
+    const t1 = String(randomTeam1);
+    const t2 = String(randomTeam2);
+    const gw = String(randomGameweek);
+
+    setTeam1Id(t1);
+    setTeam2Id(t2);
+    setGameweek(gw);
+    
+    await compareTeams(t1, t2, gw);
   };
 
   return (
@@ -147,74 +157,21 @@ export function CompareTeams() {
               onChange={(e) => setGameweek(e.target.value)}
             />
           </InputGroup>
-
-          <div className="mt-4">
-            <Label>View Mode</Label>
-            <ButtonGroup>
-              <Button
-                type="button"
-                variant={viewMode === 'simple' ? 'default' : 'outline'}
-                onClick={() => setViewMode('simple')}
-              >
-                Simple
-              </Button>
-              <Button
-                type="button"
-                variant={viewMode === 'detailed' ? 'default' : 'outline'}
-                onClick={() => setViewMode('detailed')}
-              >
-                Detailed
-              </Button>
-            </ButtonGroup>
-          </div>
         </form>
       </CardContent>
-      <CardFooter>
-        <ButtonGroup>
-          <Button type="submit" form="compare-form">Compare Teams</Button>
-          <Button type="button" variant="outline" onClick={loadExample}>
-            Try Example
-          </Button>
-          <Button type="button" variant="outline" onClick={loadRandomExample}>
-            Try Random
-          </Button>
-        </ButtonGroup>
+      <CardFooter className="flex gap-2">
+        <Button type="submit" form="compare-form">Compare Teams</Button>
+        <Button type="button" variant="outline" onClick={loadExample}>
+          Try Example
+        </Button>
+        <Button type="button" variant="outline" onClick={loadRandomExample}>
+          Try Random
+        </Button>
       </CardFooter>
       <CardContent>
-
         {isLoading && <Spinner />}
 
-        {result && !isLoading && viewMode === 'simple' && (
-          <>
-            <Card>
-              <CardHeader>
-                <CardTitle>{result.team1.name}</CardTitle>
-                <CardDescription>{result.team1.points} points</CardDescription>
-              </CardHeader>
-              {result.team1.points > result.team2.points && (
-                <CardContent>
-                  <Badge>Winner</Badge>
-                </CardContent>
-              )}
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>{result.team2.name}</CardTitle>
-                <CardDescription>{result.team2.points} points</CardDescription>
-              </CardHeader>
-              {result.team2.points > result.team1.points && (
-                <CardContent>
-                  <Badge>Winner</Badge>
-                </CardContent>
-              )}
-            </Card>
-            {result.team1.points === result.team2.points && (
-              <Badge variant="secondary">Draw!</Badge>
-            )}
-          </>
-        )}
-
-        {result && !isLoading && viewMode === 'detailed' && result.differentials && (
+        {result && !isLoading && (
           <DifferentialView
             differentials={result.differentials}
             commonPlayers={result.commonPlayers}

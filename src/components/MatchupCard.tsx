@@ -1,24 +1,27 @@
 import { Card, CardContent } from './ui/card';
-import { Progress } from './ui/progress';
 import { Badge } from './ui/badge';
-import type { Battle } from '../services/differentials';
+import type { Matchup } from '../services/differentials';
 
-interface BattleCardProps {
-  battle: Battle;
+interface MatchupCardProps {
+  matchup: Matchup;
   teamAName: string;
   teamBName: string;
-  battleRank: number;
-  maxPointsGlobal: number;
+  matchupRank: number;
+  maxSwing: number;
 }
 
-export function BattleCard({ battle, teamAName, teamBName, battleRank, maxPointsGlobal }: BattleCardProps) {
-  const { playerA, playerB, swing, winner } = battle;
+export function MatchupCard({ matchup, teamAName, teamBName, matchupRank, maxSwing }: MatchupCardProps) {
+  const { playerA, playerB, swing, winner } = matchup;
 
   const pointsA = playerA ? playerA.points * playerA.multiplier : 0;
   const pointsB = playerB ? playerB.points * playerB.multiplier : 0;
 
-  const progressA = (pointsA / maxPointsGlobal) * 100;
-  const progressB = (pointsB / maxPointsGlobal) * 100;
+  // Scale bars based on swing relative to max swing
+  const scaleFactor = swing / maxSwing;
+  const maxPointsInMatchup = Math.max(pointsA, pointsB, 1);
+  
+  const progressA = (pointsA / maxPointsInMatchup) * scaleFactor * 100;
+  const progressB = (pointsB / maxPointsInMatchup) * scaleFactor * 100;
 
   const getPositionBadge = (elementType: number) => {
     switch(elementType) {
@@ -37,15 +40,15 @@ export function BattleCard({ battle, teamAName, teamBName, battleRank, maxPoints
       ${winner === 'draw' ? 'border-t-2 border-t-muted' : ''}
     `}>
       <CardContent className="py-2 px-3">
-        {/* Header: Battle number and swing */}
+        {/* Header: Matchup number and swing */}
         <div className="flex justify-between items-center mb-1">
-          <span className="text-xs text-muted-foreground">Battle #{battleRank}</span>
+          <span className="text-xs text-muted-foreground">Matchup #{matchupRank}</span>
           <Badge variant={swing > 10 ? 'default' : 'secondary'} className="text-xs h-5">
             {swing > 0 ? `+${swing}pt swing` : 'Draw'}
           </Badge>
         </div>
 
-        {/* Battle Layout */}
+        {/* Matchup Layout */}
         <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
           
           {/* Left Player (Team A) */}
@@ -62,10 +65,6 @@ export function BattleCard({ battle, teamAName, teamBName, battleRank, maxPoints
                 <div className="text-xs text-muted-foreground">
                   {playerA.points} × {playerA.multiplier} = <span className="font-semibold">{pointsA}pts</span>
                 </div>
-                <Progress
-                  value={progressA}
-                  className={`h-1.5 ${winner === 'A' ? '[&>*]:bg-blue-500' : '[&>*]:bg-muted'}`}
-                />
               </>
             ) : (
               <div className="text-xs text-muted-foreground italic">No differential</div>
@@ -89,13 +88,35 @@ export function BattleCard({ battle, teamAName, teamBName, battleRank, maxPoints
                 <div className="text-xs text-muted-foreground text-right">
                   <span className="font-semibold">{pointsB}pts</span> = {playerB.points} × {playerB.multiplier}
                 </div>
-                <Progress
-                  value={progressB}
-                  className={`h-1.5 ${winner === 'B' ? '[&>*]:bg-purple-500' : '[&>*]:bg-muted'}`}
-                />
               </>
             ) : (
               <div className="text-xs text-muted-foreground italic text-right">No differential</div>
+            )}
+          </div>
+        </div>
+
+        {/* Center-aligned progress bars (population chart style) */}
+        <div className="flex items-center gap-0 mt-1">
+          {/* Left bar - grows from center to left */}
+          <div className="flex-1 flex justify-end">
+            {playerA && (
+              <div 
+                className={`h-1.5 rounded-l transition-all ${winner === 'A' ? 'bg-blue-500' : 'bg-muted'}`}
+                style={{ width: `${progressA}%` }}
+              />
+            )}
+          </div>
+          
+          {/* Center divider */}
+          <div className="w-0.5 h-3 bg-border" />
+          
+          {/* Right bar - grows from center to right */}
+          <div className="flex-1">
+            {playerB && (
+              <div 
+                className={`h-1.5 rounded-r transition-all ${winner === 'B' ? 'bg-purple-500' : 'bg-muted'}`}
+                style={{ width: `${progressB}%` }}
+              />
             )}
           </div>
         </div>

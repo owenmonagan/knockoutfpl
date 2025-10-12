@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateDifferentials, calculateCommonPlayers, createBattleMatchups } from './differentials';
+import { calculateDifferentials, calculateCommonPlayers, createMatchups } from './differentials';
 import type { FPLTeamPicks, FPLPlayer } from './fpl';
 
 describe('calculateDifferentials', () => {
@@ -155,8 +155,8 @@ describe('calculateCommonPlayers', () => {
   });
 });
 
-describe('createBattleMatchups', () => {
-  it('should match differentials by impact and return battles sorted by swing', () => {
+describe('createMatchups', () => {
+  it('should match differentials by impact and return matchups sorted by swing', () => {
     const playerMap = new Map<number, FPLPlayer>([
       [1, { id: 1, web_name: 'Pope', element_type: 1, team: 1, now_cost: 50 }],
       [2, { id: 2, web_name: 'Saliba', element_type: 2, team: 2, now_cost: 60 }],
@@ -194,33 +194,33 @@ describe('createBattleMatchups', () => {
     };
 
     const differentials = calculateDifferentials(teamA, teamB, playerMap, liveScores);
-    const battles = createBattleMatchups(differentials);
+    const matchups = createMatchups(differentials);
 
-    // Should create 3 battles (matching MVP with MVP based on impact)
-    expect(battles).toHaveLength(3);
+    // Should create 3 matchups (matching MVP with MVP based on impact)
+    expect(matchups).toHaveLength(3);
 
-    // Battle #1: Highest swing - Salah (C) 24pts vs Salah 12pts = 12pt swing
+    // Matchup #1: Highest swing - Salah (C) 24pts vs Salah 12pts = 12pt swing
     // (Salah has different multipliers, so appears in both teams)
-    expect(battles[0].swing).toBe(12);
-    expect(battles[0].playerA?.player.web_name).toBe('Salah');
-    expect(battles[0].playerA?.points).toBe(12);
-    expect(battles[0].playerA?.multiplier).toBe(2);
-    expect(battles[0].playerA?.isCaptain).toBe(true);
-    expect(battles[0].playerB?.player.web_name).toBe('Salah');
-    expect(battles[0].playerB?.points).toBe(12);
-    expect(battles[0].playerB?.multiplier).toBe(1);
-    expect(battles[0].winner).toBe('A');
+    expect(matchups[0].swing).toBe(12);
+    expect(matchups[0].playerA?.player.web_name).toBe('Salah');
+    expect(matchups[0].playerA?.points).toBe(12);
+    expect(matchups[0].playerA?.multiplier).toBe(2);
+    expect(matchups[0].playerA?.isCaptain).toBe(true);
+    expect(matchups[0].playerB?.player.web_name).toBe('Salah');
+    expect(matchups[0].playerB?.points).toBe(12);
+    expect(matchups[0].playerB?.multiplier).toBe(1);
+    expect(matchups[0].winner).toBe('A');
 
-    // Battle #2: Haaland (2pts) vs Saliba (6pts) = 4pt swing
-    expect(battles[1].swing).toBe(4);
-    expect(battles[1].playerA?.player.web_name).toBe('Haaland');
-    expect(battles[1].playerB?.player.web_name).toBe('Saliba');
-    expect(battles[1].winner).toBe('B');
+    // Matchup #2: Haaland (2pts) vs Saliba (6pts) = 4pt swing
+    expect(matchups[1].swing).toBe(4);
+    expect(matchups[1].playerA?.player.web_name).toBe('Haaland');
+    expect(matchups[1].playerB?.player.web_name).toBe('Saliba');
+    expect(matchups[1].winner).toBe('B');
 
-    // Battle #3: Pope (7pts) vs Kane (10pts) = 3pt swing
-    expect(battles[2].swing).toBe(3);
-    expect(battles[2].playerA?.player.web_name).toBe('Pope');
-    expect(battles[2].playerB?.player.web_name).toBe('Kane');
-    expect(battles[2].winner).toBe('B');
+    // Matchup #3: Pope (7pts) vs Kane (10pts) = 3pt swing
+    expect(matchups[2].swing).toBe(3);
+    expect(matchups[2].playerA?.player.web_name).toBe('Pope');
+    expect(matchups[2].playerB?.player.web_name).toBe('Kane');
+    expect(matchups[2].winner).toBe('B');
   });
 });

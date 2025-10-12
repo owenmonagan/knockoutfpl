@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { createBattleMatchups, type Differential, type CommonPlayer } from '../services/differentials';
+import { createMatchups, type Differential, type CommonPlayer } from '../services/differentials';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { BattleCard } from './BattleCard';
+import { MatchupCard } from './MatchupCard';
 
 interface DifferentialViewProps {
   differentials: Differential[];
@@ -41,15 +41,11 @@ export function DifferentialView({
 }: DifferentialViewProps) {
   const [isCommonOpen, setIsCommonOpen] = useState(false);
 
-  // Create battle matchups
-  const battles = createBattleMatchups(differentials);
+  // Create matchups from differentials
+  const matchups = createMatchups(differentials);
 
-  // Calculate global max points across all battles for relative progress bars
-  const maxPointsGlobal = battles.reduce((max, battle) => {
-    const pointsA = battle.playerA ? battle.playerA.points * battle.playerA.multiplier : 0;
-    const pointsB = battle.playerB ? battle.playerB.points * battle.playerB.multiplier : 0;
-    return Math.max(max, pointsA, pointsB);
-  }, 1);
+  // Calculate max swing across all matchups for relative progress bars
+  const maxSwing = matchups.reduce((max, matchup) => Math.max(max, matchup.swing), 1);
 
   // Group common players by position
   const commonByPosition: Record<string, CommonPlayer[]> = {
@@ -65,14 +61,14 @@ export function DifferentialView({
 
   // Calculate summary stats
   const totalDifferentials = differentials.length;
-  const battlesWonA = battles.filter((b) => b.winner === 'A').length;
-  const battlesWonB = battles.filter((b) => b.winner === 'B').length;
+  const matchupsWonA = matchups.filter((m) => m.winner === 'A').length;
+  const matchupsWonB = matchups.filter((m) => m.winner === 'B').length;
   const teamAAdvantage = differentials.reduce((sum, d) => sum + Math.max(0, d.pointDifference), 0);
   const teamBAdvantage = differentials.reduce((sum, d) => sum + Math.max(0, -d.pointDifference), 0);
   
-  const biggestSwing = battles.length > 0 ? battles[0] : null;
-  const closestBattle = battles.length > 0 
-    ? battles.reduce((min, b) => b.swing < min.swing ? b : min, battles[0])
+  const biggestSwing = matchups.length > 0 ? matchups[0] : null;
+  const closestMatchup = matchups.length > 0 
+    ? matchups.reduce((min, m) => m.swing < min.swing ? m : min, matchups[0])
     : null;
 
   const winnerName = teamAScore > teamBScore ? teamAName : teamBName;
@@ -110,7 +106,7 @@ export function DifferentialView({
                 )}
               </div>
             </div>
-            <div className="mt-1">Battle Results</div>
+            <div className="mt-1">Matchup Results</div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -122,17 +118,17 @@ export function DifferentialView({
         </CardContent>
       </Card>
 
-      {/* All Battle Cards - Ultra Condensed */}
-      {battles.length > 0 && (
+      {/* All Matchup Cards - Ultra Condensed */}
+      {matchups.length > 0 && (
         <div className="space-y-1.5">
-          {battles.map((battle, idx) => (
-            <BattleCard
+          {matchups.map((matchup, idx) => (
+            <MatchupCard
               key={idx}
-              battle={battle}
+              matchup={matchup}
               teamAName={teamAName}
               teamBName={teamBName}
-              battleRank={idx + 1}
-              maxPointsGlobal={maxPointsGlobal}
+              matchupRank={idx + 1}
+              maxSwing={maxSwing}
             />
           ))}
         </div>
@@ -194,10 +190,10 @@ export function DifferentialView({
         </Collapsible>
       )}
 
-      {/* Battle Summary Panel */}
+      {/* Matchup Summary Panel */}
       <Card>
         <CardHeader>
-          <CardTitle>Battle Summary</CardTitle>
+          <CardTitle>Matchup Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex justify-between">
@@ -205,16 +201,16 @@ export function DifferentialView({
             <span className="font-semibold">{winnerName} by {scoreDiff} points</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Battles Won:</span>
+            <span className="text-muted-foreground">Matchups Won:</span>
             <span className="font-semibold">
-              <span className="text-blue-600">{teamAName}: {battlesWonA}</span>
+              <span className="text-blue-600">{teamAName}: {matchupsWonA}</span>
               {' | '}
-              <span className="text-purple-600">{teamBName}: {battlesWonB}</span>
+              <span className="text-purple-600">{teamBName}: {matchupsWonB}</span>
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Total Battles:</span>
-            <span className="font-semibold">{battles.length}</span>
+            <span className="text-muted-foreground">Total Matchups:</span>
+            <span className="font-semibold">{matchups.length}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">{teamAName} differential points:</span>
@@ -233,12 +229,12 @@ export function DifferentialView({
               </span>
             </div>
           )}
-          {closestBattle && closestBattle.swing > 0 && (
+          {closestMatchup && closestMatchup.swing > 0 && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Closest battle:</span>
+              <span className="text-muted-foreground">Closest matchup:</span>
               <span className="font-semibold">
-                {closestBattle.playerA?.player.web_name || closestBattle.playerB?.player.web_name}{' '}
-                ({closestBattle.swing} pts)
+                {closestMatchup.playerA?.player.web_name || closestMatchup.playerB?.player.web_name}{' '}
+                ({closestMatchup.swing} pts)
               </span>
             </div>
           )}

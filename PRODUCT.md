@@ -12,20 +12,44 @@ There is an informal but existing fantasy premier league API. Eventually, we wil
 
 ---
 
-## 📍 Current Status: Technical Proof of Concept
+## 📍 Current Status: Advanced Matchup Visualization Prototype
 
 **What's Working Now:**
 - ✅ React 18 + Vite + TypeScript foundation
 - ✅ shadcn/ui component library integrated
 - ✅ Tailwind CSS styling system
 - ✅ FPL API integration via Vite proxy (CORS bypass)
-- ✅ Basic team comparison functionality (`CompareTeams` component)
+- ✅ Advanced team comparison with detailed matchup analysis
+- ✅ Differential player identification and matchup creation
+- ✅ Common player tracking (non-differentials)
+- ✅ Visual matchup cards with population-style progress bars
+- ✅ Player-by-player score breakdown by position
+- ✅ Chip detection and display (BB, 3xC, FH, WC)
+- ✅ Swing-based matchup ranking
+- ✅ Industry-standard "Matchup" terminology throughout
+- ✅ Matchup summary statistics (biggest swing, closest matchup, etc.)
 - ✅ TDD workflow with TDD Guard + Vitest
 - ✅ Playwright MCP for automated E2E testing
-- ✅ Test coverage for core components
+- ✅ Comprehensive test coverage
 
 **Current Capabilities:**
-Users can compare two FPL teams for any gameweek by entering team IDs. The app fetches real FPL data and displays the winner. This proves the FPL API integration works and establishes our development workflow.
+Users can compare two FPL teams for any gameweek by entering team IDs. The app:
+- Fetches live FPL data for both teams and all players
+- Identifies differential players (unique to each team or different multipliers)
+- Creates strategic matchups sorted by impact/price
+- Displays visual "head-to-head" matchup cards with point swings
+- Shows common players separately (collapsible section)
+- Displays active chips for each manager
+- Provides detailed matchup statistics and insights
+
+This establishes a rich, engaging comparison experience that goes beyond simple score totals, highlighting the key battles that decided the outcome.
+
+**Technical Highlights:**
+- **Smart Matchup Algorithm:** Captain differentials matched first, then position-based matching (FWD → MID → DEF → GK) sorted by player price within positions
+- **Visual Design:** Population chart-style progress bars that scale based on swing magnitude relative to the largest swing (not absolute points)
+- **Differential Logic:** Identifies unique players OR players with different multipliers (e.g., one team captains Salah, other doesn't)
+- **Type Safety:** Full TypeScript implementation with strict typing for FPL data structures
+- **Component Architecture:** Modular, reusable components following shadcn/ui patterns
 
 **What's Missing for MVP:**
 - ❌ Firebase (Auth, Firestore, Cloud Functions)
@@ -81,23 +105,39 @@ Users can compare two FPL teams for any gameweek by entering team IDs. The app f
 - `/challenge/:id` - Challenge detail/accept page
 - `/profile` - User profile with FPL ID
 
-### Key Components
-- `ChallengeCard` - Display challenge status
-- `FPLTeamConnect` - Input/verify FPL Team ID
-- `ScoreDisplay` - Show both teams' points
-- `ChallengeStatus` - Upcoming/Active/Complete badges
+### Key Components (Implemented)
+- ✅ `CompareTeams` - Main comparison form with team ID inputs
+- ✅ `DifferentialView` - Parent component orchestrating matchup display
+- ✅ `MatchupCard` - Individual player matchup with visual progress bars
+- ✅ `Collapsible` - Common players section (collapsible UI)
+
+### Future Components (Planned)
+- ⬜ `ChallengeCard` - Display challenge status
+- ⬜ `FPLTeamConnect` - Input/verify FPL Team ID
+- ⬜ `ChallengeStatus` - Upcoming/Active/Complete badges
 
 ---
 
 ## 📝 Implementation Roadmap
 
-### ✅ Phase 0: Technical Foundation (COMPLETED)
+### ✅ Phase 0: Technical Foundation + Advanced Visualization (COMPLETED)
 - ✅ Initialize Vite + React + TypeScript
 - ✅ Install shadcn/ui, configure Tailwind
 - ✅ Setup TDD Guard + Vitest
 - ✅ FPL API integration proof-of-concept
-- ✅ Basic team comparison component
+- ✅ Advanced team comparison with matchup visualization
+- ✅ Differential player identification algorithm
+- ✅ Strategic matchup creation (captain-first, position-based, price-sorted)
+- ✅ Visual matchup cards with population-style progress bars
+- ✅ Swing-based relative scaling for visual impact
+- ✅ Common player tracking and collapsible display
+- ✅ Chip detection and display (BB, 3xC, FH, WC)
+- ✅ Matchup summary statistics
+- ✅ Consistent "Matchup" terminology (industry-standard branding)
 - ✅ Playwright MCP for E2E testing
+- ✅ Comprehensive test coverage (28 passing tests)
+
+**Note:** Phase 0 went beyond initial scope, implementing rich visualization features originally planned for Phase 7. This provides a compelling demo experience and validates the core value proposition.
 
 ### 🚧 Phase 1: Firebase Setup (2-3 days)
 - ⬜ Create Firebase project
@@ -154,15 +194,21 @@ Users can compare two FPL teams for any gameweek by entering team IDs. The app f
 ### Phase 7: Enhanced Experience
 **Goal:** Make challenges more engaging and informative
 
-- Live scoring during gameweeks (provisional points)
-- Rich FPL team display (starting XI, bench, captain)
-- Player-by-player score breakdown
-- Challenge reminders via email notifications
-- Head-to-head statistics (historical record between users)
-- Gameweek deadline countdown timers
-- Recent activity feed
+**Already Implemented (Phase 0):**
+- ✅ Rich FPL team display (starting XI with positions, captain badges)
+- ✅ Player-by-player score breakdown (matchup cards)
+- ✅ Chip display integration
+- ✅ Visual impact representation (population-style progress bars)
 
-**Estimated:** 2-3 weeks
+**Remaining Features:**
+- ⬜ Live scoring during gameweeks (provisional points)
+- ⬜ Bench display for each team
+- ⬜ Challenge reminders via email notifications
+- ⬜ Head-to-head statistics (historical record between users)
+- ⬜ Gameweek deadline countdown timers
+- ⬜ Recent activity feed
+
+**Estimated:** 1-2 weeks (reduced due to Phase 0 progress)
 
 ### Phase 8: Social Features
 **Goal:** Build community and make it easier to find opponents
@@ -220,4 +266,6 @@ Users can compare two FPL teams for any gameweek by entering team IDs. The app f
 
 ---
 
-**Current Focus:** Complete Phase 0 (Technical Foundation) → Move to Phase 1 (Firebase Setup) for full MVP functionality.
+**Current Focus:** Phase 0 completed with advanced visualization features. Ready to begin Phase 1 (Firebase Setup) to enable persistent challenges, authentication, and full MVP functionality.
+
+**Key Achievement:** Built a compelling matchup visualization system that demonstrates the product's core value proposition and provides an engaging UX foundation for the full challenge system.

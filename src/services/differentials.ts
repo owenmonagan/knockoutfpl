@@ -149,15 +149,15 @@ export function calculateCommonPlayers(
   return commonPlayers;
 }
 
-export interface Battle {
+export interface Matchup {
   playerA: DifferentialPlayer | null;
   playerB: DifferentialPlayer | null;
   swing: number;
   winner: 'A' | 'B' | 'draw';
 }
 
-export function createBattleMatchups(differentials: Differential[]): Battle[] {
-  const battles: Battle[] = [];
+export function createMatchups(differentials: Differential[]): Matchup[] {
+  const matchups: Matchup[] = [];
 
   // Separate Team A and Team B differentials by position
   const teamAByPosition: Record<PositionType, Array<{ diff: Differential; impact: number }>> = {
@@ -203,7 +203,7 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
     }
   }
 
-  // Create captain battle first (if applicable)
+  // Create captain matchup first (if applicable)
   if (captainDiffA && captainDiffB) {
     const playerA = captainDiffA.diff.teamA;
     const playerB = captainDiffB.diff.teamB;
@@ -221,7 +221,7 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
       winner = 'draw';
     }
 
-    battles.push({
+    matchups.push({
       playerA,
       playerB,
       swing,
@@ -231,7 +231,7 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
     const playerA = captainDiffA.diff.teamA;
     const pointsA = playerA ? playerA.points * playerA.multiplier : 0;
 
-    battles.push({
+    matchups.push({
       playerA,
       playerB: null,
       swing: pointsA,
@@ -241,7 +241,7 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
     const playerB = captainDiffB.diff.teamB;
     const pointsB = playerB ? playerB.points * playerB.multiplier : 0;
 
-    battles.push({
+    matchups.push({
       playerA: null,
       playerB,
       swing: pointsB,
@@ -270,7 +270,7 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
 
     // Match players within the same position
     const maxMatches = Math.max(teamAPlayers.length, teamBPlayers.length);
-    const positionBattles: Battle[] = [];
+    const positionMatchups: Matchup[] = [];
 
     for (let i = 0; i < maxMatches; i++) {
       const playerA = teamAPlayers[i]?.diff.teamA || null;
@@ -289,7 +289,7 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
         winner = 'draw';
       }
 
-      positionBattles.push({
+      positionMatchups.push({
         playerA,
         playerB,
         swing,
@@ -297,8 +297,8 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
       });
     }
 
-    // Sort battles within this position by max price (highest first)
-    positionBattles.sort((a, b) => {
+    // Sort matchups within this position by max price (highest first)
+    positionMatchups.sort((a, b) => {
       const maxPriceA = Math.max(
         a.playerA?.player.now_cost || 0,
         a.playerB?.player.now_cost || 0
@@ -310,11 +310,10 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
       return maxPriceB - maxPriceA;
     });
 
-    // Add sorted position battles to main battles array
-    battles.push(...positionBattles);
+    // Add sorted position matchups to main matchups array
+    matchups.push(...positionMatchups);
   }
 
-  return battles;
+  return matchups;
 }
-
 

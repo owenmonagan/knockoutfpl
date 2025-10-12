@@ -37,7 +37,10 @@
       "Bash(chmod:*)",
       "WebFetch(domain:www.squawka.com)",
       "WebFetch(domain:www.joliver.me)",
-      "WebFetch(domain:stathead.com)"
+      "WebFetch(domain:stathead.com)",
+      "mcp__playwright__browser_console_messages",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
