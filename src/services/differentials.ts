@@ -256,9 +256,17 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
     const teamAPlayers = teamAByPosition[position];
     const teamBPlayers = teamBByPosition[position];
 
-    // Sort by impact within position (highest first)
-    teamAPlayers.sort((a, b) => b.impact - a.impact);
-    teamBPlayers.sort((a, b) => b.impact - a.impact);
+    // Sort by price within position (highest price first)
+    teamAPlayers.sort((a, b) => {
+      const priceA = a.diff.teamA?.player.now_cost || 0;
+      const priceB = b.diff.teamA?.player.now_cost || 0;
+      return priceB - priceA;
+    });
+    teamBPlayers.sort((a, b) => {
+      const priceA = a.diff.teamB?.player.now_cost || 0;
+      const priceB = b.diff.teamB?.player.now_cost || 0;
+      return priceB - priceA;
+    });
 
     // Match players within the same position
     const maxMatches = Math.max(teamAPlayers.length, teamBPlayers.length);
