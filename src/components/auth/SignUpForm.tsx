@@ -3,6 +3,7 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { signUpWithEmail } from '../../services/auth';
+import { createUserProfile } from '../../services/user';
 
 export function SignUpForm() {
   const [email, setEmail] = useState('');
@@ -12,7 +13,12 @@ export function SignUpForm() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    await signUpWithEmail(email, password);
+    const userCredential = await signUpWithEmail(email, password);
+    await createUserProfile({
+      userId: userCredential.user.uid,
+      email: userCredential.user.email || email,
+      displayName,
+    });
   };
 
   return (
