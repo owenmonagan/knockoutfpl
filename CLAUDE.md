@@ -199,6 +199,222 @@ A hook automatically suggests E2E verification when:
 
 ---
 
+### Integrated E2E TDD Workflow
+
+We now have **automated Playwright E2E tests** that integrate seamlessly with your TDD workflow. Tests are organized by feature and can be run selectively based on what you're working on.
+
+#### E2E Test Organization
+
+Tests are organized in `e2e/` by feature:
+
+```
+e2e/
+├── auth.spec.ts        # Authentication flows (signup, login, logout)
+├── navigation.spec.ts  # Routing and protected routes
+└── dashboard.spec.ts   # Dashboard functionality
+```
+
+Each test is tagged for selective running:
+- **@smoke** - Critical smoke tests (fast, should always pass)
+- **@critical** - Critical user flows
+- **@auth** - Authentication-related tests
+- **@navigation** - Navigation and routing tests
+- **@dashboard** - Dashboard functionality tests
+
+#### Running E2E Tests
+
+**Run all E2E tests:**
+```bash
+npm run test:e2e
+```
+
+**Run by feature/tag:**
+```bash
+npm run test:e2e:smoke       # Only smoke tests
+npm run test:e2e:auth        # Only auth tests
+npm run test:e2e:navigation  # Only navigation tests
+npm run test:e2e:dashboard   # Only dashboard tests
+npm run test:e2e:critical    # Only critical tests
+```
+
+**Interactive mode (recommended for development):**
+```bash
+npm run test:e2e:watch       # Opens Playwright UI
+```
+
+**Run unit + smoke E2E tests:**
+```bash
+npm run test:critical        # Fast confidence check
+```
+
+**Run full test suite:**
+```bash
+npm run test:all             # Unit tests + all E2E tests
+```
+
+#### Selective E2E Watcher (Experimental)
+
+The **selective E2E watcher** watches your source files and automatically triggers relevant E2E tests when critical files change:
+
+```bash
+npm run test:e2e:selective
+```
+
+**How it works:**
+1. Watches `src/` for file changes
+2. Matches changed files against patterns in `.e2e-watch.json`
+3. Runs unit tests first (if they fail, skips E2E)
+4. Runs only relevant E2E tests based on file-to-tag mapping
+5. Debounces to avoid excessive test runs
+
+**File-to-Tag Mapping:**
+- `src/components/auth/**` → `@auth` tests
+- `src/pages/LoginPage.*` → `@auth` tests
+- `src/services/auth.*` → `@auth` tests
+- `src/pages/DashboardPage.*` → `@dashboard` tests
+- `src/services/{fpl,user}.*` → `@dashboard` tests
+- `src/router.*` → `@navigation` tests
+- `src/components/auth/ProtectedRoute.*` → `@navigation` + `@auth` tests
+
+Configure mappings in `.e2e-watch.json`.
+
+#### Recommended TDD Workflow
+
+**For New Features:**
+
+```bash
+# Terminal 1: Unit test watcher (constant feedback)
+npm run test:watch   # or: tdd-guard
+
+# Terminal 2: Dev server
+npm run dev
+
+# Your TDD cycle:
+1. Write unit test (Red)
+2. Implement code (Green)
+3. Refactor (Green)
+4. Repeat until feature complete
+
+# When feature milestone complete:
+npm run test:e2e:smoke    # Quick E2E sanity check
+# OR
+npm run test:e2e:auth     # Run specific feature E2E tests
+
+# Before committing:
+npm run test:critical      # Unit + smoke E2E tests
+```
+
+**For Selective E2E Integration:**
+
+```bash
+# Terminal 1: Selective E2E watcher
+npm run test:e2e:selective
+
+# Terminal 2: Unit test watcher
+npm run test:watch
+
+# Terminal 3: Dev server
+npm run dev
+
+# E2E tests auto-run when you modify critical files
+# Example: Edit src/components/auth/LoginForm.tsx
+#   → Runs unit tests first
+#   → Runs @auth E2E tests if unit tests pass
+```
+
+**For Deep E2E Work:**
+
+```bash
+# Use Playwright UI for interactive test development
+npm run test:e2e:watch
+
+# Debug specific test
+npm run test:e2e:debug
+
+# View test report
+npm run test:e2e:report
+```
+
+#### E2E Test Writing Guidelines
+
+**1. Use Tags:**
+```typescript
+test('should login successfully @auth @critical', async ({ page }) => {
+  // Test code
+});
+```
+
+**2. Group Related Tests:**
+```typescript
+test.describe('Authentication Flow', () => {
+  test.beforeEach(async ({ page }) => {
+    // Setup for all tests in group
+  });
+
+  test('signup @auth @smoke', async ({ page }) => { ... });
+  test('login @auth @critical', async ({ page }) => { ... });
+});
+```
+
+**3. Check Console Errors:**
+```typescript
+test('should have no console errors @smoke', async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') {
+      consoleErrors.push(msg.text());
+    }
+  });
+
+  await page.goto('/');
+  expect(consoleErrors).toHaveLength(0);
+});
+```
+
+**4. Use Descriptive Selectors:**
+```typescript
+// Good: Semantic selectors
+await page.getByLabel('Email').fill('user@example.com');
+await page.getByRole('button', { name: 'Log In' }).click();
+
+// Avoid: Fragile CSS selectors
+await page.locator('.btn-primary').click();
+```
+
+**5. Wait for Network Idle:**
+```typescript
+await page.goto('/dashboard');
+await page.waitForLoadState('networkidle');
+```
+
+#### E2E Test Best Practices
+
+✅ **DO:**
+- Write smoke tests that are fast and stable
+- Tag tests appropriately for selective running
+- Test critical user flows end-to-end
+- Check for console errors
+- Use semantic selectors (labels, roles, text)
+- Group related tests with `test.describe()`
+
+❌ **DON'T:**
+- Run full E2E suite on every code change (too slow)
+- Write E2E tests for things covered by unit tests
+- Use brittle CSS class selectors
+- Forget to wait for network/loading states
+- Mix concerns (one test = one user flow)
+
+#### Pre-commit E2E Testing
+
+Before committing, run:
+```bash
+npm run test:critical    # Unit + smoke E2E tests
+```
+
+A pre-commit hook (see below) can enforce this automatically.
+
+---
+
 ## 🏗️ Technical Architecture
 
 ### Frontend Structure
