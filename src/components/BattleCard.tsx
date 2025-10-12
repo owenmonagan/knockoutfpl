@@ -1,7 +1,6 @@
-import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+import { Card, CardContent } from './ui/card';
 import { Progress } from './ui/progress';
 import { Badge } from './ui/badge';
-import { Separator } from './ui/separator';
 import type { Battle } from '../services/differentials';
 
 interface BattleCardProps {
@@ -21,88 +20,99 @@ export function BattleCard({ battle, teamAName, teamBName, battleRank }: BattleC
   const progressA = (pointsA / maxPoints) * 100;
   const progressB = (pointsB / maxPoints) * 100;
 
+  const getPositionBadge = (elementType: number) => {
+    switch(elementType) {
+      case 1: return 'GK';
+      case 2: return 'DEF';
+      case 3: return 'MID';
+      case 4: return 'FWD';
+      default: return 'MID';
+    }
+  };
+
   return (
     <Card className={`
       ${winner === 'A' ? 'border-l-4 border-l-blue-500' : ''}
       ${winner === 'B' ? 'border-r-4 border-r-purple-500' : ''}
       ${winner === 'draw' ? 'border-t-2 border-t-muted' : ''}
     `}>
-      <CardHeader>
-        <CardTitle className="text-sm font-medium text-muted-foreground flex justify-between items-center">
-          <span>Battle #{battleRank}</span>
-          <Badge variant={swing > 10 ? 'default' : 'secondary'}>
-            {swing > 0 ? `+${swing} point swing` : 'Draw'}
+      <CardContent className="py-3 px-4">
+        {/* Header: Battle number and swing */}
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-xs text-muted-foreground">Battle #{battleRank}</span>
+          <Badge variant={swing > 10 ? 'default' : 'secondary'} className="text-xs h-5">
+            {swing > 0 ? `+${swing}pt swing` : 'Draw'}
           </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
+        </div>
 
-          <div className="space-y-2">
+        {/* Battle Layout */}
+        <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
+          
+          {/* Left Player (Team A) */}
+          <div className="space-y-1">
             {playerA ? (
               <>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">{playerA.player.element_type === 1 ? 'GK' : playerA.player.element_type === 2 ? 'DEF' : playerA.player.element_type === 3 ? 'MID' : 'FWD'}</Badge>
-                  <span className={`font-semibold ${winner === 'A' ? 'text-blue-600' : ''}`}>
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="outline" className="text-[10px] h-4 px-1">{getPositionBadge(playerA.player.element_type)}</Badge>
+                  <span className={`text-sm font-medium truncate ${winner === 'A' ? 'text-blue-600' : ''}`}>
                     {playerA.player.web_name}
                   </span>
-                  {playerA.isCaptain && <Badge className="text-xs bg-blue-500">C</Badge>}
+                  {playerA.isCaptain && <Badge className="text-[10px] h-4 px-1 bg-blue-500">C</Badge>}
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {playerA.points} × {playerA.multiplier} = {pointsA} pts
+                <div className="text-xs text-muted-foreground">
+                  {playerA.points} × {playerA.multiplier} = <span className="font-semibold">{pointsA}pts</span>
                 </div>
                 <Progress
                   value={progressA}
-                  className={`h-2 ${winner === 'A' ? '[&>*]:bg-blue-500' : '[&>*]:bg-muted'}`}
+                  className={`h-1.5 ${winner === 'A' ? '[&>*]:bg-blue-500' : '[&>*]:bg-muted'}`}
                 />
               </>
             ) : (
-              <div className="text-sm text-muted-foreground italic">No differential</div>
+              <div className="text-xs text-muted-foreground italic">No differential</div>
             )}
           </div>
 
-          <div className="flex flex-col items-center gap-1">
-            <Separator orientation="vertical" className="h-12" />
-            <span className="text-xs font-bold text-muted-foreground">VS</span>
-            <Separator orientation="vertical" className="h-12" />
-          </div>
+          {/* VS Divider */}
+          <div className="text-[10px] font-bold text-muted-foreground px-1">VS</div>
 
-          <div className="space-y-2">
+          {/* Right Player (Team B) */}
+          <div className="space-y-1">
             {playerB ? (
               <>
-                <div className="flex items-center gap-2 justify-end">
-                  {playerB.isCaptain && <Badge className="text-xs bg-purple-500">C</Badge>}
-                  <span className={`font-semibold ${winner === 'B' ? 'text-purple-600' : ''}`}>
+                <div className="flex items-center gap-1.5 justify-end">
+                  {playerB.isCaptain && <Badge className="text-[10px] h-4 px-1 bg-purple-500">C</Badge>}
+                  <span className={`text-sm font-medium truncate ${winner === 'B' ? 'text-purple-600' : ''}`}>
                     {playerB.player.web_name}
                   </span>
-                  <Badge variant="outline" className="text-xs">{playerB.player.element_type === 1 ? 'GK' : playerB.player.element_type === 2 ? 'DEF' : playerB.player.element_type === 3 ? 'MID' : 'FWD'}</Badge>
+                  <Badge variant="outline" className="text-[10px] h-4 px-1">{getPositionBadge(playerB.player.element_type)}</Badge>
                 </div>
-                <div className="text-sm text-muted-foreground text-right">
-                  {pointsB} pts = {playerB.points} × {playerB.multiplier}
+                <div className="text-xs text-muted-foreground text-right">
+                  <span className="font-semibold">{pointsB}pts</span> = {playerB.points} × {playerB.multiplier}
                 </div>
                 <Progress
                   value={progressB}
-                  className={`h-2 ${winner === 'B' ? '[&>*]:bg-purple-500' : '[&>*]:bg-muted'}`}
+                  className={`h-1.5 ${winner === 'B' ? '[&>*]:bg-purple-500' : '[&>*]:bg-muted'}`}
                 />
               </>
             ) : (
-              <div className="text-sm text-muted-foreground italic text-right">No differential</div>
+              <div className="text-xs text-muted-foreground italic text-right">No differential</div>
             )}
           </div>
-
         </div>
 
-        <div className="mt-4 text-center">
-          {winner === 'A' && (
-            <Badge className="bg-blue-500">{teamAName} won this battle</Badge>
-          )}
-          {winner === 'B' && (
-            <Badge className="bg-purple-500">{teamBName} won this battle</Badge>
-          )}
-          {winner === 'draw' && (
-            <Badge variant="secondary">Draw</Badge>
-          )}
-        </div>
+        {/* Winner Badge - smaller and inline */}
+        {winner !== 'draw' && (
+          <div className="mt-2 text-center">
+            <Badge className={`text-[10px] h-5 ${winner === 'A' ? 'bg-blue-500' : 'bg-purple-500'}`}>
+              {winner === 'A' ? teamAName : teamBName} won
+            </Badge>
+          </div>
+        )}
+        {winner === 'draw' && (
+          <div className="mt-2 text-center">
+            <Badge variant="secondary" className="text-[10px] h-5">Draw</Badge>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
