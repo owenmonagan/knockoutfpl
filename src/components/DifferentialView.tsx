@@ -14,6 +14,19 @@ interface DifferentialViewProps {
   teamBName: string;
   teamAScore: number;
   teamBScore: number;
+  teamAChip?: string | null;
+  teamBChip?: string | null;
+}
+
+function formatChipName(chip: string): string {
+  const chipMap: Record<string, string> = {
+    '3xc': '3xC',
+    'bboost': 'BB',
+    'freehit': 'FH',
+    'wildcard': 'WC',
+  };
+  
+  return chipMap[chip.toLowerCase()] || chip.toUpperCase();
 }
 
 export function DifferentialView({
@@ -23,6 +36,8 @@ export function DifferentialView({
   teamBName,
   teamAScore,
   teamBScore,
+  teamAChip,
+  teamBChip,
 }: DifferentialViewProps) {
   const [isCommonOpen, setIsCommonOpen] = useState(false);
 
@@ -76,7 +91,26 @@ export function DifferentialView({
       <Card>
         <CardHeader>
           <CardTitle className="text-center">
-            {teamAName} vs {teamBName} - Battle Results
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span>{teamAName}</span>
+                {teamAChip && (
+                  <Badge variant="secondary" className="text-xs">
+                    {formatChipName(teamAChip)}
+                  </Badge>
+                )}
+              </div>
+              <span>vs</span>
+              <div className="flex items-center gap-2">
+                <span>{teamBName}</span>
+                {teamBChip && (
+                  <Badge variant="secondary" className="text-xs">
+                    {formatChipName(teamBChip)}
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <div className="mt-1">Battle Results</div>
           </CardTitle>
         </CardHeader>
         <CardContent>
