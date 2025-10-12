@@ -29,7 +29,9 @@
       "WebFetch(domain:www.fantasyfootballfix.com)",
       "WebFetch(domain:fantasy.premierleague.com)",
       "WebFetch(domain:medium.com)",
-      "WebFetch(domain:www.oliverlooney.com)"
+      "WebFetch(domain:www.oliverlooney.com)",
+      "WebFetch(domain:playwright.dev)",
+      "WebFetch(domain:www.kyrre.dev)"
     ],
     "deny": [],
     "ask": []

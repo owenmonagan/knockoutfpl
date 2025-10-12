@@ -17,6 +17,15 @@ export interface Differential {
   pointDifference: number;
 }
 
+export interface CommonPlayer {
+  player: FPLPlayer;
+  position: PositionType;
+  points: number;
+  multiplier: number;
+  isCaptain: boolean;
+  totalPoints: number;
+}
+
 function getPositionType(elementType: number): PositionType {
   switch (elementType) {
     case 1:
@@ -98,4 +107,44 @@ export function calculateDifferentials(
   }
 
   return differentials;
+}
+
+export function calculateCommonPlayers(
+  teamA: FPLTeamPicks,
+  teamB: FPLTeamPicks,
+  playerMap: Map<number, FPLPlayer>,
+  liveScores: Map<number, number>
+): CommonPlayer[] {
+  const commonPlayers: CommonPlayer[] = [];
+
+  const teamAStarters = teamA.picks.filter((p) => p.multiplier > 0);
+  const teamBStarters = teamB.picks.filter((p) => p.multiplier > 0);
+
+  const teamAMap = new Map(teamAStarters.map((p) => [p.element, p]));
+  const teamBMap = new Map(teamBStarters.map((p) => [p.element, p]));
+
+  // Find players in both teams
+  for (const [playerId, pickA] of teamAMap) {
+    const pickB = teamBMap.get(playerId);
+    
+    // Player must be in both teams with same multiplier
+    if (pickB && pickA.multiplier === pickB.multiplier) {
+      const player = playerMap.get(playerId);
+      if (!player) continue;
+
+      const basePoints = liveScores.get(playerId) || 0;
+      const totalPoints = basePoints * pickA.multiplier;
+
+      commonPlayers.push({
+        player,
+        position: getPositionType(player.element_type),
+        points: basePoints,
+        multiplier: pickA.multiplier,
+        isCaptain: pickA.is_captain,
+        totalPoints,
+      });
+    }
+  }
+
+  return commonPlayers;
 }
