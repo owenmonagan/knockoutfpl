@@ -39,3 +39,41 @@ export async function getFPLGameweekScore(teamId: number, gameweek: number): Pro
     points: data.entry_history.points,
   };
 }
+
+export interface FPLPick {
+  element: number;
+  position: number;
+  multiplier: number;
+  is_captain: boolean;
+  is_vice_captain: boolean;
+}
+
+export interface FPLTeamPicks {
+  picks: FPLPick[];
+  entryHistory: {
+    event: number;
+    points: number;
+    totalPoints: number;
+  };
+  activeChip: string | null;
+}
+
+export async function getFPLTeamPicks(teamId: number, gameweek: number): Promise<FPLTeamPicks> {
+  const response = await fetch(`/api/fpl/entry/${teamId}/event/${gameweek}/picks/`);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch team picks');
+  }
+
+  const data = await response.json();
+
+  return {
+    picks: data.picks,
+    entryHistory: {
+      event: data.entry_history.event,
+      points: data.entry_history.points,
+      totalPoints: data.entry_history.total_points,
+    },
+    activeChip: data.active_chip,
+  };
+}
