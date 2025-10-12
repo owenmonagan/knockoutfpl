@@ -159,31 +159,54 @@ export interface Battle {
 export function createBattleMatchups(differentials: Differential[]): Battle[] {
   const battles: Battle[] = [];
 
-  // Separate Team A and Team B differentials, calculate impact for each
-  const teamADiffs: Array<{ diff: Differential; impact: number }> = [];
-  const teamBDiffs: Array<{ diff: Differential; impact: number }> = [];
+  // Separate Team A and Team B differentials by position
+  const teamAByPosition: Record<PositionType, Array<{ diff: Differential; impact: number }>> = {
+    GK: [],
+    DEF: [],
+    MID: [],
+    FWD: [],
+  };
 
+  const teamBByPosition: Record<PositionType, Array<{ diff: Differential; impact: number }>> = {
+    GK: [],
+    DEF: [],
+    MID: [],
+    FWD: [],
+  };
+
+  // Separate captains
+  let captainDiffA: { diff: Differential; impact: number } | null = null;
+  let captainDiffB: { diff: Differential; impact: number } | null = null;
+
+  // Group differentials by position and identify captains
   for (const diff of differentials) {
     if (diff.teamA !== null) {
       const impact = Math.abs(diff.teamA.points * diff.teamA.multiplier);
-      teamADiffs.push({ diff, impact });
+      const entry = { diff, impact };
+
+      if (diff.teamA.isCaptain) {
+        captainDiffA = entry;
+      } else {
+        teamAByPosition[diff.position].push(entry);
+      }
     }
+
     if (diff.teamB !== null) {
       const impact = Math.abs(diff.teamB.points * diff.teamB.multiplier);
-      teamBDiffs.push({ diff, impact });
+      const entry = { diff, impact };
+
+      if (diff.teamB.isCaptain) {
+        captainDiffB = entry;
+      } else {
+        teamBByPosition[diff.position].push(entry);
+      }
     }
   }
 
-  // Sort by impact (highest first)
-  teamADiffs.sort((a, b) => b.impact - a.impact);
-  teamBDiffs.sort((a, b) => b.impact - a.impact);
-
-  // Create matchups: MVP vs MVP, #2 vs #2, etc.
-  const maxBattles = Math.max(teamADiffs.length, teamBDiffs.length);
-
-  for (let i = 0; i < maxBattles; i++) {
-    const playerA = teamADiffs[i]?.diff.teamA || null;
-    const playerB = teamBDiffs[i]?.diff.teamB || null;
+  // Create captain battle first (if applicable)
+  if (captainDiffA && captainDiffB) {
+    const playerA = captainDiffA.diff.teamA;
+    const playerB = captainDiffB.diff.teamB;
 
     const pointsA = playerA ? playerA.points * playerA.multiplier : 0;
     const pointsB = playerB ? playerB.points * playerB.multiplier : 0;
@@ -204,10 +227,72 @@ export function createBattleMatchups(differentials: Differential[]): Battle[] {
       swing,
       winner,
     });
+  } else if (captainDiffA) {
+    const playerA = captainDiffA.diff.teamA;
+    const pointsA = playerA ? playerA.points * playerA.multiplier : 0;
+
+    battles.push({
+      playerA,
+      playerB: null,
+      swing: pointsA,
+      winner: 'A',
+    });
+  } else if (captainDiffB) {
+    const playerB = captainDiffB.diff.teamB;
+    const pointsB = playerB ? playerB.points * playerB.multiplier : 0;
+
+    battles.push({
+      playerA: null,
+      playerB,
+      swing: pointsB,
+      winner: 'B',
+    });
   }
 
-  // Sort battles by swing (biggest impact first)
+  // Match by position: FWD, MID, DEF, GK
+  const positions: PositionType[] = ['FWD', 'MID', 'DEF', 'GK'];
+
+  for (const position of positions) {
+    const teamAPlayers = teamAByPosition[position];
+    const teamBPlayers = teamBByPosition[position];
+
+    // Sort by impact within position (highest first)
+    teamAPlayers.sort((a, b) => b.impact - a.impact);
+    teamBPlayers.sort((a, b) => b.impact - a.impact);
+
+    // Match players within the same position
+    const maxMatches = Math.max(teamAPlayers.length, teamBPlayers.length);
+
+    for (let i = 0; i < maxMatches; i++) {
+      const playerA = teamAPlayers[i]?.diff.teamA || null;
+      const playerB = teamBPlayers[i]?.diff.teamB || null;
+
+      const pointsA = playerA ? playerA.points * playerA.multiplier : 0;
+      const pointsB = playerB ? playerB.points * playerB.multiplier : 0;
+      const swing = Math.abs(pointsA - pointsB);
+
+      let winner: 'A' | 'B' | 'draw';
+      if (pointsA > pointsB) {
+        winner = 'A';
+      } else if (pointsB > pointsA) {
+        winner = 'B';
+      } else {
+        winner = 'draw';
+      }
+
+      battles.push({
+        playerA,
+        playerB,
+        swing,
+        winner,
+      });
+    }
+  }
+
+  // Sort all battles by swing (biggest impact first)
   battles.sort((a, b) => b.swing - a.swing);
 
   return battles;
 }
+
+
