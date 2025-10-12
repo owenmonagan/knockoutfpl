@@ -1,10 +1,14 @@
-import type { Differential } from '../services/differentials';
+import { useState } from 'react';
+import type { Differential, CommonPlayer } from '../services/differentials';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface DifferentialViewProps {
   differentials: Differential[];
+  commonPlayers?: CommonPlayer[];
   teamAName: string;
   teamBName: string;
   teamAScore: number;
@@ -13,11 +17,14 @@ interface DifferentialViewProps {
 
 export function DifferentialView({
   differentials,
+  commonPlayers = [],
   teamAName,
   teamBName,
   teamAScore,
   teamBScore,
 }: DifferentialViewProps) {
+  const [isCommonOpen, setIsCommonOpen] = useState(false);
+
   // Group differentials by position
   const byPosition: Record<string, Differential[]> = {
     GK: [],
@@ -28,6 +35,18 @@ export function DifferentialView({
 
   for (const diff of differentials) {
     byPosition[diff.position].push(diff);
+  }
+
+  // Group common players by position
+  const commonByPosition: Record<string, CommonPlayer[]> = {
+    GK: [],
+    DEF: [],
+    MID: [],
+    FWD: [],
+  };
+
+  for (const player of commonPlayers) {
+    commonByPosition[player.position].push(player);
   }
 
   // Calculate summary stats
@@ -41,6 +60,13 @@ export function DifferentialView({
 
   const winnerName = teamAScore > teamBScore ? teamAName : teamBName;
   const scoreDiff = Math.abs(teamAScore - teamBScore);
+
+  // Common players stats
+  const totalCommonPoints = commonPlayers.reduce((sum, p) => sum + p.totalPoints, 0);
+  const bestCommonPlayer = commonPlayers.reduce(
+    (max, p) => (p.totalPoints > (max?.totalPoints || 0) ? p : max),
+    commonPlayers[0]
+  );
 
   return (
     <div className="space-y-4">
@@ -147,6 +173,62 @@ export function DifferentialView({
         </Card>
       </div>
 
+      {/* Collapsible Common Players Section */}
+      {commonPlayers.length > 0 && (
+        <Collapsible open={isCommonOpen} onOpenChange={setIsCommonOpen}>
+          <Card className="border-muted">
+            <CollapsibleTrigger className="w-full">
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-muted-foreground">Common Players</CardTitle>
+                    <Badge variant="secondary">{commonPlayers.length} players</Badge>
+                    <span className="text-sm text-muted-foreground">• {totalCommonPoints} combined points</span>
+                  </div>
+                  {isCommonOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="space-y-4">
+                {Object.entries(commonByPosition).map(([position, players]) => {
+                  if (players.length === 0) return null;
+
+                  return (
+                    <div key={position}>
+                      <Badge variant="outline" className="mb-2">
+                        {position}
+                      </Badge>
+                      <div className="space-y-2">
+                        {players.map((player, idx) => (
+                          <div key={idx} className="flex justify-between items-center p-2 bg-muted/30 rounded">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-muted-foreground">{player.player.web_name}</span>
+                              {player.isCaptain && (
+                                <Badge variant="outline" className="text-xs">C</Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">
+                                {player.points} × {player.multiplier}
+                              </span>
+                              <span className="font-semibold text-muted-foreground">
+                                {player.totalPoints} pts
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {position !== 'FWD' && <Separator className="mt-4" />}
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+      )}
+
       {/* Summary Panel */}
       <Card>
         <CardHeader>
@@ -169,6 +251,23 @@ export function DifferentialView({
             <span className="text-muted-foreground">{teamBName} differential points:</span>
             <span className="font-semibold text-purple-600">+{teamBAdvantage}</span>
           </div>
+          {commonPlayers.length > 0 && (
+            <>
+              <Separator className="my-2" />
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Common players:</span>
+                <span className="font-semibold">{commonPlayers.length} players ({totalCommonPoints} pts)</span>
+              </div>
+              {bestCommonPlayer && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Best common player:</span>
+                  <span className="font-semibold">
+                    {bestCommonPlayer.player.web_name} ({bestCommonPlayer.totalPoints} pts)
+                  </span>
+                </div>
+              )}
+            </>
+          )}
           {biggestDiff && (
             <div className="flex justify-between pt-2 border-t">
               <span className="text-muted-foreground">Biggest swing:</span>
