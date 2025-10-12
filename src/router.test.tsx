@@ -30,4 +30,13 @@ describe('Router', () => {
     render(<RouterProvider router={testRouter} />);
     expect(screen.getByLabelText(/display name/i)).toBeInTheDocument();
   });
+
+  it('should render dashboard page at /dashboard', () => {
+    const testRouter = createMemoryRouter(router, {
+      initialEntries: ['/dashboard'],
+    });
+
+    render(<RouterProvider router={testRouter} />);
+    expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
+  });
 });

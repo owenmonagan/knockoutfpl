@@ -2,6 +2,7 @@ import { RouteObject } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
+import { DashboardPage } from './pages/DashboardPage';
 
 export const router: RouteObject[] = [
   {
@@ -15,5 +16,9 @@ export const router: RouteObject[] = [
   {
     path: '/signup',
     element: <SignUpPage />,
+  },
+  {
+    path: '/dashboard',
+    element: <DashboardPage />,
   },
 ];
