@@ -1,6 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { LoginForm } from './LoginForm';
+import * as authService from '../../services/auth';
 
 describe('LoginForm', () => {
   it('should render email and password inputs', () => {
@@ -14,5 +16,18 @@ describe('LoginForm', () => {
     render(<LoginForm />);
 
     expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
+  });
+
+  it('should call signInWithEmail when form is submitted', async () => {
+    const signInSpy = vi.spyOn(authService, 'signInWithEmail');
+    const user = userEvent.setup();
+
+    render(<LoginForm />);
+
+    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/password/i), 'password123');
+    await user.click(screen.getByRole('button', { name: /log in/i }));
+
+    expect(signInSpy).toHaveBeenCalledWith('test@example.com', 'password123');
   });
 });
