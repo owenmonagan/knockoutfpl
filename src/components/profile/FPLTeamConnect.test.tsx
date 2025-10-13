@@ -57,4 +57,35 @@ describe('FPLTeamConnect', () => {
 
     expect(getFPLTeamInfo).toHaveBeenCalledWith(158256);
   });
+
+  it('should show loading state during verification', async () => {
+    const user = userEvent.setup();
+    const { getFPLTeamInfo } = await import('../../services/fpl');
+
+    // Create a promise we can control
+    let resolvePromise: (value: any) => void;
+    const promise = new Promise((resolve) => {
+      resolvePromise = resolve;
+    });
+
+    vi.mocked(getFPLTeamInfo).mockReturnValue(promise as any);
+
+    render(<FPLTeamConnect userId="test-uid" />);
+
+    const input = screen.getByLabelText(/fpl team id/i);
+    await user.type(input, '158256');
+
+    const button = screen.getByRole('button', { name: /verify team/i });
+    await user.click(button);
+
+    // Should show verifying state
+    expect(screen.getByText(/verifying/i)).toBeInTheDocument();
+
+    // Clean up
+    resolvePromise!({
+      teamId: 158256,
+      teamName: "Owen's Team",
+      managerName: 'Owen Smith',
+    });
+  });
 });
