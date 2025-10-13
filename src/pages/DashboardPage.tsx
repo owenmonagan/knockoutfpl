@@ -436,6 +436,10 @@ export function DashboardPage() {
         {/* Completed Challenges Section */}
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Completed Challenges (0)</h2>
+          <EmptyState
+            title="No Completed Challenges"
+            description="Your challenge history will appear here"
+          />
         </div>
       </div>
     </main>

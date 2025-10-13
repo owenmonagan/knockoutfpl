@@ -350,8 +350,8 @@ describe('DashboardPage', () => {
     it('Step 41: shows 4 stat cards', () => {
       render(<DashboardPage />);
       const statCards = screen.getAllByRole('article');
-      // 1 FPL Connection Card + 4 Stat Cards + 2 Empty States = 7 total articles
-      expect(statCards).toHaveLength(7);
+      // 1 FPL Connection Card + 4 Stat Cards + 3 Empty States = 8 total articles
+      expect(statCards).toHaveLength(8);
     });
 
     it('Step 42: shows "Total Challenges" card with 0', () => {
@@ -456,6 +456,11 @@ describe('DashboardPage', () => {
       render(<DashboardPage />);
       const header = screen.getByRole('heading', { name: 'Completed Challenges (0)', level: 2 });
       expect(header).toBeInTheDocument();
+    });
+
+    it('Step 62: shows empty state for completed challenges', () => {
+      render(<DashboardPage />);
+      expect(screen.getByText('No Completed Challenges')).toBeInTheDocument();
     });
   });
 });
