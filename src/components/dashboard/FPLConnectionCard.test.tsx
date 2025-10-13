@@ -193,5 +193,26 @@ describe('FPLConnectionCard', () => {
       const error = screen.getByText(/team id must be 6-7 digits/i);
       expect(error).toBeInTheDocument();
     });
+
+    it('Step 16: shows help text with link', () => {
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      // Should show help text
+      const helpText = screen.getByText(/find your team id/i);
+      expect(helpText).toBeInTheDocument();
+
+      // Should have link to FPL site
+      const link = screen.getByRole('link', { name: /fantasy.premierleague.com/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', 'https://fantasy.premierleague.com');
+    });
   });
 });

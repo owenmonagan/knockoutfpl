@@ -155,6 +155,17 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
             )}
           </div>
           <Button disabled={!isValidTeamId(teamId)}>Connect</Button>
+          <p className="text-sm text-muted-foreground">
+            Find your Team ID at{' '}
+            <a
+              href="https://fantasy.premierleague.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              fantasy.premierleague.com
+            </a>
+          </p>
         </div>
       </CardContent>
     </Card>
