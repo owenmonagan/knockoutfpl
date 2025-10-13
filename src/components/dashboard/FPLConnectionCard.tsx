@@ -144,6 +144,13 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
     }
   };
 
+  // Handle update button click
+  const handleUpdate = async () => {
+    if (isValidTeamId(teamId)) {
+      await props.onUpdate(parseInt(teamId, 10));
+    }
+  };
+
   return (
     <Card role="article">
       <CardHeader>
@@ -194,7 +201,7 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
               />
             </div>
             <div className="flex gap-2">
-              <Button>Update</Button>
+              <Button onClick={handleUpdate}>Update</Button>
               <Button variant="outline" onClick={() => setIsEditing(false)}>
                 Cancel
               </Button>

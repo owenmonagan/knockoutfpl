@@ -683,5 +683,34 @@ describe('FPLConnectionCard', () => {
       expect(screen.queryByLabelText(/fpl team id/i)).not.toBeInTheDocument();
       expect(screen.getByText(/monzaga/i)).toBeInTheDocument();
     });
+
+    it('Step 35: update calls onUpdate with new team ID', async () => {
+      const mockOnUpdate = vi.fn().mockResolvedValue(undefined);
+
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={mockOnUpdate}
+        />
+      );
+
+      // Click Edit button
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      fireEvent.click(editButton);
+
+      // Change team ID
+      const input = screen.getByLabelText(/fpl team id/i);
+      fireEvent.change(input, { target: { value: '999999' } });
+
+      // Click Update button
+      const updateButton = screen.getByRole('button', { name: /update/i });
+      fireEvent.click(updateButton);
+
+      // Should call onUpdate with new team ID
+      expect(mockOnUpdate).toHaveBeenCalledWith(999999);
+    });
   });
 });
