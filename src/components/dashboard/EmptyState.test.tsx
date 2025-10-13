@@ -41,4 +41,19 @@ describe('EmptyState', () => {
     fireEvent.click(button);
     expect(mockOnAction).toHaveBeenCalledTimes(1);
   });
+
+  it('Step 53: has centered layout', () => {
+    render(<EmptyState title="No Challenges" description="Test" />);
+    const card = screen.getByRole('article');
+    const content = card.querySelector('.flex.flex-col.items-center.justify-center');
+    expect(content).toBeInTheDocument();
+  });
+
+  it('Step 54: uses Card component', () => {
+    render(<EmptyState title="No Challenges" description="Test" />);
+    const card = screen.getByRole('article');
+    // shadcn Card has these classes
+    expect(card).toHaveClass('rounded-lg');
+    expect(card).toHaveClass('border');
+  });
 });
