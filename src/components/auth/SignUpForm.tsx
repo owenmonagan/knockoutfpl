@@ -1,4 +1,5 @@
 import { useState, FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
@@ -6,6 +7,7 @@ import { signUpWithEmail } from '../../services/auth';
 import { createUserProfile } from '../../services/user';
 
 export function SignUpForm() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
@@ -30,6 +32,7 @@ export function SignUpForm() {
         email: userCredential.user.email || email,
         displayName,
       });
+      navigate('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during sign up');
     } finally {

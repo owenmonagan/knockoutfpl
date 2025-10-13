@@ -149,4 +149,30 @@ describe('SignUpForm', () => {
     // Resolve the signup
     resolveSignup({ user: { uid: 'test-uid', email: 'test@example.com' } });
   });
+
+  it('should navigate to dashboard after successful signup', async () => {
+    const { signUpWithEmail } = await import('../../services/auth');
+    const { createUserProfile } = await import('../../services/user');
+
+    vi.mocked(signUpWithEmail).mockResolvedValue({
+      user: { uid: 'test-uid', email: 'test@example.com' },
+    } as any);
+    vi.mocked(createUserProfile).mockResolvedValue();
+
+    const user = userEvent.setup();
+
+    render(<SignUpForm />);
+
+    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/display name/i), 'Test User');
+    await user.type(screen.getByLabelText(/^password$/i), 'password123');
+    await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+
+    await user.click(screen.getByRole('button', { name: /sign up/i }));
+
+    // Wait for async operations
+    await screen.findByRole('button', { name: /sign up/i });
+
+    expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+  });
 });
