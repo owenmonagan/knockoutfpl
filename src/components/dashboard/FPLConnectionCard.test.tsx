@@ -4,10 +4,22 @@ import { FPLConnectionCard } from './FPLConnectionCard';
 
 describe('FPLConnectionCard', () => {
   describe('PHASE 2: Not Connected State', () => {
+    const mockUser = {
+      userId: 'test-uid',
+      fplTeamId: 0, // Not connected
+      fplTeamName: '',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      wins: 0,
+      losses: 0,
+      createdAt: {} as any,
+      updatedAt: {} as any,
+    };
+
     it('Step 6: component renders', () => {
       render(
         <FPLConnectionCard
-          user={null}
+          user={mockUser}
           fplData={null}
           isLoading={false}
           onConnect={async () => {}}
@@ -17,6 +29,21 @@ describe('FPLConnectionCard', () => {
 
       // Should render without crashing
       expect(screen.getByRole('article')).toBeInTheDocument();
+    });
+
+    it('Step 7: shows "Connect Your FPL Team" title when not connected', () => {
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const title = screen.getByRole('heading', { name: /connect your fpl team/i });
+      expect(title).toBeInTheDocument();
     });
   });
 });

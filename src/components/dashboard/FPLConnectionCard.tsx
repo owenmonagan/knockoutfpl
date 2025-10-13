@@ -96,6 +96,7 @@
  */
 
 import type { User } from '../../types/user';
+import { Card, CardHeader, CardTitle } from '../ui/card';
 
 export interface FPLTeamData {
   teamName: string;
@@ -115,5 +116,11 @@ export interface FPLConnectionCardProps {
 }
 
 export function FPLConnectionCard(props: FPLConnectionCardProps) {
-  return <article role="article">FPLConnectionCard</article>;
+  return (
+    <Card role="article">
+      <CardHeader>
+        <CardTitle>Connect Your FPL Team</CardTitle>
+      </CardHeader>
+    </Card>
+  );
 }
