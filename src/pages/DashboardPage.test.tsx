@@ -1,8 +1,22 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { DashboardPage } from './DashboardPage';
+import * as AuthContext from '../contexts/AuthContext';
+
+vi.mock('../contexts/AuthContext', () => ({
+  useAuth: vi.fn(),
+}));
 
 describe('DashboardPage', () => {
+  beforeEach(() => {
+    // Default: user not authenticated
+    vi.mocked(AuthContext.useAuth).mockReturnValue({
+      user: null,
+      loading: false,
+      isAuthenticated: false,
+    });
+  });
+
   describe('PHASE 1: Basic Page Structure', () => {
     it('Step 1: renders with main element', () => {
       render(<DashboardPage />);
@@ -26,6 +40,23 @@ describe('DashboardPage', () => {
     it('Step 4: shows welcome message', () => {
       render(<DashboardPage />);
       const welcome = screen.getByText(/welcome/i);
+      expect(welcome).toBeInTheDocument();
+    });
+
+    it("Step 5: displays user's display name in welcome", () => {
+      // Mock authenticated user with display name
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      render(<DashboardPage />);
+      const welcome = screen.getByText(/welcome back, test user/i);
       expect(welcome).toBeInTheDocument();
     });
   });

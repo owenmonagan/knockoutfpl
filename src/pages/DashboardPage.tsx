@@ -319,11 +319,17 @@
  * - Future: Real-time updates possible with Firestore listeners (Phase 7)
  */
 
+import { useAuth } from '../contexts/AuthContext';
+
 export function DashboardPage() {
+  const { user } = useAuth();
+
   return (
     <main className="container mx-auto px-4 py-8">
       <h1>Dashboard</h1>
-      <p>Welcome back!</p>
+      <p>
+        Welcome back{user?.displayName ? `, ${user.displayName}` : ''}!
+      </p>
     </main>
   );
 }
