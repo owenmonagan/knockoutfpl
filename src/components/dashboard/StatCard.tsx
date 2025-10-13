@@ -1,4 +1,4 @@
-import { Card } from '../ui/card';
+import { Card, CardContent } from '../ui/card';
 
 export interface StatCardProps {
   label: string;
@@ -7,5 +7,13 @@ export interface StatCardProps {
 }
 
 export function StatCard(props: StatCardProps) {
-  return <Card role="article" />;
+  const { label } = props;
+
+  return (
+    <Card role="article">
+      <CardContent className="pt-6">
+        <p className="text-sm text-muted-foreground">{label}</p>
+      </CardContent>
+    </Card>
+  );
 }

@@ -8,4 +8,10 @@ describe('StatCard', () => {
     const card = screen.getByRole('article');
     expect(card).toBeInTheDocument();
   });
+
+  it('Step 38: displays label', () => {
+    render(<StatCard label="Total Challenges" value={42} />);
+    const label = screen.getByText('Total Challenges');
+    expect(label).toBeInTheDocument();
+  });
 });
