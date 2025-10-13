@@ -45,5 +45,20 @@ describe('FPLConnectionCard', () => {
       const title = screen.getByRole('heading', { name: /connect your fpl team/i });
       expect(title).toBeInTheDocument();
     });
+
+    it('Step 8: shows description text', () => {
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const description = screen.getByText(/link your fpl team to start creating challenges/i);
+      expect(description).toBeInTheDocument();
+    });
   });
 });

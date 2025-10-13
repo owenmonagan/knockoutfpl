@@ -96,7 +96,7 @@
  */
 
 import type { User } from '../../types/user';
-import { Card, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '../ui/card';
 
 export interface FPLTeamData {
   teamName: string;
@@ -120,6 +120,9 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
     <Card role="article">
       <CardHeader>
         <CardTitle>Connect Your FPL Team</CardTitle>
+        <CardDescription>
+          Link your FPL team to start creating challenges
+        </CardDescription>
       </CardHeader>
     </Card>
   );
