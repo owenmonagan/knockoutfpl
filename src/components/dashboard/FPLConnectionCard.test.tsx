@@ -596,5 +596,25 @@ describe('FPLConnectionCard', () => {
       const input = screen.getByLabelText(/fpl team id/i);
       expect(input).toBeInTheDocument();
     });
+
+    it('Step 31: input is pre-filled with current team ID', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      // Click Edit button
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      fireEvent.click(editButton);
+
+      // Input should be pre-filled with current team ID
+      const input = screen.getByLabelText(/fpl team id/i) as HTMLInputElement;
+      expect(input.value).toBe('158256');
+    });
   });
 });

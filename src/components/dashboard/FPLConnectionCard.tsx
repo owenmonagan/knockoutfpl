@@ -157,7 +157,16 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
             </CardDescription>
           </div>
           {isConnected && !isEditing && (
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (user) {
+                  setTeamId(user.fplTeamId.toString());
+                }
+                setIsEditing(true);
+              }}
+            >
               Edit
             </Button>
           )}
