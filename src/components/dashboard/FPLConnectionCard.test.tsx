@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { FPLConnectionCard } from './FPLConnectionCard';
 
 describe('FPLConnectionCard', () => {
@@ -711,6 +711,40 @@ describe('FPLConnectionCard', () => {
 
       // Should call onUpdate with new team ID
       expect(mockOnUpdate).toHaveBeenCalledWith(999999);
+    });
+
+    it('Step 36: exits edit mode after successful update', async () => {
+      const mockOnUpdate = vi.fn().mockResolvedValue(undefined);
+
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={mockOnUpdate}
+        />
+      );
+
+      // Click Edit button
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      fireEvent.click(editButton);
+
+      // Change team ID
+      const input = screen.getByLabelText(/fpl team id/i);
+      fireEvent.change(input, { target: { value: '999999' } });
+
+      // Click Update button
+      const updateButton = screen.getByRole('button', { name: /update/i });
+      fireEvent.click(updateButton);
+
+      // Wait for update to complete and exit edit mode
+      await waitFor(() => {
+        expect(screen.queryByLabelText(/fpl team id/i)).not.toBeInTheDocument();
+      });
+
+      // Should show connected view again
+      expect(screen.getByText(/monzaga/i)).toBeInTheDocument();
     });
   });
 });

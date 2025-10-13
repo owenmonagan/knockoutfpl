@@ -148,6 +148,7 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
   const handleUpdate = async () => {
     if (isValidTeamId(teamId)) {
       await props.onUpdate(parseInt(teamId, 10));
+      setIsEditing(false);
     }
   };
 
