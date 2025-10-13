@@ -97,19 +97,14 @@
 
 import { useState } from 'react';
 import type { User } from '../../types/user';
+import type { FPLTeamInfo } from '../../services/fpl';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 
-export interface FPLTeamData {
-  teamName: string;
-  overallPoints: number;
-  overallRank: number;
-  gameweekPoints: number;
-  gameweekRank: number;
-  teamValue: number; // in £m
-}
+// Re-export for backwards compatibility
+export type FPLTeamData = FPLTeamInfo;
 
 export interface FPLConnectionCardProps {
   user: User | null;
