@@ -111,4 +111,31 @@ describe('LoginForm', () => {
     const forgotLink = screen.getByRole('link', { name: /forgot password/i });
     expect(forgotLink).toBeInTheDocument();
   });
+
+  it('should show loading state during login', async () => {
+    let resolveLogin: any;
+    const loginPromise = new Promise((resolve) => {
+      resolveLogin = resolve;
+    });
+
+    const signInSpy = vi.spyOn(authService, 'signInWithEmail');
+    signInSpy.mockReturnValue(loginPromise as any);
+    const user = userEvent.setup();
+
+    render(
+      <BrowserRouter>
+        <LoginForm />
+      </BrowserRouter>
+    );
+
+    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/password/i), 'password123');
+    await user.click(screen.getByRole('button', { name: /log in/i }));
+
+    // Button should be disabled during loading
+    expect(screen.getByRole('button', { name: /logging in/i })).toBeDisabled();
+
+    // Resolve the login
+    resolveLogin({});
+  });
 });

@@ -11,17 +11,21 @@ export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
     try {
       await signInWithEmail(email, password);
       navigate('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during login');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -66,7 +70,9 @@ export function LoginForm() {
               required
             />
           </div>
-          <Button type="submit" className="w-full">Log In</Button>
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? 'Logging in...' : 'Log In'}
+          </Button>
         </form>
       </CardContent>
       <CardFooter className="flex flex-col space-y-4">

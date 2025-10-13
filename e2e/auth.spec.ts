@@ -98,8 +98,9 @@ test.describe('Authentication Flow', () => {
     // Submit form
     await page.getByRole('button', { name: 'Sign Up' }).click();
 
-    // Firebase should reject with weak password error
-    await expect(page.locator('.text-red-500')).toBeVisible({ timeout: 5000 });
+    // Firebase should reject with weak password error (displayed in Alert component)
+    await expect(page.getByRole('alert')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('alert')).toContainText(/password/i);
   });
 
   test('should show error message on invalid login @auth @critical', async ({ page }) => {
@@ -110,8 +111,8 @@ test.describe('Authentication Flow', () => {
     await page.getByLabel('Password').fill('wrongpassword');
     await page.getByRole('button', { name: 'Log In' }).click();
 
-    // Wait for error message (Firebase auth error)
-    await expect(page.locator('.text-red-500')).toBeVisible({ timeout: 5000 });
+    // Wait for error message (Firebase auth error displayed in Alert component)
+    await expect(page.getByRole('alert')).toBeVisible({ timeout: 5000 });
   });
 
   test('should have no console errors on signup page @smoke @auth', async ({ page }) => {
