@@ -335,6 +335,7 @@ export function DashboardPage() {
   const [userData, setUserData] = useState<User | null>(null);
   const [fplData, setFplData] = useState<FPLTeamData | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
+  const [isLoadingFpl, setIsLoadingFpl] = useState(false);
 
   // Fetch user profile on mount
   useEffect(() => {
@@ -355,8 +356,10 @@ export function DashboardPage() {
     async function loadFPLData() {
       if (!userData || userData.fplTeamId === 0) return;
 
+      setIsLoadingFpl(true);
       const teamInfo = await getFPLTeamInfo(userData.fplTeamId);
       setFplData(teamInfo);
+      setIsLoadingFpl(false);
     }
 
     loadFPLData();
@@ -448,7 +451,7 @@ export function DashboardPage() {
             <FPLConnectionCard
               user={userData}
               fplData={fplData}
-              isLoading={false}
+              isLoading={isLoadingFpl}
               onConnect={handleConnect}
               onUpdate={handleUpdate}
             />
