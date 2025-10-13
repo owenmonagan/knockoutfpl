@@ -541,11 +541,11 @@ describe('FPLConnectionCard', () => {
       expect(teamName).toBeInTheDocument();
 
       // Should show N/A for all missing fields
-      const gwRank = screen.getByText(/gw rank.*n\/a/i);
-      expect(gwRank).toBeInTheDocument();
+      const gwPoints = screen.getByText(/gw points.*n\/a.*\|.*gw rank/i);
+      expect(gwPoints).toBeInTheDocument();
 
-      const overallRank = screen.getByText(/overall rank.*n\/a/i);
-      expect(overallRank).toBeInTheDocument();
+      const overall = screen.getByText(/overall.*n\/a.*pts.*\|.*overall rank.*n\/a/i);
+      expect(overall).toBeInTheDocument();
 
       const teamValue = screen.getByText(/team value.*£n\/a/i);
       expect(teamValue).toBeInTheDocument();
