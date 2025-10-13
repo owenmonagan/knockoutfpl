@@ -515,5 +515,40 @@ describe('FPLConnectionCard', () => {
       const teamName = screen.getByText(/monzaga/i);
       expect(teamName).toBeInTheDocument();
     });
+
+    it('handles incomplete FPL data gracefully (all fields missing)', () => {
+      const incompleteFplData = {
+        teamName: 'Test Team',
+        overallPoints: undefined as any,
+        overallRank: undefined as any,
+        gameweekPoints: undefined as any,
+        gameweekRank: undefined as any,
+        teamValue: undefined as any,
+      };
+
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={incompleteFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      // Should not crash, should show team name and N/A for missing data
+      const teamName = screen.getByText(/test team/i);
+      expect(teamName).toBeInTheDocument();
+
+      // Should show N/A for all missing fields
+      const gwRank = screen.getByText(/gw rank.*n\/a/i);
+      expect(gwRank).toBeInTheDocument();
+
+      const overallRank = screen.getByText(/overall rank.*n\/a/i);
+      expect(overallRank).toBeInTheDocument();
+
+      const teamValue = screen.getByText(/team value.*£n\/a/i);
+      expect(teamValue).toBeInTheDocument();
+    });
   });
 });
