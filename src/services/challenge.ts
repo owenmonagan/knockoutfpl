@@ -1,4 +1,4 @@
-import { collection, addDoc, doc, getDoc, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, query, where, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { CreateChallengeData, Challenge } from '../types/challenge';
 
@@ -39,6 +39,7 @@ export async function getChallenge(challengeId: string): Promise<Challenge | nul
 }
 
 export async function getUserChallenges(userId: string): Promise<Challenge[]> {
-  collection(db, 'challenges');
+  const challengesRef = collection(db, 'challenges');
+  where('creatorUserId', '==', userId);
   return [];
 }

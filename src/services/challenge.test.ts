@@ -164,5 +164,21 @@ describe('Challenge Service', () => {
 
       expect(collection).toHaveBeenCalledWith(expect.anything(), 'challenges');
     });
+
+    it('should query for challenges where user is creator', async () => {
+      const { query, collection, where, getDocs } = await import('firebase/firestore');
+      const { getUserChallenges } = await import('./challenge');
+
+      vi.mocked(collection).mockReturnValue('challenges-ref' as any);
+      vi.mocked(where).mockReturnValue('where-clause' as any);
+      vi.mocked(query).mockReturnValue('query-ref' as any);
+      vi.mocked(getDocs).mockResolvedValue({
+        docs: [],
+      } as any);
+
+      await getUserChallenges('user-123');
+
+      expect(where).toHaveBeenCalledWith('creatorUserId', '==', 'user-123');
+    });
   });
 });
