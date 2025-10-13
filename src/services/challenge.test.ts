@@ -140,4 +140,14 @@ describe('Challenge Service', () => {
       expect(challenge?.status).toBe('pending');
     });
   });
+
+  describe('getUserChallenges', () => {
+    it('should be a function that returns a promise', async () => {
+      const { getUserChallenges } = await import('./challenge');
+
+      const result = getUserChallenges('user-123');
+
+      expect(result).toBeInstanceOf(Promise);
+    });
+  });
 });

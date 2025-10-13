@@ -37,3 +37,7 @@ export async function getChallenge(challengeId: string): Promise<Challenge | nul
     ...challengeSnap.data(),
   } as Challenge;
 }
+
+export async function getUserChallenges(userId: string): Promise<Challenge[]> {
+  return [];
+}
