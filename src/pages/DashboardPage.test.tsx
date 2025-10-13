@@ -375,5 +375,16 @@ describe('DashboardPage', () => {
       expect(card).toHaveTextContent('0');
       expect(card).toHaveTextContent('Wins');
     });
+
+    it('Step 44: shows "Losses" card with 0', () => {
+      render(<DashboardPage />);
+      const lossesLabel = screen.getByText('Losses');
+      expect(lossesLabel).toBeInTheDocument();
+
+      // Check the value is in the same card
+      const card = lossesLabel.closest('[role="article"]');
+      expect(card).toHaveTextContent('0');
+      expect(card).toHaveTextContent('Losses');
+    });
   });
 });
