@@ -1,6 +1,7 @@
 import { doc, setDoc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { CreateUserData, User } from '../types/user';
+import { getFPLTeamInfo } from './fpl';
 
 /**
  * Create a new user profile in Firestore
@@ -49,5 +50,19 @@ export async function updateUserProfile(
   await updateDoc(userRef, {
     ...updates,
     updatedAt: now,
+  });
+}
+
+/**
+ * Connect FPL team to user profile
+ */
+export async function connectFPLTeam(userId: string, fplTeamId: number): Promise<void> {
+  // Fetch team info from FPL API to verify team exists
+  const teamInfo = await getFPLTeamInfo(fplTeamId);
+
+  // Update user profile with FPL team info
+  await updateUserProfile(userId, {
+    fplTeamId: teamInfo.teamId,
+    fplTeamName: teamInfo.teamName,
   });
 }

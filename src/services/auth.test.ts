@@ -6,6 +6,8 @@ vi.mock('firebase/auth', () => ({
   createUserWithEmailAndPassword: vi.fn(),
   signInWithEmailAndPassword: vi.fn(),
   signOut: vi.fn(),
+  signInWithPopup: vi.fn(),
+  GoogleAuthProvider: vi.fn(),
   getAuth: vi.fn(() => ({ currentUser: null })),
 }));
 
@@ -101,6 +103,14 @@ describe('Authentication Service', () => {
       await authSignOut();
 
       expect(firebaseAuth.signOut).toHaveBeenCalledWith(expect.anything());
+    });
+  });
+
+  describe('signInWithGoogle', () => {
+    it('should export signInWithGoogle function', async () => {
+      const { signInWithGoogle } = await import('./auth');
+      expect(signInWithGoogle).toBeDefined();
+      expect(typeof signInWithGoogle).toBe('function');
     });
   });
 

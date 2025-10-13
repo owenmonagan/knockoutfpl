@@ -16,6 +16,11 @@ vi.mock('../lib/firebase', () => ({
   db: {},
 }));
 
+// Mock FPL service
+vi.mock('./fpl', () => ({
+  getFPLTeamInfo: vi.fn(),
+}));
+
 describe('User Service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -98,6 +103,25 @@ describe('User Service', () => {
 
       await updateUserProfile('test-uid', updates);
 
+      expect(updateDoc).toHaveBeenCalled();
+    });
+  });
+
+  describe('connectFPLTeam', () => {
+    it('should fetch team info and update user document', async () => {
+      const { updateDoc } = await import('firebase/firestore');
+      const { getFPLTeamInfo } = await import('./fpl');
+      const { connectFPLTeam } = await import('./user');
+
+      vi.mocked(getFPLTeamInfo).mockResolvedValue({
+        teamId: 158256,
+        teamName: "Owen's Team",
+        managerName: 'Owen Smith',
+      });
+
+      await connectFPLTeam('test-uid', 158256);
+
+      expect(getFPLTeamInfo).toHaveBeenCalledWith(158256);
       expect(updateDoc).toHaveBeenCalled();
     });
   });

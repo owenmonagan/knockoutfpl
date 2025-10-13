@@ -2,6 +2,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  signInWithPopup,
+  GoogleAuthProvider,
 } from 'firebase/auth';
 import type { User, UserCredential } from 'firebase/auth';
 import { auth } from '../lib/firebase';
@@ -25,6 +27,14 @@ export async function signInWithEmail(email: string, password: string): Promise<
  */
 export async function signOut(): Promise<void> {
   return firebaseSignOut(auth);
+}
+
+/**
+ * Sign in with Google using popup
+ */
+export async function signInWithGoogle(): Promise<UserCredential> {
+  const provider = new GoogleAuthProvider();
+  return signInWithPopup(auth, provider);
 }
 
 /**
