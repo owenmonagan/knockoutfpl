@@ -101,4 +101,14 @@ describe('LoginForm', () => {
     expect(signupLink).toBeInTheDocument();
     expect(signupLink).toHaveAttribute('href', '/signup');
   });
+
+  it('should display forgot password link', () => {
+    render(
+      <BrowserRouter>
+        <LoginForm />
+      </BrowserRouter>
+    );
+    const forgotLink = screen.getByRole('link', { name: /forgot password/i });
+    expect(forgotLink).toBeInTheDocument();
+  });
 });
