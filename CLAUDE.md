@@ -31,6 +31,59 @@ We use **TDD Guard** to maintain a test-driven workflow:
   3. Refactor and improve
   4. Repeat
 
+### Micro-TDD Philosophy
+
+We practice **micro-TDD**: working in the smallest possible increments to maximize quality and confidence.
+
+**What is Micro-TDD?**
+- **One tiny behavior** = **One test** = **One implementation**
+- Each Red-Green-Refactor cycle should take **1-3 minutes**
+- Break down features into atomic behaviors
+- Example progression:
+  ```
+  ✓ Button renders
+  ✓ Button has correct text
+  ✓ Button has correct variant
+  ✓ Button responds to click
+  ✓ Button shows loading state when processing
+  ✓ Button calls onSubmit handler
+  ```
+
+**Core Principles:**
+
+1. **Never Skip Ahead**
+   - Resist the urge to implement multiple behaviors at once
+   - Each test must be the simplest next step
+   - Trust that small steps compound quickly
+
+2. **Never Ask to Continue**
+   - TDD is expected to be slow and thorough
+   - 2-3 hours for a complete component is normal and desired
+   - Keep going until ALL work is complete
+   - Speed comes from confidence, not shortcuts
+
+3. **Red-Green-Refactor Discipline**
+   - **Red:** Write the smallest possible failing test
+   - **Green:** Write minimal code to make it pass (no more, no less)
+   - **Refactor:** Clean up while tests stay green
+   - **Repeat:** Immediately move to next micro-behavior
+
+4. **Complete Everything**
+   - Finish entire components/features in one session
+   - Don't leave partial implementations
+   - Each passing test is permanent progress
+   - Slow and steady prevents bugs and rework
+
+**Why Micro-TDD?**
+- **Prevents bugs:** Each behavior is independently verified
+- **Builds confidence:** Every change is immediately validated
+- **Enables refactoring:** Comprehensive test coverage
+- **Reduces debugging:** Problems are caught at the smallest scope
+- **Documents intent:** Tests serve as living specifications
+
+**Hook Reminder:**
+A hook fires on every prompt to remind Claude to follow micro-TDD discipline.
+
 ### Testing Approach
 
 **Playwright MCP Integration:**
