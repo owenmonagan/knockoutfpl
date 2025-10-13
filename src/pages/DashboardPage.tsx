@@ -332,14 +332,17 @@ export function DashboardPage() {
   const { user: authUser } = useAuth();
   const [userData, setUserData] = useState<User | null>(null);
   const [fplData, setFplData] = useState<FPLTeamData | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(false);
 
   // Fetch user profile on mount
   useEffect(() => {
     async function loadDashboardData() {
       if (!authUser?.uid) return;
 
+      setIsLoadingUser(true);
       const userProfile = await getUserProfile(authUser.uid);
       setUserData(userProfile);
+      setIsLoadingUser(false);
     }
 
     loadDashboardData();
@@ -397,6 +400,8 @@ export function DashboardPage() {
             Welcome back{authUser?.displayName ? `, ${authUser.displayName}` : ''}!
           </p>
         </div>
+
+        {isLoadingUser && <p>Loading...</p>}
 
         {/* FPL Connection Card */}
         <FPLConnectionCard

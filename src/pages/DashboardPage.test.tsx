@@ -463,4 +463,43 @@ describe('DashboardPage', () => {
       expect(screen.getByText('No Completed Challenges')).toBeInTheDocument();
     });
   });
+
+  describe('PHASE 7: Loading States', () => {
+    it('Step 63: shows loading spinner while fetching user', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      // Make getUserProfile return a delayed promise
+      vi.mocked(userService.getUserProfile).mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve({
+          userId: 'test-uid',
+          fplTeamId: 0,
+          fplTeamName: '',
+          email: 'test@example.com',
+          displayName: 'Test User',
+          wins: 0,
+          losses: 0,
+          createdAt: {} as any,
+          updatedAt: {} as any,
+        }), 100))
+      );
+
+      render(<DashboardPage />);
+
+      // Should show loading text
+      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
+      });
+    });
+  });
 });
