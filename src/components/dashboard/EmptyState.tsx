@@ -1,4 +1,4 @@
-import { Card } from '../ui/card';
+import { Card, CardContent } from '../ui/card';
 
 export interface EmptyStateProps {
   title: string;
@@ -9,5 +9,13 @@ export interface EmptyStateProps {
 }
 
 export function EmptyState(props: EmptyStateProps) {
-  return <Card role="article" />;
+  const { title } = props;
+
+  return (
+    <Card role="article">
+      <CardContent className="flex flex-col items-center justify-center p-6">
+        <h3 className="text-lg font-semibold">{title}</h3>
+      </CardContent>
+    </Card>
+  );
 }
