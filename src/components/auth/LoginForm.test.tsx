@@ -138,4 +138,14 @@ describe('LoginForm', () => {
     // Resolve the login
     resolveLogin({});
   });
+
+  it('should render Google sign-in button', () => {
+    render(
+      <BrowserRouter>
+        <LoginForm />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByRole('button', { name: /continue with google/i })).toBeInTheDocument();
+  });
 });
