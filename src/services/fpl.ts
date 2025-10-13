@@ -5,6 +5,8 @@ export interface FPLTeamInfo {
   overallPoints?: number;
   overallRank?: number;
   gameweekPoints?: number;
+  gameweekRank?: number;
+  teamValue?: number;
 }
 
 export interface FPLGameweekScore {
@@ -29,6 +31,7 @@ export async function getFPLTeamInfo(teamId: number): Promise<FPLTeamInfo> {
     overallRank: data.summary_overall_rank,
     gameweekPoints: data.summary_event_points,
     gameweekRank: data.summary_event_rank,
+    teamValue: data.last_deadline_value ? data.last_deadline_value / 10 : undefined,
   };
 }
 

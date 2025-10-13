@@ -101,6 +101,25 @@ describe('FPL Service', () => {
 
       expect(result.gameweekRank).toBe(1656624);
     });
+
+    it('should return teamValue in £m from last_deadline_value', async () => {
+      const mockTeamData = {
+        id: 158256,
+        name: "Owen's XI",
+        player_first_name: 'Owen',
+        player_last_name: 'Test',
+        last_deadline_value: 1020,
+      };
+
+      global.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockTeamData,
+      });
+
+      const result = await getFPLTeamInfo(158256);
+
+      expect(result.teamValue).toBe(102.0);
+    });
   });
 
   describe('getFPLGameweekScore', () => {
