@@ -63,6 +63,25 @@ describe('FPL Service', () => {
 
       expect(result.overallRank).toBe(841192);
     });
+
+    it('should return gameweekPoints from summary_event_points', async () => {
+      const mockTeamData = {
+        id: 158256,
+        name: "Owen's XI",
+        player_first_name: 'Owen',
+        player_last_name: 'Test',
+        summary_event_points: 78,
+      };
+
+      global.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockTeamData,
+      });
+
+      const result = await getFPLTeamInfo(158256);
+
+      expect(result.gameweekPoints).toBe(78);
+    });
   });
 
   describe('getFPLGameweekScore', () => {

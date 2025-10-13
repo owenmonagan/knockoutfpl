@@ -4,6 +4,7 @@ export interface FPLTeamInfo {
   managerName: string;
   overallPoints?: number;
   overallRank?: number;
+  gameweekPoints?: number;
 }
 
 export interface FPLGameweekScore {
@@ -26,6 +27,7 @@ export async function getFPLTeamInfo(teamId: number): Promise<FPLTeamInfo> {
     managerName: `${data.player_first_name} ${data.player_last_name}`,
     overallPoints: data.summary_overall_points,
     overallRank: data.summary_overall_rank,
+    gameweekPoints: data.summary_event_points,
   };
 }
 
