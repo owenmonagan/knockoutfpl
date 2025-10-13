@@ -270,5 +270,24 @@ describe('FPLConnectionCard', () => {
       // Should call onConnect with numeric team ID
       expect(mockOnConnect).toHaveBeenCalledWith(123456);
     });
+
+    it('Step 20: shows error message from API failure', () => {
+      const errorMessage = 'Team not found. Please check your Team ID.';
+
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          error={errorMessage}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const error = screen.getByText(errorMessage);
+      expect(error).toBeInTheDocument();
+      expect(error).toHaveClass('text-destructive');
+    });
   });
 });

@@ -115,12 +115,13 @@ export interface FPLConnectionCardProps {
   user: User | null;
   fplData: FPLTeamData | null;
   isLoading: boolean;
+  error?: string | null;
   onConnect: (teamId: number) => Promise<void>;
   onUpdate: (teamId: number) => Promise<void>;
 }
 
 export function FPLConnectionCard(props: FPLConnectionCardProps) {
-  const { isLoading, onConnect } = props;
+  const { isLoading, error, onConnect } = props;
   const [teamId, setTeamId] = useState('');
 
   // Validate team ID format: must be 6-7 digits
@@ -168,6 +169,9 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
           >
             {isLoading ? 'Connecting...' : 'Connect'}
           </Button>
+          {error && (
+            <p className="text-sm text-destructive">{error}</p>
+          )}
           <p className="text-sm text-muted-foreground">
             Find your Team ID at{' '}
             <a
