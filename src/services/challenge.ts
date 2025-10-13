@@ -39,5 +39,6 @@ export async function getChallenge(challengeId: string): Promise<Challenge | nul
 }
 
 export async function getUserChallenges(userId: string): Promise<Challenge[]> {
+  collection(db, 'challenges');
   return [];
 }
