@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui/card';
 import { signInWithEmail } from '../../services/auth';
 
 export function LoginForm() {
@@ -59,6 +59,14 @@ export function LoginForm() {
           <Button type="submit" className="w-full">Log In</Button>
         </form>
       </CardContent>
+      <CardFooter className="flex flex-col space-y-4">
+        <div className="text-sm text-center text-muted-foreground">
+          Don't have an account?{' '}
+          <Link to="/signup" className="underline hover:text-primary">
+            Sign up
+          </Link>
+        </div>
+      </CardFooter>
     </Card>
   );
 }
