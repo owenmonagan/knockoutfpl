@@ -364,5 +364,16 @@ describe('DashboardPage', () => {
       expect(card).toHaveTextContent('0');
       expect(card).toHaveTextContent('Total Challenges');
     });
+
+    it('Step 43: shows "Wins" card with 0', () => {
+      render(<DashboardPage />);
+      const winsLabel = screen.getByText('Wins');
+      expect(winsLabel).toBeInTheDocument();
+
+      // Check the value is in the same card
+      const card = winsLabel.closest('[role="article"]');
+      expect(card).toHaveTextContent('0');
+      expect(card).toHaveTextContent('Wins');
+    });
   });
 });
