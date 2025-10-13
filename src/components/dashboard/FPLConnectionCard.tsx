@@ -167,8 +167,8 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
           // Connected state: Show team stats
           <div className="space-y-4">
             <p className="text-lg font-semibold">{fplData.teamName}</p>
-            <p className="text-sm">GW Points: {fplData.gameweekPoints} | GW Rank: {fplData.gameweekRank?.toLocaleString() ?? 'N/A'}</p>
-            <p className="text-sm">Overall: {fplData.overallPoints} pts | Overall Rank: {fplData.overallRank?.toLocaleString() ?? 'N/A'}</p>
+            <p className="text-sm">GW Points: {fplData.gameweekPoints ?? 'N/A'} | GW Rank: {fplData.gameweekRank?.toLocaleString() ?? 'N/A'}</p>
+            <p className="text-sm">Overall: {fplData.overallPoints ?? 'N/A'} pts | Overall Rank: {fplData.overallRank?.toLocaleString() ?? 'N/A'}</p>
             <p className="text-sm">Team Value: £{fplData.teamValue?.toFixed(1) ?? 'N/A'}m</p>
           </div>
         ) : (
