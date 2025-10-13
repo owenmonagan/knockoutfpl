@@ -43,4 +43,33 @@ describe('User Service', () => {
       expect(setDoc).toHaveBeenCalled();
     });
   });
+
+  describe('getUserProfile', () => {
+    it('should fetch a user document from Firestore', async () => {
+      const { getDoc } = await import('firebase/firestore');
+      const { getUserProfile } = await import('./user');
+
+      const mockUserData: User = {
+        userId: 'test-uid',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        fplTeamId: 158256,
+        fplTeamName: "Owen's Team",
+        wins: 5,
+        losses: 3,
+        createdAt: { seconds: 1234567890, nanoseconds: 0 } as any,
+        updatedAt: { seconds: 1234567890, nanoseconds: 0 } as any,
+      };
+
+      vi.mocked(getDoc).mockResolvedValue({
+        exists: () => true,
+        data: () => mockUserData,
+      } as any);
+
+      const result = await getUserProfile('test-uid');
+
+      expect(getDoc).toHaveBeenCalled();
+      expect(result).toEqual(mockUserData);
+    });
+  });
 });

@@ -44,7 +44,10 @@
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_click",
       "Bash(firebase projects:list:*)",
-      "WebFetch(domain:firebase.google.com)"
+      "WebFetch(domain:firebase.google.com)",
+      "WebFetch(domain:shadcnuikit.com)",
+      "WebFetch(domain:support.discord.com)",
+      "WebFetch(domain:www.shadcn-ui-blocks.com)"
     ],
     "deny": [],
     "ask": []
