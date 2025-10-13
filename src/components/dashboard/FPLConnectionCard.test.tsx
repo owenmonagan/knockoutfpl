@@ -172,5 +172,26 @@ describe('FPLConnectionCard', () => {
       const error = screen.getByText(/team id must be 6-7 digits/i);
       expect(error).toBeInTheDocument();
     });
+
+    it('Step 15: shows error for non-numeric input', () => {
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const input = screen.getByRole('textbox');
+
+      // Enter non-numeric input
+      fireEvent.change(input, { target: { value: 'abc123' } });
+
+      // Should show error message
+      const error = screen.getByText(/team id must be 6-7 digits/i);
+      expect(error).toBeInTheDocument();
+    });
   });
 });
