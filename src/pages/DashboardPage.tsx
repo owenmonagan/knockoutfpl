@@ -427,6 +427,10 @@ export function DashboardPage() {
         {/* Active Challenges Section */}
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Active Challenges (0)</h2>
+          <EmptyState
+            title="No Active Challenges"
+            description="Active challenges will appear here once accepted"
+          />
         </div>
       </div>
     </main>
