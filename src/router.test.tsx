@@ -62,4 +62,38 @@ describe('Router', () => {
     );
     expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
   });
+
+  it('should render profile page at /profile when authenticated', () => {
+    const testRouter = createMemoryRouter(router, {
+      initialEntries: ['/profile'],
+    });
+
+    // Mock Firebase onAuthStateChanged to provide authenticated user
+    vi.mock('firebase/auth', async () => {
+      const actual = await vi.importActual('firebase/auth');
+      return {
+        ...actual,
+        onAuthStateChanged: (auth: any, callback: any) => {
+          callback({ uid: 'test-uid', email: 'test@example.com' });
+          return () => {};
+        },
+      };
+    });
+
+    // Mock FPL and user services
+    vi.mock('./services/fpl', () => ({
+      getFPLTeamInfo: vi.fn(),
+    }));
+
+    vi.mock('./services/user', () => ({
+      connectFPLTeam: vi.fn(),
+    }));
+
+    render(
+      <AuthProvider>
+        <RouterProvider router={testRouter} />
+      </AuthProvider>
+    );
+    expect(screen.getByText(/connect your fpl team/i)).toBeInTheDocument();
+  });
 });
