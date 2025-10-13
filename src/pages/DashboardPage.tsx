@@ -324,6 +324,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { FPLConnectionCard, type FPLTeamData } from '../components/dashboard/FPLConnectionCard';
 import { StatCard } from '../components/dashboard/StatCard';
 import { EmptyState } from '../components/dashboard/EmptyState';
+import { Card, CardContent, CardHeader } from '../components/ui/card';
+import { Skeleton } from '../components/ui/skeleton';
 import type { User } from '../types/user';
 import { getUserProfile, connectFPLTeam, updateUserProfile } from '../services/user';
 import { getFPLTeamInfo } from '../services/fpl';
@@ -401,51 +403,92 @@ export function DashboardPage() {
           </p>
         </div>
 
-        {isLoadingUser && <p>Loading...</p>}
+        {isLoadingUser ? (
+          <>
+            {/* FPL Connection Card Skeleton */}
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-[200px]" />
+                <Skeleton className="h-4 w-[280px] mt-2" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-[100px]" />
+              </CardContent>
+            </Card>
 
-        {/* FPL Connection Card */}
-        <FPLConnectionCard
-          user={userData}
-          fplData={fplData}
-          isLoading={false}
-          onConnect={handleConnect}
-          onUpdate={handleUpdate}
-        />
+            {/* Stats Section Skeleton */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {[1, 2, 3, 4].map((i) => (
+                <Card key={i}>
+                  <CardContent className="pt-6">
+                    <Skeleton className="h-8 w-16 mb-2" />
+                    <Skeleton className="h-4 w-24" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-        {/* Stats Section */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard label="Total Challenges" value={0} />
-          <StatCard label="Wins" value={0} />
-          <StatCard label="Losses" value={0} />
-          <StatCard label="Win Rate" value="N/A" />
-        </div>
+            {/* Challenge Sections Skeletons */}
+            {['Upcoming', 'Active', 'Completed'].map((section) => (
+              <div key={section}>
+                <Skeleton className="h-8 w-[250px] mb-4" />
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center p-6">
+                    <Skeleton className="h-6 w-[180px] mb-2" />
+                    <Skeleton className="h-4 w-[280px]" />
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
+          </>
+        ) : (
+          <>
+            {/* FPL Connection Card */}
+            <FPLConnectionCard
+              user={userData}
+              fplData={fplData}
+              isLoading={false}
+              onConnect={handleConnect}
+              onUpdate={handleUpdate}
+            />
 
-        {/* Upcoming Challenges Section */}
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Upcoming Challenges (0)</h2>
-          <EmptyState
-            title="No Upcoming Challenges"
-            description="Create your first challenge to compete with other managers"
-          />
-        </div>
+            {/* Stats Section */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <StatCard label="Total Challenges" value={0} />
+              <StatCard label="Wins" value={0} />
+              <StatCard label="Losses" value={0} />
+              <StatCard label="Win Rate" value="N/A" />
+            </div>
 
-        {/* Active Challenges Section */}
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Active Challenges (0)</h2>
-          <EmptyState
-            title="No Active Challenges"
-            description="Active challenges will appear here once accepted"
-          />
-        </div>
+            {/* Upcoming Challenges Section */}
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Upcoming Challenges (0)</h2>
+              <EmptyState
+                title="No Upcoming Challenges"
+                description="Create your first challenge to compete with other managers"
+              />
+            </div>
 
-        {/* Completed Challenges Section */}
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Completed Challenges (0)</h2>
-          <EmptyState
-            title="No Completed Challenges"
-            description="Your challenge history will appear here"
-          />
-        </div>
+            {/* Active Challenges Section */}
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Active Challenges (0)</h2>
+              <EmptyState
+                title="No Active Challenges"
+                description="Active challenges will appear here once accepted"
+              />
+            </div>
+
+            {/* Completed Challenges Section */}
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Completed Challenges (0)</h2>
+              <EmptyState
+                title="No Completed Challenges"
+                description="Your challenge history will appear here"
+              />
+            </div>
+          </>
+        )}
       </div>
     </main>
   );

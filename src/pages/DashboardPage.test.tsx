@@ -74,7 +74,7 @@ describe('DashboardPage', () => {
   });
 
   describe('PHASE 2: FPL Connection Card Integration', () => {
-    it('Step 6 (Integration): renders FPLConnectionCard component', () => {
+    it('Step 6 (Integration): renders FPLConnectionCard component', async () => {
       vi.mocked(AuthContext.useAuth).mockReturnValue({
         user: {
           uid: 'test-uid',
@@ -85,11 +85,26 @@ describe('DashboardPage', () => {
         isAuthenticated: true,
       });
 
+      // Mock getUserProfile to resolve immediately
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 0,
+        fplTeamName: '',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
       render(<DashboardPage />);
 
-      // Look for the FPL Connection Card by its title
-      const cardTitle = screen.getByRole('heading', { name: /connect your fpl team/i });
-      expect(cardTitle).toBeInTheDocument();
+      // Wait for loading to complete
+      await waitFor(() => {
+        const cardTitle = screen.getByRole('heading', { name: /connect your fpl team/i });
+        expect(cardTitle).toBeInTheDocument();
+      });
     });
   });
 
@@ -345,69 +360,94 @@ describe('DashboardPage', () => {
         loading: false,
         isAuthenticated: true,
       });
+
+      // Mock getUserProfile to resolve immediately
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 0,
+        fplTeamName: '',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
     });
 
-    it('Step 41: shows 4 stat cards', () => {
+    it('Step 41: shows 4 stat cards', async () => {
       render(<DashboardPage />);
-      const statCards = screen.getAllByRole('article');
-      // 1 FPL Connection Card + 4 Stat Cards + 3 Empty States = 8 total articles
-      expect(statCards).toHaveLength(8);
+      await waitFor(() => {
+        const statCards = screen.getAllByRole('article');
+        // 1 FPL Connection Card + 4 Stat Cards + 3 Empty States = 8 total articles
+        expect(statCards).toHaveLength(8);
+      });
     });
 
-    it('Step 42: shows "Total Challenges" card with 0', () => {
+    it('Step 42: shows "Total Challenges" card with 0', async () => {
       render(<DashboardPage />);
-      const totalChallengesLabel = screen.getByText('Total Challenges');
-      expect(totalChallengesLabel).toBeInTheDocument();
+      await waitFor(() => {
+        const totalChallengesLabel = screen.getByText('Total Challenges');
+        expect(totalChallengesLabel).toBeInTheDocument();
 
-      // Check the value is in the same card
-      const card = totalChallengesLabel.closest('[role="article"]');
-      expect(card).toHaveTextContent('0');
-      expect(card).toHaveTextContent('Total Challenges');
+        // Check the value is in the same card
+        const card = totalChallengesLabel.closest('[role="article"]');
+        expect(card).toHaveTextContent('0');
+        expect(card).toHaveTextContent('Total Challenges');
+      });
     });
 
-    it('Step 43: shows "Wins" card with 0', () => {
+    it('Step 43: shows "Wins" card with 0', async () => {
       render(<DashboardPage />);
-      const winsLabel = screen.getByText('Wins');
-      expect(winsLabel).toBeInTheDocument();
+      await waitFor(() => {
+        const winsLabel = screen.getByText('Wins');
+        expect(winsLabel).toBeInTheDocument();
 
-      // Check the value is in the same card
-      const card = winsLabel.closest('[role="article"]');
-      expect(card).toHaveTextContent('0');
-      expect(card).toHaveTextContent('Wins');
+        // Check the value is in the same card
+        const card = winsLabel.closest('[role="article"]');
+        expect(card).toHaveTextContent('0');
+        expect(card).toHaveTextContent('Wins');
+      });
     });
 
-    it('Step 44: shows "Losses" card with 0', () => {
+    it('Step 44: shows "Losses" card with 0', async () => {
       render(<DashboardPage />);
-      const lossesLabel = screen.getByText('Losses');
-      expect(lossesLabel).toBeInTheDocument();
+      await waitFor(() => {
+        const lossesLabel = screen.getByText('Losses');
+        expect(lossesLabel).toBeInTheDocument();
 
-      // Check the value is in the same card
-      const card = lossesLabel.closest('[role="article"]');
-      expect(card).toHaveTextContent('0');
-      expect(card).toHaveTextContent('Losses');
+        // Check the value is in the same card
+        const card = lossesLabel.closest('[role="article"]');
+        expect(card).toHaveTextContent('0');
+        expect(card).toHaveTextContent('Losses');
+      });
     });
 
-    it('Step 45: shows "Win Rate" card with "N/A"', () => {
+    it('Step 45: shows "Win Rate" card with "N/A"', async () => {
       render(<DashboardPage />);
-      const winRateLabel = screen.getByText('Win Rate');
-      expect(winRateLabel).toBeInTheDocument();
+      await waitFor(() => {
+        const winRateLabel = screen.getByText('Win Rate');
+        expect(winRateLabel).toBeInTheDocument();
 
-      // Check the value is in the same card
-      const card = winRateLabel.closest('[role="article"]');
-      expect(card).toHaveTextContent('N/A');
-      expect(card).toHaveTextContent('Win Rate');
+        // Check the value is in the same card
+        const card = winRateLabel.closest('[role="article"]');
+        expect(card).toHaveTextContent('N/A');
+        expect(card).toHaveTextContent('Win Rate');
+      });
     });
 
-    it('Step 46: stats are in responsive grid', () => {
+    it('Step 46: stats are in responsive grid', async () => {
       render(<DashboardPage />);
-      const totalChallengesLabel = screen.getByText('Total Challenges');
-      const gridContainer = totalChallengesLabel.closest('.grid');
+      await waitFor(() => {
+        const totalChallengesLabel = screen.getByText('Total Challenges');
+        const gridContainer = totalChallengesLabel.closest('.grid');
 
-      expect(gridContainer).toBeInTheDocument();
-      expect(gridContainer).toHaveClass('grid');
-      expect(gridContainer).toHaveClass('gap-4');
-      expect(gridContainer).toHaveClass('md:grid-cols-2');
-      expect(gridContainer).toHaveClass('lg:grid-cols-4');
+        expect(gridContainer).toBeInTheDocument();
+        expect(gridContainer).toHaveClass('grid');
+        expect(gridContainer).toHaveClass('gap-4');
+        expect(gridContainer).toHaveClass('md:grid-cols-2');
+        expect(gridContainer).toHaveClass('lg:grid-cols-4');
+      });
     });
   });
 
@@ -422,50 +462,77 @@ describe('DashboardPage', () => {
         loading: false,
         isAuthenticated: true,
       });
+
+      // Mock getUserProfile to resolve immediately
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 0,
+        fplTeamName: '',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
     });
 
-    it('Step 55: shows "Upcoming Challenges" section header', () => {
+    it('Step 55: shows "Upcoming Challenges" section header', async () => {
       render(<DashboardPage />);
-      const header = screen.getByRole('heading', { name: 'Upcoming Challenges (0)', level: 2 });
-      expect(header).toBeInTheDocument();
+      await waitFor(() => {
+        const header = screen.getByRole('heading', { name: 'Upcoming Challenges (0)', level: 2 });
+        expect(header).toBeInTheDocument();
+      });
     });
 
-    it('Step 56: shows count in header (0 initially)', () => {
+    it('Step 56: shows count in header (0 initially)', async () => {
       render(<DashboardPage />);
-      const header = screen.getByRole('heading', { name: /upcoming challenges.*0/i });
-      expect(header).toBeInTheDocument();
+      await waitFor(() => {
+        const header = screen.getByRole('heading', { name: /upcoming challenges.*0/i });
+        expect(header).toBeInTheDocument();
+      });
     });
 
-    it('Step 57: shows empty state for upcoming challenges', () => {
+    it('Step 57: shows empty state for upcoming challenges', async () => {
       render(<DashboardPage />);
-      expect(screen.getByText('No Upcoming Challenges')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('No Upcoming Challenges')).toBeInTheDocument();
+      });
     });
 
-    it('Step 59: shows "Active Challenges" section header', () => {
+    it('Step 59: shows "Active Challenges" section header', async () => {
       render(<DashboardPage />);
-      const header = screen.getByRole('heading', { name: 'Active Challenges (0)', level: 2 });
-      expect(header).toBeInTheDocument();
+      await waitFor(() => {
+        const header = screen.getByRole('heading', { name: 'Active Challenges (0)', level: 2 });
+        expect(header).toBeInTheDocument();
+      });
     });
 
-    it('Step 60: shows empty state for active challenges', () => {
+    it('Step 60: shows empty state for active challenges', async () => {
       render(<DashboardPage />);
-      expect(screen.getByText('No Active Challenges')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('No Active Challenges')).toBeInTheDocument();
+      });
     });
 
-    it('Step 61: shows "Completed Challenges" section header', () => {
+    it('Step 61: shows "Completed Challenges" section header', async () => {
       render(<DashboardPage />);
-      const header = screen.getByRole('heading', { name: 'Completed Challenges (0)', level: 2 });
-      expect(header).toBeInTheDocument();
+      await waitFor(() => {
+        const header = screen.getByRole('heading', { name: 'Completed Challenges (0)', level: 2 });
+        expect(header).toBeInTheDocument();
+      });
     });
 
-    it('Step 62: shows empty state for completed challenges', () => {
+    it('Step 62: shows empty state for completed challenges', async () => {
       render(<DashboardPage />);
-      expect(screen.getByText('No Completed Challenges')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('No Completed Challenges')).toBeInTheDocument();
+      });
     });
   });
 
   describe('PHASE 7: Loading States', () => {
-    it('Step 63: shows loading spinner while fetching user', async () => {
+    it('Step 63: shows skeleton loading while fetching user', async () => {
       vi.mocked(AuthContext.useAuth).mockReturnValue({
         user: {
           uid: 'test-uid',
@@ -493,13 +560,20 @@ describe('DashboardPage', () => {
 
       render(<DashboardPage />);
 
-      // Should show loading text
-      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+      // Should show skeleton (check for skeleton class)
+      const skeletons = document.querySelectorAll('.animate-pulse');
+      expect(skeletons.length).toBeGreaterThan(0);
+
+      // Should NOT show the real content yet
+      expect(screen.queryByRole('heading', { name: /connect your fpl team/i })).not.toBeInTheDocument();
 
       // Wait for data to load
       await waitFor(() => {
-        expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
+        expect(document.querySelectorAll('.animate-pulse').length).toBe(0);
       });
+
+      // Should now show real content
+      expect(screen.getByRole('heading', { name: /connect your fpl team/i })).toBeInTheDocument();
     });
   });
 });
