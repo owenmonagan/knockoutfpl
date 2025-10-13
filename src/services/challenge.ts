@@ -42,6 +42,10 @@ export async function getUserChallenges(userId: string): Promise<Challenge[]> {
   const challengesRef = collection(db, 'challenges');
   const whereClause = where('creatorUserId', '==', userId);
   const q = query(challengesRef, whereClause);
-  await getDocs(q);
-  return [];
+  const querySnapshot = await getDocs(q);
+
+  return querySnapshot.docs.map((doc) => ({
+    challengeId: doc.id,
+    ...doc.data(),
+  })) as Challenge[];
 }

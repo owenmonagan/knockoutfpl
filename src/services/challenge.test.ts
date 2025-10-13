@@ -196,5 +196,62 @@ describe('Challenge Service', () => {
 
       expect(getDocs).toHaveBeenCalledWith('query-ref');
     });
+
+    it('should return challenges from query results', async () => {
+      const { query, collection, where, getDocs, Timestamp } = await import('firebase/firestore');
+      const { getUserChallenges } = await import('./challenge');
+
+      vi.mocked(collection).mockReturnValue('challenges-ref' as any);
+      vi.mocked(where).mockReturnValue('where-clause' as any);
+      vi.mocked(query).mockReturnValue('query-ref' as any);
+      vi.mocked(getDocs).mockResolvedValue({
+        docs: [
+          {
+            id: 'challenge-1',
+            data: () => ({
+              gameweek: 7,
+              status: 'pending',
+              creatorUserId: 'user-123',
+              creatorFplId: 158256,
+              creatorFplTeamName: 'Test Team',
+              creatorScore: null,
+              opponentUserId: null,
+              opponentFplId: null,
+              opponentFplTeamName: null,
+              opponentScore: null,
+              winnerId: null,
+              isDraw: false,
+              gameweekDeadline: Timestamp.now(),
+              gameweekFinished: false,
+              completedAt: null,
+              createdAt: Timestamp.now(),
+            }),
+          },
+        ],
+      } as any);
+
+      const challenges = await getUserChallenges('user-123');
+
+      expect(challenges).toHaveLength(1);
+      expect(challenges[0].challengeId).toBe('challenge-1');
+      expect(challenges[0].gameweek).toBe(7);
+      expect(challenges[0].status).toBe('pending');
+    });
+
+    it('should also query for challenges where user is opponent', async () => {
+      const { query, collection, where, getDocs } = await import('firebase/firestore');
+      const { getUserChallenges } = await import('./challenge');
+
+      vi.mocked(collection).mockReturnValue('challenges-ref' as any);
+      vi.mocked(where).mockReturnValue('where-clause' as any);
+      vi.mocked(query).mockReturnValue('query-ref' as any);
+      vi.mocked(getDocs).mockResolvedValue({
+        docs: [],
+      } as any);
+
+      await getUserChallenges('user-123');
+
+      expect(where).toHaveBeenCalledWith('opponentUserId', '==', 'user-123');
+    });
   });
 });
