@@ -494,5 +494,26 @@ describe('FPLConnectionCard', () => {
       const teamName = screen.getByText(/monzaga/i);
       expect(teamName).toBeInTheDocument();
     });
+
+    it('handles missing teamValue gracefully', () => {
+      const incompleteFplData = {
+        ...mockFplData,
+        teamValue: undefined as any,
+      };
+
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={incompleteFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      // Should not crash, should still show team name
+      const teamName = screen.getByText(/monzaga/i);
+      expect(teamName).toBeInTheDocument();
+    });
   });
 });

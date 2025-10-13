@@ -169,7 +169,7 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
             <p className="text-lg font-semibold">{fplData.teamName}</p>
             <p className="text-sm">GW Points: {fplData.gameweekPoints} | GW Rank: {fplData.gameweekRank?.toLocaleString() ?? 'N/A'}</p>
             <p className="text-sm">Overall: {fplData.overallPoints} pts | Overall Rank: {fplData.overallRank?.toLocaleString() ?? 'N/A'}</p>
-            <p className="text-sm">Team Value: £{fplData.teamValue.toFixed(1)}m</p>
+            <p className="text-sm">Team Value: £{fplData.teamValue?.toFixed(1) ?? 'N/A'}m</p>
           </div>
         ) : (
           // Not connected state: Show input form
