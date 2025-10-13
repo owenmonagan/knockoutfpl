@@ -397,5 +397,17 @@ describe('DashboardPage', () => {
       expect(card).toHaveTextContent('N/A');
       expect(card).toHaveTextContent('Win Rate');
     });
+
+    it('Step 46: stats are in responsive grid', () => {
+      render(<DashboardPage />);
+      const totalChallengesLabel = screen.getByText('Total Challenges');
+      const gridContainer = totalChallengesLabel.closest('.grid');
+
+      expect(gridContainer).toBeInTheDocument();
+      expect(gridContainer).toHaveClass('grid');
+      expect(gridContainer).toHaveClass('gap-4');
+      expect(gridContainer).toHaveClass('md:grid-cols-2');
+      expect(gridContainer).toHaveClass('lg:grid-cols-4');
+    });
   });
 });
