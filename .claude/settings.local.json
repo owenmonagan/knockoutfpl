@@ -47,7 +47,10 @@
       "WebFetch(domain:firebase.google.com)",
       "WebFetch(domain:shadcnuikit.com)",
       "WebFetch(domain:support.discord.com)",
-      "WebFetch(domain:www.shadcn-ui-blocks.com)"
+      "WebFetch(domain:www.shadcn-ui-blocks.com)",
+      "WebFetch(domain:dribbble.com)",
+      "WebFetch(domain:www.halo-lab.com)",
+      "mcp__shadcn__get_item_examples_from_registries"
     ],
     "deny": [],
     "ask": []
