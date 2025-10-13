@@ -88,4 +88,27 @@ describe('FPLTeamConnect', () => {
       managerName: 'Owen Smith',
     });
   });
+
+  it('should display verified team information after successful verification', async () => {
+    const user = userEvent.setup();
+    const { getFPLTeamInfo } = await import('../../services/fpl');
+
+    vi.mocked(getFPLTeamInfo).mockResolvedValue({
+      teamId: 158256,
+      teamName: "Owen's Team",
+      managerName: 'Owen Smith',
+    });
+
+    render(<FPLTeamConnect userId="test-uid" />);
+
+    const input = screen.getByLabelText(/fpl team id/i);
+    await user.type(input, '158256');
+
+    const button = screen.getByRole('button', { name: /verify team/i });
+    await user.click(button);
+
+    // Wait for verification to complete and team info to appear
+    expect(await screen.findByText("Owen's Team")).toBeInTheDocument();
+    expect(screen.getByText(/owen smith/i)).toBeInTheDocument();
+  });
 });

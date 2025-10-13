@@ -11,12 +11,18 @@ interface FPLTeamConnectProps {
 export function FPLTeamConnect({ userId }: FPLTeamConnectProps) {
   const [teamId, setTeamId] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+  const [verifiedTeam, setVerifiedTeam] = useState<{
+    teamId: number;
+    teamName: string;
+    managerName: string;
+  } | null>(null);
 
   const handleVerify = async () => {
     setIsVerifying(true);
     try {
       const teamIdNum = parseInt(teamId, 10);
-      await getFPLTeamInfo(teamIdNum);
+      const teamInfo = await getFPLTeamInfo(teamIdNum);
+      setVerifiedTeam(teamInfo);
     } finally {
       setIsVerifying(false);
     }
@@ -37,6 +43,13 @@ export function FPLTeamConnect({ userId }: FPLTeamConnectProps) {
       <Button disabled={!teamId || isVerifying} onClick={handleVerify}>
         {isVerifying ? 'Verifying...' : 'Verify Team'}
       </Button>
+
+      {verifiedTeam && (
+        <div>
+          <p>{verifiedTeam.teamName}</p>
+          <p>{verifiedTeam.managerName}</p>
+        </div>
+      )}
     </div>
   );
 }
