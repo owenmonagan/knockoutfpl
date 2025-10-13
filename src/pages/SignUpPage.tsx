@@ -1,5 +1,9 @@
 import { SignUpForm } from '../components/auth/SignUpForm';
 
 export function SignUpPage() {
-  return <SignUpForm />;
+  return (
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <SignUpForm />
+    </div>
+  );
 }

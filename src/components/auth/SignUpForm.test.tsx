@@ -24,12 +24,20 @@ describe('SignUpForm', () => {
   });
 
   it('should render email input', () => {
-    render(<SignUpForm />);
+    render(
+      <BrowserRouter>
+        <SignUpForm />
+      </BrowserRouter>
+    );
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
   });
 
   it('should render all required form fields', () => {
-    render(<SignUpForm />);
+    render(
+      <BrowserRouter>
+        <SignUpForm />
+      </BrowserRouter>
+    );
     expect(screen.getByLabelText(/display name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
@@ -45,7 +53,11 @@ describe('SignUpForm', () => {
 
     const user = userEvent.setup();
 
-    render(<SignUpForm />);
+    render(
+      <BrowserRouter>
+        <SignUpForm />
+      </BrowserRouter>
+    );
 
     await user.type(screen.getByLabelText(/email/i), 'test@example.com');
     await user.type(screen.getByLabelText(/display name/i), 'Test User');
@@ -67,7 +79,11 @@ describe('SignUpForm', () => {
 
     const user = userEvent.setup();
 
-    render(<SignUpForm />);
+    render(
+      <BrowserRouter>
+        <SignUpForm />
+      </BrowserRouter>
+    );
 
     await user.type(screen.getByLabelText(/email/i), 'test@example.com');
     await user.type(screen.getByLabelText(/display name/i), 'Test User');
@@ -87,7 +103,11 @@ describe('SignUpForm', () => {
     const { signUpWithEmail } = await import('../../services/auth');
     const user = userEvent.setup();
 
-    render(<SignUpForm />);
+    render(
+      <BrowserRouter>
+        <SignUpForm />
+      </BrowserRouter>
+    );
 
     await user.type(screen.getByLabelText(/email/i), 'test@example.com');
     await user.type(screen.getByLabelText(/display name/i), 'Test User');
@@ -107,7 +127,11 @@ describe('SignUpForm', () => {
 
     const user = userEvent.setup();
 
-    render(<SignUpForm />);
+    render(
+      <BrowserRouter>
+        <SignUpForm />
+      </BrowserRouter>
+    );
 
     await user.type(screen.getByLabelText(/email/i), 'test@example.com');
     await user.type(screen.getByLabelText(/display name/i), 'Test User');
@@ -134,7 +158,11 @@ describe('SignUpForm', () => {
 
     const user = userEvent.setup();
 
-    render(<SignUpForm />);
+    render(
+      <BrowserRouter>
+        <SignUpForm />
+      </BrowserRouter>
+    );
 
     await user.type(screen.getByLabelText(/email/i), 'test@example.com');
     await user.type(screen.getByLabelText(/display name/i), 'Test User');
@@ -161,7 +189,11 @@ describe('SignUpForm', () => {
 
     const user = userEvent.setup();
 
-    render(<SignUpForm />);
+    render(
+      <BrowserRouter>
+        <SignUpForm />
+      </BrowserRouter>
+    );
 
     await user.type(screen.getByLabelText(/email/i), 'test@example.com');
     await user.type(screen.getByLabelText(/display name/i), 'Test User');
@@ -174,5 +206,16 @@ describe('SignUpForm', () => {
     await screen.findByRole('button', { name: /sign up/i });
 
     expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('should display link to log in page', () => {
+    render(
+      <BrowserRouter>
+        <SignUpForm />
+      </BrowserRouter>
+    );
+    const loginLink = screen.getByRole('link', { name: /log in/i });
+    expect(loginLink).toBeInTheDocument();
+    expect(loginLink).toHaveAttribute('href', '/login');
   });
 });
