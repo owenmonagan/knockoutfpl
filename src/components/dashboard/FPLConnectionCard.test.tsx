@@ -636,5 +636,25 @@ describe('FPLConnectionCard', () => {
       const updateButton = screen.getByRole('button', { name: /update/i });
       expect(updateButton).toBeInTheDocument();
     });
+
+    it('Step 33: shows "Cancel" button', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      // Click Edit button
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      fireEvent.click(editButton);
+
+      // Should show Cancel button
+      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      expect(cancelButton).toBeInTheDocument();
+    });
   });
 });

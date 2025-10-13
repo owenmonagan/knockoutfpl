@@ -193,7 +193,10 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
                 onChange={(e) => setTeamId(e.target.value)}
               />
             </div>
-            <Button>Update</Button>
+            <div className="flex gap-2">
+              <Button>Update</Button>
+              <Button variant="outline">Cancel</Button>
+            </div>
           </div>
         ) : (
           // Not connected state: Show input form
