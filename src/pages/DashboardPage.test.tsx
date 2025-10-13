@@ -9,5 +9,11 @@ describe('DashboardPage', () => {
       const main = screen.getByRole('main');
       expect(main).toBeInTheDocument();
     });
+
+    it('Step 2: shows "Dashboard" heading', () => {
+      render(<DashboardPage />);
+      const heading = screen.getByRole('heading', { name: /dashboard/i });
+      expect(heading).toBeInTheDocument();
+    });
   });
 });
