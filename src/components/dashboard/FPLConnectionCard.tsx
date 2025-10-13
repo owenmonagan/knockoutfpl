@@ -193,6 +193,7 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
                 onChange={(e) => setTeamId(e.target.value)}
               />
             </div>
+            <Button>Update</Button>
           </div>
         ) : (
           // Not connected state: Show input form

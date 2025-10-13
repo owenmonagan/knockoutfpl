@@ -616,5 +616,25 @@ describe('FPLConnectionCard', () => {
       const input = screen.getByLabelText(/fpl team id/i) as HTMLInputElement;
       expect(input.value).toBe('158256');
     });
+
+    it('Step 32: shows "Update" button', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      // Click Edit button
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      fireEvent.click(editButton);
+
+      // Should show Update button
+      const updateButton = screen.getByRole('button', { name: /update/i });
+      expect(updateButton).toBeInTheDocument();
+    });
   });
 });
