@@ -410,4 +410,24 @@ describe('DashboardPage', () => {
       expect(gridContainer).toHaveClass('lg:grid-cols-4');
     });
   });
+
+  describe('PHASE 6: Challenge Sections', () => {
+    beforeEach(() => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+    });
+
+    it('Step 55: shows "Upcoming Challenges" section header', () => {
+      render(<DashboardPage />);
+      const header = screen.getByRole('heading', { name: /upcoming challenges/i });
+      expect(header).toBeInTheDocument();
+    });
+  });
 });

@@ -413,6 +413,11 @@ export function DashboardPage() {
           <StatCard label="Losses" value={0} />
           <StatCard label="Win Rate" value="N/A" />
         </div>
+
+        {/* Upcoming Challenges Section */}
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Upcoming Challenges</h2>
+        </div>
       </div>
     </main>
   );
