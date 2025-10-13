@@ -148,4 +148,20 @@ describe('LoginForm', () => {
 
     expect(screen.getByRole('button', { name: /continue with google/i })).toBeInTheDocument();
   });
+
+  it('should call signInWithGoogle when Google button is clicked', async () => {
+    const signInGoogleSpy = vi.spyOn(authService, 'signInWithGoogle');
+    signInGoogleSpy.mockResolvedValue({} as any);
+    const user = userEvent.setup();
+
+    render(
+      <BrowserRouter>
+        <LoginForm />
+      </BrowserRouter>
+    );
+
+    await user.click(screen.getByRole('button', { name: /continue with google/i }));
+
+    expect(signInGoogleSpy).toHaveBeenCalled();
+  });
 });

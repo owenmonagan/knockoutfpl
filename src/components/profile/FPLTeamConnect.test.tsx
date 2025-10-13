@@ -8,4 +8,10 @@ describe('FPLTeamConnect', () => {
 
     expect(screen.getByLabelText(/fpl team id/i)).toBeInTheDocument();
   });
+
+  it('should render verify team button', () => {
+    render(<FPLTeamConnect userId="test-uid" />);
+
+    expect(screen.getByRole('button', { name: /verify team/i })).toBeInTheDocument();
+  });
 });

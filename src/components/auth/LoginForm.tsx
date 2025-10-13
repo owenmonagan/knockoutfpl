@@ -5,7 +5,7 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
-import { signInWithEmail } from '../../services/auth';
+import { signInWithEmail, signInWithGoogle } from '../../services/auth';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -29,6 +29,20 @@ export function LoginForm() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setIsLoading(true);
+
+    try {
+      await signInWithGoogle();
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred during Google sign-in');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Card className="mx-auto w-full max-w-md">
       <CardHeader className="space-y-1">
@@ -39,7 +53,7 @@ export function LoginForm() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <Button type="button" variant="outline" className="w-full">
+          <Button type="button" variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
             Continue with Google
           </Button>
           <div className="relative">

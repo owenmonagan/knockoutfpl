@@ -218,4 +218,14 @@ describe('SignUpForm', () => {
     expect(loginLink).toBeInTheDocument();
     expect(loginLink).toHaveAttribute('href', '/login');
   });
+
+  it('should render Google sign-in button', () => {
+    render(
+      <BrowserRouter>
+        <SignUpForm />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByRole('button', { name: /continue with google/i })).toBeInTheDocument();
+  });
 });
