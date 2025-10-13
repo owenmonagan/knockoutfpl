@@ -386,5 +386,16 @@ describe('DashboardPage', () => {
       expect(card).toHaveTextContent('0');
       expect(card).toHaveTextContent('Losses');
     });
+
+    it('Step 45: shows "Win Rate" card with "N/A"', () => {
+      render(<DashboardPage />);
+      const winRateLabel = screen.getByText('Win Rate');
+      expect(winRateLabel).toBeInTheDocument();
+
+      // Check the value is in the same card
+      const card = winRateLabel.closest('[role="article"]');
+      expect(card).toHaveTextContent('N/A');
+      expect(card).toHaveTextContent('Win Rate');
+    });
   });
 });
