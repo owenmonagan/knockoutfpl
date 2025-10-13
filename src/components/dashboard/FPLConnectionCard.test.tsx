@@ -214,5 +214,20 @@ describe('FPLConnectionCard', () => {
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute('href', 'https://fantasy.premierleague.com');
     });
+
+    it('Step 17: button shows loading state when connecting', () => {
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={true}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const button = screen.getByRole('button', { name: /connecting/i });
+      expect(button).toBeInTheDocument();
+    });
   });
 });

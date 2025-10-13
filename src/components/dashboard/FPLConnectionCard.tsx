@@ -120,6 +120,7 @@ export interface FPLConnectionCardProps {
 }
 
 export function FPLConnectionCard(props: FPLConnectionCardProps) {
+  const { isLoading } = props;
   const [teamId, setTeamId] = useState('');
 
   // Validate team ID format: must be 6-7 digits
@@ -154,7 +155,9 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
               </p>
             )}
           </div>
-          <Button disabled={!isValidTeamId(teamId)}>Connect</Button>
+          <Button disabled={!isValidTeamId(teamId) || isLoading}>
+            {isLoading ? 'Connecting...' : 'Connect'}
+          </Button>
           <p className="text-sm text-muted-foreground">
             Find your Team ID at{' '}
             <a
