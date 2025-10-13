@@ -178,11 +178,28 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
       </CardHeader>
       <CardContent>
         {isConnected && fplData && !isEditing ? (
-          // Connected state: Show team stats
-          <div className="space-y-4">
-            <p className="text-sm">GW Points: {fplData.gameweekPoints ?? 'N/A'} | GW Rank: {fplData.gameweekRank?.toLocaleString() ?? 'N/A'}</p>
-            <p className="text-sm">Overall: {fplData.overallPoints ?? 'N/A'} pts | Overall Rank: {fplData.overallRank?.toLocaleString() ?? 'N/A'}</p>
-            <p className="text-sm">Team Value: £{fplData.teamValue?.toFixed(1) ?? 'N/A'}m</p>
+          // Connected state: Show team stats in beautiful grid layout
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <div className="text-2xl font-bold">{fplData.gameweekPoints ?? 'N/A'}</div>
+              <div className="text-sm text-muted-foreground">GW Points</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold">{fplData.gameweekRank?.toLocaleString() ?? 'N/A'}</div>
+              <div className="text-sm text-muted-foreground">GW Rank</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold">{fplData.overallPoints ?? 'N/A'}</div>
+              <div className="text-sm text-muted-foreground">Overall Points</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold">{fplData.overallRank?.toLocaleString() ?? 'N/A'}</div>
+              <div className="text-sm text-muted-foreground">Overall Rank</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold">£{fplData.teamValue?.toFixed(1) ?? 'N/A'}m</div>
+              <div className="text-sm text-muted-foreground">Team Value</div>
+            </div>
           </div>
         ) : isConnected && isEditing ? (
           // Editing state: Show input form

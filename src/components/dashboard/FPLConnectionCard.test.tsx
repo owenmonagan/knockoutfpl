@@ -380,8 +380,9 @@ describe('FPLConnectionCard', () => {
         />
       );
 
-      const gwPoints = screen.getByText(/gw points.*78/i);
-      expect(gwPoints).toBeInTheDocument();
+      // Value and label are now in separate elements
+      expect(screen.getByText('78')).toBeInTheDocument();
+      expect(screen.getByText('GW Points')).toBeInTheDocument();
     });
 
     it('Step 25: displays gameweek rank (formatted)', () => {
@@ -395,8 +396,9 @@ describe('FPLConnectionCard', () => {
         />
       );
 
-      const gwRank = screen.getByText(/gw rank.*1,656,624/i);
-      expect(gwRank).toBeInTheDocument();
+      // Value and label are now in separate elements
+      expect(screen.getByText('1,656,624')).toBeInTheDocument();
+      expect(screen.getByText('GW Rank')).toBeInTheDocument();
     });
 
     it('Step 26: displays overall points', () => {
@@ -410,8 +412,9 @@ describe('FPLConnectionCard', () => {
         />
       );
 
-      const overallPts = screen.getByText(/overall.*427.*pts/i);
-      expect(overallPts).toBeInTheDocument();
+      // Value and label are now in separate elements
+      expect(screen.getByText('427')).toBeInTheDocument();
+      expect(screen.getByText('Overall Points')).toBeInTheDocument();
     });
 
     it('Step 27: displays overall rank (formatted)', () => {
@@ -425,8 +428,9 @@ describe('FPLConnectionCard', () => {
         />
       );
 
-      const overallRank = screen.getByText(/overall rank.*841,192/i);
-      expect(overallRank).toBeInTheDocument();
+      // Value and label are now in separate elements
+      expect(screen.getByText('841,192')).toBeInTheDocument();
+      expect(screen.getByText('Overall Rank')).toBeInTheDocument();
     });
 
     it('Step 28: displays team value (formatted)', () => {
@@ -440,8 +444,9 @@ describe('FPLConnectionCard', () => {
         />
       );
 
-      const teamValue = screen.getByText(/team value.*£102\.0m/i);
-      expect(teamValue).toBeInTheDocument();
+      // Value and label are now in separate elements
+      expect(screen.getByText(/£102\.0m/)).toBeInTheDocument();
+      expect(screen.getByText('Team Value')).toBeInTheDocument();
     });
 
     it('Step 29: shows "Edit" button', () => {
@@ -457,6 +462,22 @@ describe('FPLConnectionCard', () => {
 
       const editButton = screen.getByRole('button', { name: /edit/i });
       expect(editButton).toBeInTheDocument();
+    });
+
+    it('Step 30: stats are displayed in grid layout', () => {
+      const { container } = render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      // Should have a grid container for stats
+      const gridContainer = container.querySelector('.grid');
+      expect(gridContainer).toBeInTheDocument();
     });
 
     it('shows loading state when connected but fplData is null', () => {
@@ -541,15 +562,16 @@ describe('FPLConnectionCard', () => {
       const teamName = screen.getByText(/test team/i);
       expect(teamName).toBeInTheDocument();
 
-      // Should show N/A for all missing fields
-      const gwPoints = screen.getByText(/gw points.*n\/a.*\|.*gw rank/i);
-      expect(gwPoints).toBeInTheDocument();
+      // Should show N/A for all missing fields in grid layout
+      const naValues = screen.getAllByText('N/A');
+      expect(naValues.length).toBeGreaterThanOrEqual(4); // At least 4 stats show N/A
 
-      const overall = screen.getByText(/overall.*n\/a.*pts.*\|.*overall rank.*n\/a/i);
-      expect(overall).toBeInTheDocument();
-
-      const teamValue = screen.getByText(/team value.*£n\/a/i);
-      expect(teamValue).toBeInTheDocument();
+      // Check that labels are still present
+      expect(screen.getByText('GW Points')).toBeInTheDocument();
+      expect(screen.getByText('GW Rank')).toBeInTheDocument();
+      expect(screen.getByText('Overall Points')).toBeInTheDocument();
+      expect(screen.getByText('Overall Rank')).toBeInTheDocument();
+      expect(screen.getByText('Team Value')).toBeInTheDocument();
     });
   });
 
