@@ -1,4 +1,5 @@
 import { Card, CardContent } from '../ui/card';
+import { Button } from '../ui/button';
 
 export interface EmptyStateProps {
   title: string;
@@ -9,7 +10,7 @@ export interface EmptyStateProps {
 }
 
 export function EmptyState(props: EmptyStateProps) {
-  const { title, description, icon } = props;
+  const { title, description, icon, actionLabel } = props;
 
   return (
     <Card role="article">
@@ -17,6 +18,7 @@ export function EmptyState(props: EmptyStateProps) {
         {icon && icon}
         <h3 className="text-lg font-semibold">{title}</h3>
         <p className="text-sm text-muted-foreground mt-2">{description}</p>
+        {actionLabel && <Button className="mt-4">{actionLabel}</Button>}
       </CardContent>
     </Card>
   );

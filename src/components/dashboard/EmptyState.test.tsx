@@ -27,4 +27,10 @@ describe('EmptyState', () => {
     const iconElement = screen.getByTestId('test-icon');
     expect(iconElement).toBeInTheDocument();
   });
+
+  it('Step 51: shows action button when provided', () => {
+    render(<EmptyState title="No Challenges" description="Test" actionLabel="Create Challenge" />);
+    const button = screen.getByRole('button', { name: /create challenge/i });
+    expect(button).toBeInTheDocument();
+  });
 });
