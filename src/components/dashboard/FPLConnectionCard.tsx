@@ -95,6 +95,7 @@
  * [ ] Step 36: Exits edit mode after successful update
  */
 
+import { useState } from 'react';
 import type { User } from '../../types/user';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
 import { Input } from '../ui/input';
@@ -119,6 +120,8 @@ export interface FPLConnectionCardProps {
 }
 
 export function FPLConnectionCard(props: FPLConnectionCardProps) {
+  const [teamId, setTeamId] = useState('');
+
   return (
     <Card role="article">
       <CardHeader>
@@ -131,9 +134,14 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="fpl-team-id">FPL Team ID</Label>
-            <Input id="fpl-team-id" type="text" />
+            <Input
+              id="fpl-team-id"
+              type="text"
+              value={teamId}
+              onChange={(e) => setTeamId(e.target.value)}
+            />
           </div>
-          <Button>Connect</Button>
+          <Button disabled={!teamId}>Connect</Button>
         </div>
       </CardContent>
     </Card>

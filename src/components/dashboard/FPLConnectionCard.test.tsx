@@ -105,5 +105,20 @@ describe('FPLConnectionCard', () => {
       const button = screen.getByRole('button', { name: /connect/i });
       expect(button).toBeInTheDocument();
     });
+
+    it('Step 12: button is disabled when input is empty', () => {
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const button = screen.getByRole('button', { name: /connect/i });
+      expect(button).toBeDisabled();
+    });
   });
 });
