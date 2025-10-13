@@ -3,6 +3,7 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { getFPLTeamInfo } from '../../services/fpl';
+import { connectFPLTeam } from '../../services/user';
 
 interface FPLTeamConnectProps {
   userId: string;
@@ -28,6 +29,11 @@ export function FPLTeamConnect({ userId }: FPLTeamConnectProps) {
     }
   };
 
+  const handleConnect = async () => {
+    if (!verifiedTeam) return;
+    await connectFPLTeam(userId, verifiedTeam.teamId);
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -50,7 +56,7 @@ export function FPLTeamConnect({ userId }: FPLTeamConnectProps) {
             <p>{verifiedTeam.teamName}</p>
             <p>{verifiedTeam.managerName}</p>
           </div>
-          <Button>Connect Team</Button>
+          <Button onClick={handleConnect}>Connect Team</Button>
         </div>
       )}
     </div>

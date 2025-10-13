@@ -133,4 +133,31 @@ describe('FPLTeamConnect', () => {
     // Wait for connect button to appear
     expect(await screen.findByRole('button', { name: /connect team/i })).toBeInTheDocument();
   });
+
+  it('should call connectFPLTeam when connect button is clicked', async () => {
+    const user = userEvent.setup();
+    const { getFPLTeamInfo } = await import('../../services/fpl');
+    const { connectFPLTeam } = await import('../../services/user');
+
+    vi.mocked(getFPLTeamInfo).mockResolvedValue({
+      teamId: 158256,
+      teamName: "Owen's Team",
+      managerName: 'Owen Smith',
+    });
+
+    vi.mocked(connectFPLTeam).mockResolvedValue();
+
+    render(<FPLTeamConnect userId="test-uid" />);
+
+    const input = screen.getByLabelText(/fpl team id/i);
+    await user.type(input, '158256');
+
+    const verifyButton = screen.getByRole('button', { name: /verify team/i });
+    await user.click(verifyButton);
+
+    const connectButton = await screen.findByRole('button', { name: /connect team/i });
+    await user.click(connectButton);
+
+    expect(connectFPLTeam).toHaveBeenCalledWith('test-uid', 158256);
+  });
 });
