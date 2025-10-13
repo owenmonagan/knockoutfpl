@@ -429,5 +429,11 @@ describe('DashboardPage', () => {
       const header = screen.getByRole('heading', { name: /upcoming challenges/i });
       expect(header).toBeInTheDocument();
     });
+
+    it('Step 56: shows count in header (0 initially)', () => {
+      render(<DashboardPage />);
+      const header = screen.getByRole('heading', { name: /upcoming challenges.*0/i });
+      expect(header).toBeInTheDocument();
+    });
   });
 });

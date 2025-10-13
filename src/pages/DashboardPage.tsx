@@ -416,7 +416,7 @@ export function DashboardPage() {
 
         {/* Upcoming Challenges Section */}
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Upcoming Challenges</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Upcoming Challenges (0)</h2>
         </div>
       </div>
     </main>
