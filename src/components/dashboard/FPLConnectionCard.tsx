@@ -124,6 +124,7 @@ export interface FPLConnectionCardProps {
 export function FPLConnectionCard(props: FPLConnectionCardProps) {
   const { user, fplData, isLoading, error, onConnect, onClearError } = props;
   const [teamId, setTeamId] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
 
   // Check if user is connected to FPL
   const isConnected = user && user.fplTeamId > 0;
@@ -155,21 +156,34 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
               Link your FPL team to start creating challenges
             </CardDescription>
           </div>
-          {isConnected && (
-            <Button variant="outline" size="sm">
+          {isConnected && !isEditing && (
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
               Edit
             </Button>
           )}
         </div>
       </CardHeader>
       <CardContent>
-        {isConnected && fplData ? (
+        {isConnected && fplData && !isEditing ? (
           // Connected state: Show team stats
           <div className="space-y-4">
             <p className="text-lg font-semibold">{fplData.teamName}</p>
             <p className="text-sm">GW Points: {fplData.gameweekPoints ?? 'N/A'} | GW Rank: {fplData.gameweekRank?.toLocaleString() ?? 'N/A'}</p>
             <p className="text-sm">Overall: {fplData.overallPoints ?? 'N/A'} pts | Overall Rank: {fplData.overallRank?.toLocaleString() ?? 'N/A'}</p>
             <p className="text-sm">Team Value: £{fplData.teamValue?.toFixed(1) ?? 'N/A'}m</p>
+          </div>
+        ) : isConnected && isEditing ? (
+          // Editing state: Show input form
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="fpl-team-id">FPL Team ID</Label>
+              <Input
+                id="fpl-team-id"
+                type="text"
+                value={teamId}
+                onChange={(e) => setTeamId(e.target.value)}
+              />
+            </div>
           </div>
         ) : (
           // Not connected state: Show input form

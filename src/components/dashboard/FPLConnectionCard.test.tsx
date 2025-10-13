@@ -551,4 +551,50 @@ describe('FPLConnectionCard', () => {
       expect(teamValue).toBeInTheDocument();
     });
   });
+
+  describe('PHASE 4: Editing State', () => {
+    const connectedUser = {
+      userId: 'test-uid',
+      fplTeamId: 158256, // Connected
+      fplTeamName: 'Monzaga',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      wins: 0,
+      losses: 0,
+      createdAt: {} as any,
+      updatedAt: {} as any,
+    };
+
+    const mockFplData = {
+      teamName: 'Monzaga',
+      overallPoints: 427,
+      overallRank: 841192,
+      gameweekPoints: 78,
+      gameweekRank: 1656624,
+      teamValue: 102.0,
+    };
+
+    it('Step 30: clicking Edit shows input field', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      // Initially should show connected view (no input)
+      expect(screen.queryByLabelText(/fpl team id/i)).not.toBeInTheDocument();
+
+      // Click Edit button
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      fireEvent.click(editButton);
+
+      // Should now show input field
+      const input = screen.getByLabelText(/fpl team id/i);
+      expect(input).toBeInTheDocument();
+    });
+  });
 });
