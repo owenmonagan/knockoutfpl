@@ -338,7 +338,7 @@ describe('FPLConnectionCard', () => {
       teamValue: 102.0,
     };
 
-    it('Step 22: shows "Your FPL Team" title when connected', () => {
+    it('Step 22: shows team name as title when connected', () => {
       render(
         <FPLConnectionCard
           user={connectedUser}
@@ -349,7 +349,8 @@ describe('FPLConnectionCard', () => {
         />
       );
 
-      const title = screen.getByRole('heading', { name: /^your fpl team$/i });
+      // Title should be the team name, not "Your FPL Team"
+      const title = screen.getByRole('heading', { name: /monzaga/i });
       expect(title).toBeInTheDocument();
     });
 
