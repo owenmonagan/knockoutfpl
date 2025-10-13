@@ -60,5 +60,20 @@ describe('FPLConnectionCard', () => {
       const description = screen.getByText(/link your fpl team to start creating challenges/i);
       expect(description).toBeInTheDocument();
     });
+
+    it('Step 9: shows team ID input field', () => {
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const input = screen.getByRole('textbox');
+      expect(input).toBeInTheDocument();
+    });
   });
 });
