@@ -45,9 +45,12 @@ export function FPLTeamConnect({ userId }: FPLTeamConnectProps) {
       </Button>
 
       {verifiedTeam && (
-        <div>
-          <p>{verifiedTeam.teamName}</p>
-          <p>{verifiedTeam.managerName}</p>
+        <div className="space-y-4">
+          <div>
+            <p>{verifiedTeam.teamName}</p>
+            <p>{verifiedTeam.managerName}</p>
+          </div>
+          <Button>Connect Team</Button>
         </div>
       )}
     </div>

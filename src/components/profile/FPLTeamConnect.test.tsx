@@ -111,4 +111,26 @@ describe('FPLTeamConnect', () => {
     expect(await screen.findByText("Owen's Team")).toBeInTheDocument();
     expect(screen.getByText(/owen smith/i)).toBeInTheDocument();
   });
+
+  it('should show connect button after successful verification', async () => {
+    const user = userEvent.setup();
+    const { getFPLTeamInfo } = await import('../../services/fpl');
+
+    vi.mocked(getFPLTeamInfo).mockResolvedValue({
+      teamId: 158256,
+      teamName: "Owen's Team",
+      managerName: 'Owen Smith',
+    });
+
+    render(<FPLTeamConnect userId="test-uid" />);
+
+    const input = screen.getByLabelText(/fpl team id/i);
+    await user.type(input, '158256');
+
+    const verifyButton = screen.getByRole('button', { name: /verify team/i });
+    await user.click(verifyButton);
+
+    // Wait for connect button to appear
+    expect(await screen.findByRole('button', { name: /connect team/i })).toBeInTheDocument();
+  });
 });
