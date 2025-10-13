@@ -75,5 +75,20 @@ describe('FPLConnectionCard', () => {
       const input = screen.getByRole('textbox');
       expect(input).toBeInTheDocument();
     });
+
+    it('Step 10: input has proper label', () => {
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const label = screen.getByLabelText(/fpl team id/i);
+      expect(label).toBeInTheDocument();
+    });
   });
 });
