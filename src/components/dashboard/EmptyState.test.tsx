@@ -20,4 +20,11 @@ describe('EmptyState', () => {
     const description = screen.getByText('Create your first challenge');
     expect(description).toBeInTheDocument();
   });
+
+  it('Step 50: displays icon when provided', () => {
+    const icon = <span data-testid="test-icon">📋</span>;
+    render(<EmptyState title="No Challenges" description="Test" icon={icon} />);
+    const iconElement = screen.getByTestId('test-icon');
+    expect(iconElement).toBeInTheDocument();
+  });
 });
