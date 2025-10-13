@@ -656,5 +656,32 @@ describe('FPLConnectionCard', () => {
       const cancelButton = screen.getByRole('button', { name: /cancel/i });
       expect(cancelButton).toBeInTheDocument();
     });
+
+    it('Step 34: cancel exits edit mode', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      // Click Edit button
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      fireEvent.click(editButton);
+
+      // Should be in edit mode (input visible)
+      expect(screen.getByLabelText(/fpl team id/i)).toBeInTheDocument();
+
+      // Click Cancel button
+      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      fireEvent.click(cancelButton);
+
+      // Should exit edit mode (input gone, stats visible)
+      expect(screen.queryByLabelText(/fpl team id/i)).not.toBeInTheDocument();
+      expect(screen.getByText(/monzaga/i)).toBeInTheDocument();
+    });
   });
 });

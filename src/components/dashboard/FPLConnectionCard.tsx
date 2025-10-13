@@ -195,7 +195,9 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
             </div>
             <div className="flex gap-2">
               <Button>Update</Button>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline" onClick={() => setIsEditing(false)}>
+                Cancel
+              </Button>
             </div>
           </div>
         ) : (
