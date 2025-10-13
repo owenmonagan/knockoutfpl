@@ -135,16 +135,21 @@ describe('FPLConnectionCard', () => {
       const input = screen.getByRole('textbox');
       const button = screen.getByRole('button', { name: /connect/i });
 
-      // Valid 6-digit team ID
-      input.focus();
-      input.blur();
-      input.focus();
+      // Too short (5 digits) - should be disabled
+      fireEvent.change(input, { target: { value: '12345' } });
+      expect(button).toBeDisabled();
+
+      // Valid 6-digit team ID - should be enabled
       fireEvent.change(input, { target: { value: '123456' } });
       expect(button).not.toBeDisabled();
 
-      // Valid 7-digit team ID
+      // Valid 7-digit team ID - should be enabled
       fireEvent.change(input, { target: { value: '1234567' } });
       expect(button).not.toBeDisabled();
+
+      // Too long (8 digits) - should be disabled
+      fireEvent.change(input, { target: { value: '12345678' } });
+      expect(button).toBeDisabled();
     });
   });
 });

@@ -122,6 +122,11 @@ export interface FPLConnectionCardProps {
 export function FPLConnectionCard(props: FPLConnectionCardProps) {
   const [teamId, setTeamId] = useState('');
 
+  // Validate team ID format: must be 6-7 digits
+  const isValidTeamId = (id: string): boolean => {
+    return /^\d{6,7}$/.test(id);
+  };
+
   return (
     <Card role="article">
       <CardHeader>
@@ -141,7 +146,7 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
               onChange={(e) => setTeamId(e.target.value)}
             />
           </div>
-          <Button disabled={!teamId}>Connect</Button>
+          <Button disabled={!isValidTeamId(teamId)}>Connect</Button>
         </div>
       </CardContent>
     </Card>
