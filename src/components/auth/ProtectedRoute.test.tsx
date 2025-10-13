@@ -44,4 +44,27 @@ describe('ProtectedRoute', () => {
 
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
+
+  it('should show skeleton loading state when loading', () => {
+    vi.mocked(AuthContext.useAuth).mockReturnValue({
+      user: null,
+      loading: true,
+      isAuthenticated: false,
+    });
+
+    render(
+      <BrowserRouter>
+        <ProtectedRoute>
+          <div>Protected Content</div>
+        </ProtectedRoute>
+      </BrowserRouter>
+    );
+
+    // Should show skeleton (check for skeleton class)
+    const skeletons = document.querySelectorAll('.animate-pulse');
+    expect(skeletons.length).toBeGreaterThan(0);
+
+    // Should NOT show protected content while loading
+    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+  });
 });

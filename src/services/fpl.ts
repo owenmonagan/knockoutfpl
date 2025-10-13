@@ -28,6 +28,7 @@ export async function getFPLTeamInfo(teamId: number): Promise<FPLTeamInfo> {
     overallPoints: data.summary_overall_points,
     overallRank: data.summary_overall_rank,
     gameweekPoints: data.summary_event_points,
+    gameweekRank: data.summary_event_rank,
   };
 }
 
