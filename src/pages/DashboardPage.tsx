@@ -319,15 +319,50 @@
  * - Future: Real-time updates possible with Firestore listeners (Phase 7)
  */
 
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { FPLConnectionCard } from '../components/dashboard/FPLConnectionCard';
+import { FPLConnectionCard, type FPLTeamData } from '../components/dashboard/FPLConnectionCard';
+import type { User } from '../types/user';
+import { getUserProfile, connectFPLTeam } from '../services/user';
+import { getFPLTeamInfo } from '../services/fpl';
 
 export function DashboardPage() {
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
+  const [userData, setUserData] = useState<User | null>(null);
+  const [fplData, setFplData] = useState<FPLTeamData | null>(null);
 
-  // Mock handlers for now - will implement real logic later
+  // Fetch user profile on mount
+  useEffect(() => {
+    async function loadDashboardData() {
+      if (!authUser?.uid) return;
+
+      const userProfile = await getUserProfile(authUser.uid);
+      setUserData(userProfile);
+    }
+
+    loadDashboardData();
+  }, [authUser]);
+
+  // Fetch FPL data when user is connected
+  useEffect(() => {
+    async function loadFPLData() {
+      if (!userData || userData.fplTeamId === 0) return;
+
+      const teamInfo = await getFPLTeamInfo(userData.fplTeamId);
+      setFplData(teamInfo);
+    }
+
+    loadFPLData();
+  }, [userData]);
+
+  // Connect FPL team
   const handleConnect = async (teamId: number) => {
-    console.log('Connect team:', teamId);
+    if (!authUser?.uid) return;
+    await connectFPLTeam(authUser.uid, teamId);
+
+    // Refresh user profile to get updated fplTeamId and fplTeamName
+    const updatedProfile = await getUserProfile(authUser.uid);
+    setUserData(updatedProfile);
   };
 
   const handleUpdate = async (teamId: number) => {
@@ -341,14 +376,14 @@ export function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground mt-2">
-            Welcome back{user?.displayName ? `, ${user.displayName}` : ''}!
+            Welcome back{authUser?.displayName ? `, ${authUser.displayName}` : ''}!
           </p>
         </div>
 
         {/* FPL Connection Card */}
         <FPLConnectionCard
-          user={null}
-          fplData={null}
+          user={userData}
+          fplData={fplData}
           isLoading={false}
           onConnect={handleConnect}
           onUpdate={handleUpdate}

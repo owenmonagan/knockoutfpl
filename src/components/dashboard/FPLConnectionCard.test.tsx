@@ -352,5 +352,147 @@ describe('FPLConnectionCard', () => {
       const title = screen.getByRole('heading', { name: /^your fpl team$/i });
       expect(title).toBeInTheDocument();
     });
+
+    it('Step 23: displays team name', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const teamName = screen.getByText(/monzaga/i);
+      expect(teamName).toBeInTheDocument();
+    });
+
+    it('Step 24: displays gameweek points', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const gwPoints = screen.getByText(/gw points.*78/i);
+      expect(gwPoints).toBeInTheDocument();
+    });
+
+    it('Step 25: displays gameweek rank (formatted)', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const gwRank = screen.getByText(/gw rank.*1,656,624/i);
+      expect(gwRank).toBeInTheDocument();
+    });
+
+    it('Step 26: displays overall points', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const overallPts = screen.getByText(/overall.*427.*pts/i);
+      expect(overallPts).toBeInTheDocument();
+    });
+
+    it('Step 27: displays overall rank (formatted)', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const overallRank = screen.getByText(/overall rank.*841,192/i);
+      expect(overallRank).toBeInTheDocument();
+    });
+
+    it('Step 28: displays team value (formatted)', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const teamValue = screen.getByText(/team value.*£102\.0m/i);
+      expect(teamValue).toBeInTheDocument();
+    });
+
+    it('Step 29: shows "Edit" button', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      expect(editButton).toBeInTheDocument();
+    });
+
+    it('shows loading state when connected but fplData is null', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={null}
+          isLoading={true}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      // Should not crash and should show connect form until data loads
+      const connectForm = screen.getByLabelText(/fpl team id/i);
+      expect(connectForm).toBeInTheDocument();
+    });
+
+    it('handles missing gameweekRank gracefully', () => {
+      const incompleteFplData = {
+        ...mockFplData,
+        gameweekRank: undefined as any,
+      };
+
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={incompleteFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      // Should not crash, should still show team name
+      const teamName = screen.getByText(/monzaga/i);
+      expect(teamName).toBeInTheDocument();
+    });
   });
 });

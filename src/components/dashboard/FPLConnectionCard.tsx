@@ -122,7 +122,7 @@ export interface FPLConnectionCardProps {
 }
 
 export function FPLConnectionCard(props: FPLConnectionCardProps) {
-  const { user, isLoading, error, onConnect, onClearError } = props;
+  const { user, fplData, isLoading, error, onConnect, onClearError } = props;
   const [teamId, setTeamId] = useState('');
 
   // Check if user is connected to FPL
@@ -146,53 +146,73 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
   return (
     <Card role="article">
       <CardHeader>
-        <CardTitle>
-          {isConnected ? 'Your FPL Team' : 'Connect Your FPL Team'}
-        </CardTitle>
-        <CardDescription>
-          Link your FPL team to start creating challenges
-        </CardDescription>
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle>
+              {isConnected ? 'Your FPL Team' : 'Connect Your FPL Team'}
+            </CardTitle>
+            <CardDescription>
+              Link your FPL team to start creating challenges
+            </CardDescription>
+          </div>
+          {isConnected && (
+            <Button variant="outline" size="sm">
+              Edit
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="fpl-team-id">FPL Team ID</Label>
-            <Input
-              id="fpl-team-id"
-              type="text"
-              value={teamId}
-              onChange={(e) => {
-                setTeamId(e.target.value);
-                onClearError?.();
-              }}
-            />
-            {showError && (
-              <p className="text-sm text-destructive">
-                Team ID must be 6-7 digits
-              </p>
-            )}
+        {isConnected && fplData ? (
+          // Connected state: Show team stats
+          <div className="space-y-4">
+            <p className="text-lg font-semibold">{fplData.teamName}</p>
+            <p className="text-sm">GW Points: {fplData.gameweekPoints} | GW Rank: {fplData.gameweekRank?.toLocaleString() ?? 'N/A'}</p>
+            <p className="text-sm">Overall: {fplData.overallPoints} pts | Overall Rank: {fplData.overallRank?.toLocaleString() ?? 'N/A'}</p>
+            <p className="text-sm">Team Value: £{fplData.teamValue.toFixed(1)}m</p>
           </div>
-          <Button
-            disabled={!isValidTeamId(teamId) || isLoading}
-            onClick={handleConnect}
-          >
-            {isLoading ? 'Connecting...' : 'Connect'}
-          </Button>
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
-          <p className="text-sm text-muted-foreground">
-            Find your Team ID at{' '}
-            <a
-              href="https://fantasy.premierleague.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
+        ) : (
+          // Not connected state: Show input form
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="fpl-team-id">FPL Team ID</Label>
+              <Input
+                id="fpl-team-id"
+                type="text"
+                value={teamId}
+                onChange={(e) => {
+                  setTeamId(e.target.value);
+                  onClearError?.();
+                }}
+              />
+              {showError && (
+                <p className="text-sm text-destructive">
+                  Team ID must be 6-7 digits
+                </p>
+              )}
+            </div>
+            <Button
+              disabled={!isValidTeamId(teamId) || isLoading}
+              onClick={handleConnect}
             >
-              fantasy.premierleague.com
-            </a>
-          </p>
-        </div>
+              {isLoading ? 'Connecting...' : 'Connect'}
+            </Button>
+            {error && (
+              <p className="text-sm text-destructive">{error}</p>
+            )}
+            <p className="text-sm text-muted-foreground">
+              Find your Team ID at{' '}
+              <a
+                href="https://fantasy.premierleague.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                fantasy.premierleague.com
+              </a>
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

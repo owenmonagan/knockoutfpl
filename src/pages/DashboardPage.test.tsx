@@ -1,10 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { DashboardPage } from './DashboardPage';
 import * as AuthContext from '../contexts/AuthContext';
+import * as userService from '../services/user';
+import * as fplService from '../services/fpl';
 
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: vi.fn(),
+}));
+
+vi.mock('../services/user', () => ({
+  getUserProfile: vi.fn(),
+  connectFPLTeam: vi.fn(),
+  updateUserProfile: vi.fn(),
+}));
+
+vi.mock('../services/fpl', () => ({
+  getFPLTeamInfo: vi.fn(),
 }));
 
 describe('DashboardPage', () => {
@@ -78,6 +90,175 @@ describe('DashboardPage', () => {
       // Look for the FPL Connection Card by its title
       const cardTitle = screen.getByRole('heading', { name: /connect your fpl team/i });
       expect(cardTitle).toBeInTheDocument();
+    });
+  });
+
+  describe('PHASE 3: Real Data Integration', () => {
+    const mockAuthUser = {
+      uid: 'test-uid',
+      email: 'test@example.com',
+      displayName: 'Test User',
+    } as any;
+
+    const mockUserProfile = {
+      userId: 'test-uid',
+      fplTeamId: 0,
+      fplTeamName: '',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      wins: 0,
+      losses: 0,
+      createdAt: {} as any,
+      updatedAt: {} as any,
+    };
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('Integration Test 1: fetches user profile on mount', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: mockAuthUser,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue(mockUserProfile);
+
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(userService.getUserProfile).toHaveBeenCalledWith('test-uid');
+      });
+    });
+
+    it('Integration Test 2: calls connectFPLTeam when connecting team', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: mockAuthUser,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue(mockUserProfile);
+      vi.mocked(userService.connectFPLTeam).mockResolvedValue(undefined);
+
+      render(<DashboardPage />);
+
+      // Wait for initial load
+      await waitFor(() => {
+        expect(userService.getUserProfile).toHaveBeenCalledWith('test-uid');
+      });
+
+      // Find the input and button
+      const input = screen.getByLabelText(/fpl team id/i);
+      const button = screen.getByRole('button', { name: /connect/i });
+
+      // Enter valid team ID
+      fireEvent.change(input, { target: { value: '158256' } });
+
+      // Click connect
+      fireEvent.click(button);
+
+      // Should call connectFPLTeam with userId and teamId
+      await waitFor(() => {
+        expect(userService.connectFPLTeam).toHaveBeenCalledWith('test-uid', 158256);
+      });
+    });
+
+    it('Integration Test 3: refreshes user profile after connecting team', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: mockAuthUser,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      // First call: returns unconnected user
+      // Second call: returns connected user
+      const connectedUserProfile = {
+        ...mockUserProfile,
+        fplTeamId: 158256,
+        fplTeamName: 'Test Team',
+      };
+
+      vi.mocked(userService.getUserProfile)
+        .mockResolvedValueOnce(mockUserProfile) // Initial load
+        .mockResolvedValueOnce(connectedUserProfile); // After connect
+
+      vi.mocked(userService.connectFPLTeam).mockResolvedValue(undefined);
+
+      render(<DashboardPage />);
+
+      // Wait for initial load
+      await waitFor(() => {
+        expect(userService.getUserProfile).toHaveBeenCalledTimes(1);
+      });
+
+      // Should show "Connect Your FPL Team" title
+      expect(screen.getByRole('heading', { name: /connect your fpl team/i })).toBeInTheDocument();
+
+      // Find the input and button
+      const input = screen.getByLabelText(/fpl team id/i);
+      const button = screen.getByRole('button', { name: /connect/i });
+
+      // Enter valid team ID
+      fireEvent.change(input, { target: { value: '158256' } });
+
+      // Click connect
+      fireEvent.click(button);
+
+      // Should call connectFPLTeam
+      await waitFor(() => {
+        expect(userService.connectFPLTeam).toHaveBeenCalledWith('test-uid', 158256);
+      });
+
+      // Should refresh user profile (second call)
+      await waitFor(() => {
+        expect(userService.getUserProfile).toHaveBeenCalledTimes(2);
+      });
+
+      // Should now show "Your FPL Team" title
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /^your fpl team$/i })).toBeInTheDocument();
+      });
+    });
+
+    it('Integration Test 4: fetches FPL data when user is connected', async () => {
+      // User is already connected
+      const connectedUserProfile = {
+        ...mockUserProfile,
+        fplTeamId: 158256,
+        fplTeamName: 'Test Team',
+      };
+
+      const mockFPLData = {
+        teamName: 'Test Team',
+        overallPoints: 427,
+        overallRank: 841192,
+        gameweekPoints: 78,
+        gameweekRank: 1656624,
+        teamValue: 102.0,
+      };
+
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: mockAuthUser,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue(connectedUserProfile);
+      vi.mocked(fplService.getFPLTeamInfo).mockResolvedValue(mockFPLData);
+
+      render(<DashboardPage />);
+
+      // Wait for user profile to load
+      await waitFor(() => {
+        expect(userService.getUserProfile).toHaveBeenCalledWith('test-uid');
+      });
+
+      // Should call getFPLTeamInfo with the fplTeamId
+      await waitFor(() => {
+        expect(fplService.getFPLTeamInfo).toHaveBeenCalledWith(158256);
+      });
     });
   });
 });

@@ -9,6 +9,16 @@ vi.mock('./lib/firebase', () => ({
   db: {},
 }));
 
+vi.mock('./services/user', () => ({
+  getUserProfile: vi.fn(),
+  connectFPLTeam: vi.fn(),
+  updateUserProfile: vi.fn(),
+}));
+
+vi.mock('./services/fpl', () => ({
+  getFPLTeamInfo: vi.fn(),
+}));
+
 describe('Router', () => {
   it('should render landing page at /', () => {
     const testRouter = createMemoryRouter(router, {
@@ -79,15 +89,6 @@ describe('Router', () => {
         },
       };
     });
-
-    // Mock FPL and user services
-    vi.mock('./services/fpl', () => ({
-      getFPLTeamInfo: vi.fn(),
-    }));
-
-    vi.mock('./services/user', () => ({
-      connectFPLTeam: vi.fn(),
-    }));
 
     render(
       <AuthProvider>
