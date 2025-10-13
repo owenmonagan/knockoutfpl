@@ -60,4 +60,24 @@ describe('DashboardPage', () => {
       expect(welcome).toBeInTheDocument();
     });
   });
+
+  describe('PHASE 2: FPL Connection Card Integration', () => {
+    it('Step 6 (Integration): renders FPLConnectionCard component', () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      render(<DashboardPage />);
+
+      // Look for the FPL Connection Card by its title
+      const cardTitle = screen.getByRole('heading', { name: /connect your fpl team/i });
+      expect(cardTitle).toBeInTheDocument();
+    });
+  });
 });

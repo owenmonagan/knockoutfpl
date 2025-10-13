@@ -320,16 +320,40 @@
  */
 
 import { useAuth } from '../contexts/AuthContext';
+import { FPLConnectionCard } from '../components/dashboard/FPLConnectionCard';
 
 export function DashboardPage() {
   const { user } = useAuth();
 
+  // Mock handlers for now - will implement real logic later
+  const handleConnect = async (teamId: number) => {
+    console.log('Connect team:', teamId);
+  };
+
+  const handleUpdate = async (teamId: number) => {
+    console.log('Update team:', teamId);
+  };
+
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1>Dashboard</h1>
-      <p>
-        Welcome back{user?.displayName ? `, ${user.displayName}` : ''}!
-      </p>
+      <div className="space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground mt-2">
+            Welcome back{user?.displayName ? `, ${user.displayName}` : ''}!
+          </p>
+        </div>
+
+        {/* FPL Connection Card */}
+        <FPLConnectionCard
+          user={null}
+          fplData={null}
+          isLoading={false}
+          onConnect={handleConnect}
+          onUpdate={handleUpdate}
+        />
+      </div>
     </main>
   );
 }
