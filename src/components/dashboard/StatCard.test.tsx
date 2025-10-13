@@ -20,4 +20,11 @@ describe('StatCard', () => {
     const value = screen.getByText('42');
     expect(value).toBeInTheDocument();
   });
+
+  it('Step 40: displays icon when provided', () => {
+    const icon = <span data-testid="test-icon">🏆</span>;
+    render(<StatCard label="Total Challenges" value={42} icon={icon} />);
+    const iconElement = screen.getByTestId('test-icon');
+    expect(iconElement).toBeInTheDocument();
+  });
 });
