@@ -54,6 +54,54 @@ test.describe('Authentication Flow', () => {
     await expect(page.getByText('Passwords do not match')).toBeVisible();
   });
 
+  test('should prevent submission with empty required fields @auth', async ({ page }) => {
+    await page.goto('/signup');
+    await page.waitForLoadState('networkidle');
+
+    // Try to submit without filling any fields
+    await page.getByRole('button', { name: 'Sign Up' }).click();
+
+    // Browser should prevent submission due to HTML5 required attribute
+    // We should still be on the signup page
+    await expect(page).toHaveURL('/signup');
+
+    // Check form is still visible (not submitted)
+    await expect(page.getByRole('button', { name: 'Sign Up' })).toBeVisible();
+  });
+
+  test('should show error on signup with invalid email format @auth', async ({ page }) => {
+    await page.goto('/signup');
+
+    // Fill form with invalid email
+    await page.getByLabel('Email').fill('notanemail');
+    await page.getByLabel('Display Name').fill('Test User');
+    await page.getByLabel(/^Password$/).fill('password123');
+    await page.getByLabel('Confirm Password').fill('password123');
+
+    // Try to submit
+    await page.getByRole('button', { name: 'Sign Up' }).click();
+
+    // HTML5 validation should prevent submission
+    // We should still be on the signup page
+    await expect(page).toHaveURL('/signup');
+  });
+
+  test('should show error on signup with weak password @auth', async ({ page }) => {
+    await page.goto('/signup');
+
+    // Fill form with weak password (< 6 characters)
+    await page.getByLabel('Email').fill('test@example.com');
+    await page.getByLabel('Display Name').fill('Test User');
+    await page.getByLabel(/^Password$/).fill('12345');
+    await page.getByLabel('Confirm Password').fill('12345');
+
+    // Submit form
+    await page.getByRole('button', { name: 'Sign Up' }).click();
+
+    // Firebase should reject with weak password error
+    await expect(page.locator('.text-red-500')).toBeVisible({ timeout: 5000 });
+  });
+
   test('should show error message on invalid login @auth @critical', async ({ page }) => {
     await page.goto('/login');
 

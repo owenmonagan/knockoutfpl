@@ -11,6 +11,7 @@ export function SignUpForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -21,6 +22,7 @@ export function SignUpForm() {
       return;
     }
 
+    setIsLoading(true);
     try {
       const userCredential = await signUpWithEmail(email, password);
       await createUserProfile({
@@ -30,6 +32,8 @@ export function SignUpForm() {
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during sign up');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -72,7 +76,9 @@ export function SignUpForm() {
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
       </div>
-      <Button type="submit">Sign Up</Button>
+      <Button type="submit" disabled={isLoading}>
+        {isLoading ? 'Signing up...' : 'Sign Up'}
+      </Button>
     </form>
   );
 }

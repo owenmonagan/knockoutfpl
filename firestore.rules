@@ -20,7 +20,7 @@ service cloud.firestore {
 
       // Users can create their own profile on signup
       allow create: if isOwner(userId)
-        && request.resource.data.keys().hasAll(['fplTeamId', 'email', 'displayName', 'wins', 'losses', 'createdAt', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['userId', 'fplTeamId', 'fplTeamName', 'email', 'displayName', 'wins', 'losses', 'createdAt', 'updatedAt'])
         && request.resource.data.userId == userId;
 
       // Users can update their own profile (except userId)
