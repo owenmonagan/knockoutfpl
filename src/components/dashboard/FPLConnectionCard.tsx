@@ -120,7 +120,7 @@ export interface FPLConnectionCardProps {
 }
 
 export function FPLConnectionCard(props: FPLConnectionCardProps) {
-  const { isLoading } = props;
+  const { isLoading, onConnect } = props;
   const [teamId, setTeamId] = useState('');
 
   // Validate team ID format: must be 6-7 digits
@@ -130,6 +130,13 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
 
   // Show error if team ID is entered but invalid
   const showError = teamId.length > 0 && !isValidTeamId(teamId);
+
+  // Handle connect button click
+  const handleConnect = async () => {
+    if (isValidTeamId(teamId)) {
+      await onConnect(parseInt(teamId, 10));
+    }
+  };
 
   return (
     <Card role="article">
@@ -155,7 +162,10 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
               </p>
             )}
           </div>
-          <Button disabled={!isValidTeamId(teamId) || isLoading}>
+          <Button
+            disabled={!isValidTeamId(teamId) || isLoading}
+            onClick={handleConnect}
+          >
             {isLoading ? 'Connecting...' : 'Connect'}
           </Button>
           <p className="text-sm text-muted-foreground">

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { FPLConnectionCard } from './FPLConnectionCard';
 
@@ -243,6 +243,32 @@ describe('FPLConnectionCard', () => {
 
       const button = screen.getByRole('button', { name: /connecting/i });
       expect(button).toBeDisabled();
+    });
+
+    it('Step 19: calls onConnect with team ID on submit', async () => {
+      const mockOnConnect = vi.fn().mockResolvedValue(undefined);
+
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          onConnect={mockOnConnect}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const input = screen.getByRole('textbox');
+      const button = screen.getByRole('button', { name: /connect/i });
+
+      // Enter valid team ID
+      fireEvent.change(input, { target: { value: '123456' } });
+
+      // Click connect button
+      fireEvent.click(button);
+
+      // Should call onConnect with numeric team ID
+      expect(mockOnConnect).toHaveBeenCalledWith(123456);
     });
   });
 });
