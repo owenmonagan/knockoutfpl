@@ -90,5 +90,20 @@ describe('FPLConnectionCard', () => {
       const label = screen.getByLabelText(/fpl team id/i);
       expect(label).toBeInTheDocument();
     });
+
+    it('Step 11: shows "Connect" button', () => {
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const button = screen.getByRole('button', { name: /connect/i });
+      expect(button).toBeInTheDocument();
+    });
   });
 });

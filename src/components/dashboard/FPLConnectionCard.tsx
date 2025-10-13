@@ -99,6 +99,7 @@ import type { User } from '../../types/user';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { Button } from '../ui/button';
 
 export interface FPLTeamData {
   teamName: string;
@@ -127,9 +128,12 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          <Label htmlFor="fpl-team-id">FPL Team ID</Label>
-          <Input id="fpl-team-id" type="text" />
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="fpl-team-id">FPL Team ID</Label>
+            <Input id="fpl-team-id" type="text" />
+          </div>
+          <Button>Connect</Button>
         </div>
       </CardContent>
     </Card>
