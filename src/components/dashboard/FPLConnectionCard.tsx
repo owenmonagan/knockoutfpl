@@ -122,8 +122,11 @@ export interface FPLConnectionCardProps {
 }
 
 export function FPLConnectionCard(props: FPLConnectionCardProps) {
-  const { isLoading, error, onConnect, onClearError } = props;
+  const { user, isLoading, error, onConnect, onClearError } = props;
   const [teamId, setTeamId] = useState('');
+
+  // Check if user is connected to FPL
+  const isConnected = user && user.fplTeamId > 0;
 
   // Validate team ID format: must be 6-7 digits
   const isValidTeamId = (id: string): boolean => {
@@ -143,7 +146,9 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
   return (
     <Card role="article">
       <CardHeader>
-        <CardTitle>Connect Your FPL Team</CardTitle>
+        <CardTitle>
+          {isConnected ? 'Your FPL Team' : 'Connect Your FPL Team'}
+        </CardTitle>
         <CardDescription>
           Link your FPL team to start creating challenges
         </CardDescription>

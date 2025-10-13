@@ -349,7 +349,7 @@ describe('FPLConnectionCard', () => {
         />
       );
 
-      const title = screen.getByRole('heading', { name: /your fpl team/i });
+      const title = screen.getByRole('heading', { name: /^your fpl team$/i });
       expect(title).toBeInTheDocument();
     });
   });
