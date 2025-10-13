@@ -322,6 +322,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { FPLConnectionCard, type FPLTeamData } from '../components/dashboard/FPLConnectionCard';
+import { StatCard } from '../components/dashboard/StatCard';
 import type { User } from '../types/user';
 import { getUserProfile, connectFPLTeam, updateUserProfile } from '../services/user';
 import { getFPLTeamInfo } from '../services/fpl';
@@ -404,6 +405,14 @@ export function DashboardPage() {
           onConnect={handleConnect}
           onUpdate={handleUpdate}
         />
+
+        {/* Stats Section */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatCard label="Total Challenges" value={0} />
+          <StatCard label="Wins" value={0} />
+          <StatCard label="Losses" value={0} />
+          <StatCard label="Win Rate" value="N/A" />
+        </div>
       </div>
     </main>
   );

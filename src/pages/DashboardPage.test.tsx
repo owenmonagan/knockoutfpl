@@ -333,4 +333,25 @@ describe('DashboardPage', () => {
       });
     });
   });
+
+  describe('PHASE 4: Stats Section', () => {
+    beforeEach(() => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+    });
+
+    it('Step 41: shows 4 stat cards', () => {
+      render(<DashboardPage />);
+      const statCards = screen.getAllByRole('article');
+      // 1 FPL Connection Card + 4 Stat Cards = 5 total articles
+      expect(statCards).toHaveLength(5);
+    });
+  });
 });
