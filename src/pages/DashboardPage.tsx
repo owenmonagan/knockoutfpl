@@ -323,6 +323,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { FPLConnectionCard, type FPLTeamData } from '../components/dashboard/FPLConnectionCard';
 import { StatCard } from '../components/dashboard/StatCard';
+import { EmptyState } from '../components/dashboard/EmptyState';
 import type { User } from '../types/user';
 import { getUserProfile, connectFPLTeam, updateUserProfile } from '../services/user';
 import { getFPLTeamInfo } from '../services/fpl';
@@ -417,6 +418,10 @@ export function DashboardPage() {
         {/* Upcoming Challenges Section */}
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Upcoming Challenges (0)</h2>
+          <EmptyState
+            title="No Upcoming Challenges"
+            description="Create your first challenge to compete with other managers"
+          />
         </div>
       </div>
     </main>
