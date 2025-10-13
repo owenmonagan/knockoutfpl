@@ -228,4 +228,31 @@ describe('SignUpForm', () => {
 
     expect(screen.getByRole('button', { name: /continue with google/i })).toBeInTheDocument();
   });
+
+  it('should call signInWithGoogle and create profile when Google button is clicked', async () => {
+    const { signInWithGoogle } = await import('../../services/auth');
+    const { createUserProfile } = await import('../../services/user');
+
+    vi.mocked(signInWithGoogle).mockResolvedValue({
+      user: { uid: 'google-uid', email: 'google@example.com', displayName: 'Google User' },
+    } as any);
+    vi.mocked(createUserProfile).mockResolvedValue();
+
+    const user = userEvent.setup();
+
+    render(
+      <BrowserRouter>
+        <SignUpForm />
+      </BrowserRouter>
+    );
+
+    await user.click(screen.getByRole('button', { name: /continue with google/i }));
+
+    expect(signInWithGoogle).toHaveBeenCalled();
+    expect(createUserProfile).toHaveBeenCalledWith({
+      userId: 'google-uid',
+      email: 'google@example.com',
+      displayName: 'Google User',
+    });
+  });
 });

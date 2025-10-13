@@ -14,4 +14,11 @@ describe('FPLTeamConnect', () => {
 
     expect(screen.getByRole('button', { name: /verify team/i })).toBeInTheDocument();
   });
+
+  it('should disable verify button when team ID is empty', () => {
+    render(<FPLTeamConnect userId="test-uid" />);
+
+    const button = screen.getByRole('button', { name: /verify team/i });
+    expect(button).toBeDisabled();
+  });
 });
