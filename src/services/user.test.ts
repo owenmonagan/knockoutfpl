@@ -85,4 +85,20 @@ describe('User Service', () => {
       expect(result).toBeNull();
     });
   });
+
+  describe('updateUserProfile', () => {
+    it('should update a user document in Firestore', async () => {
+      const { updateDoc } = await import('firebase/firestore');
+      const { updateUserProfile } = await import('./user');
+
+      const updates = {
+        displayName: 'Updated Name',
+        fplTeamId: 999999,
+      };
+
+      await updateUserProfile('test-uid', updates);
+
+      expect(updateDoc).toHaveBeenCalled();
+    });
+  });
 });

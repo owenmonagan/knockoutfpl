@@ -1,4 +1,4 @@
-import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { CreateUserData, User } from '../types/user';
 
@@ -34,4 +34,20 @@ export async function getUserProfile(userId: string): Promise<User | null> {
   }
 
   return userSnap.data() as User;
+}
+
+/**
+ * Update a user profile in Firestore
+ */
+export async function updateUserProfile(
+  userId: string,
+  updates: Partial<Omit<User, 'userId' | 'createdAt'>>
+): Promise<void> {
+  const userRef = doc(db, 'users', userId);
+  const now = Timestamp.now();
+
+  await updateDoc(userRef, {
+    ...updates,
+    updatedAt: now,
+  });
 }
