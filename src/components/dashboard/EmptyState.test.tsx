@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EmptyState } from './EmptyState';
 
 describe('EmptyState', () => {
@@ -32,5 +32,13 @@ describe('EmptyState', () => {
     render(<EmptyState title="No Challenges" description="Test" actionLabel="Create Challenge" />);
     const button = screen.getByRole('button', { name: /create challenge/i });
     expect(button).toBeInTheDocument();
+  });
+
+  it('Step 52: calls onAction when button clicked', () => {
+    const mockOnAction = vi.fn();
+    render(<EmptyState title="No Challenges" description="Test" actionLabel="Create Challenge" onAction={mockOnAction} />);
+    const button = screen.getByRole('button', { name: /create challenge/i });
+    fireEvent.click(button);
+    expect(mockOnAction).toHaveBeenCalledTimes(1);
   });
 });
