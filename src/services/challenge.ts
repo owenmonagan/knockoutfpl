@@ -1,6 +1,6 @@
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import type { CreateChallengeData } from '../types/challenge';
+import type { CreateChallengeData, Challenge } from '../types/challenge';
 
 export async function createChallenge(data: CreateChallengeData): Promise<string> {
   const challengesRef = collection(db, 'challenges');
@@ -22,4 +22,18 @@ export async function createChallenge(data: CreateChallengeData): Promise<string
     completedAt: null,
   });
   return docRef.id;
+}
+
+export async function getChallenge(challengeId: string): Promise<Challenge | null> {
+  const challengeRef = doc(db, 'challenges', challengeId);
+  const challengeSnap = await getDoc(challengeRef);
+
+  if (!challengeSnap.exists()) {
+    return null;
+  }
+
+  return {
+    challengeId: challengeSnap.id,
+    ...challengeSnap.data(),
+  } as Challenge;
 }

@@ -97,4 +97,47 @@ describe('Challenge Service', () => {
       expect(challengeId).toBe('new-challenge-id');
     });
   });
+
+  describe('getChallenge', () => {
+    it('should fetch a single challenge by ID', async () => {
+      const { getDoc, doc, Timestamp } = await import('firebase/firestore');
+      const { getChallenge } = await import('./challenge');
+
+      // Mock doc to return a document reference
+      vi.mocked(doc).mockReturnValue('challenge-doc-ref' as any);
+
+      // Mock getDoc to return a document snapshot
+      vi.mocked(getDoc).mockResolvedValue({
+        exists: () => true,
+        id: 'challenge-123',
+        data: () => ({
+          gameweek: 7,
+          status: 'pending',
+          creatorUserId: 'user-1',
+          creatorFplId: 158256,
+          creatorFplTeamName: 'Test Team',
+          creatorScore: null,
+          opponentUserId: null,
+          opponentFplId: null,
+          opponentFplTeamName: null,
+          opponentScore: null,
+          winnerId: null,
+          isDraw: false,
+          gameweekDeadline: Timestamp.now(),
+          gameweekFinished: false,
+          completedAt: null,
+          createdAt: Timestamp.now(),
+        }),
+      } as any);
+
+      const challenge = await getChallenge('challenge-123');
+
+      expect(doc).toHaveBeenCalledWith(expect.anything(), 'challenges', 'challenge-123');
+      expect(getDoc).toHaveBeenCalled();
+      expect(challenge).toBeDefined();
+      expect(challenge?.challengeId).toBe('challenge-123');
+      expect(challenge?.gameweek).toBe(7);
+      expect(challenge?.status).toBe('pending');
+    });
+  });
 });
