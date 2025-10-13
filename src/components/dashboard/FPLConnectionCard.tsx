@@ -157,7 +157,7 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
               {isConnected && fplData ? fplData.teamName : isConnected ? 'Your FPL Team' : 'Connect Your FPL Team'}
             </CardTitle>
             <CardDescription>
-              Link your FPL team to start creating challenges
+              {isConnected && fplData ? fplData.managerName : 'Link your FPL team to start creating challenges'}
             </CardDescription>
           </div>
           {isConnected && !isEditing && (

@@ -330,7 +330,9 @@ describe('FPLConnectionCard', () => {
     };
 
     const mockFplData = {
+      teamId: 158256,
       teamName: 'Monzaga',
+      managerName: 'Owen Smith',
       overallPoints: 427,
       overallRank: 841192,
       gameweekPoints: 78,
@@ -480,6 +482,22 @@ describe('FPLConnectionCard', () => {
       expect(gridContainer).toBeInTheDocument();
     });
 
+    it('Step 31: shows manager name as subtitle when connected', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      // Subtitle should show manager name
+      const subtitle = screen.getByText(/owen smith/i);
+      expect(subtitle).toBeInTheDocument();
+    });
+
     it('shows loading state when connected but fplData is null', () => {
       render(
         <FPLConnectionCard
@@ -589,7 +607,9 @@ describe('FPLConnectionCard', () => {
     };
 
     const mockFplData = {
+      teamId: 158256,
       teamName: 'Monzaga',
+      managerName: 'Owen Smith',
       overallPoints: 427,
       overallRank: 841192,
       gameweekPoints: 78,
