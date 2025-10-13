@@ -353,5 +353,16 @@ describe('DashboardPage', () => {
       // 1 FPL Connection Card + 4 Stat Cards = 5 total articles
       expect(statCards).toHaveLength(5);
     });
+
+    it('Step 42: shows "Total Challenges" card with 0', () => {
+      render(<DashboardPage />);
+      const totalChallengesLabel = screen.getByText('Total Challenges');
+      expect(totalChallengesLabel).toBeInTheDocument();
+
+      // Check the value is in the same card
+      const card = totalChallengesLabel.closest('[role="article"]');
+      expect(card).toHaveTextContent('0');
+      expect(card).toHaveTextContent('Total Challenges');
+    });
   });
 });
