@@ -112,6 +112,32 @@ describe('Authentication Service', () => {
       expect(signInWithGoogle).toBeDefined();
       expect(typeof signInWithGoogle).toBe('function');
     });
+
+    it('should call signInWithPopup with GoogleAuthProvider and return UserCredential', async () => {
+      const { signInWithPopup, GoogleAuthProvider } = await import('firebase/auth');
+      const { signInWithGoogle } = await import('./auth');
+
+      const mockUser = {
+        uid: 'google-uid',
+        email: 'google@example.com',
+        displayName: 'Google User'
+      } as User;
+      const mockUserCredential: UserCredential = {
+        user: mockUser,
+      } as UserCredential;
+
+      vi.mocked(signInWithPopup).mockResolvedValue(mockUserCredential);
+
+      const result = await signInWithGoogle();
+
+      expect(GoogleAuthProvider).toHaveBeenCalled();
+      expect(signInWithPopup).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything()
+      );
+      expect(result).toBeDefined();
+      expect(result.user.email).toBe('google@example.com');
+    });
   });
 
   describe('getCurrentUser', () => {
