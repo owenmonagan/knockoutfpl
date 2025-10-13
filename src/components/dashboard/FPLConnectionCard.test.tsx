@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { FPLConnectionCard } from './FPLConnectionCard';
 
 describe('FPLConnectionCard', () => {
@@ -119,6 +119,32 @@ describe('FPLConnectionCard', () => {
 
       const button = screen.getByRole('button', { name: /connect/i });
       expect(button).toBeDisabled();
+    });
+
+    it('Step 13: validates team ID format (6-7 digits)', () => {
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const input = screen.getByRole('textbox');
+      const button = screen.getByRole('button', { name: /connect/i });
+
+      // Valid 6-digit team ID
+      input.focus();
+      input.blur();
+      input.focus();
+      fireEvent.change(input, { target: { value: '123456' } });
+      expect(button).not.toBeDisabled();
+
+      // Valid 7-digit team ID
+      fireEvent.change(input, { target: { value: '1234567' } });
+      expect(button).not.toBeDisabled();
     });
   });
 });
