@@ -321,7 +321,7 @@
 
 export function DashboardPage() {
   return (
-    <main>
+    <main className="container mx-auto px-4 py-8">
       <h1>Dashboard</h1>
     </main>
   );
