@@ -22,5 +22,11 @@ describe('DashboardPage', () => {
       // Check for container classes (max-w, mx-auto, padding)
       expect(main).toHaveClass('container');
     });
+
+    it('Step 4: shows welcome message', () => {
+      render(<DashboardPage />);
+      const welcome = screen.getByText(/welcome/i);
+      expect(welcome).toBeInTheDocument();
+    });
   });
 });
