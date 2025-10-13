@@ -260,5 +260,77 @@ describe('DashboardPage', () => {
         expect(fplService.getFPLTeamInfo).toHaveBeenCalledWith(158256);
       });
     });
+
+    it('Integration Test 5: calls updateUserProfile when updating team', async () => {
+      // User is already connected
+      const connectedUserProfile = {
+        ...mockUserProfile,
+        fplTeamId: 158256,
+        fplTeamName: 'Old Team',
+      };
+
+      const mockFPLData = {
+        teamName: 'Old Team',
+        overallPoints: 427,
+        overallRank: 841192,
+        gameweekPoints: 78,
+        gameweekRank: 1656624,
+        teamValue: 102.0,
+      };
+
+      const newTeamFPLData = {
+        teamId: 999999,
+        teamName: 'New Team',
+        overallPoints: 500,
+        overallRank: 100000,
+        gameweekPoints: 80,
+        gameweekRank: 50000,
+        teamValue: 105.0,
+      };
+
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: mockAuthUser,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue(connectedUserProfile);
+      vi.mocked(fplService.getFPLTeamInfo)
+        .mockResolvedValueOnce(mockFPLData) // Initial load
+        .mockResolvedValueOnce(newTeamFPLData); // After update
+      vi.mocked(userService.updateUserProfile).mockResolvedValue(undefined);
+
+      render(<DashboardPage />);
+
+      // Wait for initial load
+      await waitFor(() => {
+        expect(userService.getUserProfile).toHaveBeenCalledWith('test-uid');
+      });
+
+      // Click Edit button
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      fireEvent.click(editButton);
+
+      // Change team ID
+      const input = screen.getByLabelText(/fpl team id/i);
+      fireEvent.change(input, { target: { value: '999999' } });
+
+      // Click Update button
+      const updateButton = screen.getByRole('button', { name: /update/i });
+      fireEvent.click(updateButton);
+
+      // Should call getFPLTeamInfo with new team ID
+      await waitFor(() => {
+        expect(fplService.getFPLTeamInfo).toHaveBeenCalledWith(999999);
+      });
+
+      // Should call updateUserProfile with new team data
+      await waitFor(() => {
+        expect(userService.updateUserProfile).toHaveBeenCalledWith('test-uid', {
+          fplTeamId: 999999,
+          fplTeamName: 'New Team',
+        });
+      });
+    });
   });
 });

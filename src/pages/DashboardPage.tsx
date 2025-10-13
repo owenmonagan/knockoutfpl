@@ -323,7 +323,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { FPLConnectionCard, type FPLTeamData } from '../components/dashboard/FPLConnectionCard';
 import type { User } from '../types/user';
-import { getUserProfile, connectFPLTeam } from '../services/user';
+import { getUserProfile, connectFPLTeam, updateUserProfile } from '../services/user';
 import { getFPLTeamInfo } from '../services/fpl';
 
 export function DashboardPage() {
@@ -366,7 +366,23 @@ export function DashboardPage() {
   };
 
   const handleUpdate = async (teamId: number) => {
-    console.log('Update team:', teamId);
+    if (!authUser?.uid) return;
+
+    // Fetch new team info to validate and get team name
+    const teamInfo = await getFPLTeamInfo(teamId);
+
+    // Update user profile in Firestore
+    await updateUserProfile(authUser.uid, {
+      fplTeamId: teamId,
+      fplTeamName: teamInfo.teamName,
+    });
+
+    // Refresh user profile
+    const updatedProfile = await getUserProfile(authUser.uid);
+    setUserData(updatedProfile);
+
+    // Update FPL data
+    setFplData(teamInfo);
   };
 
   return (
