@@ -451,5 +451,11 @@ describe('DashboardPage', () => {
       render(<DashboardPage />);
       expect(screen.getByText('No Active Challenges')).toBeInTheDocument();
     });
+
+    it('Step 61: shows "Completed Challenges" section header', () => {
+      render(<DashboardPage />);
+      const header = screen.getByRole('heading', { name: 'Completed Challenges (0)', level: 2 });
+      expect(header).toBeInTheDocument();
+    });
   });
 });

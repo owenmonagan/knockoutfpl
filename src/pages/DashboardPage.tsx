@@ -432,6 +432,11 @@ export function DashboardPage() {
             description="Active challenges will appear here once accepted"
           />
         </div>
+
+        {/* Completed Challenges Section */}
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Completed Challenges (0)</h2>
+        </div>
       </div>
     </main>
   );
