@@ -440,5 +440,11 @@ describe('DashboardPage', () => {
       render(<DashboardPage />);
       expect(screen.getByText('No Upcoming Challenges')).toBeInTheDocument();
     });
+
+    it('Step 59: shows "Active Challenges" section header', () => {
+      render(<DashboardPage />);
+      const header = screen.getByRole('heading', { name: 'Active Challenges (0)', level: 2 });
+      expect(header).toBeInTheDocument();
+    });
   });
 });

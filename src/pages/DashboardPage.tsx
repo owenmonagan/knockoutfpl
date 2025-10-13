@@ -423,6 +423,11 @@ export function DashboardPage() {
             description="Create your first challenge to compete with other managers"
           />
         </div>
+
+        {/* Active Challenges Section */}
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Active Challenges (0)</h2>
+        </div>
       </div>
     </main>
   );
