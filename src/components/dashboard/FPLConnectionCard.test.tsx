@@ -229,5 +229,20 @@ describe('FPLConnectionCard', () => {
       const button = screen.getByRole('button', { name: /connecting/i });
       expect(button).toBeInTheDocument();
     });
+
+    it('Step 18: button is disabled while loading', () => {
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={true}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const button = screen.getByRole('button', { name: /connecting/i });
+      expect(button).toBeDisabled();
+    });
   });
 });
