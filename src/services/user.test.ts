@@ -125,4 +125,30 @@ describe('User Service', () => {
       expect(updateDoc).toHaveBeenCalled();
     });
   });
+
+  describe('User Type with Caching', () => {
+    it('should allow User type to include cachedFplStats', () => {
+      const userWithCache: User = {
+        userId: 'test-uid',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        fplTeamId: 158256,
+        fplTeamName: "Owen's Team",
+        wins: 5,
+        losses: 3,
+        createdAt: { seconds: 1234567890, nanoseconds: 0 } as any,
+        updatedAt: { seconds: 1234567890, nanoseconds: 0 } as any,
+        cachedFplStats: {
+          overallPoints: 427,
+          overallRank: 841192,
+          gameweekPoints: 78,
+          gameweekRank: 1656624,
+          teamValue: 102.0,
+        },
+      };
+
+      expect(userWithCache.cachedFplStats).toBeDefined();
+      expect(userWithCache.cachedFplStats?.overallPoints).toBe(427);
+    });
+  });
 });
