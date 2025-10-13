@@ -14,4 +14,10 @@ describe('EmptyState', () => {
     const title = screen.getByText('No Challenges');
     expect(title).toBeInTheDocument();
   });
+
+  it('Step 49: displays description', () => {
+    render(<EmptyState title="No Challenges" description="Create your first challenge" />);
+    const description = screen.getByText('Create your first challenge');
+    expect(description).toBeInTheDocument();
+  });
 });
