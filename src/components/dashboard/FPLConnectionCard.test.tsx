@@ -289,5 +289,68 @@ describe('FPLConnectionCard', () => {
       expect(error).toBeInTheDocument();
       expect(error).toHaveClass('text-destructive');
     });
+
+    it('Step 21: clears error when user types', () => {
+      const mockOnClearError = vi.fn();
+      const errorMessage = 'Team not found';
+
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          error={errorMessage}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+          onClearError={mockOnClearError}
+        />
+      );
+
+      const input = screen.getByRole('textbox');
+
+      // User starts typing
+      fireEvent.change(input, { target: { value: '1' } });
+
+      // Should call onClearError
+      expect(mockOnClearError).toHaveBeenCalled();
+    });
+  });
+
+  describe('PHASE 3: Connected State', () => {
+    const connectedUser = {
+      userId: 'test-uid',
+      fplTeamId: 158256, // Connected
+      fplTeamName: 'Monzaga',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      wins: 0,
+      losses: 0,
+      createdAt: {} as any,
+      updatedAt: {} as any,
+    };
+
+    const mockFplData = {
+      teamName: 'Monzaga',
+      overallPoints: 427,
+      overallRank: 841192,
+      gameweekPoints: 78,
+      gameweekRank: 1656624,
+      teamValue: 102.0,
+    };
+
+    it('Step 22: shows "Your FPL Team" title when connected', () => {
+      render(
+        <FPLConnectionCard
+          user={connectedUser}
+          fplData={mockFplData}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const title = screen.getByRole('heading', { name: /your fpl team/i });
+      expect(title).toBeInTheDocument();
+    });
   });
 });
