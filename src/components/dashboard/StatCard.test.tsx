@@ -14,4 +14,10 @@ describe('StatCard', () => {
     const label = screen.getByText('Total Challenges');
     expect(label).toBeInTheDocument();
   });
+
+  it('Step 39: displays value', () => {
+    render(<StatCard label="Total Challenges" value={42} />);
+    const value = screen.getByText('42');
+    expect(value).toBeInTheDocument();
+  });
 });
