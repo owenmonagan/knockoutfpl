@@ -71,5 +71,18 @@ describe('User Service', () => {
       expect(getDoc).toHaveBeenCalled();
       expect(result).toEqual(mockUserData);
     });
+
+    it('should return null if user document does not exist', async () => {
+      const { getDoc } = await import('firebase/firestore');
+      const { getUserProfile } = await import('./user');
+
+      vi.mocked(getDoc).mockResolvedValue({
+        exists: () => false,
+      } as any);
+
+      const result = await getUserProfile('nonexistent-uid');
+
+      expect(result).toBeNull();
+    });
   });
 });
