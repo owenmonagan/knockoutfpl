@@ -1,7 +1,8 @@
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import type { CreateChallengeData } from '../types/challenge';
 
-export async function createChallenge(data: any): Promise<string> {
+export async function createChallenge(data: CreateChallengeData): Promise<string> {
   const challengesRef = collection(db, 'challenges');
 
   const docRef = await addDoc(challengesRef, {

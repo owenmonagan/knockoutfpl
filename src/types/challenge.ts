@@ -21,3 +21,11 @@ export interface Challenge {
   completedAt: Timestamp | null;
   createdAt: Timestamp;
 }
+
+export interface CreateChallengeData {
+  userId: string;
+  fplTeamId: number;
+  fplTeamName: string;
+  gameweek: number;
+  gameweekDeadline: Date;
+}
