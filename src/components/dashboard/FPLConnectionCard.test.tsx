@@ -151,5 +151,26 @@ describe('FPLConnectionCard', () => {
       fireEvent.change(input, { target: { value: '12345678' } });
       expect(button).toBeDisabled();
     });
+
+    it('Step 14: shows error for invalid team ID', () => {
+      render(
+        <FPLConnectionCard
+          user={mockUser}
+          fplData={null}
+          isLoading={false}
+          onConnect={async () => {}}
+          onUpdate={async () => {}}
+        />
+      );
+
+      const input = screen.getByRole('textbox');
+
+      // Enter invalid team ID
+      fireEvent.change(input, { target: { value: '123' } });
+
+      // Should show error message
+      const error = screen.getByText(/team id must be 6-7 digits/i);
+      expect(error).toBeInTheDocument();
+    });
   });
 });

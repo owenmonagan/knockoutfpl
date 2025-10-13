@@ -127,6 +127,9 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
     return /^\d{6,7}$/.test(id);
   };
 
+  // Show error if team ID is entered but invalid
+  const showError = teamId.length > 0 && !isValidTeamId(teamId);
+
   return (
     <Card role="article">
       <CardHeader>
@@ -145,6 +148,11 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
               value={teamId}
               onChange={(e) => setTeamId(e.target.value)}
             />
+            {showError && (
+              <p className="text-sm text-destructive">
+                Team ID must be 6-7 digits
+              </p>
+            )}
           </div>
           <Button disabled={!isValidTeamId(teamId)}>Connect</Button>
         </div>
