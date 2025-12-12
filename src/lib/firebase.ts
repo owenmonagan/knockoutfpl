@@ -21,4 +21,15 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const functions = getFunctions(app);
 
+
+// Connect to emulators in development
+if (import.meta.env.DEV) {
+  try {
+    connectFirestoreEmulator(db, '127.0.0.1', 8080);
+    connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+    connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+  } catch (error) {
+    // Emulators already connected (prevents errors on hot reload)
+  }
+}
 export default app;

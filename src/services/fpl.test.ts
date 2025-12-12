@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers, getFPLLiveScores } from './fpl';
+import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers, getFPLLiveScores, getCurrentGameweek, getGameweekInfo, getFPLFixtures, getPlayerFixtureStatus } from './fpl';
 
 describe('FPL Service', () => {
   describe('getFPLTeamInfo', () => {
@@ -244,6 +244,225 @@ describe('FPL Service', () => {
       expect(result.get(1)).toBe(7);
       expect(result.get(234)).toBe(12);
       expect(result.get(567)).toBe(15);
+    });
+  });
+
+  describe('getCurrentGameweek', () => {
+    it('should fetch and return current gameweek number', async () => {
+      const mockBootstrapData = {
+        events: [
+          { id: 6, is_current: false, deadline_time: '2025-10-06T10:30:00Z', finished: true },
+          { id: 7, is_current: true, deadline_time: '2025-10-13T10:30:00Z', finished: false },
+          { id: 8, is_current: false, deadline_time: '2025-10-20T10:30:00Z', finished: false },
+        ],
+      };
+
+      global.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockBootstrapData,
+      });
+
+      const result = await getCurrentGameweek();
+
+      expect(global.fetch).toHaveBeenCalledWith('/api/fpl/bootstrap-static/');
+      expect(result).toBe(7);
+    });
+
+    it('should return different gameweek when is_current changes', async () => {
+      const mockBootstrapData = {
+        events: [
+          { id: 7, is_current: false, deadline_time: '2025-10-13T10:30:00Z', finished: true },
+          { id: 8, is_current: true, deadline_time: '2025-10-20T10:30:00Z', finished: false },
+          { id: 9, is_current: false, deadline_time: '2025-10-27T10:30:00Z', finished: false },
+        ],
+      };
+
+      global.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockBootstrapData,
+      });
+
+      const result = await getCurrentGameweek();
+
+      expect(result).toBe(8);
+    });
+  });
+
+  describe('getGameweekInfo', () => {
+    it('should fetch and return gameweek information', async () => {
+      const mockBootstrapData = {
+        events: [
+          { id: 6, is_current: false, deadline_time: '2025-10-06T10:30:00Z', finished: true },
+          { id: 7, is_current: true, deadline_time: '2025-10-13T10:30:00Z', finished: false },
+          { id: 8, is_current: false, deadline_time: '2025-10-20T10:30:00Z', finished: false },
+        ],
+      };
+
+      global.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockBootstrapData,
+      });
+
+      const result = await getGameweekInfo(7);
+
+      expect(global.fetch).toHaveBeenCalledWith('/api/fpl/bootstrap-static/');
+      expect(result.id).toBe(7);
+      expect(result.deadline).toBeInstanceOf(Date);
+      expect(result.finished).toBe(false);
+    });
+
+    it('should return correct info for different gameweek', async () => {
+      const mockBootstrapData = {
+        events: [
+          { id: 7, is_current: false, deadline_time: '2025-10-13T10:30:00Z', finished: true },
+          { id: 8, is_current: true, deadline_time: '2025-10-20T10:30:00Z', finished: false },
+          { id: 9, is_current: false, deadline_time: '2025-10-27T10:30:00Z', finished: false },
+        ],
+      };
+
+      global.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockBootstrapData,
+      });
+
+      const result = await getGameweekInfo(8);
+
+      expect(result.id).toBe(8);
+      expect(result.finished).toBe(false);
+    });
+
+    it('should parse the correct deadline from API response', async () => {
+      const mockBootstrapData = {
+        events: [
+          { id: 8, is_current: true, deadline_time: '2025-10-20T15:45:00Z', finished: false },
+        ],
+      };
+
+      global.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockBootstrapData,
+      });
+
+      const result = await getGameweekInfo(8);
+
+      expect(result.deadline.toISOString()).toBe('2025-10-20T15:45:00.000Z');
+    });
+
+    it('should find the correct event by ID when multiple events exist', async () => {
+      const mockBootstrapData = {
+        events: [
+          { id: 7, is_current: false, deadline_time: '2025-10-13T10:30:00Z', finished: true },
+          { id: 8, is_current: true, deadline_time: '2025-10-20T10:30:00Z', finished: false },
+          { id: 9, is_current: false, deadline_time: '2025-10-27T11:00:00Z', finished: false },
+        ],
+      };
+
+      global.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockBootstrapData,
+      });
+
+      const result = await getGameweekInfo(9);
+
+      expect(result.id).toBe(9);
+      expect(result.deadline.toISOString()).toBe('2025-10-27T11:00:00.000Z');
+      expect(result.finished).toBe(false);
+    });
+  });
+
+  describe('getFPLFixtures', () => {
+    it('should fetch and return fixtures for a gameweek', async () => {
+      const mockFixturesData = [
+        {
+          id: 100,
+          event: 7,
+          team_h: 1,
+          team_a: 2,
+          started: false,
+          finished: false,
+          minutes: 0,
+        },
+        {
+          id: 101,
+          event: 7,
+          team_h: 3,
+          team_a: 4,
+          started: true,
+          finished: false,
+          minutes: 45,
+        },
+      ];
+
+      global.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockFixturesData,
+      });
+
+      const result = await getFPLFixtures(7);
+
+      expect(global.fetch).toHaveBeenCalledWith('/api/fpl/fixtures/?event=7');
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        id: 100,
+        event: 7,
+        teamH: 1,
+        teamA: 2,
+        started: false,
+        finished: false,
+        minutes: 0,
+      });
+    });
+  });
+
+  describe('getPlayerFixtureStatus', () => {
+    it('should return "scheduled" when player fixture has not started', () => {
+      const playerId = 234;
+      const playerMap = new Map([[234, { id: 234, web_name: 'Salah', element_type: 3, team: 2, now_cost: 130 }]]);
+      const fixtures = [
+        { id: 100, event: 7, teamH: 1, teamA: 2, started: false, finished: false, minutes: 0 },
+      ];
+
+      const result = getPlayerFixtureStatus(playerId, fixtures, playerMap);
+
+      expect(result).toBe('scheduled');
+    });
+
+    it('should return "live" when player fixture has started but not finished', () => {
+      const playerId = 234;
+      const playerMap = new Map([[234, { id: 234, web_name: 'Salah', element_type: 3, team: 2, now_cost: 130 }]]);
+      const fixtures = [
+        { id: 100, event: 7, teamH: 1, teamA: 2, started: true, finished: false, minutes: 45 },
+      ];
+
+      const result = getPlayerFixtureStatus(playerId, fixtures, playerMap);
+
+      expect(result).toBe('live');
+    });
+
+    it('should return "finished" when player fixture has finished', () => {
+      const playerId = 234;
+      const playerMap = new Map([[234, { id: 234, web_name: 'Salah', element_type: 3, team: 2, now_cost: 130 }]]);
+      const fixtures = [
+        { id: 100, event: 7, teamH: 1, teamA: 2, started: true, finished: true, minutes: 90 },
+      ];
+
+      const result = getPlayerFixtureStatus(playerId, fixtures, playerMap);
+
+      expect(result).toBe('finished');
+    });
+
+    it('should find the correct fixture for player team among multiple fixtures', () => {
+      const playerId = 234;
+      const playerMap = new Map([[234, { id: 234, web_name: 'Salah', element_type: 3, team: 2, now_cost: 130 }]]);
+      const fixtures = [
+        { id: 100, event: 7, teamH: 1, teamA: 3, started: false, finished: false, minutes: 0 },
+        { id: 101, event: 7, teamH: 2, teamA: 4, started: true, finished: false, minutes: 45 },
+        { id: 102, event: 7, teamH: 5, teamA: 6, started: false, finished: false, minutes: 0 },
+      ];
+
+      const result = getPlayerFixtureStatus(playerId, fixtures, playerMap);
+
+      expect(result).toBe('live');
     });
   });
 });

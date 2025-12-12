@@ -320,22 +320,37 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FPLConnectionCard, type FPLTeamData } from '../components/dashboard/FPLConnectionCard';
 import { StatCard } from '../components/dashboard/StatCard';
 import { EmptyState } from '../components/dashboard/EmptyState';
-import { Card, CardContent, CardHeader } from '../components/ui/card';
+import { ChallengeCard } from '../components/dashboard/ChallengeCard';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
+import { Button } from '../components/ui/button';
 import type { User } from '../types/user';
+import type { Challenge } from '../types/challenge';
 import { getUserProfile, connectFPLTeam, updateUserProfile } from '../services/user';
 import { getFPLTeamInfo } from '../services/fpl';
+import { getUserChallenges } from '../services/challenge';
+import { calculateChallengeStats } from '../lib/challengeStats';
 
 export function DashboardPage() {
+  const navigate = useNavigate();
   const { user: authUser } = useAuth();
   const [userData, setUserData] = useState<User | null>(null);
   const [fplData, setFplData] = useState<FPLTeamData | null>(null);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
   const [isLoadingFpl, setIsLoadingFpl] = useState(false);
+
+  // Filter challenges by status
+  const pendingChallenges = challenges.filter((c) => c.status === 'pending');
+  const activeChallenges = challenges.filter(
+    (c) => c.status === 'accepted' || c.status === 'active'
+  );
+  const completedChallenges = challenges.filter((c) => c.status === 'completed');
 
   // Fetch user profile on mount
   useEffect(() => {
@@ -349,6 +364,18 @@ export function DashboardPage() {
     }
 
     loadDashboardData();
+  }, [authUser]);
+
+  // Fetch challenges on mount
+  useEffect(() => {
+    async function loadChallenges() {
+      if (!authUser?.uid) return;
+
+      const userChallenges = await getUserChallenges(authUser.uid);
+      setChallenges(userChallenges);
+    }
+
+    loadChallenges();
   }, [authUser]);
 
   // Fetch FPL data when user is connected
@@ -399,11 +426,16 @@ export function DashboardPage() {
     <main className="container mx-auto px-4 py-8">
       <div className="space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Welcome back{authUser?.displayName ? `, ${authUser.displayName}` : ''}!
-          </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground mt-2">
+              Welcome back{authUser?.displayName ? `, ${authUser.displayName}` : ''}!
+            </p>
+          </div>
+          <Button onClick={() => navigate('/create-challenge')}>
+            Create Challenge
+          </Button>
         </div>
 
         {isLoadingUser ? (
@@ -456,39 +488,111 @@ export function DashboardPage() {
               onUpdate={handleUpdate}
             />
 
+            {/* Compare Teams Card */}
+            <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate('/compare')}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span>⚡</span>
+                  <span>Compare FPL Teams</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
+                  Compare any two FPL teams to see head-to-head matchups, differentials, and points breakdown
+                </p>
+                <Button variant="outline" className="w-full">
+                  Try Team Comparison
+                </Button>
+              </CardContent>
+            </Card>
+
             {/* Stats Section */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <StatCard label="Total Challenges" value={0} />
-              <StatCard label="Wins" value={0} />
-              <StatCard label="Losses" value={0} />
-              <StatCard label="Win Rate" value="N/A" />
+              {(() => {
+                const stats = authUser?.uid
+                  ? calculateChallengeStats(challenges, authUser.uid)
+                  : { total: 0, wins: 0, losses: 0, winRate: 'N/A' };
+
+                return (
+                  <>
+                    <StatCard label="Total Challenges" value={stats.total} />
+                    <StatCard label="Wins" value={stats.wins} />
+                    <StatCard label="Losses" value={stats.losses} />
+                    <StatCard label="Win Rate" value={stats.winRate} />
+                  </>
+                );
+              })()}
             </div>
 
             {/* Upcoming Challenges Section */}
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">Upcoming Challenges (0)</h2>
-              <EmptyState
-                title="No Upcoming Challenges"
-                description="Create your first challenge to compete with other managers"
-              />
+              <h2 className="text-2xl font-bold tracking-tight">
+                Upcoming Challenges ({pendingChallenges.length})
+              </h2>
+              {pendingChallenges.length === 0 ? (
+                <EmptyState
+                  title="No Upcoming Challenges"
+                  description="Create your first challenge to compete with other managers"
+                  actionLabel="Create Challenge"
+                  onAction={() => navigate('/create-challenge')}
+                />
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  {pendingChallenges.map((challenge) => (
+                    <ChallengeCard
+                      key={challenge.challengeId}
+                      challenge={challenge}
+                      currentUserId={authUser?.uid || ''}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Active Challenges Section */}
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">Active Challenges (0)</h2>
-              <EmptyState
-                title="No Active Challenges"
-                description="Active challenges will appear here once accepted"
-              />
+              <h2 className="text-2xl font-bold tracking-tight">
+                Active Challenges ({activeChallenges.length})
+              </h2>
+              {activeChallenges.length === 0 ? (
+                <EmptyState
+                  title="No Active Challenges"
+                  description="Active challenges will appear here once accepted"
+                />
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  {activeChallenges.map((challenge) => (
+                    <ChallengeCard
+                      key={challenge.challengeId}
+                      challenge={challenge}
+                      currentUserId={authUser?.uid || ''}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Completed Challenges Section */}
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">Completed Challenges (0)</h2>
-              <EmptyState
-                title="No Completed Challenges"
-                description="Your challenge history will appear here"
-              />
+              <h2 className="text-2xl font-bold tracking-tight">
+                Completed Challenges ({completedChallenges.length})
+              </h2>
+              {completedChallenges.length === 0 ? (
+                <EmptyState
+                  title="No Completed Challenges"
+                  description="Your challenge history will appear here"
+                />
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  {completedChallenges.map((challenge) => (
+                    <ChallengeCard
+                      key={challenge.challengeId}
+                      challenge={challenge}
+                      currentUserId={authUser?.uid || ''}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </>
         )}

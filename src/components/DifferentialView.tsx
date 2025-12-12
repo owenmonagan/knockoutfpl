@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createMatchups, type Differential, type CommonPlayer } from '../services/differentials';
+import { type FPLFixture, type FPLPlayer } from '../services/fpl';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
@@ -16,6 +17,8 @@ interface DifferentialViewProps {
   teamBScore: number;
   teamAChip?: string | null;
   teamBChip?: string | null;
+  fixtures: FPLFixture[];
+  allPlayers: Map<number, FPLPlayer>;
 }
 
 function formatChipName(chip: string): string {
@@ -38,6 +41,8 @@ export function DifferentialView({
   teamBScore,
   teamAChip,
   teamBChip,
+  fixtures,
+  allPlayers,
 }: DifferentialViewProps) {
   const [isCommonOpen, setIsCommonOpen] = useState(false);
 
@@ -129,6 +134,8 @@ export function DifferentialView({
               teamBName={teamBName}
               matchupRank={idx + 1}
               maxSwing={maxSwing}
+              fixtures={fixtures}
+              allPlayers={allPlayers}
             />
           ))}
         </div>

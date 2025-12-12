@@ -30,12 +30,10 @@ service cloud.firestore {
 
     // Challenges collection
     match /challenges/{challengeId} {
-      // Users can read challenges they're part of
-      allow read: if isAuthenticated()
-        && (resource.data.creatorUserId == request.auth.uid
-            || resource.data.opponentUserId == request.auth.uid);
+      // Anyone can read challenges (required for shareable links)
+      allow read: if true;
 
-      // Users can create challenges
+      // Users can create challenges (must be authenticated and set as creator)
       allow create: if isAuthenticated()
         && request.resource.data.creatorUserId == request.auth.uid
         && request.resource.data.status == 'pending'

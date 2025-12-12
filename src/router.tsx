@@ -4,6 +4,10 @@ import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { CreateChallengePage } from './pages/CreateChallengePage';
+import { ChallengeDetailPage } from './pages/ChallengeDetailPage';
+import { ComparePage } from './pages/ComparePage';
+import { TestDataPage } from './pages/TestDataPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 export const router: RouteObject[] = [
@@ -20,6 +24,18 @@ export const router: RouteObject[] = [
     element: <SignUpPage />,
   },
   {
+    path: '/challenge/:id',
+    element: <ChallengeDetailPage />,
+  },
+  {
+    path: '/compare',
+    element: <ComparePage />,
+  },
+  {
+    path: '/test-data',
+    element: <TestDataPage />,
+  },
+  {
     path: '/dashboard',
     element: (
       <ProtectedRoute>
@@ -32,6 +48,14 @@ export const router: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <ProfilePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/create-challenge',
+    element: (
+      <ProtectedRoute>
+        <CreateChallengePage />
       </ProtectedRoute>
     ),
   },

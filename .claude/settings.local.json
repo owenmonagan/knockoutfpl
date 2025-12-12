@@ -50,7 +50,16 @@
       "WebFetch(domain:www.shadcn-ui-blocks.com)",
       "WebFetch(domain:dribbble.com)",
       "WebFetch(domain:www.halo-lab.com)",
-      "mcp__shadcn__get_item_examples_from_registries"
+      "mcp__shadcn__get_item_examples_from_registries",
+      "WebFetch(domain:www.gameuidatabase.com)",
+      "WebFetch(domain:www.premierfantasytools.com)",
+      "WebFetch(domain:livefpltables.com)",
+      "mcp__playwright__browser_snapshot",
+      "Bash(lsof:*)",
+      "Bash(firebase use:*)",
+      "Bash(npm run test:e2e)",
+      "Bash(xargs kill -9)",
+      "Bash(firebase emulators:start --only auth,firestore --project demo-knockoutfpl)"
     ],
     "deny": [],
     "ask": []

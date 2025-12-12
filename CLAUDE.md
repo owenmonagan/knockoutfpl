@@ -712,6 +712,34 @@ npx shadcn@latest add card
 - Implement proper error handling
 - Cache external API calls appropriately
 
+### Test Credentials
+
+For E2E testing and manual verification, use these test account credentials:
+
+**Test Account:**
+- **Email:** `testuser@knockoutfpl.com`
+- **Password:** `TestPass123!`
+- **Display Name:** Test User
+- **Created:** October 13, 2025
+
+**Usage:**
+- Use this account for Playwright MCP E2E verification
+- Use for manual testing of features
+- Account is pre-configured in Firebase Auth (local emulator or dev environment)
+
+**To login:**
+```bash
+# 1. Start dev server
+npm run dev
+
+# 2. Navigate to login page
+# http://localhost:5173/login (or whatever port Vite assigns)
+
+# 3. Enter credentials:
+# Email: testuser@knockoutfpl.com
+# Password: TestPass123!
+```
+
 ---
 
 For product features, implementation timeline, and roadmap, see [PRODUCT.md](./PRODUCT.md)

@@ -1,6 +1,7 @@
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import type { Matchup } from '../services/differentials';
+import { getPlayerFixtureStatus, type FPLFixture, type FPLPlayer } from '../services/fpl';
 
 interface MatchupCardProps {
   matchup: Matchup;
@@ -8,13 +9,19 @@ interface MatchupCardProps {
   teamBName: string;
   matchupRank: number;
   maxSwing: number;
+  fixtures: FPLFixture[];
+  allPlayers: Map<number, FPLPlayer>;
 }
 
-export function MatchupCard({ matchup, teamAName, teamBName, matchupRank, maxSwing }: MatchupCardProps) {
+export function MatchupCard({ matchup, teamAName, teamBName, matchupRank, maxSwing, fixtures, allPlayers }: MatchupCardProps) {
   const { playerA, playerB, swing, winner } = matchup;
 
   const pointsA = playerA ? playerA.points * playerA.multiplier : 0;
   const pointsB = playerB ? playerB.points * playerB.multiplier : 0;
+
+  // Get fixture status for each player (only if fixtures exist)
+  const playerAStatus = playerA && fixtures.length > 0 ? getPlayerFixtureStatus(playerA.player.id, fixtures, allPlayers) : null;
+  const playerBStatus = playerB && fixtures.length > 0 ? getPlayerFixtureStatus(playerB.player.id, fixtures, allPlayers) : null;
 
   // Scale bars based on swing relative to max swing
   const scaleFactor = swing / maxSwing;
@@ -43,7 +50,13 @@ export function MatchupCard({ matchup, teamAName, teamBName, matchupRank, maxSwi
         {/* Header: Matchup number and swing */}
         <div className="flex justify-between items-center mb-1">
           <span className="text-xs text-muted-foreground">Matchup #{matchupRank}</span>
-          <Badge variant={swing > 10 ? 'default' : 'secondary'} className="text-xs h-5">
+          <Badge
+            className={`text-xs h-5 text-white ${
+              winner === 'A' ? 'bg-blue-500' :
+              winner === 'B' ? 'bg-purple-500' :
+              'bg-muted-foreground'
+            }`}
+          >
             {swing > 0 ? `+${swing}pt swing` : 'Draw'}
           </Badge>
         </div>
@@ -60,6 +73,15 @@ export function MatchupCard({ matchup, teamAName, teamBName, matchupRank, maxSwi
                   <span className={`text-sm font-medium truncate ${winner === 'A' ? 'text-blue-600' : ''}`}>
                     {playerA.player.web_name}
                   </span>
+                  {playerAStatus === 'scheduled' && (
+                    <Badge className="text-[10px] h-4 px-1 bg-gray-500 text-white">⏰ SCH</Badge>
+                  )}
+                  {playerAStatus === 'live' && (
+                    <Badge className="text-[10px] h-4 px-1 bg-red-500 text-white animate-pulse">🔴 LIVE</Badge>
+                  )}
+                  {playerAStatus === 'finished' && (
+                    <Badge className="text-[10px] h-4 px-1 bg-green-500 text-white">✅ FT</Badge>
+                  )}
                   {playerA.isCaptain && <Badge className="text-[10px] h-4 px-1 bg-blue-500">C</Badge>}
                 </div>
                 <div className="text-xs text-muted-foreground">
@@ -83,6 +105,15 @@ export function MatchupCard({ matchup, teamAName, teamBName, matchupRank, maxSwi
                   <span className={`text-sm font-medium truncate ${winner === 'B' ? 'text-purple-600' : ''}`}>
                     {playerB.player.web_name}
                   </span>
+                  {playerBStatus === 'scheduled' && (
+                    <Badge className="text-[10px] h-4 px-1 bg-gray-500 text-white">⏰ SCH</Badge>
+                  )}
+                  {playerBStatus === 'live' && (
+                    <Badge className="text-[10px] h-4 px-1 bg-red-500 text-white animate-pulse">🔴 LIVE</Badge>
+                  )}
+                  {playerBStatus === 'finished' && (
+                    <Badge className="text-[10px] h-4 px-1 bg-green-500 text-white">✅ FT</Badge>
+                  )}
                   <Badge variant="outline" className="text-[10px] h-4 px-1">{getPositionBadge(playerB.player.element_type)}</Badge>
                 </div>
                 <div className="text-xs text-muted-foreground text-right">

@@ -136,3 +136,67 @@ export async function getFPLLiveScores(gameweek: number): Promise<Map<number, nu
 
   return scoresMap;
 }
+
+export async function getCurrentGameweek(): Promise<number> {
+  const response = await fetch('/api/fpl/bootstrap-static/');
+  const data = await response.json();
+  const currentEvent = data.events.find((event: any) => event.is_current);
+  return currentEvent.id;
+}
+
+export interface FPLGameweekInfo {
+  id: number;
+  deadline: Date;
+  finished: boolean;
+}
+
+export async function getGameweekInfo(gameweek: number): Promise<FPLGameweekInfo> {
+  const response = await fetch('/api/fpl/bootstrap-static/');
+  const data = await response.json();
+  const event = data.events.find((e: any) => e.id === gameweek);
+  return { id: gameweek, deadline: new Date(event.deadline_time), finished: event.finished };
+}
+
+export interface FPLFixture {
+  id: number;
+  event: number;
+  teamH: number;
+  teamA: number;
+  started: boolean;
+  finished: boolean;
+  minutes: number;
+}
+
+export async function getFPLFixtures(gameweek: number): Promise<FPLFixture[]> {
+  const response = await fetch(`/api/fpl/fixtures/?event=${gameweek}`);
+  const data = await response.json();
+
+  return data.map((fixture: any) => ({
+    id: fixture.id,
+    event: fixture.event,
+    teamH: fixture.team_h,
+    teamA: fixture.team_a,
+    started: fixture.started,
+    finished: fixture.finished,
+    minutes: fixture.minutes,
+  }));
+}
+
+export type FixtureStatus = 'scheduled' | 'live' | 'finished';
+
+export function getPlayerFixtureStatus(
+  playerId: number,
+  fixtures: FPLFixture[],
+  playerMap: Map<number, FPLPlayer>
+): FixtureStatus {
+  const player = playerMap.get(playerId);
+  const playerTeam = player?.team;
+
+  const fixture = playerTeam
+    ? fixtures.find((f) => f.teamH === playerTeam || f.teamA === playerTeam)
+    : fixtures[0];
+
+  if (fixture && fixture.finished) return 'finished';
+  if (fixture && fixture.started) return 'live';
+  return 'scheduled';
+}

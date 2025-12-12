@@ -1,9 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
 import { DashboardPage } from './DashboardPage';
 import * as AuthContext from '../contexts/AuthContext';
 import * as userService from '../services/user';
 import * as fplService from '../services/fpl';
+import * as challengeService from '../services/challenge';
+
+// Helper to render with router
+const renderWithRouter = (component: React.ReactElement) => {
+  return render(<BrowserRouter>{component}</BrowserRouter>);
+};
 
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: vi.fn(),
@@ -19,6 +27,18 @@ vi.mock('../services/fpl', () => ({
   getFPLTeamInfo: vi.fn(),
 }));
 
+vi.mock('../services/challenge', () => ({
+  getUserChallenges: vi.fn(),
+}));
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: vi.fn(),
+  };
+});
+
 describe('DashboardPage', () => {
   beforeEach(() => {
     // Default: user not authenticated
@@ -27,6 +47,9 @@ describe('DashboardPage', () => {
       loading: false,
       isAuthenticated: false,
     });
+
+    // Default: no challenges
+    vi.mocked(challengeService.getUserChallenges).mockResolvedValue([]);
   });
 
   describe('PHASE 1: Basic Page Structure', () => {
@@ -70,6 +93,58 @@ describe('DashboardPage', () => {
       render(<DashboardPage />);
       const welcome = screen.getByText(/welcome back, test user/i);
       expect(welcome).toBeInTheDocument();
+    });
+
+    it('Step 5a: shows "Create Challenge" button in header even when challenges exist', async () => {
+      const mockNavigate = vi.fn();
+      vi.mocked(useNavigate).mockReturnValue(mockNavigate);
+
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      // Mock at least one pending challenge so EmptyState is NOT shown
+      vi.mocked(challengeService.getUserChallenges).mockResolvedValue([
+        {
+          challengeId: 'challenge-1',
+          gameweek: 10,
+          status: 'pending',
+          creatorUserId: 'test-uid',
+        } as any,
+      ]);
+
+      renderWithRouter(<DashboardPage />);
+
+      // Wait for page to load
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /dashboard/i })).toBeInTheDocument();
+      });
+
+      // EmptyState should NOT be shown (because we have challenges)
+      expect(screen.queryByText('No Upcoming Challenges')).not.toBeInTheDocument();
+
+      // But we should still see a "Create Challenge" button in the header
+      // (This test will fail because the button is only in EmptyState currently)
+      const buttons = screen.queryAllByRole('button', { name: /create challenge/i });
+      expect(buttons.length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -500,6 +575,33 @@ describe('DashboardPage', () => {
       });
     });
 
+    it('Step 58: empty state has "Create Challenge" button', async () => {
+      renderWithRouter(<DashboardPage />);
+      await waitFor(() => {
+        const button = screen.getByRole('button', { name: /create challenge/i });
+        expect(button).toBeInTheDocument();
+      });
+    });
+
+    it('Step 58a: clicking "Create Challenge" button navigates to /create-challenge', async () => {
+      const user = userEvent.setup();
+      const mockNavigate = vi.fn();
+      vi.mocked(useNavigate).mockReturnValue(mockNavigate);
+
+      renderWithRouter(<DashboardPage />);
+
+      await waitFor(() => {
+        const buttons = screen.getAllByRole('button', { name: /create challenge/i });
+        expect(buttons.length).toBeGreaterThan(0);
+      });
+
+      // Click the first "Create Challenge" button (could be header or empty state)
+      const createButtons = screen.getAllByRole('button', { name: /create challenge/i });
+      await user.click(createButtons[0]);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/create-challenge');
+    });
+
     it('Step 59: shows "Active Challenges" section header', async () => {
       render(<DashboardPage />);
       await waitFor(() => {
@@ -574,6 +676,275 @@ describe('DashboardPage', () => {
 
       // Should now show real content
       expect(screen.getByRole('heading', { name: /connect your fpl team/i })).toBeInTheDocument();
+    });
+  });
+
+  describe('PHASE 8: Challenge Integration', () => {
+    it('Step 74: fetches user challenges on mount', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(challengeService.getUserChallenges).mockResolvedValue([]);
+
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(challengeService.getUserChallenges).toHaveBeenCalledWith('test-uid');
+      });
+    });
+
+    it('Step 75: calculates and displays stats from challenge data', async () => {
+      const mockChallenges = [
+        {
+          challengeId: 'challenge-1',
+          status: 'completed',
+          winnerId: 'test-uid',
+        } as any,
+        {
+          challengeId: 'challenge-2',
+          status: 'completed',
+          winnerId: 'other-user',
+          isDraw: false,
+        } as any,
+      ];
+
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(challengeService.getUserChallenges).mockResolvedValue(mockChallenges);
+
+      renderWithRouter(<DashboardPage />);
+
+      await waitFor(() => {
+        const totalCard = screen.getByText('Total Challenges').closest('[role="article"]');
+        expect(totalCard).toHaveTextContent('2');
+      });
+
+      await waitFor(() => {
+        const winsCard = screen.getByText('Wins').closest('[role="article"]');
+        expect(winsCard).toHaveTextContent('1');
+      });
+
+      await waitFor(() => {
+        const lossesCard = screen.getByText('Losses').closest('[role="article"]');
+        expect(lossesCard).toHaveTextContent('1');
+      });
+
+      await waitFor(() => {
+        const winRateCard = screen.getByText('Win Rate').closest('[role="article"]');
+        expect(winRateCard).toHaveTextContent('50%');
+      });
+    });
+
+    it('Step 76: displays pending challenges with ChallengeCards', async () => {
+      const pendingChallenge = {
+        challengeId: 'pending-1',
+        gameweek: 10,
+        status: 'pending',
+        creatorUserId: 'test-uid',
+      } as any;
+
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(challengeService.getUserChallenges).mockResolvedValue([pendingChallenge]);
+
+      renderWithRouter(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/gameweek 10/i)).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/pending/i)).toBeInTheDocument();
+      });
+    });
+
+    it('Step 77: displays active challenges with ChallengeCards', async () => {
+      const activeChallenge = {
+        challengeId: 'active-1',
+        gameweek: 11,
+        status: 'accepted',
+        creatorUserId: 'test-uid',
+        opponentUserId: 'other-user',
+        opponentFplTeamName: 'Opponent Team',
+      } as any;
+
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(challengeService.getUserChallenges).mockResolvedValue([activeChallenge]);
+
+      renderWithRouter(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/gameweek 11/i)).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        const badges = screen.getAllByText(/active/i);
+        // Should have section header and badge
+        expect(badges.length).toBeGreaterThan(0);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/opponent team/i)).toBeInTheDocument();
+      });
+    });
+
+    it('Step 78: displays completed challenges with ChallengeCards', async () => {
+      const completedChallenge = {
+        challengeId: 'completed-1',
+        gameweek: 9,
+        status: 'completed',
+        creatorUserId: 'test-uid',
+        creatorScore: 85,
+        opponentUserId: 'other-user',
+        opponentFplTeamName: 'Opponent Team',
+        opponentScore: 72,
+        winnerId: 'test-uid',
+        isDraw: false,
+      } as any;
+
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(challengeService.getUserChallenges).mockResolvedValue([completedChallenge]);
+
+      renderWithRouter(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/gameweek 9/i)).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/won/i)).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/85/)).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/72/)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Compare Teams Feature', () => {
+    it('shows Compare FPL Teams card', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: { uid: 'test-user-1', displayName: 'Test User' } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-user-1',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+      } as any);
+      vi.mocked(challengeService.getUserChallenges).mockResolvedValue([]);
+
+      renderWithRouter(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/compare fpl teams/i)).toBeInTheDocument();
+      });
     });
   });
 });

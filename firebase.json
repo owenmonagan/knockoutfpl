@@ -27,6 +27,10 @@
     ],
     "rewrites": [
       {
+        "source": "/api/fpl/**",
+        "function": "fplProxy"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
