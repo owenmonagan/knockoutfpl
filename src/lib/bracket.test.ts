@@ -1,7 +1,7 @@
 // src/lib/bracket.test.ts
 import { describe, it, expect } from 'vitest';
-import type { Participant, Round } from '../types/tournament';
-import { getRoundName, calculateByes, generateBracket } from './bracket';
+import type { Participant, Round, Match } from '../types/tournament';
+import { getRoundName, calculateByes, generateBracket, determineMatchWinner, advanceWinnersToNextRound } from './bracket';
 
 describe('getRoundName', () => {
   it('should return "Final" for last round', () => {
@@ -94,5 +94,123 @@ describe('generateBracket with byes', () => {
     // Top 3 seeds should have byes
     const byeMatches = round1.matches.filter(m => m.isBye);
     expect(byeMatches.length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe('determineMatchWinner', () => {
+  it('should return player with higher score', () => {
+    const match: Match = {
+      id: 'r1-m1',
+      player1: { fplTeamId: 1, seed: 1, score: 65 },
+      player2: { fplTeamId: 2, seed: 4, score: 58 },
+      winnerId: null,
+      isBye: false,
+    };
+
+    expect(determineMatchWinner(match)).toBe(1);
+  });
+
+  it('should return higher seed (lower number) on tie', () => {
+    const match: Match = {
+      id: 'r1-m1',
+      player1: { fplTeamId: 1, seed: 3, score: 60 },
+      player2: { fplTeamId: 2, seed: 2, score: 60 },
+      winnerId: null,
+      isBye: false,
+    };
+
+    // Player 2 has higher seed (seed 2 < seed 3), so player 2 wins on tie
+    expect(determineMatchWinner(match)).toBe(2);
+  });
+
+  it('should return null if scores are not set', () => {
+    const match: Match = {
+      id: 'r1-m1',
+      player1: { fplTeamId: 1, seed: 1, score: null },
+      player2: { fplTeamId: 2, seed: 4, score: null },
+      winnerId: null,
+      isBye: false,
+    };
+
+    expect(determineMatchWinner(match)).toBeNull();
+  });
+
+  it('should return player1 for bye matches', () => {
+    const match: Match = {
+      id: 'r1-m1',
+      player1: { fplTeamId: 1, seed: 1, score: null },
+      player2: null,
+      winnerId: null,
+      isBye: true,
+    };
+
+    expect(determineMatchWinner(match)).toBe(1);
+  });
+});
+
+describe('advanceWinnersToNextRound', () => {
+  it('should advance winners to next round matches', () => {
+    const rounds: Round[] = [
+      {
+        roundNumber: 1,
+        name: 'Semi-Finals',
+        gameweek: 16,
+        matches: [
+          { id: 'r1-m1', player1: { fplTeamId: 1, seed: 1, score: 65 }, player2: { fplTeamId: 4, seed: 4, score: 58 }, winnerId: 1, isBye: false },
+          { id: 'r1-m2', player1: { fplTeamId: 2, seed: 2, score: 60 }, player2: { fplTeamId: 3, seed: 3, score: 70 }, winnerId: 3, isBye: false },
+        ],
+        isComplete: true,
+      },
+      {
+        roundNumber: 2,
+        name: 'Final',
+        gameweek: 17,
+        matches: [
+          { id: 'r2-m1', player1: null, player2: null, winnerId: null, isBye: false },
+        ],
+        isComplete: false,
+      },
+    ];
+
+    const participants: Participant[] = [
+      { fplTeamId: 1, fplTeamName: 'Team 1', managerName: 'Manager 1', seed: 1 },
+      { fplTeamId: 2, fplTeamName: 'Team 2', managerName: 'Manager 2', seed: 2 },
+      { fplTeamId: 3, fplTeamName: 'Team 3', managerName: 'Manager 3', seed: 3 },
+      { fplTeamId: 4, fplTeamName: 'Team 4', managerName: 'Manager 4', seed: 4 },
+    ];
+
+    const updatedRounds = advanceWinnersToNextRound(rounds, 1, participants);
+
+    // Final should now have player1 = team 1 (winner of match 1) and player2 = team 3 (winner of match 2)
+    expect(updatedRounds[1].matches[0].player1?.fplTeamId).toBe(1);
+    expect(updatedRounds[1].matches[0].player2?.fplTeamId).toBe(3);
+  });
+
+  it('should not modify rounds if current round is not complete', () => {
+    const rounds: Round[] = [
+      {
+        roundNumber: 1,
+        name: 'Semi-Finals',
+        gameweek: 16,
+        matches: [
+          { id: 'r1-m1', player1: { fplTeamId: 1, seed: 1, score: null }, player2: { fplTeamId: 4, seed: 4, score: null }, winnerId: null, isBye: false },
+        ],
+        isComplete: false,
+      },
+      {
+        roundNumber: 2,
+        name: 'Final',
+        gameweek: 17,
+        matches: [
+          { id: 'r2-m1', player1: null, player2: null, winnerId: null, isBye: false },
+        ],
+        isComplete: false,
+      },
+    ];
+
+    const updatedRounds = advanceWinnersToNextRound(rounds, 1, []);
+
+    // Final should still have null players
+    expect(updatedRounds[1].matches[0].player1).toBeNull();
   });
 });
