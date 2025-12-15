@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers, getFPLLiveScores, getCurrentGameweek, getGameweekInfo, getFPLFixtures, getPlayerFixtureStatus } from './fpl';
+import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers, getFPLLiveScores, getCurrentGameweek, getGameweekInfo, getFPLFixtures, getPlayerFixtureStatus, getUserMiniLeagues } from './fpl';
 
 describe('FPL Service', () => {
   describe('getFPLTeamInfo', () => {
