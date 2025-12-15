@@ -214,3 +214,20 @@ export function getPlayerFixtureStatus(
   if (fixture && fixture.started) return 'live';
   return 'scheduled';
 }
+
+export async function getUserMiniLeagues(teamId: number): Promise<FPLMiniLeague[]> {
+  const response = await fetch(`/api/fpl/entry/${teamId}/`);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch team data');
+  }
+
+  const data = await response.json();
+  const classicLeagues = data.leagues?.classic || [];
+
+  return classicLeagues.map((league: any) => ({
+    id: league.id,
+    name: league.name,
+    entryRank: league.entry_rank,
+  }));
+}
