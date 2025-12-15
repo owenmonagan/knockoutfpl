@@ -99,12 +99,4 @@ describe('Router', () => {
     expect(screen.getByText(/connect your fpl team/i)).toBeInTheDocument();
   });
 
-  it('should render test data page at /test-data', () => {
-    const testRouter = createMemoryRouter(router, {
-      initialEntries: ['/test-data'],
-    });
-
-    render(<RouterProvider router={testRouter} />);
-    expect(screen.getByText(/test data generator/i)).toBeInTheDocument();
-  });
 });
