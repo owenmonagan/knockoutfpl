@@ -9,3 +9,11 @@ export function getRoundName(roundNumber: number, totalRounds: number): string {
 
   return `Round ${roundNumber}`;
 }
+
+export function calculateByes(participants: number): number {
+  // Find next power of 2
+  const nextPowerOf2 = Math.pow(2, Math.ceil(Math.log2(participants)));
+
+  // Return the number of byes needed
+  return nextPowerOf2 - participants;
+}

@@ -231,3 +231,22 @@ export async function getUserMiniLeagues(teamId: number): Promise<FPLMiniLeague[
     entryRank: league.entry_rank,
   }));
 }
+
+export async function getLeagueStandings(leagueId: number): Promise<LeagueStanding[]> {
+  const response = await fetch(`/api/fpl/leagues-classic/${leagueId}/standings/`);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch league standings');
+  }
+
+  const data = await response.json();
+  const results = data.standings?.results || [];
+
+  return results.map((entry: any) => ({
+    fplTeamId: entry.entry,
+    teamName: entry.entry_name,
+    managerName: entry.player_name,
+    rank: entry.rank,
+    totalPoints: entry.total,
+  }));
+}
