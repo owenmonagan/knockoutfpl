@@ -5,32 +5,32 @@ import type { FPLMiniLeague } from '../../services/fpl';
 
 interface LeagueCardProps {
   league: FPLMiniLeague;
+  onClick: () => void;
   hasTournament?: boolean;
   tournamentStatus?: 'active' | 'completed';
-  onClick: () => void;
 }
 
 export function LeagueCard({
   league,
+  onClick,
   hasTournament = false,
   tournamentStatus,
-  onClick,
 }: LeagueCardProps) {
   return (
     <Card
       role="article"
+      className="cursor-pointer hover:bg-accent transition-colors"
       onClick={onClick}
-      className="cursor-pointer hover:bg-accent/5 transition-colors"
     >
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{league.name}</CardTitle>
-          {hasTournament && (
-            <Badge variant={tournamentStatus === 'completed' ? 'secondary' : 'default'}>
-              {tournamentStatus === 'completed' ? 'Tournament Complete' : 'Tournament Active'}
+      <CardHeader>
+        <CardTitle className="text-lg flex items-center justify-between">
+          <span>{league.name}</span>
+          {hasTournament && tournamentStatus && (
+            <Badge variant={tournamentStatus === 'active' ? 'default' : 'secondary'}>
+              {tournamentStatus === 'active' ? 'Tournament Active' : 'Tournament Complete'}
             </Badge>
           )}
-        </div>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">Rank #{league.entryRank}</p>
