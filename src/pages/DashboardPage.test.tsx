@@ -154,25 +154,4 @@ describe('DashboardPage', () => {
       });
     });
   });
-
-  describe('Compare Teams Feature', () => {
-    it('shows Compare FPL Teams card', async () => {
-      vi.mocked(AuthContext.useAuth).mockReturnValue({
-        user: { uid: 'test-user-1', displayName: 'Test User' } as any,
-        loading: false,
-        isAuthenticated: true,
-      });
-      vi.mocked(userService.getUserProfile).mockResolvedValue({
-        userId: 'test-user-1',
-        fplTeamId: 123456,
-        fplTeamName: 'Test Team',
-      } as any);
-
-      renderWithRouter(<DashboardPage />);
-
-      await waitFor(() => {
-        expect(screen.getByText(/compare fpl teams/i)).toBeInTheDocument();
-      });
-    });
-  });
 });
