@@ -8,18 +8,15 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FPLConnectionCard, type FPLTeamData } from '../components/dashboard/FPLConnectionCard';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
+import { Card, CardContent } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
 import type { User } from '../types/user';
 import { getUserProfile, connectFPLTeam, updateUserProfile } from '../services/user';
 import { getFPLTeamInfo } from '../services/fpl';
 
 export function DashboardPage() {
-  const navigate = useNavigate();
   const { user: authUser } = useAuth();
   const [userData, setUserData] = useState<User | null>(null);
   const [fplData, setFplData] = useState<FPLTeamData | null>(null);
@@ -99,11 +96,9 @@ export function DashboardPage() {
           <>
             {/* FPL Connection Card Skeleton */}
             <Card>
-              <CardHeader>
+              <CardContent className="space-y-4 pt-6">
                 <Skeleton className="h-6 w-[200px]" />
-                <Skeleton className="h-4 w-[280px] mt-2" />
-              </CardHeader>
-              <CardContent className="space-y-4">
+                <Skeleton className="h-4 w-[280px]" />
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-[100px]" />
               </CardContent>
@@ -120,27 +115,18 @@ export function DashboardPage() {
               onUpdate={handleUpdate}
             />
 
-            {/* Compare Teams Card */}
-            <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate('/compare')}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span>⚡</span>
-                  <span>Compare FPL Teams</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Compare any two FPL teams to see head-to-head matchups, differentials, and points breakdown
-                </p>
-                <Button variant="outline" className="w-full">
-                  Try Team Comparison
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Your Leagues Section */}
+            {/* Your Leagues Section - Placeholder */}
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">Your Leagues</h2>
+              <h2 className="text-2xl font-bold tracking-tight mb-4">
+                Your Leagues
+              </h2>
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center p-12 text-center">
+                  <p className="text-muted-foreground">
+                    Tournament leagues will appear here
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </>
         )}
