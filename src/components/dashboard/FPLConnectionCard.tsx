@@ -11,7 +11,7 @@
  * ┌─────────────────────────────────────────────────────────────────────────┐
  * │ 🏆 Connect Your FPL Team                                                │
  * │                                                                         │
- * │ Link your FPL team to start creating challenges                        │
+ * │ Link your FPL team to join tournaments                                 │
  * │                                                                         │
  * │ [Team ID Input] [Connect Button]                                       │
  * │                                                                         │
@@ -157,7 +157,7 @@ export function FPLConnectionCard(props: FPLConnectionCardProps) {
               {isConnected && fplData ? fplData.teamName : isConnected ? 'Your FPL Team' : 'Connect Your FPL Team'}
             </CardTitle>
             <CardDescription>
-              {isConnected && fplData ? fplData.managerName : 'Link your FPL team to start creating challenges'}
+              {isConnected && fplData ? fplData.managerName : 'Link your FPL team to join tournaments'}
             </CardDescription>
           </div>
           {isConnected && !isEditing && (

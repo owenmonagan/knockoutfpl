@@ -57,7 +57,7 @@ describe('FPLConnectionCard', () => {
         />
       );
 
-      const description = screen.getByText(/link your fpl team to start creating challenges/i);
+      const description = screen.getByText(/link your fpl team to join tournaments/i);
       expect(description).toBeInTheDocument();
     });
 
