@@ -138,18 +138,16 @@ export function DashboardPage() {
               onUpdate={handleUpdate}
             />
 
-            {/* Your Leagues Section - Placeholder */}
+            {/* Your Leagues Section */}
             <div>
               <h2 className="text-2xl font-bold tracking-tight mb-4">
                 Your Leagues
               </h2>
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center p-12 text-center">
-                  <p className="text-muted-foreground">
-                    Tournament leagues will appear here
-                  </p>
-                </CardContent>
-              </Card>
+              <LeagueList
+                leagues={leagues}
+                isLoading={isLoadingLeagues}
+                onLeagueClick={handleLeagueClick}
+              />
             </div>
           </>
         )}
