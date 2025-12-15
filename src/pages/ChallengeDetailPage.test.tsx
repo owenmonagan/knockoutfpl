@@ -44,7 +44,8 @@ vi.mock('../services/fpl', () => ({
 
 // Test helper: Create a mock challenge
 function createMockChallenge(overrides?: Partial<Challenge>): Challenge {
-  const deadline = new Date('2025-10-21T10:30:00Z');
+  // Use a far future date to ensure tests don't fail as time passes
+  const deadline = new Date('2099-10-21T10:30:00Z');
   return {
     challengeId: 'test-challenge-123',
     gameweek: 8,
