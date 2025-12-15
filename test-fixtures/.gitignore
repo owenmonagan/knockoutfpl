@@ -1,0 +1,5 @@
+# Downloaded snapshots are gitignored (large files, regenerate from Firestore)
+snapshots/
+
+# Keep the directory
+!snapshots/.gitkeep
