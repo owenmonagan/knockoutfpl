@@ -27,7 +27,8 @@ test.describe('Dashboard', () => {
 
   // TODO: Add more dashboard tests after Firebase emulators are set up:
   // - should load user's FPL data
-  // - should display challenges
-  // - should allow creating new challenges
-  // - should show win/loss record
+  // - should display "Your Leagues" section
+  // - should show league cards for connected leagues
+  // - should navigate to league page when card is clicked
+  // - should display tournament bracket for active tournaments
 });
