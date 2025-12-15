@@ -19,13 +19,6 @@ vi.mock('./services/fpl', () => ({
   getFPLTeamInfo: vi.fn(),
 }));
 
-vi.mock('./services/challenge', () => ({
-  getChallenge: vi.fn(),
-  acceptChallenge: vi.fn(),
-  getUserChallenges: vi.fn().mockResolvedValue([]),
-  createChallenge: vi.fn(),
-}));
-
 describe('Router', () => {
   it('should render landing page at /', () => {
     const testRouter = createMemoryRouter(router, {
@@ -103,19 +96,6 @@ describe('Router', () => {
       </AuthProvider>
     );
     expect(screen.getByText(/connect your fpl team/i)).toBeInTheDocument();
-  });
-
-  it('should render challenge detail page at /challenge/:id (public route)', () => {
-    const testRouter = createMemoryRouter(router, {
-      initialEntries: ['/challenge/test-challenge-id'],
-    });
-
-    render(
-      <AuthProvider>
-        <RouterProvider router={testRouter} />
-      </AuthProvider>
-    );
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
 
   it('should render test data page at /test-data', () => {

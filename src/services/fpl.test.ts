@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers, getFPLLiveScores, getCurrentGameweek, getGameweekInfo, getFPLFixtures, getPlayerFixtureStatus } from './fpl';
+import { getFPLTeamInfo, getFPLGameweekScore, getFPLTeamPicks, getFPLPlayers, getFPLLiveScores, getCurrentGameweek, getGameweekInfo, getFPLFixtures, getPlayerFixtureStatus, getUserMiniLeagues, getLeagueStandings } from './fpl';
 
 describe('FPL Service', () => {
   describe('getFPLTeamInfo', () => {
@@ -463,6 +463,69 @@ describe('FPL Service', () => {
       const result = getPlayerFixtureStatus(playerId, fixtures, playerMap);
 
       expect(result).toBe('live');
+    });
+  });
+
+  describe('getUserMiniLeagues', () => {
+    it('should return array of mini-leagues for a team', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          leagues: {
+            classic: [
+              { id: 123, name: 'Test League', entry_rank: 5 },
+              { id: 456, name: 'Another League', entry_rank: 12 },
+            ],
+          },
+        }),
+      });
+
+      const result = await getUserMiniLeagues(158256);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ id: 123, name: 'Test League', entryRank: 5 });
+      expect(result[1]).toEqual({ id: 456, name: 'Another League', entryRank: 12 });
+      expect(fetch).toHaveBeenCalledWith('/api/fpl/entry/158256/');
+    });
+  });
+
+  describe('getLeagueStandings', () => {
+    it('should return standings for a league', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          standings: {
+            results: [
+              {
+                entry: 158256,
+                entry_name: 'Team A',
+                player_name: 'John Doe',
+                rank: 1,
+                total: 500,
+              },
+              {
+                entry: 789012,
+                entry_name: 'Team B',
+                player_name: 'Jane Smith',
+                rank: 2,
+                total: 480,
+              },
+            ],
+          },
+        }),
+      });
+
+      const result = await getLeagueStandings(123);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        fplTeamId: 158256,
+        teamName: 'Team A',
+        managerName: 'John Doe',
+        rank: 1,
+        totalPoints: 500,
+      });
+      expect(fetch).toHaveBeenCalledWith('/api/fpl/leagues-classic/123/standings/');
     });
   });
 });
