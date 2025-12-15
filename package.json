@@ -32,6 +32,8 @@
     "deploy:functions": "firebase deploy --only functions",
     "deploy:firestore": "firebase deploy --only firestore",
     "fixtures:list": "npx tsx scripts/fixtures-list.ts",
+    "fixtures:download": "npx tsx scripts/fixtures-download.ts",
+    "fixtures:scenario": "npx tsx scripts/fixtures-scenario.ts",
     "prepare": "husky"
   },
   "dependencies": {
