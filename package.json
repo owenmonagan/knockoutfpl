@@ -31,6 +31,7 @@
     "deploy:hosting": "npm run build && firebase deploy --only hosting",
     "deploy:functions": "firebase deploy --only functions",
     "deploy:firestore": "firebase deploy --only firestore",
+    "fixtures:list": "npx tsx scripts/fixtures-list.ts",
     "prepare": "husky"
   },
   "dependencies": {
