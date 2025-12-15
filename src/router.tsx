@@ -5,7 +5,6 @@ import { SignUpPage } from './pages/SignUpPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ComparePage } from './pages/ComparePage';
-import { TestDataPage } from './pages/TestDataPage';
 import { LeaguePage } from './pages/LeaguePage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
@@ -25,10 +24,6 @@ export const router: RouteObject[] = [
   {
     path: '/compare',
     element: <ComparePage />,
-  },
-  {
-    path: '/test-data',
-    element: <TestDataPage />,
   },
   {
     path: '/dashboard',
