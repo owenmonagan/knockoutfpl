@@ -14,6 +14,7 @@ describe('ProtectedRoute', () => {
       user: { uid: 'test-uid' } as any,
       loading: false,
       isAuthenticated: true,
+      connectionError: false,
     });
 
     render(
@@ -32,6 +33,7 @@ describe('ProtectedRoute', () => {
       user: null,
       loading: false,
       isAuthenticated: false,
+      connectionError: false,
     });
 
     render(
@@ -50,6 +52,7 @@ describe('ProtectedRoute', () => {
       user: null,
       loading: true,
       isAuthenticated: false,
+      connectionError: false,
     });
 
     render(
@@ -65,6 +68,27 @@ describe('ProtectedRoute', () => {
     expect(skeletons.length).toBeGreaterThan(0);
 
     // Should NOT show protected content while loading
+    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+  });
+
+  it('displays connection error message when Firebase is unavailable', () => {
+    vi.mocked(AuthContext.useAuth).mockReturnValue({
+      isAuthenticated: false,
+      loading: false,
+      user: null,
+      connectionError: true,
+    });
+
+    render(
+      <BrowserRouter>
+        <ProtectedRoute>
+          <div>Protected Content</div>
+        </ProtectedRoute>
+      </BrowserRouter>
+    );
+
+    expect(screen.getByText(/unable to connect/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
 });
