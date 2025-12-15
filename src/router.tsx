@@ -6,6 +6,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ComparePage } from './pages/ComparePage';
 import { TestDataPage } from './pages/TestDataPage';
+import { LeaguePage } from './pages/LeaguePage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 export const router: RouteObject[] = [
@@ -42,6 +43,14 @@ export const router: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <ProfilePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/league/:leagueId',
+    element: (
+      <ProtectedRoute>
+        <LeaguePage />
       </ProtectedRoute>
     ),
   },
