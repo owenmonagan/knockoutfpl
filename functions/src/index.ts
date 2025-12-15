@@ -1,11 +1,9 @@
 import * as admin from 'firebase-admin';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
-import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { fetchFPLBootstrapData, fetchFPLTeamInfo, fetchFPLGameweekScore as fetchScore } from './fplApi';
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
-const db = admin.firestore();
 
 // ============================================================================
 // FPL API Proxy Functions (HTTPS Callable)
@@ -75,3 +73,6 @@ export const getFPLGameweekScore = onCall(async (request) => {
 
 // Export proxy function
 export { fplProxy } from './proxy';
+
+// Export FPL snapshot capture functions
+export { captureFloawoSnapshot, triggerSnapshotCapture } from './captureFloawoSnapshot';
