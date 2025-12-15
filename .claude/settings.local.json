@@ -56,7 +56,8 @@
       "Bash(firebase use:*)",
       "Bash(npm run test:e2e)",
       "Bash(xargs kill -9)",
-      "Bash(firebase emulators:start --only auth,firestore --project demo-knockoutfpl)"
+      "Bash(firebase emulators:start --only auth,firestore --project demo-knockoutfpl)",
+      "Bash(./node_modules/.bin/firebase emulators:start:*)"
     ],
     "deny": [],
     "ask": []
