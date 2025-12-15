@@ -28,7 +28,7 @@ There is an informal but existing fantasy premier league API. Eventually, we wil
 - ✅ Swing-based matchup ranking
 - ✅ Industry-standard "Matchup" terminology throughout
 - ✅ Matchup summary statistics (biggest swing, closest matchup, etc.)
-- ✅ TDD workflow with TDD Guard + Vitest
+- ✅ TDD workflow with Vitest
 - ✅ Playwright E2E testing infrastructure (smoke, auth, navigation, dashboard tags)
 - ✅ Comprehensive test coverage (79 unit tests, 9 E2E auth tests)
 - ✅ Firebase Authentication (email/password signup/login)
@@ -147,7 +147,7 @@ This establishes a rich, engaging comparison experience AND a secure authenticat
 ### ✅ Phase 0: Technical Foundation + Advanced Visualization (COMPLETED)
 - ✅ Initialize Vite + React + TypeScript
 - ✅ Install shadcn/ui, configure Tailwind
-- ✅ Setup TDD Guard + Vitest
+- ✅ Setup Vitest for testing
 - ✅ FPL API integration proof-of-concept
 - ✅ Advanced team comparison with matchup visualization
 - ✅ Differential player identification algorithm

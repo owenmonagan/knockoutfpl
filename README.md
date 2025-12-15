@@ -7,7 +7,6 @@ A web application for Fantasy Premier League head-to-head challenges.
 - React 19 + TypeScript + Vite
 - Vitest for unit/integration testing
 - Playwright for E2E testing
-- TDD Guard for test-driven development enforcement
 - Firebase (Auth, Firestore, Cloud Functions)
 
 ## Getting Started
@@ -16,7 +15,6 @@ A web application for Fantasy Premier League head-to-head challenges.
 
 - Node.js v18+ (v20+ recommended)
 - npm
-- tdd-guard (install via Homebrew: `brew install nizos/tap/tdd-guard`)
 
 ### Installation
 
@@ -56,7 +54,7 @@ npm run test:all
 
 This project uses a two-layer testing approach:
 
-### Layer 1: Unit & Integration Tests (Vitest + TDD Guard)
+### Layer 1: Unit & Integration Tests (Vitest)
 
 **Purpose:** Fast feedback loop for Test-Driven Development
 
@@ -64,20 +62,10 @@ This project uses a two-layer testing approach:
 
 **Run with:**
 ```bash
-npm test           # Run once
-npm run test:ui    # Interactive mode
+npm test              # Run once
+npm run test:watch    # Watch mode
+npm run test:ui       # Interactive mode
 ```
-
-**TDD Guard Integration:**
-- Enforces test-first development via Claude Code hooks
-- Blocks code changes without failing tests
-- Validates that implementations don't exceed test requirements
-- Encourages refactoring when tests are green
-
-**Setup TDD Guard:**
-1. Install TDD Guard: `brew install nizos/tap/tdd-guard`
-2. Configure Claude Code hooks (see below)
-3. TDD Guard will automatically validate your development workflow
 
 ### Layer 2: E2E Tests (Playwright)
 
@@ -102,64 +90,6 @@ npm run test:e2e:debug  # Debug mode with breakpoints
 3. View test reports: `npm run test:e2e:report`
 
 See [e2e/README.md](e2e/README.md) for detailed E2E testing guide.
-
-## TDD Guard Setup
-
-TDD Guard enforces Test-Driven Development principles by integrating with Claude Code.
-
-### How It Works
-
-1. **Test-First Enforcement:** Blocks implementation without failing tests
-2. **Minimal Implementation:** Prevents over-engineering beyond current test requirements
-3. **Refactoring Support:** Validates safe refactoring when tests are green
-
-### Configuration
-
-TDD Guard is integrated via:
-- **Vitest Reporter:** Configured in [vite.config.ts](vite.config.ts:12-15)
-- **Claude Code Hooks:** Must be set up manually (see below)
-
-### Claude Code Hooks Setup
-
-Type `/hooks` in Claude Code and configure these three hooks:
-
-#### 1. PreToolUse Hook
-- **Matcher:** `Write|Edit|MultiEdit|TodoWrite`
-- **Command:** `tdd-guard`
-- **Purpose:** Validates file changes before they happen
-
-#### 2. UserPromptSubmit Hook
-- **Matcher:** (none - applies to all prompts)
-- **Command:** `tdd-guard`
-- **Purpose:** Handles session commands (/tdd-on, /tdd-off, /tdd-status)
-
-#### 3. SessionStart Hook
-- **Matcher:** `startup|resume|clear`
-- **Command:** `tdd-guard`
-- **Purpose:** Auto-enables TDD Guard on new sessions
-
-**Note:** Choose the same settings location for all three hooks (project, folder, or global).
-
-### TDD Guard Commands
-
-Once configured, use these commands in Claude Code:
-- `/tdd-status` - Check TDD Guard state
-- `/tdd-off` - Temporarily disable enforcement
-- `/tdd-on` - Re-enable enforcement
-
-### Testing the Setup
-
-1. Run tests to generate test results:
-   ```bash
-   npm test -- --run
-   ```
-
-2. Verify TDD Guard data is generated:
-   ```bash
-   ls -la .claude/tdd-guard/data/
-   ```
-
-3. TDD Guard will now validate your development workflow through Claude Code hooks!
 
 ## Project Structure
 

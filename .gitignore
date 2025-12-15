@@ -24,9 +24,6 @@ coverage
 *.trace.zip
 .playwright-mcp/
 
-# TDD Guard
-.claude/tdd-guard/
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

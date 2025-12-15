@@ -13,7 +13,6 @@ This document describes our development process, technical stack, and implementa
 - **FPL API:** Unofficial public endpoints (proxied via Cloud Functions)
 - **Hosting:** Firebase Hosting
 - **Testing:** Playwright MCP for automated browser testing
-- **Development:** TDD Guard for test-driven development workflow
 
 ---
 
@@ -21,10 +20,9 @@ This document describes our development process, technical stack, and implementa
 
 ### Test-Driven Development (TDD)
 
-We use **TDD Guard** to maintain a test-driven workflow:
+We use a test-driven workflow with Vitest:
 
-- **TDD Guard Integration:** Automatically runs tests on file changes
-- **Configuration:** See `.tdd-guard.json` for setup
+- **Test Watcher:** Use `npm run test:watch` to automatically run tests on file changes
 - **Workflow:**
   1. Write failing test
   2. Implement minimal code to pass
@@ -337,7 +335,7 @@ Configure mappings in `.e2e-watch.json`.
 
 ```bash
 # Terminal 1: Unit test watcher (constant feedback)
-npm run test:watch   # or: tdd-guard
+npm run test:watch
 
 # Terminal 2: Dev server
 npm run dev
@@ -636,9 +634,9 @@ knockoutfpl/
    npm test
    ```
 
-3. **TDD Guard (Auto-test on changes):**
+3. **Watch Mode (Auto-test on changes):**
    ```bash
-   tdd-guard
+   npm run test:watch
    ```
 
 4. **Build for Production:**
