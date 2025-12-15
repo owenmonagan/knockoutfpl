@@ -26,8 +26,9 @@ describe('Router', () => {
     });
 
     render(<RouterProvider router={testRouter} />);
-    expect(screen.getByText(/knockout/i)).toBeInTheDocument();
-    expect(screen.getByText(/fpl/i)).toBeInTheDocument();
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading).toHaveTextContent(/Knockout/i);
+    expect(heading).toHaveTextContent(/FPL/i);
   });
 
   it('should render login page at /login', () => {

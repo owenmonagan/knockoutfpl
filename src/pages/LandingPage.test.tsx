@@ -11,8 +11,9 @@ describe('LandingPage', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/knockout/i)).toBeInTheDocument();
-    expect(screen.getByText(/fpl/i)).toBeInTheDocument();
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading).toHaveTextContent(/knockout/i);
+    expect(heading).toHaveTextContent(/fpl/i);
   });
 
   it('should render Get Started and Log In CTAs', () => {
@@ -38,7 +39,7 @@ describe('LandingPage', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/Now Live/i)).toBeInTheDocument();
-    expect(screen.getByText(/Battle your friends/i)).toBeInTheDocument();
+    expect(screen.getByText(/Now Live - Mini-League Knockout Tournaments/i)).toBeInTheDocument();
+    expect(screen.getByText(/Transform your FPL mini-leagues into knockout tournaments/i)).toBeInTheDocument();
   });
 });

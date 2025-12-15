@@ -14,14 +14,15 @@ describe('Hero', () => {
 
   it('renders the hero heading with gradient text', () => {
     renderHero();
-    expect(screen.getByText(/Knockout/i)).toBeInTheDocument();
-    expect(screen.getByText(/FPL/i)).toBeInTheDocument();
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading).toHaveTextContent(/Knockout/i);
+    expect(heading).toHaveTextContent(/FPL/i);
   });
 
   it('renders the value proposition subheading', () => {
     renderHero();
     expect(
-      screen.getByText(/Head-to-head Fantasy Premier League challenges/i)
+      screen.getByText(/Transform your FPL mini-leagues into knockout tournaments/i)
     ).toBeInTheDocument();
   });
 

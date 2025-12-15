@@ -8,7 +8,7 @@ export function Hero() {
     <section className="container flex flex-col items-center justify-center gap-8 py-20 md:py-32">
       <Badge variant="secondary" className="gap-2">
         <Trophy className="h-3 w-3" />
-        Now Live - Challenge Your Friends
+        Now Live - Mini-League Knockout Tournaments
       </Badge>
 
       <div className="flex flex-col items-center gap-4 text-center">
@@ -19,7 +19,7 @@ export function Hero() {
           </span>
         </h1>
         <p className="max-w-[42rem] text-lg text-muted-foreground sm:text-xl">
-          Head-to-head Fantasy Premier League challenges. Battle your friends each gameweek and track your winning record.
+          Transform your FPL mini-leagues into knockout tournaments. Battle league rivals each gameweek and crown a champion.
         </p>
       </div>
 
