@@ -1,3 +1,17 @@
+export interface FPLMiniLeague {
+  id: number;
+  name: string;
+  entryRank: number;
+}
+
+export interface LeagueStanding {
+  fplTeamId: number;
+  teamName: string;
+  managerName: string;
+  rank: number;
+  totalPoints: number;
+}
+
 export interface FPLTeamInfo {
   teamId: number;
   teamName: string;
