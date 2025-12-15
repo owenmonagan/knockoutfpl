@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { DashboardPage } from './DashboardPage';
 import * as AuthContext from '../contexts/AuthContext';
 import * as userService from '../services/user';
+import * as fplService from '../services/fpl';
 
 // Helper to render with router
 const renderWithRouter = (component: React.ReactElement) => {
@@ -22,6 +23,7 @@ vi.mock('../services/user', () => ({
 
 vi.mock('../services/fpl', () => ({
   getFPLTeamInfo: vi.fn(),
+  getUserMiniLeagues: vi.fn(),
 }));
 
 vi.mock('react-router-dom', async () => {
