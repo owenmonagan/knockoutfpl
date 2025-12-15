@@ -49,6 +49,15 @@ describe('Router', () => {
     expect(screen.getByLabelText(/display name/i)).toBeInTheDocument();
   });
 
+  it('should render forgot password page at /forgot-password', () => {
+    const testRouter = createMemoryRouter(router, {
+      initialEntries: ['/forgot-password'],
+    });
+
+    render(<RouterProvider router={testRouter} />);
+    expect(screen.getByRole('heading', { name: /reset password/i })).toBeInTheDocument();
+  });
+
   it('should render dashboard page at /dashboard when authenticated', () => {
     const testRouter = createMemoryRouter(router, {
       initialEntries: ['/dashboard'],

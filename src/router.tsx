@@ -2,6 +2,7 @@ import type { RouteObject } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ComparePage } from './pages/ComparePage';
@@ -20,6 +21,10 @@ export const router: RouteObject[] = [
   {
     path: '/signup',
     element: <SignUpPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
   },
   {
     path: '/compare',
