@@ -155,5 +155,72 @@ describe('DashboardPage', () => {
         expect(leaguesHeading).toBeInTheDocument();
       });
     });
+
+    it('should show loading state while fetching leagues', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      // Never resolve to keep loading state
+      vi.mocked(fplService.getUserMiniLeagues).mockImplementation(() => new Promise(() => {}));
+
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/loading leagues/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should show leagues when loaded', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(fplService.getUserMiniLeagues).mockResolvedValue([
+        { id: 123, name: 'Test League', entryRank: 5 },
+      ]);
+
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test League')).toBeInTheDocument();
+      });
+    });
   });
 });

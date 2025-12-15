@@ -8,20 +8,25 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FPLConnectionCard, type FPLTeamData } from '../components/dashboard/FPLConnectionCard';
+import { LeagueList } from '../components/leagues/LeagueList';
 import { Card, CardContent } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
 import type { User } from '../types/user';
 import { getUserProfile, connectFPLTeam, updateUserProfile } from '../services/user';
-import { getFPLTeamInfo } from '../services/fpl';
+import { getFPLTeamInfo, getUserMiniLeagues, type MiniLeague } from '../services/fpl';
 
 export function DashboardPage() {
   const { user: authUser } = useAuth();
+  const navigate = useNavigate();
   const [userData, setUserData] = useState<User | null>(null);
   const [fplData, setFplData] = useState<FPLTeamData | null>(null);
+  const [leagues, setLeagues] = useState<MiniLeague[]>([]);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
   const [isLoadingFpl, setIsLoadingFpl] = useState(false);
+  const [isLoadingLeagues, setIsLoadingLeagues] = useState(false);
 
   // Fetch user profile on mount
   useEffect(() => {
@@ -49,6 +54,20 @@ export function DashboardPage() {
     }
 
     loadFPLData();
+  }, [userData]);
+
+  // Fetch leagues when user has FPL team connected
+  useEffect(() => {
+    async function loadLeagues() {
+      if (!userData || userData.fplTeamId === 0) return;
+
+      setIsLoadingLeagues(true);
+      const miniLeagues = await getUserMiniLeagues(userData.fplTeamId);
+      setLeagues(miniLeagues);
+      setIsLoadingLeagues(false);
+    }
+
+    loadLeagues();
   }, [userData]);
 
   // Connect FPL team
@@ -79,6 +98,10 @@ export function DashboardPage() {
 
     // Update FPL data
     setFplData(teamInfo);
+  };
+
+  const handleLeagueClick = (leagueId: number) => {
+    navigate(`/league/${leagueId}`);
   };
 
   return (

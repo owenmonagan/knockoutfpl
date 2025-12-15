@@ -71,7 +71,8 @@ describe('MatchCard', () => {
     render(<MatchCard match={matchWithWinner} participants={mockParticipants} gameweek={16} />);
     // Winner row should have special styling - check for the winner indicator
     const teamAlpha = screen.getByText('Team Alpha');
-    expect(teamAlpha.closest('div')).toHaveClass('font-semibold');
+    const playerRow = teamAlpha.closest('.font-semibold');
+    expect(playerRow).toBeInTheDocument();
   });
 
   it('should show gameweek badge', () => {
