@@ -102,3 +102,89 @@ function generateFirstRoundMatches(sortedParticipants: Participant[], byes: numb
 
   return matches;
 }
+
+export function determineMatchWinner(match: Match): number | null {
+  // Handle bye matches
+  if (match.isBye && match.player1) {
+    return match.player1.fplTeamId;
+  }
+
+  // Need both players with scores to determine winner
+  if (!match.player1?.score || !match.player2?.score) {
+    return null;
+  }
+
+  // Higher score wins
+  if (match.player1.score > match.player2.score) {
+    return match.player1.fplTeamId;
+  }
+  if (match.player2.score > match.player1.score) {
+    return match.player2.fplTeamId;
+  }
+
+  // Tie: higher seed (lower number) wins
+  if (match.player1.seed < match.player2.seed) {
+    return match.player1.fplTeamId;
+  }
+  return match.player2.fplTeamId;
+}
+
+export function advanceWinnersToNextRound(
+  rounds: Round[],
+  completedRoundNumber: number,
+  participants: Participant[]
+): Round[] {
+  const currentRoundIndex = completedRoundNumber - 1;
+  const nextRoundIndex = completedRoundNumber;
+
+  // No next round to advance to
+  if (nextRoundIndex >= rounds.length) {
+    return rounds;
+  }
+
+  const currentRound = rounds[currentRoundIndex];
+
+  // Round not complete yet
+  if (!currentRound.isComplete) {
+    return rounds;
+  }
+
+  // Clone rounds to avoid mutation
+  const updatedRounds = JSON.parse(JSON.stringify(rounds)) as Round[];
+  const nextRound = updatedRounds[nextRoundIndex];
+
+  // Get winners from current round
+  const winners = currentRound.matches
+    .map((match) => match.winnerId)
+    .filter((id): id is number => id !== null);
+
+  // Assign winners to next round matches
+  for (let i = 0; i < nextRound.matches.length; i++) {
+    const winner1Index = i * 2;
+    const winner2Index = i * 2 + 1;
+
+    if (winners[winner1Index] !== undefined) {
+      const participant = participants.find((p) => p.fplTeamId === winners[winner1Index]);
+      if (participant) {
+        nextRound.matches[i].player1 = {
+          fplTeamId: participant.fplTeamId,
+          seed: participant.seed,
+          score: null,
+        };
+      }
+    }
+
+    if (winners[winner2Index] !== undefined) {
+      const participant = participants.find((p) => p.fplTeamId === winners[winner2Index]);
+      if (participant) {
+        nextRound.matches[i].player2 = {
+          fplTeamId: participant.fplTeamId,
+          seed: participant.seed,
+          score: null,
+        };
+      }
+    }
+  }
+
+  return updatedRounds;
+}
