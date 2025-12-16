@@ -1,6 +1,7 @@
-import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { ReactNode, useState, useEffect } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { getUserProfile } from '../../services/user';
 import { Skeleton } from '../ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Button } from '../ui/button';
@@ -11,9 +12,36 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, loading, connectionError } = useAuth();
+  const { isAuthenticated, loading, connectionError, user } = useAuth();
+  const location = useLocation();
+  const [isCheckingFpl, setIsCheckingFpl] = useState(true);
+  const [hasFplTeam, setHasFplTeam] = useState<boolean | null>(null);
 
-  if (loading) {
+  useEffect(() => {
+    async function checkFplConnection() {
+      if (!user?.uid) {
+        setIsCheckingFpl(false);
+        return;
+      }
+
+      try {
+        const profile = await getUserProfile(user.uid);
+        setHasFplTeam(profile && profile.fplTeamId > 0);
+      } catch {
+        setHasFplTeam(false);
+      } finally {
+        setIsCheckingFpl(false);
+      }
+    }
+
+    if (isAuthenticated) {
+      checkFplConnection();
+    } else {
+      setIsCheckingFpl(false);
+    }
+  }, [user?.uid, isAuthenticated]);
+
+  if (loading || isCheckingFpl) {
     return (
       <div className="container mx-auto px-4 py-8 space-y-4">
         <Skeleton className="h-8 w-[200px]" />
@@ -45,6 +73,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Redirect to /connect if no FPL team connected (but don't redirect if already on /connect)
+  if (hasFplTeam === false && location.pathname !== '/connect') {
+    return <Navigate to="/connect" replace />;
   }
 
   return <>{children}</>;

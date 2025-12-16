@@ -1,20 +1,42 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { BrowserRouter } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
 import * as AuthContext from '../../contexts/AuthContext';
+import { getUserProfile } from '../../services/user';
 
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
 
+vi.mock('../../services/user', () => ({
+  getUserProfile: vi.fn(),
+}));
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
 describe('ProtectedRoute', () => {
-  it('should render children when user is authenticated', () => {
+  it('should render children when user is authenticated and has FPL team', async () => {
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       user: { uid: 'test-uid' } as any,
       loading: false,
       isAuthenticated: true,
       connectionError: false,
+    });
+
+    vi.mocked(getUserProfile).mockResolvedValue({
+      userId: 'test-uid',
+      fplTeamId: 158256,
+      fplTeamName: 'Test Team',
+      email: 'test@test.com',
+      displayName: 'Test',
+      wins: 0,
+      losses: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     render(
@@ -25,7 +47,9 @@ describe('ProtectedRoute', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText('Protected Content')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Protected Content')).toBeInTheDocument();
+    });
   });
 
   it('should redirect to login when user is not authenticated', () => {
@@ -90,5 +114,89 @@ describe('ProtectedRoute', () => {
     expect(screen.getByText(/unable to connect/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+  });
+
+  describe('FPL Team redirect', () => {
+    it('redirects to /connect when user has no FPL Team ID', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: { uid: 'test-user-id' } as any,
+        loading: false,
+        isAuthenticated: true,
+        connectionError: false,
+      });
+
+      vi.mocked(getUserProfile).mockResolvedValue({
+        userId: 'test-user-id',
+        fplTeamId: 0,
+        fplTeamName: '',
+        email: 'test@test.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/dashboard']}>
+          <Routes>
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <div>Dashboard</div>
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/connect" element={<div>Connect Page</div>} />
+          </Routes>
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Connect Page')).toBeInTheDocument();
+      });
+    });
+
+    it('does not redirect when user has FPL Team ID', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: { uid: 'test-user-id' } as any,
+        loading: false,
+        isAuthenticated: true,
+        connectionError: false,
+      });
+
+      vi.mocked(getUserProfile).mockResolvedValue({
+        userId: 'test-user-id',
+        fplTeamId: 158256,
+        fplTeamName: 'Owen FC',
+        email: 'test@test.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/dashboard']}>
+          <Routes>
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <div>Dashboard</div>
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/connect" element={<div>Connect Page</div>} />
+          </Routes>
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Dashboard')).toBeInTheDocument();
+      });
+    });
   });
 });
