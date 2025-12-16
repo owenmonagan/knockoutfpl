@@ -6,18 +6,38 @@ export function TrophyAnimation() {
     >
       <svg
         width="80"
-        height="80"
-        viewBox="0 0 24 24"
+        height="100"
+        viewBox="0 0 64 80"
         fill="#C9A227"
         aria-label="Championship trophy"
         role="img"
       >
-        {/* Trophy cup */}
-        <path d="M12 2C13.1 2 14 2.9 14 4V5H16C16.5 5 17 5.22 17.41 5.59C17.79 5.95 18 6.45 18 7V8C18 9.1 17.1 10 16 10H14.82C14.4 11.17 13.3 12 12 12C10.7 12 9.6 11.17 9.18 10H8C6.9 10 6 9.1 6 8V7C6 6.45 6.21 5.95 6.59 5.59C7 5.22 7.5 5 8 5H10V4C10 2.9 10.9 2 12 2ZM16 7H14V8H16V7ZM10 7H8V8H10V7Z" />
-        {/* Trophy stem */}
-        <path d="M11 12.5V15H13V12.5C12.7 12.5 12.35 12.5 12 12.5C11.65 12.5 11.3 12.5 11 12.5Z" />
-        {/* Trophy base */}
-        <path d="M8 17V19H16V17H8ZM7 21V19H17V21C17 21.55 16.55 22 16 22H8C7.45 22 7 21.55 7 21Z" />
+        {/* Globe/Earth at top */}
+        <circle cx="32" cy="14" r="12" />
+        <ellipse cx="32" cy="14" rx="12" ry="4" fill="#0D1F3C" opacity="0.2" />
+        <path d="M32 2 Q38 8 38 14 Q38 20 32 26 Q26 20 26 14 Q26 8 32 2" fill="#0D1F3C" opacity="0.15" />
+
+        {/* Left figure holding globe */}
+        <path d="M20 26 Q16 22 18 18 L22 22 Q24 24 24 28 L24 38 Q22 40 20 38 L20 26Z" />
+        <circle cx="18" cy="16" r="3" />
+
+        {/* Right figure holding globe */}
+        <path d="M44 26 Q48 22 46 18 L42 22 Q40 24 40 28 L40 38 Q42 40 44 38 L44 26Z" />
+        <circle cx="46" cy="16" r="3" />
+
+        {/* Central stem connecting figures */}
+        <path d="M28 28 L28 50 L36 50 L36 28 Q34 30 32 30 Q30 30 28 28Z" />
+
+        {/* Decorative middle section */}
+        <ellipse cx="32" cy="42" rx="8" ry="3" />
+
+        {/* Base pedestal */}
+        <path d="M24 50 L24 56 L40 56 L40 50 Z" />
+        <path d="M20 56 L20 62 L44 62 L44 56 Z" />
+        <path d="M16 62 L16 68 L48 68 L48 62 Z" />
+
+        {/* Base plate */}
+        <rect x="12" y="68" width="40" height="6" rx="2" />
       </svg>
     </div>
   );
