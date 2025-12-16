@@ -154,7 +154,12 @@
     .animate-shine-burst,
     .animate-shimmer,
     .animate-bracket-fade,
-    .trophy-shimmer {
+    .trophy-shimmer,
+    .trophy-globe::after,
+    .trophy-body::after,
+    .trophy-base-1::after,
+    .trophy-base-2::after,
+    .trophy-base-3::after {
       animation: none;
       opacity: 1;
       transform: none;
@@ -168,7 +173,40 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+
+  /* Shimmer mixin - applied via pseudo-elements to each trophy part */
+  .trophy-globe,
+  .trophy-body,
+  .trophy-base-1,
+  .trophy-base-2,
+  .trophy-base-3 {
+    position: relative;
     overflow: hidden;
+  }
+
+  .trophy-globe::after,
+  .trophy-body::after,
+  .trophy-base-1::after,
+  .trophy-base-2::after,
+  .trophy-base-3::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      110deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.6) 45%,
+      rgba(255, 255, 255, 0.9) 50%,
+      rgba(255, 255, 255, 0.6) 55%,
+      transparent 70%
+    );
+    background-size: 300% 100%;
+    background-position: -100% 0;
+    animation: shimmer 2.5s ease-in-out infinite;
+    animation-delay: 0.8s;
+    pointer-events: none;
+    border-radius: inherit;
   }
 
   /* Globe at top */
@@ -177,14 +215,13 @@
     height: 32px;
     background: linear-gradient(135deg, #E8D5A3 0%, #C9A227 50%, #8B7355 100%);
     border-radius: 50%;
-    position: relative;
     box-shadow:
       inset -4px -4px 8px rgba(0, 0, 0, 0.2),
       inset 4px 4px 8px rgba(255, 255, 255, 0.3),
       0 2px 8px rgba(201, 162, 39, 0.4);
   }
 
-  /* Side handles/figures */
+  /* Side handles/figures - shimmer on pseudo-elements not practical here */
   .trophy-handles {
     width: 48px;
     height: 24px;
@@ -222,6 +259,11 @@
     clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
   }
 
+  /* Body shimmer needs to match clip-path */
+  .trophy-body::after {
+    clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+  }
+
   /* Stepped base container */
   .trophy-base {
     display: flex;
@@ -249,22 +291,33 @@
     border-radius: 0 0 2px 2px;
   }
 
-  /* Shimmer overlay - only on trophy */
+  /* Stagger shimmer animation for natural sweep effect */
+  .trophy-globe::after {
+    animation-delay: 0.8s;
+  }
+
+  .trophy-body::after {
+    animation-delay: 0.9s;
+  }
+
+  .trophy-base-1::after {
+    animation-delay: 1.0s;
+  }
+
+  .trophy-base-2::after {
+    animation-delay: 1.05s;
+  }
+
+  .trophy-base-3::after {
+    animation-delay: 1.1s;
+  }
+
+  /* Keep shimmer marker for test compatibility */
   .trophy-shimmer {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      110deg,
-      transparent 20%,
-      rgba(255, 255, 255, 0.5) 40%,
-      rgba(255, 255, 255, 0.8) 50%,
-      rgba(255, 255, 255, 0.5) 60%,
-      transparent 80%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 2.5s ease-in-out infinite;
-    animation-delay: 0.8s;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
     pointer-events: none;
-    mix-blend-mode: overlay;
   }
 }
