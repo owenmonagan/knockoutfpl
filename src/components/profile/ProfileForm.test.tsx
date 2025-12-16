@@ -24,4 +24,19 @@ describe('ProfileForm', () => {
     render(<ProfileForm {...defaultProps} />);
     expect(screen.getByText('test@example.com')).toBeInTheDocument();
   });
+
+  it('shows display name label', () => {
+    render(<ProfileForm {...defaultProps} />);
+    expect(screen.getByText('Display Name')).toBeInTheDocument();
+  });
+
+  it('shows current display name', () => {
+    render(<ProfileForm {...defaultProps} />);
+    expect(screen.getByText('Test User')).toBeInTheDocument();
+  });
+
+  it('shows Edit button', () => {
+    render(<ProfileForm {...defaultProps} />);
+    expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
+  });
 });
