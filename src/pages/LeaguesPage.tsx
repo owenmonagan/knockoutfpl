@@ -13,18 +13,23 @@ export function LeaguesPage() {
   const { user: authUser } = useAuth();
   const navigate = useNavigate();
   const [leagues, setLeagues] = useState<LeagueWithMembers[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadLeagues() {
-      if (!authUser?.uid) return;
+      if (!authUser?.uid) {
+        setIsLoading(false);
+        return;
+      }
 
       // Get user profile
       const userProfile = await getUserProfile(authUser.uid);
-      if (!userProfile || userProfile.fplTeamId === 0) return;
+      if (!userProfile || userProfile.fplTeamId === 0) {
+        setIsLoading(false);
+        return;
+      }
 
-      // Fetch leagues
-      setIsLoading(true);
+      // Fetch leagues (isLoading already true from initial state)
       const miniLeagues = await getUserMiniLeagues(userProfile.fplTeamId);
 
       // Fetch member counts for each league

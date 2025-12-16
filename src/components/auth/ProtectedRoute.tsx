@@ -24,6 +24,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         return;
       }
 
+      // Skip FPL check if we're on /connect - let user complete the connection flow
+      if (location.pathname === '/connect') {
+        setIsCheckingFpl(false);
+        setHasFplTeam(false); // Assume not connected (that's why they're here)
+        return;
+      }
+
       try {
         const profile = await getUserProfile(user.uid);
         setHasFplTeam(profile && profile.fplTeamId > 0);
@@ -39,7 +46,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     } else {
       setIsCheckingFpl(false);
     }
-  }, [user?.uid, isAuthenticated]);
+  }, [user?.uid, isAuthenticated, location.pathname]);
 
   if (loading || isCheckingFpl) {
     return (
