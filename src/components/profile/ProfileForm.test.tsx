@@ -14,4 +14,14 @@ describe('ProfileForm', () => {
     render(<ProfileForm {...defaultProps} />);
     expect(screen.getByRole('article')).toBeInTheDocument();
   });
+
+  it('shows "Account Details" title', () => {
+    render(<ProfileForm {...defaultProps} />);
+    expect(screen.getByText('Account Details')).toBeInTheDocument();
+  });
+
+  it('shows user email', () => {
+    render(<ProfileForm {...defaultProps} />);
+    expect(screen.getByText('test@example.com')).toBeInTheDocument();
+  });
 });

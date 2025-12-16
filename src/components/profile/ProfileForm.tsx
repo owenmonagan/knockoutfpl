@@ -1,4 +1,4 @@
-import { Card } from '../ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
 
 export interface ProfileFormProps {
   displayName: string;
@@ -7,6 +7,16 @@ export interface ProfileFormProps {
   isLoading: boolean;
 }
 
-export function ProfileForm(props: ProfileFormProps) {
-  return <Card role="article"></Card>;
+export function ProfileForm({ displayName, email, onUpdateDisplayName, isLoading }: ProfileFormProps) {
+  return (
+    <Card role="article">
+      <CardHeader>
+        <CardTitle>Account Details</CardTitle>
+        <CardDescription>{email}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {/* Display name editing will go here */}
+      </CardContent>
+    </Card>
+  );
 }
