@@ -56,7 +56,7 @@ This project uses a two-layer testing approach:
 
 ### Layer 1: Unit & Integration Tests (Vitest)
 
-**Purpose:** Fast feedback loop for Test-Driven Development
+**Purpose:** Fast feedback loop during development
 
 **Location:** `src/**/*.test.ts(x)`
 

@@ -16,73 +16,7 @@ This document describes our development process, technical stack, and implementa
 
 ---
 
-## 🧪 Development Methodology
-
-### Test-Driven Development (TDD)
-
-We use a test-driven workflow with Vitest:
-
-- **Test Watcher:** Use `npm run test:watch` to automatically run tests on file changes
-- **Workflow:**
-  1. Write failing test
-  2. Implement minimal code to pass
-  3. Refactor and improve
-  4. Repeat
-
-### Micro-TDD Philosophy
-
-We practice **micro-TDD**: working in the smallest possible increments to maximize quality and confidence.
-
-**What is Micro-TDD?**
-- **One tiny behavior** = **One test** = **One implementation**
-- Each Red-Green-Refactor cycle should take **1-3 minutes**
-- Break down features into atomic behaviors
-- Example progression:
-  ```
-  ✓ Button renders
-  ✓ Button has correct text
-  ✓ Button has correct variant
-  ✓ Button responds to click
-  ✓ Button shows loading state when processing
-  ✓ Button calls onSubmit handler
-  ```
-
-**Core Principles:**
-
-1. **Never Skip Ahead**
-   - Resist the urge to implement multiple behaviors at once
-   - Each test must be the simplest next step
-   - Trust that small steps compound quickly
-
-2. **Never Ask to Continue**
-   - TDD is expected to be slow and thorough
-   - 2-3 hours for a complete component is normal and desired
-   - Keep going until ALL work is complete
-   - Speed comes from confidence, not shortcuts
-
-3. **Red-Green-Refactor Discipline**
-   - **Red:** Write the smallest possible failing test
-   - **Green:** Write minimal code to make it pass (no more, no less)
-   - **Refactor:** Clean up while tests stay green
-   - **Repeat:** Immediately move to next micro-behavior
-
-4. **Complete Everything**
-   - Finish entire components/features in one session
-   - Don't leave partial implementations
-   - Each passing test is permanent progress
-   - Slow and steady prevents bugs and rework
-
-**Why Micro-TDD?**
-- **Prevents bugs:** Each behavior is independently verified
-- **Builds confidence:** Every change is immediately validated
-- **Enables refactoring:** Comprehensive test coverage
-- **Reduces debugging:** Problems are caught at the smallest scope
-- **Documents intent:** Tests serve as living specifications
-
-**Hook Reminder:**
-A hook fires on every prompt to remind Claude to follow micro-TDD discipline.
-
-### Testing Approach
+## 🧪 Testing Approach
 
 **Playwright MCP Integration:**
 - Configured Playwright MCP server for automated browser testing
@@ -108,13 +42,13 @@ A hook fires on every prompt to remind Claude to follow micro-TDD discipline.
    /__________\   Test component interactions
   /            \
  /              \ ← 70-80% Unit Tests (Vitest)
-/________________\  Fast, constant during TDD
+/________________\  Fast, run frequently
 ```
 
 **Philosophy:**
-- **Unit tests (Vitest)**: Run constantly during TDD Red-Green-Refactor cycle
+- **Unit tests (Vitest)**: Run frequently during development
 - **E2E tests (Playwright MCP)**: Run at feature completion milestones
-- **DO NOT** run E2E tests on every code change (too slow, breaks TDD flow)
+- **DO NOT** run E2E tests on every code change (too slow)
 - **DO** run E2E tests before committing user-facing features
 
 #### When to Use Playwright MCP
@@ -161,8 +95,8 @@ A hook fires on every prompt to remind Claude to follow micro-TDD discipline.
 **Recommended flow:**
 
 ```bash
-# 1. TDD Cycle (Unit Tests)
-Write test (Red) → Implement (Green) → Refactor (Green) → Repeat
+# 1. Development Cycle
+Write tests → Implement → Refactor → Repeat
 
 # 2. Feature Complete Milestone
 All unit tests passing ✓
@@ -250,9 +184,9 @@ A hook automatically suggests E2E verification when:
 
 ---
 
-### Integrated E2E TDD Workflow
+### Integrated E2E Workflow
 
-We now have **automated Playwright E2E tests** that integrate seamlessly with your TDD workflow. Tests are organized by feature and can be run selectively based on what you're working on.
+We now have **automated Playwright E2E tests** that integrate seamlessly with your development workflow. Tests are organized by feature and can be run selectively based on what you're working on.
 
 #### E2E Test Organization
 
@@ -329,7 +263,7 @@ npm run test:e2e:selective
 
 Configure mappings in `.e2e-watch.json`.
 
-#### Recommended TDD Workflow
+#### Recommended Development Workflow
 
 **For New Features:**
 
@@ -340,10 +274,10 @@ npm run test:watch
 # Terminal 2: Dev server
 npm run dev
 
-# Your TDD cycle:
-1. Write unit test (Red)
-2. Implement code (Green)
-3. Refactor (Green)
+# Your development cycle:
+1. Write unit test
+2. Implement code
+3. Refactor
 4. Repeat until feature complete
 
 # When feature milestone complete:

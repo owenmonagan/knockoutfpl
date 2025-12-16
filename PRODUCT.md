@@ -28,7 +28,7 @@ There is an informal but existing fantasy premier league API. Eventually, we wil
 - ✅ Swing-based matchup ranking
 - ✅ Industry-standard "Matchup" terminology throughout
 - ✅ Matchup summary statistics (biggest swing, closest matchup, etc.)
-- ✅ TDD workflow with Vitest
+- ✅ Testing workflow with Vitest
 - ✅ Playwright E2E testing infrastructure (smoke, auth, navigation, dashboard tags)
 - ✅ Comprehensive test coverage (79 unit tests, 9 E2E auth tests)
 - ✅ Firebase Authentication (email/password signup/login)

@@ -318,7 +318,7 @@ transitionTimingFunction: {
 4. Update tailwind.config.js with shadows
 5. Update index.css with CSS variables
 
-### Phase 2: Navbar Component (TDD)
+### Phase 2: Navbar Component
 1. Create test file with first test (renders)
 2. Create minimal component to pass
 3. Add test for logo text
@@ -330,7 +330,7 @@ transitionTimingFunction: {
 9. Add test for background color
 10. Refactor/style
 
-### Phase 3: Hero Component Update (TDD)
+### Phase 3: Hero Component Update
 1. Update tests for new headline text
 2. Update component to pass
 3. Update tests for new tagline
@@ -342,7 +342,7 @@ transitionTimingFunction: {
 9. Update tests for styling (background, uppercase)
 10. Style and refactor
 
-### Phase 4: ValueProps Component (TDD)
+### Phase 4: ValueProps Component
 1. Create test file with first test (renders)
 2. Create minimal component
 3. Add test for 3 cards
@@ -351,7 +351,7 @@ transitionTimingFunction: {
 6. Add tests for Card 3 content
 7. Implement and style
 
-### Phase 5: SocialProof Component (TDD)
+### Phase 5: SocialProof Component
 1. Create test file with first test (renders)
 2. Create minimal component
 3. Add test for quote text

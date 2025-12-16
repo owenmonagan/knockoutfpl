@@ -12,7 +12,7 @@ Before starting E2E verification:
 
 2. ✅ **Feature implementation complete**
    - All code for the feature is written
-   - TDD Red-Green-Refactor cycle complete
+   - Development and testing cycle complete
 
 3. ✅ **Dev server must be running**
    - Check if server is running on http://localhost:5173

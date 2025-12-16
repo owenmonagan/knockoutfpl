@@ -2088,4 +2088,4 @@ git commit -m "chore: final cleanup for multi-league ingestion"
 - `firestore.indexes.json`
 - `firestore.rules`
 
-**Commits:** ~23 atomic commits following TDD
+**Commits:** ~23 atomic commits

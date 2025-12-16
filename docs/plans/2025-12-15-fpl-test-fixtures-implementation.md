@@ -2873,4 +2873,4 @@ This plan implements the FPL Test Fixtures Infrastructure in 4 phases with 20 ta
 - Demo mode support
 - Deploy and verify
 
-Each task follows TDD with explicit test-first steps, exact file paths, and commit messages.
+Each task includes explicit test-first steps, exact file paths, and commit messages.
