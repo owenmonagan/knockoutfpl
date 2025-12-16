@@ -1,26 +1,50 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ProfilePage } from './ProfilePage';
+import { AuthContext } from '../contexts/AuthContext';
+import * as userService from '../services/user';
 
-// Mock auth context
-vi.mock('../contexts/AuthContext', () => ({
-  useAuth: vi.fn(() => ({ user: { uid: 'test-uid' } })),
-}));
+// Mock the user service
+vi.mock('../services/user');
 
-// Mock FPL service
-vi.mock('../services/fpl', () => ({
-  getFPLTeamInfo: vi.fn(),
-}));
+const mockAuthUser = {
+  uid: 'test-user-123',
+  email: 'test@example.com',
+  displayName: 'Test User',
+};
 
-// Mock user service
-vi.mock('../services/user', () => ({
-  connectFPLTeam: vi.fn(),
-}));
+const mockAuthContext = {
+  user: mockAuthUser,
+  loading: false,
+  isAuthenticated: true,
+  connectionError: false,
+};
 
 describe('ProfilePage', () => {
-  it('should render profile page with FPL team connection', () => {
-    render(<ProfilePage />);
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-    expect(screen.getByText(/connect your fpl team/i)).toBeInTheDocument();
+  it('fetches user profile on mount', async () => {
+    const mockGetUserProfile = vi.mocked(userService.getUserProfile);
+    mockGetUserProfile.mockResolvedValue({
+      userId: 'test-user-123',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      fplTeamId: 158256,
+      fplTeamName: 'Test FC',
+      wins: 0,
+      losses: 0,
+      createdAt: { toDate: () => new Date() } as any,
+      updatedAt: { toDate: () => new Date() } as any,
+    });
+
+    render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <ProfilePage />
+      </AuthContext.Provider>
+    );
+
+    expect(mockGetUserProfile).toHaveBeenCalledWith('test-user-123');
   });
 });

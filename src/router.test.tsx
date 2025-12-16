@@ -83,7 +83,7 @@ describe('Router', () => {
     expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
   });
 
-  it('should render profile page at /profile when authenticated', () => {
+  it('should render profile page at /profile when authenticated', async () => {
     const testRouter = createMemoryRouter(router, {
       initialEntries: ['/profile'],
     });
@@ -105,7 +105,9 @@ describe('Router', () => {
         <RouterProvider router={testRouter} />
       </AuthProvider>
     );
-    expect(screen.getByText(/connect your fpl team/i)).toBeInTheDocument();
+
+    // ProfilePage now shows "Profile" heading after loading
+    expect(await screen.findByRole('heading', { name: /profile/i })).toBeInTheDocument();
   });
 
 });

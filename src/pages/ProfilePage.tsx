@@ -1,11 +1,31 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { FPLTeamConnect } from '../components/profile/FPLTeamConnect';
+import { getUserProfile } from '../services/user';
 import { Skeleton } from '../components/ui/skeleton';
+import type { User } from '../types/user';
 
 export function ProfilePage() {
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
+  const [userProfile, setUserProfile] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (!user) {
+  useEffect(() => {
+    async function fetchProfile() {
+      if (!authUser?.uid) return;
+
+      setIsLoading(true);
+      try {
+        const profile = await getUserProfile(authUser.uid);
+        setUserProfile(profile);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchProfile();
+  }, [authUser?.uid]);
+
+  if (!authUser || isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 space-y-4">
         <Skeleton className="h-8 w-[200px]" />
@@ -15,8 +35,9 @@ export function ProfilePage() {
   }
 
   return (
-    <div>
-      <FPLTeamConnect userId={user.uid} />
-    </div>
+    <main className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Profile</h1>
+      {/* Will add FPLConnectionCard next */}
+    </main>
   );
 }
