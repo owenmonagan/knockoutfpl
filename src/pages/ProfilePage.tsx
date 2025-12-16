@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserProfile, connectFPLTeam } from '../services/user';
+import { getUserProfile, connectFPLTeam, updateUserProfile } from '../services/user';
 import { getFPLTeamInfo, type FPLTeamInfo } from '../services/fpl';
 import { Skeleton } from '../components/ui/skeleton';
 import { FPLConnectionCard } from '../components/dashboard/FPLConnectionCard';
+import { ProfileForm } from '../components/profile/ProfileForm';
 import type { User } from '../types/user';
 
 export function ProfilePage() {
@@ -78,6 +79,14 @@ export function ProfilePage() {
 
   const handleClearError = () => setError(null);
 
+  const handleUpdateDisplayName = async (name: string) => {
+    if (!authUser?.uid) return;
+    await updateUserProfile(authUser.uid, { displayName: name });
+    // Refresh profile
+    const profile = await getUserProfile(authUser.uid);
+    setUserProfile(profile);
+  };
+
   if (!authUser || isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 space-y-4">
@@ -90,6 +99,13 @@ export function ProfilePage() {
   return (
     <main className="container mx-auto px-4 py-8 space-y-6">
       <h1 className="text-2xl font-bold">Profile</h1>
+
+      <ProfileForm
+        displayName={userProfile?.displayName ?? ''}
+        email={userProfile?.email ?? authUser?.email ?? ''}
+        onUpdateDisplayName={handleUpdateDisplayName}
+        isLoading={false}
+      />
 
       <FPLConnectionCard
         user={userProfile}

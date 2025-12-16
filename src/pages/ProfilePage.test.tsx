@@ -212,4 +212,29 @@ describe('ProfilePage', () => {
       expect(screen.getByText(/failed to connect team/i)).toBeInTheDocument();
     });
   });
+
+  it('renders ProfileForm with user data', async () => {
+    const mockGetUserProfile = vi.mocked(userService.getUserProfile);
+    mockGetUserProfile.mockResolvedValue({
+      userId: 'test-user-123',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      fplTeamId: 0,
+      fplTeamName: '',
+      wins: 0,
+      losses: 0,
+      createdAt: { toDate: () => new Date() } as any,
+      updatedAt: { toDate: () => new Date() } as any,
+    });
+
+    render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <ProfilePage />
+      </AuthContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Account Details')).toBeInTheDocument();
+    });
+  });
 });
