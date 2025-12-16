@@ -1,8 +1,26 @@
 import { Link } from 'react-router-dom';
+import { TrophyAnimation } from './TrophyAnimation';
+import { BracketMotif } from './BracketMotif';
+import { ShineEffect } from './ShineEffect';
 
 export function Hero() {
   return (
-    <section className="flex min-h-[80vh] flex-col items-center justify-center bg-midnight px-4 py-16 md:py-20 lg:py-32">
+    <section className="relative flex min-h-[80vh] flex-col items-center justify-center overflow-hidden bg-midnight px-4 py-16 md:py-20 lg:py-32">
+      {/* Animation container - trophy crowning the bracket */}
+      <div className="relative mb-8 flex flex-col items-center">
+        {/* Trophy rises to the top */}
+        <div className="relative">
+          <TrophyAnimation />
+          <ShineEffect />
+        </div>
+
+        {/* Bracket motif below trophy */}
+        <div className="-mt-2">
+          <BracketMotif />
+        </div>
+      </div>
+
+      {/* Content */}
       <div className="flex flex-col items-center gap-6 text-center">
         <h1 className="text-4xl font-bold uppercase tracking-tight text-white sm:text-5xl md:text-6xl lg:text-display-xl">
           KNOCKOUT FPL

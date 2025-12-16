@@ -44,4 +44,19 @@ describe('Hero', () => {
     const cta = screen.getByRole('link', { name: /enter the arena/i });
     expect(cta).toHaveAttribute('href', '/signup');
   });
+
+  it('renders trophy animation', () => {
+    renderHero();
+    expect(document.querySelector('[data-testid="trophy-container"]')).toBeInTheDocument();
+  });
+
+  it('renders bracket motif', () => {
+    renderHero();
+    expect(screen.getByLabelText(/tournament bracket/i)).toBeInTheDocument();
+  });
+
+  it('renders shine effect', () => {
+    renderHero();
+    expect(document.querySelector('[data-testid="shine-burst"]')).toBeInTheDocument();
+  });
 });
