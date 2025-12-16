@@ -4,6 +4,14 @@ import { CheckCircle } from 'lucide-react';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/ui/dialog';
 import { getFPLTeamInfo, type FPLTeamInfo } from '../services/fpl';
 import { useAuth } from '../contexts/AuthContext';
 import { connectFPLTeam } from '../services/user';
@@ -74,12 +82,30 @@ export function ConnectPage() {
             onChange={(e) => setTeamId(e.target.value)}
             placeholder="158256"
           />
-          <button
-            type="button"
-            className="text-sm text-muted-foreground underline hover:text-foreground"
-          >
-            Where's my Team ID?
-          </button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <button
+                type="button"
+                className="text-sm text-muted-foreground underline hover:text-foreground"
+              >
+                Where's my Team ID?
+              </button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Finding Your Team ID</DialogTitle>
+              </DialogHeader>
+              <DialogDescription asChild>
+                <div className="space-y-4">
+                  <p>Your Team ID is in the FPL URL:</p>
+                  <code className="block bg-muted p-2 rounded text-sm">
+                    fantasy.premierleague.com/entry/<strong>[THIS NUMBER]</strong>/event/1
+                  </code>
+                  <p>Or in the FPL app: Team → Team Details → Your Team ID</p>
+                </div>
+              </DialogDescription>
+            </DialogContent>
+          </Dialog>
           {error && (
             <p className="text-sm text-destructive">{error}</p>
           )}

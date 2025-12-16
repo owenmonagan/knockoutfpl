@@ -7,6 +7,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ComparePage } from './pages/ComparePage';
 import { LeaguePage } from './pages/LeaguePage';
+import { ConnectPage } from './pages/ConnectPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 export const router: RouteObject[] = [
@@ -25,6 +26,14 @@ export const router: RouteObject[] = [
   {
     path: '/forgot-password',
     element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/connect',
+    element: (
+      <ProtectedRoute>
+        <ConnectPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/compare',

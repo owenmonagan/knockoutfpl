@@ -149,6 +149,22 @@ describe('ConnectPage', () => {
     });
   });
 
+  it('opens help modal when clicking "Where\'s my Team ID?"', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <BrowserRouter>
+        <ConnectPage />
+      </BrowserRouter>
+    );
+
+    await user.click(screen.getByText("Where's my Team ID?"));
+
+    await waitFor(() => {
+      expect(screen.getByText(/fantasy.premierleague.com\/entry/)).toBeInTheDocument();
+    });
+  });
+
   it('saves team to Firestore and redirects to /leagues', async () => {
     const user = userEvent.setup();
     vi.useFakeTimers({ shouldAdvanceTime: true });
