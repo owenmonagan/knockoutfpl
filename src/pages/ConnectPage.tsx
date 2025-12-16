@@ -1,10 +1,61 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle } from 'lucide-react';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
+import { getFPLTeamInfo, type FPLTeamInfo } from '../services/fpl';
+import { useAuth } from '../contexts/AuthContext';
+import { connectFPLTeam } from '../services/user';
 
 export function ConnectPage() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [teamId, setTeamId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [teamInfo, setTeamInfo] = useState<FPLTeamInfo | null>(null);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async () => {
+    if (!user?.uid) return;
+
+    setIsLoading(true);
+    setError('');
+    try {
+      const info = await getFPLTeamInfo(Number(teamId));
+      await connectFPLTeam(user.uid, info.teamId);
+      setTeamInfo(info);
+    } catch {
+      setError('Team not found. Check your ID and try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Auto-redirect after success
+  useEffect(() => {
+    if (teamInfo) {
+      const timer = setTimeout(() => {
+        navigate('/leagues');
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [teamInfo, navigate]);
+
+  if (teamInfo) {
+    return (
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-md mx-auto text-center space-y-4">
+          <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+          <h2 className="text-xl font-bold">{teamInfo.teamName}</h2>
+          <p className="text-muted-foreground">
+            Overall Rank: {teamInfo.overallRank?.toLocaleString()}
+          </p>
+          <p className="text-lg font-medium">Let's go.</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -29,10 +80,19 @@ export function ConnectPage() {
           >
             Where's my Team ID?
           </button>
+          {error && (
+            <p className="text-sm text-destructive">{error}</p>
+          )}
         </div>
 
-        <Button type="button" className="w-full" size="lg">
-          Find My Team
+        <Button
+          type="button"
+          className="w-full"
+          size="lg"
+          onClick={handleSubmit}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Finding your team...' : 'Find My Team'}
         </Button>
       </div>
     </main>
