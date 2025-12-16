@@ -1,23 +1,66 @@
-import { initializeApp, cert, type ServiceAccount } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { Firestore, Timestamp } from '@google-cloud/firestore';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { resolve, join } from 'path';
+import { homedir } from 'os';
 import type { FPLSnapshot } from '../src/types/fpl-snapshot';
 import type { BootstrapResponse, FPLElement } from '../src/types/fpl-api';
 
-// Initialize Firebase Admin
-function initFirebase() {
+// Firebase CLI OAuth client credentials (public - same as firebase-tools uses)
+const FIREBASE_CLI_CLIENT_ID = '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com';
+const FIREBASE_CLI_CLIENT_SECRET = 'j9iVZfS8kkCEFUPaAeJV0sAi';
+const PROJECT_ID = 'knockoutfpl-dev';
+
+// Create Firestore client with appropriate credentials
+function createFirestoreClient(): Firestore {
   const serviceAccountPath = resolve(process.cwd(), 'service-account.json');
 
+  // Option 1: Use service account if available
   if (existsSync(serviceAccountPath)) {
-    const serviceAccount = JSON.parse(
-      readFileSync(serviceAccountPath, 'utf-8')
-    ) as ServiceAccount;
-    initializeApp({ credential: cert(serviceAccount) });
-  } else {
-    // Use Application Default Credentials (works with gcloud auth)
-    initializeApp({ projectId: 'knockoutfpl' });
+    console.log('Using service account credentials...');
+    return new Firestore({
+      projectId: PROJECT_ID,
+      keyFilename: serviceAccountPath,
+    });
   }
+
+  // Option 2: Try to use Firebase CLI refresh token by creating an ADC file
+  const firebaseConfigPath = join(homedir(), '.config', 'configstore', 'firebase-tools.json');
+  if (existsSync(firebaseConfigPath)) {
+    try {
+      const firebaseConfig = JSON.parse(readFileSync(firebaseConfigPath, 'utf-8'));
+      const firebaseRefreshToken = firebaseConfig.tokens?.refresh_token;
+
+      if (firebaseRefreshToken) {
+        console.log('Using Firebase CLI credentials...');
+
+        // Create ADC file from Firebase CLI token
+        const adcDir = join(homedir(), '.config', 'gcloud');
+        const adcPath = join(adcDir, 'application_default_credentials.json');
+
+        // Create directory if it doesn't exist
+        if (!existsSync(adcDir)) {
+          mkdirSync(adcDir, { recursive: true });
+        }
+
+        // Write ADC file
+        const adcContent = {
+          client_id: FIREBASE_CLI_CLIENT_ID,
+          client_secret: FIREBASE_CLI_CLIENT_SECRET,
+          refresh_token: firebaseRefreshToken,
+          type: 'authorized_user',
+        };
+        writeFileSync(adcPath, JSON.stringify(adcContent, null, 2));
+
+        return new Firestore({ projectId: PROJECT_ID });
+      }
+    } catch (e) {
+      console.warn('Could not load Firebase CLI credentials:', e);
+    }
+  }
+
+  // Option 3: Fallback to Application Default Credentials
+  console.log('Using Application Default Credentials...');
+  return new Firestore({ projectId: PROJECT_ID });
 }
 
 // Parse CLI arguments
@@ -40,7 +83,7 @@ function parseArgs() {
 
 // Fetch and reassemble snapshot from Firestore
 async function fetchSnapshot(
-  db: FirebaseFirestore.Firestore,
+  db: Firestore,
   docId: string
 ): Promise<FPLSnapshot> {
   const snapshotRef = db.collection('fpl_snapshots').doc(docId);
@@ -126,7 +169,7 @@ async function fetchSnapshot(
 
 // Find snapshot by criteria
 async function findSnapshot(
-  db: FirebaseFirestore.Firestore,
+  db: Firestore,
   options: { id?: string; latest?: boolean; gameweek?: number }
 ): Promise<string> {
   if (options.id) {
@@ -140,7 +183,7 @@ async function findSnapshot(
     query = snapshotsRef
       .where('gameweek', '==', options.gameweek)
       .orderBy('capturedAt', 'desc')
-      .limit(1) as FirebaseFirestore.Query<FirebaseFirestore.DocumentData>;
+      .limit(1);
   }
 
   const snapshot = await query.get();
@@ -184,8 +227,7 @@ async function downloadSnapshot() {
     process.exit(1);
   }
 
-  initFirebase();
-  const db = getFirestore();
+  const db = createFirestoreClient();
 
   try {
     // Find snapshot to download

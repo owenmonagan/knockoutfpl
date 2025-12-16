@@ -2,80 +2,60 @@
 
 ## Overview
 
-The test fixtures system downloads FPL API snapshots from Firestore for use in tests. To download snapshots, you need Firebase credentials configured.
+The test fixtures system downloads FPL API snapshots from Firestore for use in tests.
 
 ## Current Status
 
-✅ **Implemented:**
+✅ **Fully Implemented:**
 - Download script (`scripts/fixtures-download.ts`)
+- List script (`scripts/fixtures-list.ts`)
 - Scenario creation script (`scripts/fixtures-scenario.ts`)
 - Directory structure created
 - README documentation
+- Firebase CLI credentials support (automatic)
 
-❌ **Blocked - Missing Credentials:**
-- Cannot download snapshots from Firestore
-- Cannot create initial test scenarios
+## Authentication
 
-## Authentication Required
+The scripts automatically use your Firebase CLI credentials if you're logged in. No additional setup required!
 
-The download script needs Firebase Admin SDK credentials to read from Firestore. There are two options:
+### Automatic: Firebase CLI (Recommended)
 
-### Option 1: Service Account JSON (Recommended for Local Development)
+If you're already logged into Firebase CLI, the scripts will automatically use your credentials:
+
+```bash
+# Check if you're logged in
+firebase projects:list
+
+# If not logged in:
+firebase login
+```
+
+The scripts create Application Default Credentials from your Firebase CLI token automatically.
+
+### Alternative: Service Account JSON
+
+For CI/CD or if you prefer explicit credentials:
 
 1. **Generate a service account key from Firebase Console:**
    - Go to [Firebase Console](https://console.firebase.google.com/)
-   - Select your project (knockoutfpl)
+   - Select your project (knockoutfpl-dev)
    - Go to Project Settings > Service Accounts
    - Click "Generate New Private Key"
    - Save as `service-account.json` in project root
 
-2. **Place the file in project root:**
-   ```bash
-   # Make sure it's in .gitignore (it already is)
-   ls service-account.json
-   ```
+2. **The scripts will automatically use it** (takes priority over Firebase CLI credentials)
 
-3. **The download script will automatically use it:**
-   ```typescript
-   // From scripts/fixtures-download.ts:10-16
-   const serviceAccountPath = resolve(process.cwd(), 'service-account.json');
+### Alternative: gcloud CLI
 
-   if (existsSync(serviceAccountPath)) {
-     const serviceAccount = JSON.parse(
-       readFileSync(serviceAccountPath, 'utf-8')
-     ) as ServiceAccount;
-     initializeApp({ credential: cert(serviceAccount) });
-   }
-   ```
+```bash
+# Install gcloud
+brew install --cask google-cloud-sdk
 
-### Option 2: Application Default Credentials (gcloud CLI)
+# Authenticate
+gcloud auth application-default login
+```
 
-1. **Install gcloud CLI:**
-   ```bash
-   # macOS
-   brew install --cask google-cloud-sdk
-
-   # Other platforms
-   # See: https://cloud.google.com/sdk/docs/install
-   ```
-
-2. **Authenticate:**
-   ```bash
-   gcloud auth application-default login
-   ```
-
-3. **The download script will use ADC:**
-   ```typescript
-   // From scripts/fixtures-download.ts:18-20
-   else {
-     // Use Application Default Credentials (works with gcloud auth)
-     initializeApp({ projectId: 'knockoutfpl' });
-   }
-   ```
-
-## Once Authenticated
-
-After setting up credentials, you can:
+## Usage
 
 ### 1. List Available Snapshots
 
@@ -119,30 +99,26 @@ npm run fixtures:scenario gw16-2025-12-15T14-00 gw-finished
 | `gw-in-progress` | Gameweek in progress, matches being played | Snapshot during matches |
 | `gw-finished` | Gameweek complete, all scores finalized | Snapshot after all matches |
 
-### 4. Commit Scenarios
+### 4. Use in Tests
+
+```typescript
+import { loadScenario, listScenarios } from '@test-fixtures';
+
+// Load a scenario
+const snapshot = loadScenario('gw-in-progress');
+
+// Access data
+console.log(snapshot.gameweek);        // 16
+console.log(snapshot.gameweekStatus);  // 'in_progress'
+console.log(snapshot.teamData);        // Team data for all league members
+```
+
+### 5. Commit Scenarios
 
 ```bash
 git add test-fixtures/scenarios/
 git commit -m "feat(test-fixtures): add initial curated test scenarios"
 ```
-
-## Current Error
-
-When attempting to download without credentials:
-
-```
-❌ Error downloading snapshot: Could not load the default credentials.
-Browse to https://cloud.google.com/docs/authentication/getting-started
-for more information.
-```
-
-## Next Steps
-
-1. Choose authentication method (Option 1 or 2 above)
-2. Set up credentials
-3. Download snapshots for different gameweek states
-4. Create curated scenarios
-5. Commit scenarios to git
 
 ## Security Notes
 

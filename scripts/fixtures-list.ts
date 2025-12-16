@@ -1,26 +1,69 @@
-import { initializeApp, cert, type ServiceAccount } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import { existsSync, readFileSync } from 'fs';
-import { resolve } from 'path';
+import { Firestore } from '@google-cloud/firestore';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { resolve, join } from 'path';
+import { homedir } from 'os';
 
-// Initialize Firebase Admin
-function initFirebase() {
+// Firebase CLI OAuth client credentials (public - same as firebase-tools uses)
+const FIREBASE_CLI_CLIENT_ID = '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com';
+const FIREBASE_CLI_CLIENT_SECRET = 'j9iVZfS8kkCEFUPaAeJV0sAi';
+const PROJECT_ID = 'knockoutfpl-dev';
+
+// Create Firestore client with appropriate credentials
+function createFirestoreClient(): Firestore {
   const serviceAccountPath = resolve(process.cwd(), 'service-account.json');
 
+  // Option 1: Use service account if available
   if (existsSync(serviceAccountPath)) {
-    const serviceAccount = JSON.parse(
-      readFileSync(serviceAccountPath, 'utf-8')
-    ) as ServiceAccount;
-    initializeApp({ credential: cert(serviceAccount) });
-  } else {
-    // Use Application Default Credentials (works with gcloud auth)
-    initializeApp({ projectId: 'knockoutfpl' });
+    console.log('Using service account credentials...');
+    return new Firestore({
+      projectId: PROJECT_ID,
+      keyFilename: serviceAccountPath,
+    });
   }
+
+  // Option 2: Try to use Firebase CLI refresh token by creating an ADC file
+  const firebaseConfigPath = join(homedir(), '.config', 'configstore', 'firebase-tools.json');
+  if (existsSync(firebaseConfigPath)) {
+    try {
+      const firebaseConfig = JSON.parse(readFileSync(firebaseConfigPath, 'utf-8'));
+      const firebaseRefreshToken = firebaseConfig.tokens?.refresh_token;
+
+      if (firebaseRefreshToken) {
+        console.log('Using Firebase CLI credentials...');
+
+        // Create ADC file from Firebase CLI token
+        const adcDir = join(homedir(), '.config', 'gcloud');
+        const adcPath = join(adcDir, 'application_default_credentials.json');
+
+        // Create directory if it doesn't exist
+        if (!existsSync(adcDir)) {
+          mkdirSync(adcDir, { recursive: true });
+        }
+
+        // Write ADC file
+        const adcContent = {
+          client_id: FIREBASE_CLI_CLIENT_ID,
+          client_secret: FIREBASE_CLI_CLIENT_SECRET,
+          refresh_token: firebaseRefreshToken,
+          type: 'authorized_user',
+        };
+        writeFileSync(adcPath, JSON.stringify(adcContent, null, 2));
+        console.log(`Created ADC at: ${adcPath}`);
+
+        return new Firestore({ projectId: PROJECT_ID });
+      }
+    } catch (e) {
+      console.warn('Could not load Firebase CLI credentials:', e);
+    }
+  }
+
+  // Option 3: Fallback to Application Default Credentials
+  console.log('Using Application Default Credentials...');
+  return new Firestore({ projectId: PROJECT_ID });
 }
 
 async function listSnapshots() {
-  initFirebase();
-  const db = getFirestore();
+  const db = createFirestoreClient();
 
   console.log('Fetching snapshots from Firestore...\n');
 
