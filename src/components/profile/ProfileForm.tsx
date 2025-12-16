@@ -14,6 +14,7 @@ export interface ProfileFormProps {
 export function ProfileForm({ displayName, email, onUpdateDisplayName, isLoading }: ProfileFormProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(displayName);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleEditClick = () => {
     setEditedName(displayName);
@@ -23,6 +24,16 @@ export function ProfileForm({ displayName, email, onUpdateDisplayName, isLoading
   const handleCancelClick = () => {
     setIsEditing(false);
     setEditedName(displayName);
+  };
+
+  const handleSaveClick = async () => {
+    setIsSaving(true);
+    try {
+      await onUpdateDisplayName(editedName);
+      setIsEditing(false);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -44,8 +55,10 @@ export function ProfileForm({ displayName, email, onUpdateDisplayName, isLoading
                 />
               </div>
               <div className="flex gap-2">
-                <Button size="sm">Save</Button>
-                <Button variant="outline" size="sm" onClick={handleCancelClick}>
+                <Button size="sm" onClick={handleSaveClick} disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save'}
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleCancelClick} disabled={isSaving}>
                   Cancel
                 </Button>
               </div>
