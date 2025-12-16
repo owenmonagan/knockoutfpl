@@ -79,4 +79,78 @@ describe('MatchCard', () => {
     render(<MatchCard match={mockMatch} participants={mockParticipants} gameweek={16} />);
     expect(screen.getByText(/GW ?16/i)).toBeInTheDocument();
   });
+
+  it('should display stakes callout when user is winning', () => {
+    const matchWithScores: Match = {
+      ...mockMatch,
+      player1: { fplTeamId: 1, seed: 1, score: 65 },
+      player2: { fplTeamId: 2, seed: 4, score: 58 },
+      winnerId: 1,
+    };
+    render(
+      <MatchCard
+        match={matchWithScores}
+        participants={mockParticipants}
+        gameweek={16}
+        isUserMatch={true}
+        userTeamId={1}
+      />
+    );
+    expect(screen.getByText('⚡ 7 points from elimination')).toBeInTheDocument();
+  });
+
+  it('should show gold border when it is user match', () => {
+    const matchWithScores: Match = {
+      ...mockMatch,
+      player1: { fplTeamId: 1, seed: 1, score: 65 },
+      player2: { fplTeamId: 2, seed: 4, score: 58 },
+      winnerId: 1,
+    };
+    const { container } = render(
+      <MatchCard
+        match={matchWithScores}
+        participants={mockParticipants}
+        gameweek={16}
+        isUserMatch={true}
+        userTeamId={1}
+      />
+    );
+    const card = container.querySelector('.border-amber-500');
+    expect(card).toBeInTheDocument();
+  });
+
+  it('should show checkmark next to winner score', () => {
+    const matchWithScores: Match = {
+      ...mockMatch,
+      player1: { fplTeamId: 1, seed: 1, score: 65 },
+      player2: { fplTeamId: 2, seed: 4, score: 58 },
+      winnerId: 1,
+    };
+    render(
+      <MatchCard
+        match={matchWithScores}
+        participants={mockParticipants}
+        gameweek={16}
+      />
+    );
+    expect(screen.getByText('✓')).toBeInTheDocument();
+  });
+
+  it('should reduce opacity of loser row', () => {
+    const matchWithScores: Match = {
+      ...mockMatch,
+      player1: { fplTeamId: 1, seed: 1, score: 65 },
+      player2: { fplTeamId: 2, seed: 4, score: 58 },
+      winnerId: 1,
+    };
+    render(
+      <MatchCard
+        match={matchWithScores}
+        participants={mockParticipants}
+        gameweek={16}
+      />
+    );
+    const loserRow = screen.getByText('Team Beta').closest('.opacity-50');
+    expect(loserRow).toBeInTheDocument();
+  });
 });

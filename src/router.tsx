@@ -7,6 +7,8 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ComparePage } from './pages/ComparePage';
 import { LeaguePage } from './pages/LeaguePage';
+import { LeaguesPage } from './pages/LeaguesPage';
+import { KnockoutPage } from './pages/KnockoutPage';
 import { ConnectPage } from './pages/ConnectPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
@@ -56,10 +58,26 @@ export const router: RouteObject[] = [
     ),
   },
   {
+    path: '/leagues',
+    element: (
+      <ProtectedRoute>
+        <LeaguesPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: '/league/:leagueId',
     element: (
       <ProtectedRoute>
         <LeaguePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/knockout/:leagueId',
+    element: (
+      <ProtectedRoute>
+        <KnockoutPage />
       </ProtectedRoute>
     ),
   },

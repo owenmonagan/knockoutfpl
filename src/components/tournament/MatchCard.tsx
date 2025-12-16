@@ -2,14 +2,17 @@
 import { Badge } from '../ui/badge';
 import { Card, CardContent } from '../ui/card';
 import type { Match, Participant } from '../../types/tournament';
+import { getStakesCallout } from '../../lib/stakes';
 
 interface MatchCardProps {
   match: Match;
   participants: Participant[];
   gameweek: number;
+  isUserMatch?: boolean;
+  userTeamId?: number;
 }
 
-export function MatchCard({ match, participants, gameweek }: MatchCardProps) {
+export function MatchCard({ match, participants, gameweek, isUserMatch, userTeamId }: MatchCardProps) {
   const getParticipantById = (fplTeamId: number | null): Participant | null => {
     if (!fplTeamId) return null;
     return participants.find((p) => p.fplTeamId === fplTeamId) || null;
@@ -18,10 +21,19 @@ export function MatchCard({ match, participants, gameweek }: MatchCardProps) {
   const player1 = match.player1 ? getParticipantById(match.player1.fplTeamId) : null;
   const player2 = match.player2 ? getParticipantById(match.player2.fplTeamId) : null;
 
+  const stakesCallout = isUserMatch && match.player1?.score !== null && match.player2?.score !== null
+    ? getStakesCallout(
+        userTeamId === match.player1?.fplTeamId ? match.player1.score : match.player2!.score,
+        userTeamId === match.player1?.fplTeamId ? match.player2!.score : match.player1.score,
+        true
+      )
+    : '';
+
   const renderPlayerRow = (
     player: typeof match.player1,
     participant: Participant | null,
-    isWinner: boolean
+    isWinner: boolean,
+    isLoser: boolean
   ) => {
     if (!player || !participant) {
       return (
@@ -32,27 +44,45 @@ export function MatchCard({ match, participants, gameweek }: MatchCardProps) {
     }
 
     return (
-      <div className={`flex justify-between items-center py-2 ${isWinner ? 'font-semibold' : ''}`}>
+      <div className={`flex justify-between items-center py-2 ${isWinner ? 'font-semibold' : ''} ${isLoser ? 'opacity-50' : ''}`}>
         <div className="flex items-center gap-2">
           <span>{participant.fplTeamName}</span>
           <span className="text-muted-foreground text-sm">({participant.seed})</span>
         </div>
-        {player.score !== null && <span className="text-lg">{player.score}</span>}
+        {player.score !== null && (
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{player.score}</span>
+            {isWinner && <span className="text-green-500">✓</span>}
+          </div>
+        )}
       </div>
     );
   };
 
   return (
-    <Card>
+    <Card className={isUserMatch ? 'border-2 border-amber-500' : ''}>
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
           <Badge variant="outline">GW {gameweek}</Badge>
         </div>
         <div className="space-y-1">
-          {renderPlayerRow(match.player1, player1, match.winnerId === match.player1?.fplTeamId)}
+          {renderPlayerRow(
+            match.player1,
+            player1,
+            match.winnerId === match.player1?.fplTeamId,
+            match.winnerId !== null && match.winnerId !== match.player1?.fplTeamId
+          )}
           <div className="border-t" />
-          {renderPlayerRow(match.player2, player2, match.winnerId === match.player2?.fplTeamId)}
+          {renderPlayerRow(
+            match.player2,
+            player2,
+            match.winnerId === match.player2?.fplTeamId,
+            match.winnerId !== null && match.winnerId !== match.player2?.fplTeamId
+          )}
         </div>
+        {stakesCallout && (
+          <p className="text-sm font-medium text-amber-600 mt-2">{stakesCallout}</p>
+        )}
       </CardContent>
     </Card>
   );

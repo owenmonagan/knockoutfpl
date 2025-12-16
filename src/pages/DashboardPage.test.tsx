@@ -1,41 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { DashboardPage } from './DashboardPage';
 import * as AuthContext from '../contexts/AuthContext';
-import * as userService from '../services/user';
-import * as fplService from '../services/fpl';
 
-// Helper to render with router
-const renderWithRouter = (component: React.ReactElement) => {
-  return render(<BrowserRouter>{component}</BrowserRouter>);
-};
+const mockNavigate = vi.fn();
 
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: vi.fn(),
-}));
-
-vi.mock('../services/user', () => ({
-  getUserProfile: vi.fn(),
-  connectFPLTeam: vi.fn(),
-  updateUserProfile: vi.fn(),
-}));
-
-vi.mock('../services/fpl', () => ({
-  getFPLTeamInfo: vi.fn(),
-  getUserMiniLeagues: vi.fn(),
 }));
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useNavigate: vi.fn(),
+    useNavigate: () => mockNavigate,
   };
 });
 
 describe('DashboardPage', () => {
   beforeEach(() => {
+    mockNavigate.mockClear();
     // Default: user not authenticated
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       user: null,
@@ -46,32 +32,46 @@ describe('DashboardPage', () => {
 
   describe('Basic Page Structure', () => {
     it('renders with main element', () => {
-      render(<DashboardPage />);
+      render(
+        <BrowserRouter>
+          <DashboardPage />
+        </BrowserRouter>
+      );
       const main = screen.getByRole('main');
       expect(main).toBeInTheDocument();
     });
 
     it('shows "Dashboard" heading', () => {
-      render(<DashboardPage />);
+      render(
+        <BrowserRouter>
+          <DashboardPage />
+        </BrowserRouter>
+      );
       const heading = screen.getByRole('heading', { name: /dashboard/i });
       expect(heading).toBeInTheDocument();
     });
 
     it('has container with proper spacing', () => {
-      render(<DashboardPage />);
+      render(
+        <BrowserRouter>
+          <DashboardPage />
+        </BrowserRouter>
+      );
       const main = screen.getByRole('main');
-      // Check for container classes (max-w, mx-auto, padding)
       expect(main).toHaveClass('container');
     });
 
     it('shows welcome message', () => {
-      render(<DashboardPage />);
+      render(
+        <BrowserRouter>
+          <DashboardPage />
+        </BrowserRouter>
+      );
       const welcome = screen.getByText(/welcome/i);
       expect(welcome).toBeInTheDocument();
     });
 
     it("displays user's display name in welcome message", () => {
-      // Mock authenticated user with display name
       vi.mocked(AuthContext.useAuth).mockReturnValue({
         user: {
           uid: 'test-uid',
@@ -82,145 +82,40 @@ describe('DashboardPage', () => {
         isAuthenticated: true,
       });
 
-      render(<DashboardPage />);
+      render(
+        <BrowserRouter>
+          <DashboardPage />
+        </BrowserRouter>
+      );
       const welcome = screen.getByText(/welcome back, test user/i);
       expect(welcome).toBeInTheDocument();
     });
   });
 
-  describe('FPL Connection Card', () => {
-    it('renders FPLConnectionCard component', async () => {
-      vi.mocked(AuthContext.useAuth).mockReturnValue({
-        user: {
-          uid: 'test-uid',
-          email: 'test@example.com',
-          displayName: 'Test User',
-        } as any,
-        loading: false,
-        isAuthenticated: true,
-      });
-
-      // Mock getUserProfile to resolve immediately
-      vi.mocked(userService.getUserProfile).mockResolvedValue({
-        userId: 'test-uid',
-        fplTeamId: 0,
-        fplTeamName: '',
-        email: 'test@example.com',
-        displayName: 'Test User',
-        wins: 0,
-        losses: 0,
-        createdAt: {} as any,
-        updatedAt: {} as any,
-      });
-
-      render(<DashboardPage />);
-
-      // Wait for loading to complete
-      await waitFor(() => {
-        const cardTitle = screen.getByRole('heading', { name: /connect your fpl team/i });
-        expect(cardTitle).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Your Leagues Section', () => {
-    it('shows "Your Leagues" section heading', async () => {
-      vi.mocked(AuthContext.useAuth).mockReturnValue({
-        user: {
-          uid: 'test-uid',
-          email: 'test@example.com',
-          displayName: 'Test User',
-        } as any,
-        loading: false,
-        isAuthenticated: true,
-      });
-
-      vi.mocked(userService.getUserProfile).mockResolvedValue({
-        userId: 'test-uid',
-        fplTeamId: 0,
-        fplTeamName: '',
-        email: 'test@example.com',
-        displayName: 'Test User',
-        wins: 0,
-        losses: 0,
-        createdAt: {} as any,
-        updatedAt: {} as any,
-      });
-
-      render(<DashboardPage />);
-
-      // Wait for loading to complete and check for "Your Leagues" heading
-      await waitFor(() => {
-        const leaguesHeading = screen.getByRole('heading', { name: /your leagues/i });
-        expect(leaguesHeading).toBeInTheDocument();
-      });
+  describe('View Leagues Button', () => {
+    it('renders View Your Leagues button', () => {
+      render(
+        <BrowserRouter>
+          <DashboardPage />
+        </BrowserRouter>
+      );
+      const button = screen.getByRole('button', { name: /view your leagues/i });
+      expect(button).toBeInTheDocument();
     });
 
-    it('should show loading state while fetching leagues', async () => {
-      vi.mocked(AuthContext.useAuth).mockReturnValue({
-        user: {
-          uid: 'test-uid',
-          email: 'test@example.com',
-          displayName: 'Test User',
-        } as any,
-        loading: false,
-        isAuthenticated: true,
-      });
+    it('navigates to /leagues when button is clicked', async () => {
+      const user = userEvent.setup();
 
-      vi.mocked(userService.getUserProfile).mockResolvedValue({
-        userId: 'test-uid',
-        fplTeamId: 123456,
-        fplTeamName: 'Test Team',
-        email: 'test@example.com',
-        displayName: 'Test User',
-        wins: 0,
-        losses: 0,
-        createdAt: {} as any,
-        updatedAt: {} as any,
-      });
+      render(
+        <BrowserRouter>
+          <DashboardPage />
+        </BrowserRouter>
+      );
 
-      // Never resolve to keep loading state
-      vi.mocked(fplService.getUserMiniLeagues).mockImplementation(() => new Promise(() => {}));
+      const button = screen.getByRole('button', { name: /view your leagues/i });
+      await user.click(button);
 
-      render(<DashboardPage />);
-
-      await waitFor(() => {
-        expect(screen.getByText(/loading leagues/i)).toBeInTheDocument();
-      });
-    });
-
-    it('should show leagues when loaded', async () => {
-      vi.mocked(AuthContext.useAuth).mockReturnValue({
-        user: {
-          uid: 'test-uid',
-          email: 'test@example.com',
-          displayName: 'Test User',
-        } as any,
-        loading: false,
-        isAuthenticated: true,
-      });
-
-      vi.mocked(userService.getUserProfile).mockResolvedValue({
-        userId: 'test-uid',
-        fplTeamId: 123456,
-        fplTeamName: 'Test Team',
-        email: 'test@example.com',
-        displayName: 'Test User',
-        wins: 0,
-        losses: 0,
-        createdAt: {} as any,
-        updatedAt: {} as any,
-      });
-
-      vi.mocked(fplService.getUserMiniLeagues).mockResolvedValue([
-        { id: 123, name: 'Test League', entryRank: 5 },
-      ]);
-
-      render(<DashboardPage />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Test League')).toBeInTheDocument();
-      });
+      expect(mockNavigate).toHaveBeenCalledWith('/leagues');
     });
   });
 });
