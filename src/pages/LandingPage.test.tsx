@@ -4,37 +4,38 @@ import { BrowserRouter } from 'react-router-dom';
 import { LandingPage } from './LandingPage';
 
 describe('LandingPage', () => {
-  it('should render the page title', () => {
-    render(
+  const renderLandingPage = () => {
+    return render(
       <BrowserRouter>
         <LandingPage />
       </BrowserRouter>
     );
+  };
 
+  it('renders Navbar', () => {
+    renderLandingPage();
+    expect(screen.getByRole('navigation')).toBeInTheDocument();
+  });
+
+  it('renders Hero headline', () => {
+    renderLandingPage();
     const heading = screen.getByRole('heading', { level: 1 });
-    expect(heading).toHaveTextContent(/knockout/i);
-    expect(heading).toHaveTextContent(/fpl/i);
+    expect(heading).toHaveTextContent('KNOCKOUT FPL');
   });
 
-  it('should render primary CTA', () => {
-    render(
-      <BrowserRouter>
-        <LandingPage />
-      </BrowserRouter>
-    );
-
-    const ctaLink = screen.getByRole('link', { name: /enter the arena/i });
-    expect(ctaLink).toBeInTheDocument();
-    expect(ctaLink).toHaveAttribute('href', '/signup');
+  it('renders Hero CTA linking to signup', () => {
+    renderLandingPage();
+    const cta = screen.getByRole('link', { name: /enter the arena/i });
+    expect(cta).toHaveAttribute('href', '/signup');
   });
 
-  it('should render the hero section with tagline', () => {
-    render(
-      <BrowserRouter>
-        <LandingPage />
-      </BrowserRouter>
-    );
+  it('renders ValueProps section', () => {
+    renderLandingPage();
+    expect(screen.getByTestId('value-props')).toBeInTheDocument();
+  });
 
-    expect(screen.getByText(/Every gameweek is a cup final/i)).toBeInTheDocument();
+  it('renders SocialProof section', () => {
+    renderLandingPage();
+    expect(screen.getByTestId('social-proof')).toBeInTheDocument();
   });
 });
