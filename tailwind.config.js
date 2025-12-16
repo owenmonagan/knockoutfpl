@@ -7,12 +7,19 @@ export default {
   ],
   theme: {
     extend: {
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
+        // Brand colors
+        midnight: '#0D1F3C',
+        navy: '#1A3A5C',
+        gold: {
+          DEFAULT: '#C9A227',
+          light: '#E8D5A3',
+        },
+        'near-black': '#1A1A1A',
+        // shadcn semantic colors (HSL format)
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -53,6 +60,26 @@ export default {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+      },
+      fontSize: {
+        'display-xl': ['64px', { lineHeight: '72px', fontWeight: '700' }],
+        'display-lg': ['48px', { lineHeight: '56px', fontWeight: '700' }],
+        'heading-1': ['32px', { lineHeight: '40px', fontWeight: '600' }],
+        'heading-2': ['24px', { lineHeight: '32px', fontWeight: '600' }],
+        'heading-3': ['20px', { lineHeight: '28px', fontWeight: '600' }],
+        'body-lg': ['18px', { lineHeight: '28px', fontWeight: '400' }],
+        'body': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+        'body-sm': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'caption': ['12px', { lineHeight: '16px', fontWeight: '400' }],
+        'score': ['28px', { lineHeight: '32px', fontWeight: '700' }],
+      },
+      boxShadow: {
+        'gold': '0 4px 14px rgba(201, 162, 39, 0.3)',
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
     },
   },
