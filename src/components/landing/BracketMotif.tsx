@@ -17,9 +17,9 @@ export function BracketMotif() {
       {/* Line from trophy down to finals */}
       <line x1="100" y1="0" x2="100" y2="12" stroke={strokeColor} strokeWidth={strokeWidth} />
 
-      {/* Finals tier - horizontal line with 2 drops */}
+      {/* Finals tier - horizontal line with 4 drops */}
       <path
-        d="M 50 12 H 150 M 50 12 V 28 M 150 12 V 28"
+        d="M 50 12 H 150 M 50 12 V 28 M 83 12 V 28 M 117 12 V 28 M 150 12 V 28"
         stroke={strokeColor}
         strokeWidth={strokeWidth}
         fill="none"
