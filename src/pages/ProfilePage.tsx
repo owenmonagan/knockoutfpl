@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserProfile } from '../services/user';
+import { getFPLTeamInfo, type FPLTeamInfo } from '../services/fpl';
 import { Skeleton } from '../components/ui/skeleton';
 import type { User } from '../types/user';
 
@@ -8,6 +9,8 @@ export function ProfilePage() {
   const { user: authUser } = useAuth();
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [fplData, setFplData] = useState<FPLTeamInfo | null>(null);
+  const [fplLoading, setFplLoading] = useState(false);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -24,6 +27,22 @@ export function ProfilePage() {
 
     fetchProfile();
   }, [authUser?.uid]);
+
+  useEffect(() => {
+    async function fetchFplData() {
+      if (!userProfile || userProfile.fplTeamId === 0) return;
+
+      setFplLoading(true);
+      try {
+        const data = await getFPLTeamInfo(userProfile.fplTeamId);
+        setFplData(data);
+      } finally {
+        setFplLoading(false);
+      }
+    }
+
+    fetchFplData();
+  }, [userProfile?.fplTeamId]);
 
   if (!authUser || isLoading) {
     return (

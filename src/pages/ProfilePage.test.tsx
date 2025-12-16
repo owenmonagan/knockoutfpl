@@ -1,11 +1,13 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ProfilePage } from './ProfilePage';
 import { AuthContext } from '../contexts/AuthContext';
 import * as userService from '../services/user';
+import * as fplService from '../services/fpl';
 
 // Mock the user service
 vi.mock('../services/user');
+vi.mock('../services/fpl');
 
 const mockAuthUser = {
   uid: 'test-user-123',
@@ -46,5 +48,72 @@ describe('ProfilePage', () => {
     );
 
     expect(mockGetUserProfile).toHaveBeenCalledWith('test-user-123');
+  });
+
+  it('fetches FPL data when user has fplTeamId', async () => {
+    const mockGetUserProfile = vi.mocked(userService.getUserProfile);
+    const mockGetFPLTeamInfo = vi.mocked(fplService.getFPLTeamInfo);
+
+    mockGetUserProfile.mockResolvedValue({
+      userId: 'test-user-123',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      fplTeamId: 158256,
+      fplTeamName: 'Test FC',
+      wins: 0,
+      losses: 0,
+      createdAt: { toDate: () => new Date() } as any,
+      updatedAt: { toDate: () => new Date() } as any,
+    });
+
+    mockGetFPLTeamInfo.mockResolvedValue({
+      teamId: 158256,
+      teamName: 'Test FC',
+      managerName: 'Test Manager',
+      gameweekPoints: 65,
+      gameweekRank: 500000,
+      overallPoints: 450,
+      overallRank: 100000,
+      teamValue: 102.5,
+    });
+
+    render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <ProfilePage />
+      </AuthContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(mockGetFPLTeamInfo).toHaveBeenCalledWith(158256);
+    });
+  });
+
+  it('does not fetch FPL data when fplTeamId is 0', async () => {
+    const mockGetUserProfile = vi.mocked(userService.getUserProfile);
+    const mockGetFPLTeamInfo = vi.mocked(fplService.getFPLTeamInfo);
+
+    mockGetUserProfile.mockResolvedValue({
+      userId: 'test-user-123',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      fplTeamId: 0,
+      fplTeamName: '',
+      wins: 0,
+      losses: 0,
+      createdAt: { toDate: () => new Date() } as any,
+      updatedAt: { toDate: () => new Date() } as any,
+    });
+
+    render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <ProfilePage />
+      </AuthContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(mockGetUserProfile).toHaveBeenCalled();
+    });
+
+    expect(mockGetFPLTeamInfo).not.toHaveBeenCalled();
   });
 });
