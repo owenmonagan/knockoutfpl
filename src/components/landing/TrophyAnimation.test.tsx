@@ -3,10 +3,10 @@ import { render, screen } from '@testing-library/react';
 import { TrophyAnimation } from './TrophyAnimation';
 
 describe('TrophyAnimation', () => {
-  it('renders an SVG trophy', () => {
+  it('renders trophy element', () => {
     render(<TrophyAnimation />);
-    const svg = document.querySelector('svg');
-    expect(svg).toBeInTheDocument();
+    const trophy = document.querySelector('.trophy-css');
+    expect(trophy).toBeInTheDocument();
   });
 
   it('has accessible label', () => {
@@ -20,9 +20,10 @@ describe('TrophyAnimation', () => {
     expect(container).toHaveClass('animate-trophy-rise');
   });
 
-  it('trophy is gold colored', () => {
+  it('includes shimmer effect overlay', () => {
     render(<TrophyAnimation />);
-    const svg = document.querySelector('svg');
-    expect(svg).toHaveAttribute('fill', '#C9A227');
+    const shimmer = document.querySelector('[data-testid="trophy-shimmer"]');
+    expect(shimmer).toBeInTheDocument();
+    expect(shimmer).toHaveClass('trophy-shimmer');
   });
 });

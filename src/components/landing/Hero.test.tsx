@@ -55,8 +55,8 @@ describe('Hero', () => {
     expect(screen.getByLabelText(/tournament bracket/i)).toBeInTheDocument();
   });
 
-  it('renders shine effect', () => {
+  it('renders trophy shimmer effect', () => {
     renderHero();
-    expect(document.querySelector('[data-testid="shine-burst"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="trophy-shimmer"]')).toBeInTheDocument();
   });
 });

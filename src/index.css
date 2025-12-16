@@ -153,10 +153,118 @@
     .animate-trophy-rise,
     .animate-shine-burst,
     .animate-shimmer,
-    .animate-bracket-fade {
+    .animate-bracket-fade,
+    .trophy-shimmer {
       animation: none;
       opacity: 1;
       transform: none;
     }
+  }
+
+  /* CSS Trophy - World Cup Style */
+  .trophy-css {
+    width: 80px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* Globe at top */
+  .trophy-globe {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #E8D5A3 0%, #C9A227 50%, #8B7355 100%);
+    border-radius: 50%;
+    position: relative;
+    box-shadow:
+      inset -4px -4px 8px rgba(0, 0, 0, 0.2),
+      inset 4px 4px 8px rgba(255, 255, 255, 0.3),
+      0 2px 8px rgba(201, 162, 39, 0.4);
+  }
+
+  /* Side handles/figures */
+  .trophy-handles {
+    width: 48px;
+    height: 24px;
+    position: relative;
+    margin-top: -4px;
+  }
+
+  .trophy-handles::before,
+  .trophy-handles::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 20px;
+    background: linear-gradient(180deg, #C9A227 0%, #8B7355 100%);
+    border-radius: 4px 4px 2px 2px;
+    top: 0;
+  }
+
+  .trophy-handles::before {
+    left: 4px;
+    transform: rotate(-15deg);
+  }
+
+  .trophy-handles::after {
+    right: 4px;
+    transform: rotate(15deg);
+  }
+
+  /* Central body/stem */
+  .trophy-body {
+    width: 16px;
+    height: 20px;
+    background: linear-gradient(180deg, #C9A227 0%, #A8892B 50%, #C9A227 100%);
+    margin-top: -8px;
+    clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+  }
+
+  /* Stepped base container */
+  .trophy-base {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2px;
+  }
+
+  .trophy-base-1 {
+    width: 24px;
+    height: 6px;
+    background: linear-gradient(180deg, #C9A227 0%, #8B7355 100%);
+  }
+
+  .trophy-base-2 {
+    width: 32px;
+    height: 6px;
+    background: linear-gradient(180deg, #A8892B 0%, #8B7355 100%);
+  }
+
+  .trophy-base-3 {
+    width: 40px;
+    height: 8px;
+    background: linear-gradient(180deg, #C9A227 0%, #6B5B45 100%);
+    border-radius: 0 0 2px 2px;
+  }
+
+  /* Shimmer overlay - only on trophy */
+  .trophy-shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      110deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.5) 40%,
+      rgba(255, 255, 255, 0.8) 50%,
+      rgba(255, 255, 255, 0.5) 60%,
+      transparent 80%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2.5s ease-in-out infinite;
+    animation-delay: 0.8s;
+    pointer-events: none;
+    mix-blend-mode: overlay;
   }
 }
