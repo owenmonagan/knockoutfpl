@@ -56,4 +56,43 @@ test.describe('Connect Page', () => {
     // Should show error (team not found or check your ID)
     await expect(page.getByText(/team not found|check.*id/i)).toBeVisible({ timeout: 10000 });
   });
+
+  test('shows success UI after valid team ID @connect @critical', async ({ page }) => {
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
+
+    // Enter valid FPL team ID
+    const input = page.getByLabel(/fpl team id/i);
+    await input.fill('158256');
+    await expect(input).toHaveValue('158256');
+
+    // Click submit button
+    await page.getByRole('button', { name: /find my team/i }).click();
+
+    // Should show loading state first
+    await expect(page.getByText(/finding your team/i)).toBeVisible();
+
+    // TC-06: Should show success confirmation with team name and "Let's go"
+    await expect(page.getByText(/o-win/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/let.*go/i)).toBeVisible();
+  });
+
+  test('auto-redirects to /leagues after success @connect @critical', async ({ page }) => {
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
+
+    // Enter valid FPL team ID
+    const input = page.getByLabel(/fpl team id/i);
+    await input.fill('158256');
+
+    // Click submit button
+    await page.getByRole('button', { name: /find my team/i }).click();
+
+    // First wait for success UI to appear (team name)
+    await expect(page.getByText(/o-win/i)).toBeVisible({ timeout: 10000 });
+
+    // TC-07: Should auto-redirect to /leagues after ~1.5s from success
+    await page.waitForURL(/\/leagues/, { timeout: 5000 });
+    await expect(page).toHaveURL(/\/leagues/);
+  });
 });

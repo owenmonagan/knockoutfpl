@@ -5,6 +5,9 @@ import { getUserProfile } from '../services/user';
 import { getUserMiniLeagues, getLeagueStandings, type FPLMiniLeague } from '../services/fpl';
 import { LeaguePickerCard } from '../components/leagues/LeaguePickerCard';
 
+// Session storage key used by ConnectPage for persisting success state
+const CONNECT_SUCCESS_STORAGE_KEY = 'connectPage_successTeamInfo';
+
 interface LeagueWithMembers extends FPLMiniLeague {
   memberCount: number;
 }
@@ -14,6 +17,11 @@ export function LeaguesPage() {
   const navigate = useNavigate();
   const [leagues, setLeagues] = useState<LeagueWithMembers[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Clear ConnectPage's sessionStorage on successful load
+  useEffect(() => {
+    sessionStorage.removeItem(CONNECT_SUCCESS_STORAGE_KEY);
+  }, []);
 
   useEffect(() => {
     async function loadLeagues() {

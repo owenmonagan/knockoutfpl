@@ -16,13 +16,28 @@ import { getFPLTeamInfo, type FPLTeamInfo } from '../services/fpl';
 import { useAuth } from '../contexts/AuthContext';
 import { connectFPLTeam } from '../services/user';
 
+// Session storage key for persisting success state across remounts
+const SUCCESS_STORAGE_KEY = 'connectPage_successTeamInfo';
+
 export function ConnectPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [teamId, setTeamId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [teamInfo, setTeamInfo] = useState<FPLTeamInfo | null>(null);
   const [error, setError] = useState('');
+
+  // Initialize teamInfo from sessionStorage to survive remounts
+  const [teamInfo, setTeamInfo] = useState<FPLTeamInfo | null>(() => {
+    try {
+      const stored = sessionStorage.getItem(SUCCESS_STORAGE_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    return null;
+  });
 
   const handleSubmit = async () => {
     if (!user?.uid) return;
@@ -32,6 +47,8 @@ export function ConnectPage() {
     try {
       const info = await getFPLTeamInfo(Number(teamId));
       await connectFPLTeam(user.uid, info.teamId);
+      // Persist to sessionStorage so it survives component remounts
+      sessionStorage.setItem(SUCCESS_STORAGE_KEY, JSON.stringify(info));
       setTeamInfo(info);
     } catch {
       setError('Team not found. Check your ID and try again.');
@@ -40,11 +57,13 @@ export function ConnectPage() {
     }
   };
 
-  // Auto-redirect after success
+  // Auto-redirect after success - persisted state survives remounts
   useEffect(() => {
     if (teamInfo) {
       const timer = setTimeout(() => {
-        navigate('/leagues');
+        // Don't clear sessionStorage here - let it persist in case we get redirected back
+        // LeaguesPage will clear it once it successfully loads
+        navigate('/leagues', { replace: true });
       }, 1500);
       return () => clearTimeout(timer);
     }

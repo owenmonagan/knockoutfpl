@@ -48,6 +48,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
   }, [user?.uid, isAuthenticated, location.pathname]);
 
+  // On /connect page, render children immediately to preserve state during form submission
+  // This prevents the skeleton from showing and unmounting ConnectPage mid-flow
+  // We check isAuthenticated OR user (to handle the brief moment when loading just finished)
+  if (location.pathname === '/connect' && (isAuthenticated || user)) {
+    return <>{children}</>;
+  }
+
   if (loading || isCheckingFpl) {
     return (
       <div className="container mx-auto px-4 py-8 space-y-4">

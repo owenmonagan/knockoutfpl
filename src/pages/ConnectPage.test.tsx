@@ -36,6 +36,11 @@ vi.mock('../services/fpl', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Reset mock implementations to default (undefined)
+  (getFPLTeamInfo as ReturnType<typeof vi.fn>).mockReset();
+  (connectFPLTeam as ReturnType<typeof vi.fn>).mockReset();
+  // Clear sessionStorage to prevent state leaking between tests
+  sessionStorage.clear();
 });
 
 describe('ConnectPage', () => {
@@ -192,7 +197,7 @@ describe('ConnectPage', () => {
     vi.advanceTimersByTime(1500);
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/leagues');
+      expect(mockNavigate).toHaveBeenCalledWith('/leagues', { replace: true });
     });
 
     vi.useRealTimers();
