@@ -62,4 +62,58 @@ test.describe('Profile Page', () => {
     await expect(input).not.toBeVisible();
     await expect(accountSection.getByText(originalName)).toBeVisible();
   });
+
+  test('shows FPL connection card on profile @profile', async ({ page }) => {
+    await page.goto('/profile');
+
+    // FPLConnectionCard should be visible - it's the second article
+    // If connected, shows team name; if not, shows "Connect Your FPL Team"
+    const fplSection = page.getByRole('article').nth(1);
+    await expect(fplSection).toBeVisible();
+  });
+
+  test('can update FPL team from profile @profile', async ({ page }) => {
+    await page.goto('/profile');
+
+    // Find the FPL section - it's the second article after Account Details
+    const fplSection = page.getByRole('article').nth(1);
+
+    // Check if Edit button is visible (team already connected)
+    const editButton = fplSection.getByRole('button', { name: /edit/i });
+    const isConnected = await editButton.isVisible({ timeout: 2000 }).catch(() => false);
+
+    if (isConnected) {
+      // Team is connected - click Edit to update
+      await editButton.click();
+
+      // Wait for input field
+      const input = fplSection.getByLabel('FPL Team ID');
+      await expect(input).toBeVisible();
+
+      // Clear and enter valid team ID (use 158256 which we know works)
+      await input.clear();
+      await input.fill('158256');
+
+      // Click Update button and wait for it to be enabled first
+      const updateButton = fplSection.getByRole('button', { name: /update/i });
+
+      // Use force click since button might auto-trigger during fill
+      await updateButton.click({ force: true }).catch(async () => {
+        // If click fails, just wait - the update might have auto-triggered
+      });
+    } else {
+      // Team not connected - enter team ID
+      const input = fplSection.getByLabel('FPL Team ID');
+      await input.fill('158256');
+
+      // Try to click Connect, but don't fail if button auto-triggers
+      const connectButton = fplSection.getByRole('button', { name: /connect/i });
+      await connectButton.click({ force: true }).catch(async () => {
+        // If click fails, connection might have auto-triggered
+      });
+    }
+
+    // Wait for success - card should show team stats
+    await expect(fplSection.getByText('GW Points')).toBeVisible({ timeout: 10000 });
+  });
 });
