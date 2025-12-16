@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ProfilePage } from './ProfilePage';
 import { AuthContext } from '../contexts/AuthContext';
@@ -115,5 +116,100 @@ describe('ProfilePage', () => {
     });
 
     expect(mockGetFPLTeamInfo).not.toHaveBeenCalled();
+  });
+
+  it('renders FPLConnectionCard with user and FPL data', async () => {
+    const mockGetUserProfile = vi.mocked(userService.getUserProfile);
+    const mockGetFPLTeamInfo = vi.mocked(fplService.getFPLTeamInfo);
+
+    mockGetUserProfile.mockResolvedValue({
+      userId: 'test-user-123',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      fplTeamId: 158256,
+      fplTeamName: 'Test FC',
+      wins: 0,
+      losses: 0,
+      createdAt: { toDate: () => new Date() } as any,
+      updatedAt: { toDate: () => new Date() } as any,
+    });
+
+    mockGetFPLTeamInfo.mockResolvedValue({
+      teamId: 158256,
+      teamName: 'Test FC',
+      managerName: 'Test Manager',
+      gameweekPoints: 65,
+      gameweekRank: 500000,
+      overallPoints: 450,
+      overallRank: 100000,
+      teamValue: 102.5,
+    });
+
+    render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <ProfilePage />
+      </AuthContext.Provider>
+    );
+
+    // FPLConnectionCard shows team name as title when connected
+    await waitFor(() => {
+      expect(screen.getByText('Test FC')).toBeInTheDocument();
+    });
+  });
+
+  it('shows loading skeleton while fetching profile', () => {
+    const mockGetUserProfile = vi.mocked(userService.getUserProfile);
+    mockGetUserProfile.mockImplementation(() => new Promise(() => {})); // Never resolves
+
+    render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <ProfilePage />
+      </AuthContext.Provider>
+    );
+
+    // Should show skeleton loading state
+    expect(document.querySelector('.animate-pulse')).toBeInTheDocument();
+  });
+
+  it('handles error when handleConnect fails', async () => {
+    const mockGetUserProfile = vi.mocked(userService.getUserProfile);
+    const mockConnectFPLTeam = vi.mocked(userService.connectFPLTeam);
+
+    mockGetUserProfile.mockResolvedValue({
+      userId: 'test-user-123',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      fplTeamId: 0,
+      fplTeamName: '',
+      wins: 0,
+      losses: 0,
+      createdAt: { toDate: () => new Date() } as any,
+      updatedAt: { toDate: () => new Date() } as any,
+    });
+
+    mockConnectFPLTeam.mockRejectedValue(new Error('Network error'));
+
+    render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <ProfilePage />
+      </AuthContext.Provider>
+    );
+
+    // Wait for initial profile load
+    await waitFor(() => {
+      expect(mockGetUserProfile).toHaveBeenCalled();
+    });
+
+    // Find and fill input using label
+    const input = screen.getByLabelText('FPL Team ID');
+    const connectButton = screen.getByRole('button', { name: /connect/i });
+
+    await userEvent.type(input, '158256');
+    await userEvent.click(connectButton);
+
+    // Error message should appear
+    await waitFor(() => {
+      expect(screen.getByText(/failed to connect team/i)).toBeInTheDocument();
+    });
   });
 });

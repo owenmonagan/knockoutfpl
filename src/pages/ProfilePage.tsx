@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserProfile } from '../services/user';
+import { getUserProfile, connectFPLTeam } from '../services/user';
 import { getFPLTeamInfo, type FPLTeamInfo } from '../services/fpl';
 import { Skeleton } from '../components/ui/skeleton';
+import { FPLConnectionCard } from '../components/dashboard/FPLConnectionCard';
 import type { User } from '../types/user';
 
 export function ProfilePage() {
@@ -11,6 +12,7 @@ export function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [fplData, setFplData] = useState<FPLTeamInfo | null>(null);
   const [fplLoading, setFplLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -20,6 +22,8 @@ export function ProfilePage() {
       try {
         const profile = await getUserProfile(authUser.uid);
         setUserProfile(profile);
+      } catch (e) {
+        console.error('Failed to fetch user profile:', e);
       } finally {
         setIsLoading(false);
       }
@@ -36,6 +40,8 @@ export function ProfilePage() {
       try {
         const data = await getFPLTeamInfo(userProfile.fplTeamId);
         setFplData(data);
+      } catch (e) {
+        console.error('Failed to fetch FPL data:', e);
       } finally {
         setFplLoading(false);
       }
@@ -43,6 +49,34 @@ export function ProfilePage() {
 
     fetchFplData();
   }, [userProfile?.fplTeamId]);
+
+  const handleConnect = async (teamId: number) => {
+    if (!authUser?.uid) return;
+    setError(null);
+    try {
+      await connectFPLTeam(authUser.uid, teamId);
+      // Refresh profile after connect
+      const profile = await getUserProfile(authUser.uid);
+      setUserProfile(profile);
+    } catch (e) {
+      setError('Failed to connect team. Please check the ID and try again.');
+    }
+  };
+
+  const handleUpdate = async (teamId: number) => {
+    if (!authUser?.uid) return;
+    setError(null);
+    try {
+      await connectFPLTeam(authUser.uid, teamId);
+      // Refresh profile after update
+      const profile = await getUserProfile(authUser.uid);
+      setUserProfile(profile);
+    } catch (e) {
+      setError('Failed to update team. Please check the ID and try again.');
+    }
+  };
+
+  const handleClearError = () => setError(null);
 
   if (!authUser || isLoading) {
     return (
@@ -54,9 +88,18 @@ export function ProfilePage() {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Profile</h1>
-      {/* Will add FPLConnectionCard next */}
+    <main className="container mx-auto px-4 py-8 space-y-6">
+      <h1 className="text-2xl font-bold">Profile</h1>
+
+      <FPLConnectionCard
+        user={userProfile}
+        fplData={fplData}
+        isLoading={fplLoading}
+        error={error}
+        onConnect={handleConnect}
+        onUpdate={handleUpdate}
+        onClearError={handleClearError}
+      />
     </main>
   );
 }
