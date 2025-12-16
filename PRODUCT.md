@@ -187,15 +187,15 @@ This establishes a rich, engaging comparison experience AND a secure authenticat
 - Cloud Functions implementation for FPL API proxying
 - Production deployment of auth system
 
-### 🚧 Phase 2: User Profile & FPL Connection (IN PROGRESS - 1-2 days)
+### ✅ Phase 2: User Profile & FPL Connection (COMPLETED)
 - ✅ Firebase Auth UI (sign up/login) - completed in Phase 1
 - ✅ Protected routes - completed in Phase 1
-- ⬜ FPL Team ID connection flow (input validation, team verification)
-- ⬜ User profile page with connected FPL team display
-- ⬜ Update user document with FPL team info in Firestore
-- ⬜ Fetch and display FPL team name from API
-- ⬜ Profile edit functionality (change display name, update FPL ID)
-- ⬜ E2E tests for profile and FPL connection flow
+- ✅ FPL Team ID connection flow (input validation, team verification)
+- ✅ User profile page with connected FPL team display
+- ✅ Update user document with FPL team info in Firestore
+- ✅ Fetch and display FPL team name from API
+- ✅ Profile edit functionality (change display name, update FPL ID)
+- ✅ E2E tests for profile and FPL connection flow
 
 **Note:** Auth work from original Phase 2 completed early in Phase 1.
 
