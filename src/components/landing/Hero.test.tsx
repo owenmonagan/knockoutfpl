@@ -12,36 +12,36 @@ describe('Hero', () => {
     );
   };
 
-  it('renders the hero heading with gradient text', () => {
+  it('renders without crashing', () => {
+    renderHero();
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+  });
+
+  it('displays KNOCKOUT FPL headline', () => {
     renderHero();
     const heading = screen.getByRole('heading', { level: 1 });
-    expect(heading).toHaveTextContent(/Knockout/i);
-    expect(heading).toHaveTextContent(/FPL/i);
+    expect(heading).toHaveTextContent('KNOCKOUT FPL');
   });
 
-  it('renders the value proposition subheading', () => {
+  it('headline is uppercase', () => {
     renderHero();
-    expect(
-      screen.getByText(/Transform your FPL mini-leagues into knockout tournaments/i)
-    ).toBeInTheDocument();
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading).toHaveClass('uppercase');
   });
 
-  it('renders a badge with status message', () => {
+  it('displays tagline', () => {
     renderHero();
-    expect(screen.getByText(/Now Live/i)).toBeInTheDocument();
+    expect(screen.getByText('Every gameweek is a cup final.')).toBeInTheDocument();
   });
 
-  it('renders Get Started CTA button linking to signup', () => {
+  it('displays Enter the Arena CTA', () => {
     renderHero();
-    const getStartedButton = screen.getByRole('link', { name: /Get Started/i });
-    expect(getStartedButton).toBeInTheDocument();
-    expect(getStartedButton).toHaveAttribute('href', '/signup');
+    expect(screen.getByRole('link', { name: /enter the arena/i })).toBeInTheDocument();
   });
 
-  it('renders Log In button linking to login', () => {
+  it('CTA links to /signup', () => {
     renderHero();
-    const loginButton = screen.getByRole('link', { name: /Log In/i });
-    expect(loginButton).toBeInTheDocument();
-    expect(loginButton).toHaveAttribute('href', '/login');
+    const cta = screen.getByRole('link', { name: /enter the arena/i });
+    expect(cta).toHaveAttribute('href', '/signup');
   });
 });
