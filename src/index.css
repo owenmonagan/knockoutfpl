@@ -203,7 +203,7 @@
     );
     background-size: 300% 100%;
     background-position: -100% 0;
-    animation: shimmer 0.8s ease-in-out forwards;
+    animation: shimmer 0.8s ease-in-out;
     animation-delay: 0.8s;
     pointer-events: none;
     border-radius: inherit;
