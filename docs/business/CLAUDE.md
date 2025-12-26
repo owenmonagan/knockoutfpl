@@ -6,11 +6,9 @@ All business, product, and technical documentation for Knockout FPL.
 
 ## Sections
 
-- **[strategy/](./strategy/CLAUDE.md)** - Why we exist, our market position, and where we're headed. Start here to understand the mission.
-
-- **[product/](./product/CLAUDE.md)** - What we're building, how it behaves, and how users experience it. The source of truth for product decisions.
-
-- **[technical/](./technical/CLAUDE.md)** - How the system is built, data structures, and external integrations. Reference for implementation details.
+- **[strategy/](./strategy/CLAUDE.md)** - Why we exist, market position, and where we're headed.
+- **[product/](./product/CLAUDE.md)** - What we're building, how it behaves, and user experience.
+- **[technical/](./technical/CLAUDE.md)** - System architecture, data structures, and integrations.
 
 ---
 

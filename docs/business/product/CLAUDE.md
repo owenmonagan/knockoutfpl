@@ -6,11 +6,9 @@ What we're building, how it behaves, and how users experience it.
 
 ## Sections
 
-- **[requirements/](./requirements/CLAUDE.md)** - Product requirements documents. What we're building, scope, and success criteria.
-
-- **[specs/](./specs/CLAUDE.md)** - Detailed specifications. Business rules, edge cases, and terminology (glossary).
-
-- **[journeys/](./journeys/CLAUDE.md)** - User journey documentation. End-to-end flows from user perspective.
+- **[requirements/](./requirements/CLAUDE.md)** - PRDs defining scope, users, and success criteria.
+- **[specs/](./specs/CLAUDE.md)** - Business rules, edge cases, and terminology glossary.
+- **[journeys/](./journeys/CLAUDE.md)** - End-to-end user flows from signup to tournament completion.
 
 ---
 

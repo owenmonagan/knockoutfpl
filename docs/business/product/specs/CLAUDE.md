@@ -6,9 +6,8 @@ Detailed specifications covering business rules, edge cases, and terminology.
 
 ## Documents
 
-- **[glossary.md](./glossary.md)** - Core concepts defined. Read this first to understand the vocabulary used throughout all documentation.
-
-- **[functional-spec.md](./functional-spec.md)** - Detailed behavior specification. Business rules, edge cases, validation, and error handling.
+- **[glossary.md](./glossary.md)** - Definitions of core concepts and vocabulary used throughout documentation.
+- **[functional-spec.md](./functional-spec.md)** - Business rules, edge cases, validation, and error handling.
 
 ---
 

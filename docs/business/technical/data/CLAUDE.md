@@ -6,9 +6,8 @@ Entity definitions, field specifications, and data flow documentation.
 
 ## Documents
 
-- **[data-dictionary.md](./data-dictionary.md)** - Complete entity and field reference. Every collection, every field, every constraint.
-
-- **[data-flow.md](./data-flow.md)** - How data moves through the system. Read flows, write flows, and background processes.
+- **[data-dictionary.md](./data-dictionary.md)** - Complete reference of collections, fields, types, and constraints.
+- **[data-flow.md](./data-flow.md)** - How data moves through reads, writes, and background processes.
 
 ---
 

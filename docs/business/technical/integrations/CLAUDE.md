@@ -6,7 +6,7 @@ External services and APIs the system depends on.
 
 ## Documents
 
-- **[fpl-api.md](./fpl-api.md)** - Fantasy Premier League API integration. Endpoints, data structures, rate limits, and failure handling.
+- **[fpl-api.md](./fpl-api.md)** - FPL API endpoints, data structures, rate limits, and error handling.
 
 ---
 

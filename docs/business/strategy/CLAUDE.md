@@ -7,21 +7,17 @@ Why Knockout FPL exists, our market position, and where we're headed.
 ## Documents
 
 ### Foundation
-- **[vision.md](./vision.md)** - The north star. Mission, 3-year vision, core beliefs, and what success looks like.
-
-- **[business-model.md](./business-model.md)** - How the business works. Value proposition, customer segments, channels, and future revenue possibilities.
-
-- **[competitive-landscape.md](./competitive-landscape.md)** - Know the alternatives. Direct competitors, indirect solutions, our differentiation, and risks.
+- **[vision.md](./vision.md)** - Mission, 3-year vision, core beliefs, and success definition.
+- **[business-model.md](./business-model.md)** - Value proposition, customer segments, channels, and revenue model.
+- **[competitive-landscape.md](./competitive-landscape.md)** - Competitors, alternatives, differentiation, and market risks.
 
 ### Execution
-- **[gtm-strategy.md](./gtm-strategy.md)** - How we launch and grow. Launch phases, channels, viral loop, and go-to-market tactics.
-
-- **[metrics.md](./metrics.md)** - How we measure success. North Star Metric, input metrics, guardrails, and OKR framework.
+- **[gtm-strategy.md](./gtm-strategy.md)** - Launch phases, marketing channels, viral loop, and growth tactics.
+- **[metrics.md](./metrics.md)** - North Star Metric, input metrics, guardrails, and OKR framework.
 
 ### Decision-Making
-- **[principles.md](./principles.md)** - How we make trade-offs. Product principles that guide consistent decisions.
-
-- **[hypotheses.md](./hypotheses.md)** - What we're betting on. Core assumptions, validation status, and experiment log.
+- **[principles.md](./principles.md)** - Product principles that guide consistent trade-off decisions.
+- **[hypotheses.md](./hypotheses.md)** - Core assumptions, validation status, and experiment tracking.
 
 ---
 

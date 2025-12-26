@@ -6,11 +6,9 @@ How the system is built, data structures, and external integrations.
 
 ## Documents
 
-- **[architecture.md](./architecture.md)** - System overview. Components, how they connect, and key architectural decisions.
-
-- **[data/](./data/CLAUDE.md)** - Data layer documentation. Entity definitions, field specifications, and data flow.
-
-- **[integrations/](./integrations/CLAUDE.md)** - External integrations. FPL API details and other third-party dependencies.
+- **[architecture.md](./architecture.md)** - System components, connections, and key architectural decisions.
+- **[data/](./data/CLAUDE.md)** - Entity definitions, field specifications, and data flow diagrams.
+- **[integrations/](./integrations/CLAUDE.md)** - FPL API details and third-party service dependencies.
 
 ---
 

@@ -6,9 +6,8 @@ Product requirements documents defining what we're building.
 
 ## Documents
 
-- **[core-prd.md](./core-prd.md)** - The main product requirements document. Problem statement, target users, scope, and success criteria.
-
-- **[tournament-prd.md](./tournament-prd.md)** - Tournament-specific requirements. Detailed requirements for the knockout tournament feature.
+- **[core-prd.md](./core-prd.md)** - Main PRD with problem statement, target users, scope, and success criteria.
+- **[tournament-prd.md](./tournament-prd.md)** - Detailed requirements for the knockout tournament feature.
 
 ---
 

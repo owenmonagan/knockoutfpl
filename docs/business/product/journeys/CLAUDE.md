@@ -6,11 +6,9 @@ End-to-end user flows from the user's perspective.
 
 ## Documents
 
-- **[onboarding.md](./onboarding.md)** - New user journey from landing page to being ready to participate in tournaments.
-
-- **[tournament-creation.md](./tournament-creation.md)** - How a user creates a knockout tournament for their mini-league.
-
-- **[tournament-participation.md](./tournament-participation.md)** - How a user views and follows an active tournament.
+- **[onboarding.md](./onboarding.md)** - New user flow from landing page to tournament-ready.
+- **[tournament-creation.md](./tournament-creation.md)** - Creating a knockout tournament for a mini-league.
+- **[tournament-participation.md](./tournament-participation.md)** - Viewing and following an active tournament.
 
 ---
 
