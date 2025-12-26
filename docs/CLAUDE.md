@@ -40,6 +40,10 @@ docs/
 |--------------|-------|
 | "Why does this product exist?" | [business/strategy/vision.md](./business/strategy/vision.md) |
 | "Who are our users?" | [business/strategy/business-model.md](./business/strategy/business-model.md) |
+| "How do we launch/grow?" | [business/strategy/gtm-strategy.md](./business/strategy/gtm-strategy.md) |
+| "How do we measure success?" | [business/strategy/metrics.md](./business/strategy/metrics.md) |
+| "How do we make decisions?" | [business/strategy/principles.md](./business/strategy/principles.md) |
+| "What are we assuming?" | [business/strategy/hypotheses.md](./business/strategy/hypotheses.md) |
 | "What are we building?" | [business/product/requirements/](./business/product/requirements/CLAUDE.md) |
 | "What does X term mean?" | [business/product/specs/glossary.md](./business/product/specs/glossary.md) |
 | "How does X behave?" | [business/product/specs/functional-spec.md](./business/product/specs/functional-spec.md) |
