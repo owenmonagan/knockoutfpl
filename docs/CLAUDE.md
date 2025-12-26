@@ -12,6 +12,10 @@
 2. **Mark sections as TODO** - Use `<!-- TODO: ... -->` comments liberally
 3. **Add what you know** - Even a single sentence is valuable
 4. **Link to related docs** - Even if those docs are also drafts
+5. **Update the directory's CLAUDE.md** - Add a one-line description in this format:
+   ```markdown
+   - **[new-doc.md](./new-doc.md)** - One-line description of the document's purpose.
+   ```
 
 This approach ensures:
 - Nothing gets forgotten
