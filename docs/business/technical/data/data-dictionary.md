@@ -1,217 +1,453 @@
 # Data Dictionary
 
-> **Status:** DRAFT - needs verification against actual Firestore schema
+Definitive reference for all data structures. Code types must match this document.
+
 > **Last Updated:** December 2025
 
----
-
-## Collections Overview
-
-| Collection | Description | Document ID |
-|------------|-------------|-------------|
-| `users` | User accounts and FPL connections | Firebase Auth UID |
-| `tournaments` | Tournament structure and matches | Auto-generated |
+**Naming Convention:** All fields use `snake_case` to match Firestore conventions.
 
 ---
 
-## `users` Collection (DRAFT)
+## Design Principles
 
-<!-- TODO: Verify against src/types/user.ts and Firestore -->
+1. **Season as root** - All FPL data lives under a season (e.g., `seasons/2025`)
+2. **Cache raw API responses** - Store FPL API responses as-is for entries and picks
+3. **User is just identity** - No denormalized FPL data on user, just entry references
+4. **Subcollections for scale** - Participants, matches as subcollections (supports 100k+ participants)
+5. **Compute navigation** - Bracket navigation (next match, source matches) computed via utility functions, not stored
 
-### Document Structure
+---
+
+## Top-Level Structure
+
+```
+users/{uid}                           ← Firebase Auth accounts
+seasons/{season_id}                   ← FPL season container (e.g., "2025")
+  /entries/{entry_id}                 ← Cached FPL manager data
+    /picks/{event}                    ← Cached event/gameweek picks
+  /tournaments/{tournament_id}        ← Knockout tournaments
+    /participants/{entry_id}          ← Tournament participants
+    /matches/{match_id}               ← Individual matches
+```
+
+---
+
+## `users` Collection
+
+Firebase Auth user accounts. Minimal - just identity and entry references.
+
+**Path:** `users/{uid}`
 
 ```typescript
 interface User {
-  userId: string;              // Firebase Auth UID (document ID)
-  email: string;               // User's email
-  displayName: string;         // Display name
+  email: string;
 
-  // FPL Connection
-  fplTeamId: number | null;    // FPL Team ID (e.g., 158256)
-  fplTeamName: string | null;  // Cached from FPL API
+  // Entry references per season (nullable until connected)
+  entry_id_2025: number | null;
+  // entry_id_2026: number | null;  // future seasons
 
-  // Timestamps
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  created_at: Timestamp;
+  updated_at: Timestamp;
 }
 ```
 
-### Fields
+| Field | Type | Description |
+|-------|------|-------------|
+| `email` | string | From Google Auth |
+| `entry_id_2025` | number \| null | FPL entry ID for 2025 season, null until connected |
+| `created_at` | Timestamp | First sign-in |
+| `updated_at` | Timestamp | Last profile update |
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `userId` | string | Yes | Firebase Auth UID, used as document ID |
-| `email` | string | Yes | User's email address |
-| `displayName` | string | Yes | User-chosen display name |
-| `fplTeamId` | number | No | FPL Team ID, null until connected |
-| `fplTeamName` | string | No | Cached team name from FPL API |
-| `createdAt` | Timestamp | Yes | Account creation time |
-| `updatedAt` | Timestamp | Yes | Last profile update |
-
-### Indexes
-
-<!-- TODO: Verify indexes in firestore.indexes.json -->
-
-| Fields | Purpose |
-|--------|---------|
-| `fplTeamId` | Quick lookup for FPL team validation |
+**Why this structure:**
+- User doc stays tiny (no FPL data duplication)
+- Easy to add new seasons without migration
+- Entry ID is the foreign key to all FPL data
 
 ---
 
-## `tournaments` Collection (DRAFT)
+## `seasons` Collection
 
-<!-- TODO: Verify against src/types/tournament.ts and implementation -->
+Container for all FPL season data.
 
-### Document Structure
+**Path:** `seasons/{season_id}`
+
+```typescript
+interface Season {
+  season_id: string;        // e.g., "2025"
+  fpl_season_name: string;  // e.g., "2024/25"
+  start_date: Timestamp;
+  end_date: Timestamp;
+  current_event: number;    // Active event/gameweek (1-38)
+  is_active: boolean;
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `season_id` | string | Year identifier (e.g., "2025") |
+| `fpl_season_name` | string | FPL's name (e.g., "2024/25") |
+| `current_event` | number | Active event (1-38) |
+| `is_active` | boolean | Is this season in progress |
+
+---
+
+## `entries` Subcollection
+
+Cached FPL manager/entry data. Raw API response from `/api/entry/{entry_id}/`.
+
+**Path:** `seasons/{season_id}/entries/{entry_id}`
+
+```typescript
+interface Entry {
+  // Raw FPL API response fields
+  id: number;
+  name: string;                    // Team name (e.g., "Smith's Soldiers")
+  player_first_name: string;
+  player_last_name: string;
+  summary_overall_points: number;
+  summary_overall_rank: number;
+  summary_event_points: number;
+  summary_event_rank: number;
+
+  // Our metadata
+  cached_at: Timestamp;
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | number | FPL entry ID |
+| `name` | string | FPL team name |
+| `player_first_name` | string | Manager's first name |
+| `player_last_name` | string | Manager's last name |
+| `summary_overall_points` | number | Total season points |
+| `summary_overall_rank` | number | Overall rank |
+| `cached_at` | Timestamp | When we fetched this |
+
+**Note:** This is the raw FPL API response. We store it as-is and refresh periodically.
+
+---
+
+## `picks` Subcollection
+
+Cached event picks. Raw API response from `/api/entry/{entry_id}/event/{event}/picks/`.
+
+**Path:** `seasons/{season_id}/entries/{entry_id}/picks/{event}`
+
+```typescript
+interface Picks {
+  // Raw FPL API response
+  entry_history: {
+    event: number;
+    points: number;
+    total_points: number;
+    rank: number;
+    overall_rank: number;
+    event_transfers_cost: number;
+  };
+  picks: Array<{
+    element: number;
+    position: number;
+    multiplier: number;
+    is_captain: boolean;
+    is_vice_captain: boolean;
+  }>;
+  active_chip: string | null;
+
+  // Our metadata
+  cached_at: Timestamp;
+  is_final: boolean;  // True if event is finished
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `entry_history.points` | number | Final event points (what we use for scoring) |
+| `picks` | array | Selected players |
+| `active_chip` | string \| null | Chip used this event |
+| `cached_at` | Timestamp | When we fetched this |
+| `is_final` | boolean | True if event finished, scores are final |
+
+---
+
+## `tournaments` Subcollection
+
+Knockout tournaments within a season.
+
+**Path:** `seasons/{season_id}/tournaments/{tournament_id}`
 
 ```typescript
 interface Tournament {
-  tournamentId: string;           // Document ID
-
-  // League Info
-  fplLeagueId: number;            // FPL mini-league ID
-  fplLeagueName: string;          // Cached at creation
+  // League info (snapshot at creation)
+  fpl_league_id: number;
+  fpl_league_name: string;
 
   // Creator
-  creatorUserId: string;          // Firebase Auth UID
-  creatorFplId: number;
+  creator_uid: string;        // Firebase Auth UID
+  creator_entry_id: number;   // FPL entry ID
 
-  // Tournament State
-  startGameweek: number;          // First round gameweek
-  currentRound: number;           // Active round (1-indexed)
-  status: 'pending' | 'active' | 'completed';
+  // Seeding
+  seeding_method: 'league_rank' | 'random' | 'manual';
 
-  // Structure
-  participants: TournamentParticipant[];
-  rounds: TournamentRound[];
+  // Timing
+  start_event: number;        // First round event (1-38)
 
-  // Results
-  winnerFplId: number | null;
-
-  // Timestamps
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  completedAt: Timestamp | null;
-}
-```
-
-### Embedded: TournamentParticipant
-
-```typescript
-interface TournamentParticipant {
-  fplTeamId: number;
-  fplTeamName: string;
-  managerName: string;
-  seed: number;                   // 1 = top seed
-  initialLeagueRank: number;
-}
-```
-
-### Embedded: TournamentRound
-
-```typescript
-interface TournamentRound {
-  roundNumber: number;
-  roundName: string;              // "Quarter-Finals", etc.
-  gameweek: number;
-  matches: TournamentMatch[];
-  isComplete: boolean;
-}
-```
-
-### Embedded: TournamentMatch
-
-```typescript
-interface TournamentMatch {
-  matchId: string;
-
-  // Participants
-  participant1FplId: number | null;
-  participant1Seed: number | null;
-  participant1Score: number | null;
-
-  participant2FplId: number | null;  // null = BYE
-  participant2Seed: number | null;
-  participant2Score: number | null;
+  // State
+  current_round: number;      // 1-indexed
+  total_rounds: number;       // ceil(log2(participants))
+  status: 'active' | 'completed';
 
   // Result
-  winnerFplId: number | null;
-  isBye: boolean;
-  tiebreakReason: 'higher_rank' | 'random' | null;
+  winner_entry_id: number | null;
+
+  // Timestamps
+  created_at: Timestamp;
+  updated_at: Timestamp;
 }
 ```
 
-### Fields
+| Field | Type | Description |
+|-------|------|-------------|
+| `fpl_league_id` | number | Source FPL classic league |
+| `fpl_league_name` | string | League name at creation |
+| `creator_uid` | string | Firebase Auth UID |
+| `creator_entry_id` | number | Creator's FPL entry ID |
+| `seeding_method` | enum | How participants are seeded |
+| `start_event` | number | First round event |
+| `current_round` | number | Active round (1-indexed) |
+| `total_rounds` | number | `ceil(log2(participants))` |
+| `status` | enum | `'active'` or `'completed'` |
+| `winner_entry_id` | number \| null | Champion's entry ID |
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `tournamentId` | string | Yes | Auto-generated document ID |
-| `fplLeagueId` | number | Yes | Source FPL mini-league |
-| `fplLeagueName` | string | Yes | Cached league name |
-| `creatorUserId` | string | Yes | User who created tournament |
-| `startGameweek` | number | Yes | First round GW (1-38) |
-| `currentRound` | number | Yes | Active round number |
-| `status` | enum | Yes | pending/active/completed |
-| `participants` | array | Yes | All tournament participants |
-| `rounds` | array | Yes | All rounds and matches |
-| `winnerFplId` | number | No | Champion's FPL ID |
-| `createdAt` | Timestamp | Yes | Tournament creation time |
-| `completedAt` | Timestamp | No | When champion determined |
-
-### Indexes
-
-<!-- TODO: Define needed indexes -->
-
-| Fields | Purpose |
-|--------|---------|
-| `creatorUserId`, `status` | User's tournaments query |
-| `status`, `currentRound` | Active tournaments query |
-| <!-- TODO --> | <!-- TODO --> |
+**Seeding Methods:**
+- `league_rank` - Seed by FPL league standing at creation (rank 1 = seed 1)
+- `random` - Random shuffle
+- `manual` - Creator assigns seeds (future feature)
 
 ---
 
-## What We Store vs. Fetch (DRAFT)
+## `participants` Subcollection
 
-<!-- TODO: Verify caching strategy -->
+Tournament participants. Snapshot at creation time.
 
-| Data | Store | Fetch | Why |
-|------|-------|-------|-----|
-| Tournament structure | ✓ | | Core app state |
-| Participants (snapshot) | ✓ | | Fixed at creation |
-| Seeds | ✓ | | Fixed at creation |
-| Match winners | ✓ | | Permanent record |
-| Gameweek scores | | ✓ | Changes until GW ends |
-| User's mini-leagues | | ✓ | Can change |
-| Current gameweek | | ✓ | Real-time from FPL |
+**Path:** `seasons/{season_id}/tournaments/{tournament_id}/participants/{entry_id}`
+
+```typescript
+interface Participant {
+  entry_id: number;
+
+  // Snapshot from FPL at tournament creation
+  team_name: string;
+  manager_name: string;       // "First Last"
+  seed: number;               // Assigned seed (1 = top)
+
+  // Tournament state
+  status: 'active' | 'eliminated' | 'champion';
+  current_match_id: string | null;
+  elimination_round: number | null;
+
+  // Link to user account (if claimed)
+  uid: string | null;
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `entry_id` | number | FPL entry ID (document ID) |
+| `team_name` | string | FPL team name at creation |
+| `manager_name` | string | Manager name at creation |
+| `seed` | number | Assigned seed based on seeding_method |
+| `status` | enum | Current tournament status |
+| `current_match_id` | string \| null | Active match ID |
+| `elimination_round` | number \| null | When eliminated |
+| `uid` | string \| null | Firebase UID if user claimed this entry |
 
 ---
 
-## Security Rules (DRAFT)
+## `matches` Subcollection
 
-<!-- TODO: Verify against firestore.rules -->
+Individual knockout matches.
 
-### Users Collection
+**Path:** `seasons/{season_id}/tournaments/{tournament_id}/matches/{match_id}`
 
+```typescript
+interface MatchPlayer {
+  entry_id: number;
+  name: string;               // Denormalized team name
+  seed: number;
+  points: number | null;      // Final event points
+}
+
+interface Match {
+  match_id: string;           // Auto-increment: "1", "2", "3"...
+  round: number;              // 1, 2, 3...
+  position_in_round: number;  // Position within round (for bracket layout)
+  event: number;              // FPL event (1-38)
+  status: 'pending' | 'active' | 'complete';
+
+  players: MatchPlayer[];     // 2 for normal match, 1 for bye
+
+  winner_entry_id: number | null;
+  is_bye: boolean;
+
+  created_at: Timestamp;
+  completed_at: Timestamp | null;
+}
 ```
-- User can read their own document
-- User can create their own document (on signup)
-- User can update their own document
-- Users cannot read other users' documents
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `match_id` | string | Auto-increment within tournament |
+| `round` | number | Round number (1 = first round) |
+| `position_in_round` | number | 1-16 in round 1, 1-8 in round 2, etc. |
+| `event` | number | FPL event this match is played |
+| `status` | enum | Match state |
+| `players` | array | Match participants (1-2) |
+| `winner_entry_id` | number \| null | Winner's entry ID |
+| `is_bye` | boolean | True if auto-advance (1 player) |
+
+**Match ID Numbering:**
+Matches are numbered sequentially across rounds:
+- Round 1: matches 1-16 (for 32-person bracket)
+- Round 2: matches 17-24
+- Round 3: matches 25-28
+- Round 4: matches 29-30
+- Final: match 31
+
+---
+
+## Bracket Navigation (Computed)
+
+Navigation between matches is **computed, not stored**. Use utility functions:
+
+```typescript
+// Get next match position
+function getNextPosition(position_in_round: number): number {
+  return Math.ceil(position_in_round / 2);
+}
+
+// Get match ID from round and position
+function getMatchId(
+  round: number,
+  position: number,
+  total_rounds: number
+): number {
+  let offset = 0;
+  let matchesInRound = Math.pow(2, total_rounds - 1);
+  for (let r = 1; r < round; r++) {
+    offset += matchesInRound;
+    matchesInRound /= 2;
+  }
+  return offset + position;
+}
+
+// Get source matches (who feeds into this match)
+function getSourceMatchIds(
+  round: number,
+  position: number,
+  total_rounds: number
+): [number, number] | null {
+  if (round === 1) return null; // No source for round 1
+  const prevRound = round - 1;
+  const pos1 = (position - 1) * 2 + 1;
+  const pos2 = (position - 1) * 2 + 2;
+  return [
+    getMatchId(prevRound, pos1, total_rounds),
+    getMatchId(prevRound, pos2, total_rounds)
+  ];
+}
 ```
 
-### Tournaments Collection
+**Why computed:**
+- Bracket structure is deterministic
+- No need to store redundant data
+- Easier to reason about
 
+---
+
+## Byes
+
+When participant count isn't a power of 2:
+
+- Create match with `players` array containing 1 entry
+- Set `is_bye: true`
+- Set `winner_entry_id` immediately to that player
+- Byes go to top seeds (seed 1 gets bye if 6 byes needed)
+
+Example: 10 participants in 16-slot bracket
+- Seeds 1-6 get byes (6 matches with 1 player each)
+- Seeds 7-10 play in round 1 (2 matches with 2 players each)
+
+---
+
+## User Inbox Pattern (Optional)
+
+For fast "find my matches" queries without scanning all tournaments:
+
+**Path:** `users/{uid}/match_refs/{match_id}`
+
+```typescript
+interface MatchRef {
+  season_id: string;
+  tournament_id: string;
+  match_id: string;
+  round: number;
+  event: number;
+  status: 'pending' | 'active' | 'complete';
+  opponent_name: string;
+  result: 'win' | 'loss' | 'pending';
+}
 ```
-- Authenticated users can read any tournament (public)
-- User can create tournament (if league member)
-- Only Cloud Functions can update scores
-- Only creator can delete (if pending status)
-```
+
+**Why:** Query `users/{uid}/match_refs` where `status == 'active'` instead of scanning all tournaments.
+
+---
+
+## Match Resolution Rules
+
+1. **Higher score wins** - `entry_history.points` from picks
+2. **Tie broken by seed** - Higher seed (lower seed number) advances
+3. **BYE auto-advances** - Single player wins immediately
+
+---
+
+## Read Patterns
+
+| Query | Path | Reads |
+|-------|------|-------|
+| My current match | `users/{uid}/match_refs` where active | 1 query |
+| Match details | `matches/{match_id}` | 1 read |
+| Opponent's entry | `entries/{entry_id}` | 1 read |
+| Their picks this event | `entries/{id}/picks/{event}` | 1 read |
+| Navigate to next match | Compute `getMatchId()` → read | 1 read |
+
+---
+
+## Write Patterns
+
+| Operation | Who Writes | Documents Updated |
+|-----------|------------|-------------------|
+| User signs up | Client | `users/{uid}` |
+| Connect FPL | Client | `users/{uid}` (entry_id) |
+| Cache entry | Backend | `entries/{entry_id}` |
+| Cache picks | Backend | `entries/{id}/picks/{event}` |
+| Create tournament | Backend | `tournaments/{id}`, `participants/*`, `matches/*` |
+| Score matches | Backend | `matches/{id}`, `participants/{id}`, `match_refs/{id}` |
+
+---
+
+## FPL API → Our Fields
+
+| FPL Endpoint | Our Collection |
+|--------------|----------------|
+| `/api/entry/{id}/` | `entries/{entry_id}` |
+| `/api/entry/{id}/event/{event}/picks/` | `entries/{id}/picks/{event}` |
+| `/api/leagues-classic/{id}/standings/` | Used at tournament creation → `participants` |
 
 ---
 
 ## Related
 
-- [data-flow.md](./data-flow.md) - How data moves
-- [../integrations/fpl-api.md](../integrations/fpl-api.md) - External data source
-- [../../product/specs/functional-spec.md](../../product/specs/functional-spec.md) - Business rules
+- [data-flow.md](./data-flow.md) - How data moves through the system
+- [../integrations/fpl-api.md](../integrations/fpl-api.md) - FPL API endpoint details
+- [../../product/features/](../../product/features/CLAUDE.md) - Feature specifications
