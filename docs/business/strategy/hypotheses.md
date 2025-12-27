@@ -1,275 +1,211 @@
-# Hypotheses & Experiments
+# Hypotheses
 
-> **Status:** DRAFT - living document, update as we learn
-> **Last Updated:** December 2025
-
----
-
-## Overview
-
-This document tracks our core assumptions about the product and market. Every startup is a collection of hypotheses; this document makes ours explicit so we can validate or invalidate them systematically.
-
-**How to use this:**
-- Review before major product decisions
-- Update status as we gather evidence
-- Add new hypotheses as we identify assumptions
-- Don't build major features on unvalidated hypotheses
+Core assumptions we're betting on, organized by risk if wrong.
 
 ---
 
-## Hypothesis Status Legend
+## How to Use This
+
+Every strategy doc makes assumptions. This one makes them explicit.
+
+**Before building:** Check if you're building on an unvalidated existential bet.
+**When learning:** Update status as evidence emerges.
+**When stuck:** Ask which hypothesis you're trying to validate.
 
 | Status | Meaning |
 |--------|---------|
-| 🔴 **Unvalidated** | Assumption only, no evidence |
-| 🟡 **Testing** | Currently gathering evidence |
-| 🟢 **Validated** | Evidence supports hypothesis |
-| ⚫ **Invalidated** | Evidence contradicts hypothesis |
+| 🔴 Unvalidated | Assumption only |
+| 🟡 Testing | Gathering evidence |
+| 🟢 Validated | Evidence confirms |
+| ⚫ Invalidated | Evidence contradicts |
 
 ---
 
-## Problem Hypotheses (DRAFT)
+## Existential
 
-*Do users actually have this problem?*
+If wrong, the product doesn't work. Validate before scaling.
 
-### H1: Mini-leagues lack mid-season excitement
-> "FPL mini-league members want more engagement beyond season-long standings."
+---
+
+### E1: FPL players want knockout competition
+> "The knockout/bracket format appeals to FPL players beyond what mini-leagues offer."
 
 | Attribute | Value |
 |-----------|-------|
-| Status | 🔴 Unvalidated |
-| Confidence | Medium |
+| Status | 🟢 Validated |
+| Evidence | FPL Plugin (2020): 20k users from Reddit engagement. [r/FantasyPL cup thread](https://www.reddit.com/r/FantasyPL/comments/emi457/rfantasypl_cup_is_live/). Demand was real, execution was poor. |
 | Risk if wrong | Critical - no market |
-| How to validate | User interviews, survey existing FPL players |
-| Evidence | Anecdotal (personal experience), Reddit complaints about boring mid-season |
-
-<!-- TODO: Conduct user interviews to validate -->
 
 ---
 
-### H2: Manual tracking is painful
-> "Running knockout tournaments manually (spreadsheets, WhatsApp) is tedious enough that people avoid it."
-
-| Attribute | Value |
-|-----------|-------|
-| Status | 🔴 Unvalidated |
-| Confidence | Medium |
-| Risk if wrong | High - may not need automation |
-| How to validate | Ask if people have tried manual tournaments, what happened |
-| Evidence | Assumption based on general spreadsheet fatigue |
-
----
-
-### H3: Knockout format appeals to FPL players
-> "The bracket/knockout format (vs. league format) is inherently appealing to FPL players."
-
-| Attribute | Value |
-|-----------|-------|
-| Status | 🔴 Unvalidated |
-| Confidence | Medium-High |
-| Risk if wrong | Critical - wrong format |
-| How to validate | User preference testing, tournament completion rates |
-| Evidence | FPL Cup exists and is popular; March Madness/World Cup popularity |
-
----
-
-## Solution Hypotheses (DRAFT)
-
-*Is our solution the right approach?*
-
-### H4: One round per gameweek is right
-> "Users want tournaments that progress one round per FPL gameweek, not faster."
-
-| Attribute | Value |
-|-----------|-------|
-| Status | 🔴 Unvalidated |
-| Confidence | Medium |
-| Risk if wrong | Medium - could add flexibility later |
-| How to validate | Ask users, test completion rates |
-| Evidence | Matches FPL cadence; World Cup is ~1 game per few days |
-
----
-
-### H5: Seeding by league rank is fair
-> "Seeding brackets by current mini-league rank is perceived as fair."
-
-| Attribute | Value |
-|-----------|-------|
-| Status | 🔴 Unvalidated |
-| Confidence | Medium |
-| Risk if wrong | Low - easy to change |
-| How to validate | User feedback after first tournaments |
-| Evidence | Standard practice in sports tournaments |
-
----
-
-### H6: Auto-include all members works
-> "Automatically including all mini-league members (vs. invite/accept) is the right UX."
-
-| Attribute | Value |
-|-----------|-------|
-| Status | 🔴 Unvalidated |
-| Confidence | Low |
-| Risk if wrong | Medium - may need invite flow |
-| How to validate | Watch for complaints about unwanted inclusion |
-| Evidence | None - pure assumption |
-
-<!-- TODO: This might be wrong. Watch closely. -->
-
----
-
-### H7: Final scores only (not live) is acceptable
-> "Users accept waiting for gameweek to finish for final scores, rather than live updates."
-
-| Attribute | Value |
-|-----------|-------|
-| Status | 🔴 Unvalidated |
-| Confidence | Medium |
-| Risk if wrong | Medium - live is complex to build |
-| How to validate | User feedback, feature requests |
-| Evidence | FPL itself has live scores, but bonus points change |
-
----
-
-## Growth Hypotheses (DRAFT)
-
-*Will users spread the product?*
-
-### H8: Mini-league viral loop works
-> "When one person creates a tournament, it exposes 5-20 league members to the product, some of whom create tournaments for their OTHER leagues."
-
-| Attribute | Value |
-|-----------|-------|
-| Status | 🔴 Unvalidated |
-| Confidence | Medium |
-| Risk if wrong | Critical - main growth mechanism |
-| How to validate | Track K-factor, multi-league user rate |
-| Evidence | FPL players are typically in multiple leagues (assumption) |
-
----
-
-### H9: FPL communities will share
-> "Posts in r/FantasyPL and FPL Twitter will drive meaningful traffic."
-
-| Attribute | Value |
-|-----------|-------|
-| Status | 🔴 Unvalidated |
-| Confidence | Medium |
-| Risk if wrong | Medium - may need other channels |
-| How to validate | Launch and measure |
-| Evidence | Active communities, but also crowded with content |
-
----
-
-### H10: Word of mouth is primary channel
-> "Most users will come from friend referrals (mini-league invites) rather than marketing."
-
-| Attribute | Value |
-|-----------|-------|
-| Status | 🔴 Unvalidated |
-| Confidence | Medium |
-| Risk if wrong | Medium - may need more active marketing |
-| How to validate | Track acquisition source |
-| Evidence | Assumption based on social nature of mini-leagues |
-
----
-
-## Technical Hypotheses (DRAFT)
-
-*Will the technical approach work?*
-
-### H11: FPL API remains accessible
-> "The unofficial FPL API will continue to work and not block our requests."
+### E2: Mid-season disengagement is a real problem
+> "By December, enough mini-league members feel 'out of contention' that they want fresh competition."
 
 | Attribute | Value |
 |-----------|-------|
 | Status | 🟡 Testing |
-| Confidence | Medium |
-| Risk if wrong | Critical - product doesn't work |
-| How to validate | Ongoing monitoring, community reports |
-| Evidence | API has been stable for years; other tools use it |
+| Evidence | FPL Plugin launched in January (mid-season), got traction. Anecdotal Reddit complaints. Not yet systematically validated. |
+| Risk if wrong | Critical - solving a non-problem |
+| How to validate | Post-tournament survey: "Were you out of contention in your main league?" |
 
 ---
 
-### H12: Firebase free tier is sufficient
-> "Firebase Spark (free) plan will handle our initial scale."
+### E3: FPL API remains accessible
+> "The unofficial FPL API will continue working and not block our requests."
+
+| Attribute | Value |
+|-----------|-------|
+| Status | 🟢 Validated |
+| Evidence | API stable for 5+ years. FPL Plugin used it successfully. Dozens of tools depend on it. No blocking observed. |
+| Risk if wrong | Critical - product breaks |
+| Monitoring | Watch for changes each season, follow FPL developer community |
+
+---
+
+## Growth
+
+If wrong, we stall. Can iterate, but need to catch early.
+
+---
+
+### G1: Reddit drives initial adoption
+> "Sustained r/FantasyPL engagement accumulates significant signups over a tournament's lifetime."
+
+| Attribute | Value |
+|-----------|-------|
+| Status | 🟢 Validated |
+| Evidence | FPL Plugin: 20k lifetime users. ~1:1 upvote-to-signup ratio. Growth came from consistent presence, not viral moment. |
+| Risk if wrong | High - launch strategy fails |
+| Implication | Weekly updates, drama posts, and community engagement are the strategy—not hoping for one big hit. |
+
+---
+
+### G2: Mini-league viral loop works
+> "When one person creates a tournament, it exposes 8-20 league members who then create tournaments for their OTHER leagues."
 
 | Attribute | Value |
 |-----------|-------|
 | Status | 🔴 Unvalidated |
-| Confidence | High |
-| Risk if wrong | Low - can upgrade |
-| How to validate | Monitor usage as we grow |
-| Evidence | Free tier limits are generous for small apps |
+| Evidence | Assumption based on FPL players being in multiple leagues. FPL Plugin didn't track this. |
+| Risk if wrong | High - single-use product, no organic growth |
+| How to validate | Track: users in 2+ tournaments, source of tournament creation |
 
 ---
 
-## Experiment Log (DRAFT)
+### G3: Word of mouth beats paid marketing
+> "Most users come from friend referrals and community sharing, not ads or SEO."
 
-<!-- TODO: Add experiments as we run them -->
-
-### Template for New Experiments
-
-```markdown
-### EXP-XXX: [Experiment Name]
-
-**Hypothesis being tested:** H[X]
-**Start date:** YYYY-MM-DD
-**End date:** YYYY-MM-DD
-
-**What we did:**
-[Description of experiment]
-
-**What we measured:**
-[Metrics tracked]
-
-**Results:**
-[Data and observations]
-
-**Conclusion:**
-[Validated/Invalidated/Inconclusive]
-
-**Next steps:**
-[What we'll do based on learnings]
-```
+| Attribute | Value |
+|-----------|-------|
+| Status | 🟡 Testing |
+| Evidence | FPL Plugin grew entirely through Reddit + word of mouth. Zero paid marketing. But was that optimal or just what happened? |
+| Risk if wrong | Medium - may need marketing budget |
+| How to validate | Track acquisition source from day one |
 
 ---
 
-### Completed Experiments
+### G4: Creators adopt for engagement and content
+> "FPL podcasters/Twitter accounts will run tournaments because it gives them content and engages their audience."
 
-*None yet - add as we run them*
+| Attribute | Value |
+|-----------|-------|
+| Status | 🔴 Unvalidated |
+| Evidence | Logical assumption. No direct outreach attempted with FPL Plugin. |
+| Risk if wrong | Medium - limits scale, but mini-leagues still work |
+| How to validate | Phase 2 creator outreach per GTM strategy |
 
 ---
 
-## Prioritized Validation Backlog (DRAFT)
+## Execution
 
-<!-- TODO: Order by risk and ease of validation -->
+If wrong, we pivot. Lower risk—these are design choices, not market bets.
 
-| Priority | Hypothesis | Risk if Wrong | Ease to Validate |
-|----------|------------|---------------|------------------|
-| 1 | H1: Lack of mid-season excitement | Critical | Medium (interviews) |
-| 2 | H3: Knockout format appeals | Critical | Medium (launch and see) |
-| 3 | H8: Viral loop works | Critical | Hard (need users) |
-| 4 | H11: FPL API stable | Critical | Easy (monitoring) |
-| 5 | H6: Auto-include works | Medium | Easy (feedback) |
+---
+
+### X1: One round per gameweek is right
+> "Users want tournaments that progress one round per FPL gameweek, not faster or slower."
+
+| Attribute | Value |
+|-----------|-------|
+| Status | 🟢 Validated |
+| Evidence | FPL Plugin used this cadence. No complaints. Matches FPL's natural rhythm. |
+| Risk if wrong | Low - easy to add format options later |
+
+---
+
+### X2: Final scores only (not live) is acceptable
+> "Users accept waiting for gameweek to finish for final scores, rather than live updates."
+
+| Attribute | Value |
+|-----------|-------|
+| Status | 🟢 Validated |
+| Evidence | FPL Plugin worked this way. Bonus points change until final anyway. Live adds complexity without value. |
+| Risk if wrong | Low - can add live if demanded |
+
+---
+
+### X3: Ads cover infrastructure costs
+> "Display ads offset Firebase read/write costs, keeping the product free."
+
+| Attribute | Value |
+|-----------|-------|
+| Status | 🔴 Unvalidated |
+| Evidence | FPL Plugin didn't run ads. Assumption based on typical CPMs and Firebase pricing. |
+| Risk if wrong | Low - can explore other monetization or accept small loss |
+| How to validate | Run the math once traffic exists |
+
+---
+
+### X4: No customization needed initially
+> "One tournament format (single elimination, auto-seeding) works for mini-leagues without options."
+
+| Attribute | Value |
+|-----------|-------|
+| Status | 🟡 Testing |
+| Evidence | FPL Plugin was simple, worked fine. But didn't test with creator audiences who may want more control. |
+| Risk if wrong | Low - add settings when users ask |
+
+---
+
+### X5: Mobile-first web is sufficient
+> "A responsive web app is enough. Native apps aren't needed."
+
+| Attribute | Value |
+|-----------|-------|
+| Status | 🟢 Validated |
+| Evidence | FPL Plugin was web-only. FPL itself is web-first. No native app requests. |
+| Risk if wrong | Low - can build native later if proven |
 
 ---
 
 ## Adding New Hypotheses
 
-When you catch yourself saying "I assume..." or "Users probably...", add a hypothesis:
+When you catch yourself saying "I assume..." or "Users probably...", add it here:
 
-1. Write the hypothesis as a clear statement
-2. Assess confidence level
-3. Identify risk if wrong
+1. Write it as a clear statement
+2. Categorize: Existential, Growth, or Execution
+3. Note any evidence (including "none")
 4. Define how to validate
-5. Note any existing evidence
-6. Add to appropriate section
+5. Update status as you learn
+
+---
+
+## Summary
+
+| Category | Validated | Testing | Unvalidated |
+|----------|-----------|---------|-------------|
+| **Existential** | E1, E3 | E2 | — |
+| **Growth** | G1 | G3 | G2, G4 |
+| **Execution** | X1, X2, X5 | X4 | X3 |
+
+**Key unvalidated bets:**
+- **G2** (viral loop) - determines if growth is organic or requires constant effort
+- **G4** (creator adoption) - determines scale ceiling
 
 ---
 
 ## Related
 
-- [vision.md](./vision.md) - Core beliefs (many are hypotheses)
+- [vision.md](./vision.md) - Core beliefs these hypotheses support
 - [metrics.md](./metrics.md) - How we measure validation
-- [../product/requirements/core-prd.md](../product/requirements/core-prd.md) - Assumptions section
+- [gtm-strategy.md](./gtm-strategy.md) - Launch plan that tests G1-G4
