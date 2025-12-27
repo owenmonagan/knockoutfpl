@@ -1,72 +1,60 @@
 # Vision
 
-> **Status:** DRAFT - needs review and refinement
+Why Knockout FPL exists and where we're headed.
 
 ---
 
-## Mission Statement (DRAFT)
+## Mission
 
-<!-- TODO: Refine this to be more concise and memorable -->
+**Give FPL players something to play for every gameweek, regardless of their season.**
 
-Knockout FPL brings the excitement of knockout tournaments to Fantasy Premier League mini-leagues. We let FPL managers compete in bracket-style competitions with their existing teams.
-
----
-
-## 3-Year Vision (DRAFT)
-
-<!-- TODO: Define what success looks like in 3 years -->
-
-- [ ] Become the go-to platform for FPL knockout competitions
-- [ ] Support thousands of concurrent tournaments
-- [ ] Be recognized in the FPL community as a trusted tool
+Mini-leagues reward 38-week consistency. That's great - but by December, half the players are out of contention with nothing but pride left. Knockout FPL fills the gap with tournament-style competition where your season rank doesn't matter.
 
 ---
 
-## Core Beliefs (DRAFT)
+## Core Beliefs
 
-<!-- TODO: Validate these assumptions -->
+**The mini-league format is incomplete.**
+FPL's native competition rewards season-long consistency. There's no built-in way to have high-stakes, short-form competition. Tournaments fill this gap.
 
-**Why this product needs to exist:**
+**The FPL community is underserved.**
+11+ million players, deeply engaged, yet few quality tools built specifically for them. The community deserves better.
 
-1. **FPL is social but lacks head-to-head drama** - Mini-leagues are fun but the season-long format lacks the tension of knockout rounds
-2. **Tournament formats are universally exciting** - March Madness, World Cup knockouts - people love bracket competitions
-3. **Existing tools don't serve this need** - No simple way to run knockout tournaments for your mini-league
+**Community distribution beats paid marketing.**
+FPL Twitter, Reddit, Discord, and podcasts spread good tools fast. Build something worth sharing; the community handles the rest.
+
+**Tournaments and leagues are complementary, not competing.**
+We're not replacing mini-leagues. We're adding the format that's been missing. Real football does both: the Premier League for season-long consistency, knockout cups (FA Cup, League Cup, Champions League) for elimination drama. FPL only has the league half.
 
 ---
 
-## Success Definition (DRAFT)
+## 3-Year Vision
 
-<!-- TODO: Make these more specific and measurable -->
+**Knockout FPL is the default way FPL communities run tournament competitions.**
+
+- Every FPL Discord server has an active knockout running
+- Content creators host tournaments for their audiences
+- "Let's run a knockout" is as natural as "let's start a mini-league"
+- Thousands of tournaments active each season across mini-leagues, communities, and creator fandoms
+
+---
+
+## What Success Looks Like
 
 **We've succeeded when:**
+- Communities create tournaments without us prompting them
+- Players return each season because the format is part of their FPL routine
+- Content creators actively promote their Knockout FPL tournaments
+- The product spreads through word-of-mouth alone
 
-- FPL managers actively request Knockout FPL tournaments in their mini-leagues
-- Tournament completion rates are high (people don't abandon mid-tournament)
-- Users return season after season
-
-**Metrics to track:**
-
-- Tournaments created per gameweek
-- Tournament completion rate
-- User retention (season-over-season)
-- Net Promoter Score
-
----
-
-## Non-Goals (DRAFT)
-
-<!-- TODO: Confirm these are still accurate -->
-
-**What we explicitly won't do:**
-
-- Replace FPL itself - we complement, not compete
-- Live scoring during matches - too complex, use FPL for that
-- Paid entry/prizes - legal complexity, not worth it initially
-- Mobile app - web-first, mobile-responsive
+**We've failed if:**
+- We have users but no community adoption (individuals, not groups)
+- Growth stalls because communities aren't sharing it organically
+- People try it once and don't return next season
 
 ---
 
 ## Related
 
-- [business-model.md](./business-model.md) - How we deliver on this vision
-- [../product/requirements/core-prd.md](../product/requirements/core-prd.md) - What we're building
+- [business-model.md](./business-model.md) - Who we serve and how
+- [principles.md](./principles.md) - How we make decisions

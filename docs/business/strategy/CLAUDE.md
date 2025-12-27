@@ -4,6 +4,17 @@ Why Knockout FPL exists, our market position, and where we're headed.
 
 ---
 
+## Purpose
+
+These docs serve **team alignment** and **product decisions** - not investor pitches. They should be:
+- **Concise** - Quick to read and reference
+- **Actionable** - Help make consistent decisions
+- **Honest** - Capture real beliefs, not aspirational positioning
+
+When in doubt, optimize for clarity over polish.
+
+---
+
 ## Documents
 
 ### Foundation
