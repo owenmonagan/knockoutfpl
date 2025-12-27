@@ -144,28 +144,6 @@ The total points earned by an FPL team during a gameweek.
 
 ---
 
-## Deprecated Terms
-
-<!-- TODO: Remove these from codebase -->
-
-### Challenge (DEPRECATED)
-
-**Do not use.** Legacy term from 1v1 challenge feature. Replaced by "Tournament" and "Match" concepts.
-
----
-
-### Matchup (DEPRECATED)
-
-**Do not use.** Legacy term from challenge feature. Use "Match" instead.
-
----
-
-### Differential (DEPRECATED)
-
-**Do not use.** Legacy term from team comparison feature. Not relevant to tournament product.
-
----
-
 ## Related
 
 - [functional-spec.md](./functional-spec.md) - How these concepts behave

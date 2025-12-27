@@ -27,8 +27,6 @@ What we're building, how it behaves, and how users experience it.
 
 **Tournaments are the core product.** We build bracket-style knockout competitions for FPL mini-leagues.
 
-**Deprecated:** 1v1 challenges (legacy code, to be removed)
-
 ---
 
 ## Related

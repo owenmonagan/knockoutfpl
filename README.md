@@ -1,6 +1,6 @@
 # Knockout FPL
 
-A web application for Fantasy Premier League head-to-head challenges.
+A web application that creates knockout tournaments from Fantasy Premier League classic leagues.
 
 ## Tech Stack
 

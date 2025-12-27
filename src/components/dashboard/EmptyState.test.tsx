@@ -10,47 +10,47 @@ describe('EmptyState', () => {
   });
 
   it('Step 48: displays title', () => {
-    render(<EmptyState title="No Challenges" description="Test Description" />);
-    const title = screen.getByText('No Challenges');
+    render(<EmptyState title="No Tournaments" description="Test Description" />);
+    const title = screen.getByText('No Tournaments');
     expect(title).toBeInTheDocument();
   });
 
   it('Step 49: displays description', () => {
-    render(<EmptyState title="No Challenges" description="Create your first challenge" />);
-    const description = screen.getByText('Create your first challenge');
+    render(<EmptyState title="No Tournaments" description="Create your first tournament" />);
+    const description = screen.getByText('Create your first tournament');
     expect(description).toBeInTheDocument();
   });
 
   it('Step 50: displays icon when provided', () => {
     const icon = <span data-testid="test-icon">📋</span>;
-    render(<EmptyState title="No Challenges" description="Test" icon={icon} />);
+    render(<EmptyState title="No Tournaments" description="Test" icon={icon} />);
     const iconElement = screen.getByTestId('test-icon');
     expect(iconElement).toBeInTheDocument();
   });
 
   it('Step 51: shows action button when provided', () => {
-    render(<EmptyState title="No Challenges" description="Test" actionLabel="Create Challenge" />);
-    const button = screen.getByRole('button', { name: /create challenge/i });
+    render(<EmptyState title="No Tournaments" description="Test" actionLabel="Create Tournament" />);
+    const button = screen.getByRole('button', { name: /create tournament/i });
     expect(button).toBeInTheDocument();
   });
 
   it('Step 52: calls onAction when button clicked', () => {
     const mockOnAction = vi.fn();
-    render(<EmptyState title="No Challenges" description="Test" actionLabel="Create Challenge" onAction={mockOnAction} />);
-    const button = screen.getByRole('button', { name: /create challenge/i });
+    render(<EmptyState title="No Tournaments" description="Test" actionLabel="Create Tournament" onAction={mockOnAction} />);
+    const button = screen.getByRole('button', { name: /create tournament/i });
     fireEvent.click(button);
     expect(mockOnAction).toHaveBeenCalledTimes(1);
   });
 
   it('Step 53: has centered layout', () => {
-    render(<EmptyState title="No Challenges" description="Test" />);
+    render(<EmptyState title="No Tournaments" description="Test" />);
     const card = screen.getByRole('article');
     const content = card.querySelector('.flex.flex-col.items-center.justify-center');
     expect(content).toBeInTheDocument();
   });
 
   it('Step 54: uses Card component', () => {
-    render(<EmptyState title="No Challenges" description="Test" />);
+    render(<EmptyState title="No Tournaments" description="Test" />);
     const card = screen.getByRole('article');
     // shadcn Card has these classes
     expect(card).toHaveClass('rounded-lg');

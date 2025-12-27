@@ -1,7 +1,7 @@
 {
   "indexes": [
     {
-      "collectionGroup": "challenges",
+      "collectionGroup": "tournaments",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -15,29 +15,25 @@
       ]
     },
     {
-      "collectionGroup": "challenges",
+      "collectionGroup": "tournaments",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "opponentUserId",
+          "fieldPath": "status",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "status",
+          "fieldPath": "currentRound",
           "order": "ASCENDING"
         }
       ]
     },
     {
-      "collectionGroup": "challenges",
+      "collectionGroup": "tournaments",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "gameweekFinished",
+          "fieldPath": "fplLeagueId",
           "order": "ASCENDING"
         }
       ]

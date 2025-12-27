@@ -57,8 +57,8 @@ This document describes our development process, technical stack, and implementa
 
 1. **Forms Implementation**
    - Login/signup forms
-   - Challenge creation forms
-   - FPL team ID input
+   - Tournament creation forms
+   - FPL league ID input
    - Form validation and submission flows
 
 2. **Authentication Flows**
@@ -80,8 +80,8 @@ This document describes our development process, technical stack, and implementa
    - Loading states during async operations
 
 5. **Critical User Journeys**
-   - Signup → FPL connection → Dashboard
-   - Create challenge → Opponent accepts → View results
+   - Signup → Dashboard
+   - Import league → Create tournament → View bracket
    - Dashboard data loading and real-time updates
 
 **OPTIONAL for Playwright MCP:**
@@ -418,7 +418,7 @@ A pre-commit hook (see below) can enforce this automatically.
 
 **Services:**
 - **Firebase Auth:** Email/password authentication
-- **Firestore:** NoSQL database for users and challenges
+- **Firestore:** NoSQL database for users and tournaments
 - **Cloud Functions:** API proxying and scheduled tasks
 - **Firebase Hosting:** Static site deployment
 
@@ -446,47 +446,34 @@ A pre-commit hook (see below) can enforce this automatically.
 **Indexes:**
 - `fplTeamId` (for quick lookup/validation)
 
-#### `challenges` Collection
+#### `tournaments` Collection
 ```typescript
 {
-  challengeId: string;         // Auto-generated (document ID)
-  gameweek: number;            // 1-38
-  status: 'pending' | 'accepted' | 'active' | 'completed';
-
-  // Creator (person who created the challenge)
-  creatorUserId: string;
-  creatorFplId: number;
-  creatorFplTeamName: string;
-  creatorScore: number | null;
-
-  // Opponent (person who accepts)
-  opponentUserId: string | null;     // null until accepted
-  opponentFplId: number | null;
-  opponentFplTeamName: string | null;
-  opponentScore: number | null;
-
-  // Results
-  winnerId: string | null;    // userId of winner
-  isDraw: boolean;            // true if scores are equal
-
-  // Timestamps
-  gameweekDeadline: Timestamp;       // When gameweek locks
-  gameweekFinished: boolean;         // From FPL API
-  completedAt: Timestamp | null;     // When scores were fetched
+  id: string;                  // Firestore document ID
+  fplLeagueId: number;         // FPL classic league ID
+  fplLeagueName: string;       // League name from FPL API
+  creatorUserId: string;       // Firebase Auth UID
+  startGameweek: number;       // First round gameweek
+  currentRound: number;        // 1-indexed
+  totalRounds: number;         // Calculated from participant count
+  status: 'active' | 'completed';
+  participants: Participant[]; // Array of managers
+  rounds: Round[];             // Bracket structure
+  winnerId: number | null;     // FPL team ID of winner
   createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
 ```
 
 **Indexes:**
-- `creatorUserId` + `status` (for user's challenges)
-- `opponentUserId` + `status` (for user's challenges)
-- `status` + `gameweekFinished` (for scheduled function)
+- `creatorUserId` + `status` (for user's tournaments)
+- `fplLeagueId` (for league lookup)
+- `status` + `currentRound` (for scheduled function)
 
 **Security Rules:**
-- Users can read challenges they're part of (creator or opponent)
-- Users can create challenges
-- Only the opponent can update a pending challenge to accept
-- Only Cloud Functions can update scores and status to completed
+- Users can read tournaments they created
+- Users can create tournaments
+- Only Cloud Functions can update scores and advance rounds
 
 ---
 
@@ -511,10 +498,10 @@ functions.https.onCall('getCurrentGameweek', async () => {
 
 // Scheduled function to update completed gameweeks
 functions.pubsub.schedule('every 2 hours').onRun(async () => {
-  // Find active challenges where gameweek has finished
-  // Fetch both teams' scores
-  // Update challenge with scores and winner
-  // Update user win/loss records
+  // Find active tournaments where current round gameweek has finished
+  // Fetch scores for all matches in the round
+  // Determine winners and advance to next round
+  // Mark tournament complete when final is done
 });
 ```
 

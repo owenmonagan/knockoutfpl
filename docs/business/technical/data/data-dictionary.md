@@ -30,10 +30,6 @@ interface User {
   fplTeamId: number | null;    // FPL Team ID (e.g., 158256)
   fplTeamName: string | null;  // Cached from FPL API
 
-  // Stats (DEPRECATED - from challenge system)
-  wins: number;                // TODO: Remove
-  losses: number;              // TODO: Remove
-
   // Timestamps
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -49,8 +45,6 @@ interface User {
 | `displayName` | string | Yes | User-chosen display name |
 | `fplTeamId` | number | No | FPL Team ID, null until connected |
 | `fplTeamName` | string | No | Cached team name from FPL API |
-| `wins` | number | Yes | DEPRECATED: Legacy challenge wins |
-| `losses` | number | Yes | DEPRECATED: Legacy challenge losses |
 | `createdAt` | Timestamp | Yes | Account creation time |
 | `updatedAt` | Timestamp | Yes | Last profile update |
 

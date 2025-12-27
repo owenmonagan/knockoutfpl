@@ -65,8 +65,7 @@ e2e/
 
 Future structure:
 ├── auth.spec.ts             # Authentication flows
-├── challenge-creation.spec.ts
-├── challenge-accept.spec.ts
+├── tournament.spec.ts       # Tournament creation and viewing
 └── dashboard.spec.ts
 ```
 

@@ -10,20 +10,20 @@ describe('StatCard', () => {
   });
 
   it('Step 38: displays label', () => {
-    render(<StatCard label="Total Challenges" value={42} />);
-    const label = screen.getByText('Total Challenges');
+    render(<StatCard label="Active Tournaments" value={42} />);
+    const label = screen.getByText('Active Tournaments');
     expect(label).toBeInTheDocument();
   });
 
   it('Step 39: displays value', () => {
-    render(<StatCard label="Total Challenges" value={42} />);
+    render(<StatCard label="Active Tournaments" value={42} />);
     const value = screen.getByText('42');
     expect(value).toBeInTheDocument();
   });
 
   it('Step 40: displays icon when provided', () => {
     const icon = <span data-testid="test-icon">🏆</span>;
-    render(<StatCard label="Total Challenges" value={42} icon={icon} />);
+    render(<StatCard label="Active Tournaments" value={42} icon={icon} />);
     const iconElement = screen.getByTestId('test-icon');
     expect(iconElement).toBeInTheDocument();
   });

@@ -463,10 +463,10 @@ Empty states are opportunities to build anticipation.
 **Waiting for opponents:**
 ```
         ⚔️
- Waiting for challengers
+ Waiting for opponents
    0 of 32 spots filled
 Share the link. Fill the bracket.
-  [Bring Your Opponents]
+  [Invite Opponents]
 ```
 
 ### Error States

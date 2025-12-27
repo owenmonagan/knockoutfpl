@@ -24,7 +24,7 @@ Before starting E2E verification:
 
 What type of feature are you verifying?
 
-**A. Form (login, signup, challenge creation)**
+**A. Form (login, signup, tournament creation)**
 - Verify form fields render correctly
 - Test input validation
 - Verify submission and navigation

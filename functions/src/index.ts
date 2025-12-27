@@ -63,14 +63,6 @@ export const getFPLGameweekScore = onCall(async (request) => {
   }
 });
 
-// ============================================================================
-// Scheduled Function - Update Completed Gameweeks (DEPRECATED)
-// ============================================================================
-// NOTE: This function is deprecated as part of the tournament migration.
-// It was used for the old 1v1 challenge system.
-// Tournament scoring will use a different approach.
-// This function has been removed to clean up the codebase.
-
 // Export proxy function
 export { fplProxy } from './proxy';
 
