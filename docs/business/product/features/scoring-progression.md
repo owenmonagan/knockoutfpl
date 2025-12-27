@@ -1,7 +1,5 @@
 # Feature: Scoring & Progression
 
-<!-- TODO: Complete specification -->
-
 Automatic scoring and round advancement based on FPL gameweek results.
 
 ---
@@ -16,23 +14,21 @@ See [../overview.md](../overview.md) for context.
 
 ## Behaviors
 
-<!-- TODO: Expand with detailed specifications -->
-
 ### Score Fetching
-- Fetches final gameweek scores from FPL API
-- Only after gameweek completes (not live scoring)
-- Scheduled job checks for completed gameweeks
+- After a gameweek completes, final points are fetched from FPL for all active matches
+- Points only become final once FPL marks the gameweek as finished (includes bonus points)
 
 ### Match Resolution
-- Higher score advances, lower score eliminated
-- Ties broken by higher mini-league rank at tournament creation
+- Higher points advances, lower points eliminated
+- Ties broken by higher mini-league rank at tournament creation (lower seed wins)
 
 ### Bracket Advancement
-- Next round matchups populated automatically
+- Winners automatically placed in next round matchups
 - Bracket updates visible to all viewers
+- Next round begins with the following gameweek
 
 ### Tournament Completion
-- Tournament marked complete when final is decided
+- Tournament marked complete when final match is decided
 - Winner highlighted in bracket
 
 ---
@@ -40,13 +36,14 @@ See [../overview.md](../overview.md) for context.
 ## Inputs
 
 - Tournament records with active matches
-- FPL API gameweek scores
+- FPL gameweek completion status
+- Manager points for the gameweek
 
 ---
 
 ## Outputs
 
-- Match results (winner/loser)
+- Match results (winner/loser per match)
 - Updated bracket state
 - Tournament completion status
 
@@ -54,21 +51,32 @@ See [../overview.md](../overview.md) for context.
 
 ## Edge Cases
 
-<!-- TODO: Document error states -->
+### Both Managers Tie on Points
+- Tiebreaker applies: higher seed (lower rank at tournament creation) advances
 
-- FPL API unavailable during scoring window
-- Manager didn't play (no team selected) - score is 0?
-- Blank gameweek (team has no fixture) - what happens?
-- Double gameweek - still just one round
+### Double Gameweek
+- Some managers have players with multiple fixtures
+- No special handling—just use final points from FPL
+- Still one round per gameweek
+
+### Gameweek Delayed or Postponed
+- FPL doesn't mark gameweek as finished
+- Tournament waits—no advancement until FPL confirms completion
+
+### Manager Removed from FPL
+- Manager's FPL team deleted mid-tournament
+- Treat as 0 points for remaining rounds
+- They remain in bracket (snapshot preserved)
 
 ---
 
 ## Scope Limits
 
-- No live scoring during gameweek
+- No live scoring during gameweek (only final points after completion)
 - No manual score overrides
 - No partial gameweek scoring
-- One round per gameweek (no multi-gameweek rounds in MVP)
+- One round per gameweek (no multi-gameweek rounds)
+- No replays or rematches
 
 ---
 
@@ -77,3 +85,4 @@ See [../overview.md](../overview.md) for context.
 - See [tournament-bracket.md](./tournament-bracket.md) for display
 - See [tournament-creation.md](./tournament-creation.md) for initial bracket setup
 - See [../journeys/returning-user.md](../journeys/returning-user.md) for checking results
+- See [../../technical/](../../technical/CLAUDE.md) for implementation details (scheduled jobs, API calls)

@@ -1,14 +1,12 @@
 # Feature: FPL Connection
 
-<!-- TODO: Complete specification -->
-
-Links a manager's FPL Team ID to their Knockout FPL account.
+Links a manager's FPL Team ID to their Knockout FPL account. Enables fetching the user's mini-leagues.
 
 ---
 
 ## Summary
 
-Enables us to fetch the user's mini-leagues from the FPL API.
+After Google sign-in, user enters their FPL Team ID. System validates it exists and stores it. This unlocks the dashboard (league browser).
 
 See [../overview.md](../overview.md) for context.
 
@@ -16,56 +14,77 @@ See [../overview.md](../overview.md) for context.
 
 ## Behaviors
 
-<!-- TODO: Expand with detailed specifications -->
-
-### Enter Team ID
-- User enters their FPL Team ID (numeric, e.g., `158256`)
-- Found in URL when viewing team on FPL site: `fantasy.premierleague.com/entry/{team_id}/...`
+### Enter Manager ID
+- User enters numeric FPL Team ID (e.g., `158256`)
+- Helper text: "Find this in your FPL URL: fantasy.premierleague.com/entry/**158256**/history"
+- Submit button validates and saves
 
 ### Validation
-- System validates ID exists via FPL API
-- Team name pulled automatically from FPL
-- Invalid ID shows error message
+- Call FPL API to verify ID exists: `GET /api/entry/{manager_id}/`
+- On success: extract `name` field as manager name
+- On failure (404): show "Manager ID not found. Please check and try again."
 
-### Storage
-- Team ID stored in user record
-- No ownership verification—multiple accounts can link same Team ID
+### Save Connection
+- Update user record:
+  - `manager_id` - the validated ID
+  - `manager_name` - from FPL API response
+  - `updated_at` - now
+- Redirect to Dashboard
 
-### Claim Flow (from shared link)
-- When user clicks "Claim team" on bracket, Team ID is pre-filled
-- Still requires Google sign-in, but skips manual Team ID entry
+### Claim Flow (from shared bracket link)
+- When user clicks "Claim team" on bracket, manager ID is pre-filled
+- Still requires Google sign-in first
+- After sign-in, lands on FPL Connection with ID pre-populated
+- User confirms (or changes) and submits
 
 ---
 
 ## Inputs
 
-- FPL Team ID (number)
-- Or: Team ID from bracket context (claim flow)
+- FPL Manager ID (numeric, entered by user or pre-filled from claim flow)
 
 ---
 
 ## Outputs
 
-- User record updated with `fplTeamId` and `fplTeamName`
-- Access to user's mini-leagues via FPL API
+- User record updated with `manager_id`, `manager_name`, `updated_at`
+- Redirect to Dashboard
 
 ---
 
 ## Edge Cases
 
-<!-- TODO: Document error states -->
+### Invalid Manager ID Format
+- Non-numeric input → show "Manager ID must be a number"
+- Validate client-side before API call
 
-- Invalid Team ID (doesn't exist)
-- FPL API unavailable
-- User already has a different Team ID linked (allow overwrite? or block?)
+### Manager ID Not Found
+- FPL API returns 404
+- Show "Manager ID not found. Please check and try again."
+- Keep user on page to retry
+
+### FPL API Unavailable
+- Timeout or 5xx error
+- Show "Couldn't reach FPL. Please try again in a moment."
+- Keep user on page to retry
+
+### User Already Has Manager ID
+- User returns to FPL Connection page (via settings or navigation)
+- Show current connection: "Connected as: {manager_name} ({manager_id})"
+- Allow changing to different ID (overwrites previous)
+
+### Same Manager ID, Different User
+- Multiple Knockout FPL accounts can link same FPL Manager ID
+- No conflict resolution needed - we're tracking, not verifying ownership
 
 ---
 
 ## Scope Limits
 
 - No automatic FPL login integration (FPL has no public OAuth)
-- No verification that user "owns" the FPL team
+- No ownership verification (anyone can enter any valid ID)
 - No support for multiple FPL teams per account
+- No unlinking without replacing with different ID
 
 ---
 

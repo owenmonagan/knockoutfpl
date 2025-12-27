@@ -1,7 +1,5 @@
 # Feature: League Browser
 
-<!-- TODO: Complete specification -->
-
 Shows all FPL mini-leagues the connected manager belongs to. This is the authenticated dashboard.
 
 ---
@@ -16,48 +14,73 @@ See [../overview.md](../overview.md) for context.
 
 ## Behaviors
 
-<!-- TODO: Expand with detailed specifications -->
-
 ### Fetch Leagues
-- Fetches leagues from FPL API using linked Team ID
-- Classic leagues only (not Head-to-Head)
+- Call FPL API with user's `manager_id` to get their leagues
+- Endpoint: `GET /api/entry/{manager_id}/`
+- Extract `leagues.classic` array (ignore H2H leagues)
 
 ### Display
-- List of leagues with:
+- List of leagues, each showing:
   - League name
   - Member count
-  - Manager's current rank
-  - Action: "Create Tournament" or "View Tournament"
+  - User's current rank in league
+  - Action button: "Create Tournament" or "View Tournament"
+  - If tournament exists: user's progress (e.g., "Round 2 of 4" or "Eliminated R1" or "Winner")
 
 ### Tournament Status
-- Shows "View Tournament" if tournament exists for this league
-- Shows "Create Tournament" if no tournament exists
+- For each league, check if tournament exists in our database
+- Tournament exists → show "View Tournament" + progress indicator
+- No tournament → show "Create Tournament"
 
 ### Navigation
-- Clicking either action navigates to `knockoutfpl.com/league/{fpl_league_id}`
+- Clicking either action navigates to `/league/{fpl_league_id}`
+- "Create Tournament" triggers creation first, then shows bracket
+- "View Tournament" goes directly to bracket
+
+### Data Sources
+- **League list**: Fetched fresh from FPL API on each page load (membership can change)
+- **Tournament participants**: Stored at tournament creation time (snapshot of league members when created)
+- These are separate concerns—dashboard shows current FPL leagues, tournaments remember who was in the league when created
 
 ---
 
 ## Inputs
 
-- User's FPL Team ID (from user record)
+- User's `manager_id` (from user record)
 
 ---
 
 ## Outputs
 
-- List of mini-leagues with tournament status
+- List of mini-leagues with tournament status and user progress
 - Navigation to tournament creation or viewing
 
 ---
 
 ## Edge Cases
 
-<!-- TODO: Document error states -->
+### User Has No Classic Leagues
+- Only in overall leagues or H2H leagues
+- Show empty state: "You're not in any classic mini-leagues. Join one on the FPL site to create a tournament."
 
-- User has no mini-leagues (only in overall leagues)
-- FPL API unavailable
-- User's Team ID no longer valid
+### FPL API Unavailable
+- Timeout or 5xx error
+- Show error state: "Couldn't load your leagues. Please try again."
+- Retry button
+
+### User's Manager ID No Longer Valid
+- FPL API returns 404 (team deleted or ID changed)
+- Redirect to FPL Connection page to re-link
+
+### League Has Tournament But User Not in It
+- User joined league after tournament was created
+- Show "View Tournament" (they can still watch)
+- They won't appear in the bracket (weren't in snapshot)
+
+### User in Tournament But Left League
+- User left league on FPL after tournament created
+- Still show tournament with their progress (they're in the snapshot)
+- League may not appear in their fresh FPL league list
 
 ---
 
@@ -66,11 +89,12 @@ See [../overview.md](../overview.md) for context.
 - No league search
 - No joining leagues through Knockout FPL—must join via FPL first
 - Classic leagues only (Head-to-Head not supported)
+- No sorting or filtering of leagues
 
 ---
 
 ## Related
 
-- See [fpl-connection.md](./fpl-connection.md) for how Team ID is linked
+- See [fpl-connection.md](./fpl-connection.md) for how manager_id is linked
 - See [tournament-creation.md](./tournament-creation.md) for create flow
 - See [tournament-bracket.md](./tournament-bracket.md) for view flow
