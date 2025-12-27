@@ -18,6 +18,7 @@ Journeys are the integration test for features. If a journey feels broken, a fea
 
 ## Documents
 
+- **[onboarding.md](./onboarding.md)** - Complete onboarding flow with screen wireframes and copy.
 - **[new-user-first-tournament.md](./new-user-first-tournament.md)** - Signup through creating first tournament.
 - **[shared-link-viewer.md](./shared-link-viewer.md)** - Viewing a shared bracket and claiming a team.
 - **[returning-user.md](./returning-user.md)** - Checking status, viewing results.
@@ -26,9 +27,10 @@ Journeys are the integration test for features. If a journey feels broken, a fea
 
 ## Reading Order
 
-1. **[new-user-first-tournament.md](./new-user-first-tournament.md)** - The creator experience
-2. **[shared-link-viewer.md](./shared-link-viewer.md)** - The viral loop entry point
-3. **[returning-user.md](./returning-user.md)** - The ongoing experience
+1. **[onboarding.md](./onboarding.md)** - The complete first-time experience
+2. **[new-user-first-tournament.md](./new-user-first-tournament.md)** - The creator experience
+3. **[shared-link-viewer.md](./shared-link-viewer.md)** - The viral loop entry point
+4. **[returning-user.md](./returning-user.md)** - The ongoing experience
 
 ---
 

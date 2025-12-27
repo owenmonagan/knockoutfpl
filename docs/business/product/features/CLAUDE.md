@@ -24,6 +24,7 @@ If you're building a feature and have to guess, the doc has failed.
 - **[tournament-creation.md](./tournament-creation.md)** - Creating a knockout from a league.
 - **[tournament-bracket.md](./tournament-bracket.md)** - Viewing bracket, matches, and results.
 - **[scoring-progression.md](./scoring-progression.md)** - Automatic scoring and round advancement.
+- **[tournament-experience.md](./tournament-experience.md)** - Dashboard, match cards, victory/elimination screens, emails, notifications.
 
 ---
 
