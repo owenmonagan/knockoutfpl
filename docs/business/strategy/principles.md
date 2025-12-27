@@ -1,212 +1,143 @@
 # Product Principles
 
-> **Status:** DRAFT - needs team alignment and refinement
-> **Last Updated:** December 2025
+Decision-making rules for Knockout FPL. When facing trade-offs, these guide consistent choices.
 
 ---
 
-## Overview
+## 1. Sell the Ride, Build the Engine
 
-Product principles are the decision-making framework for Knockout FPL. When facing trade-offs, these principles guide us toward consistent choices aligned with our vision.
+**Know what transformation you're selling, then build the minimum to deliver it.**
 
-**How to use these:**
-- Reference during design decisions
-- Use in code reviews and product discussions
-- When principles conflict, discuss and document the exception
+The "ride" is the feeling: fresh competition, weekly stakes, banter with your community. The "engine" is tournaments, brackets, scoring. Build the engine first (MVP), but always with the ride in mind.
 
----
-
-## Core Principles (DRAFT)
-
-<!-- TODO: Validate these with real product decisions -->
-
-### 1. Simple over Flexible
-
-> "Make the common case effortless, even if edge cases are unsupported."
-
-**What this means:**
-- Favor opinionated defaults over configuration options
-- One clear way to do things, not multiple paths
-- Say "no" to features that add complexity for edge cases
+**In practice:**
+- MVP is functionality that works
+- But design decisions should already serve the emotional payoff
+- Marketing, copy, and positioning should sell the ride from day one
+- Don't wait until the product is "done" to articulate why it matters
 
 **Examples:**
-- ✅ Auto-seed brackets by league rank (no manual seeding option)
-- ✅ One round per gameweek (no custom timing)
-- ❌ Don't add "exclude chips" option until many users request it
-- ❌ Don't build custom bracket sizes; support standard sizes only
-
-**Trade-off accepted:** Power users may want flexibility we don't offer.
+- ✅ Build working tournaments (engine), but frame it as "something to play for" (ride)
+- ✅ Even rough MVP copy should hint at the transformation
+- ❌ Don't describe features; describe what they enable
+- ❌ Don't wait for polish to think about positioning
 
 ---
 
-### 2. FPL is the Source of Truth
+## 2. Mini-Leagues First, Controls Later
 
-> "We reflect FPL data; we never modify, store, or dispute it."
+**Build for the core use case. Add flexibility only when users demand it.**
 
-**What this means:**
-- Scores come from FPL API, period
-- If FPL says X, we say X (no manual overrides)
-- We don't store historical FPL data beyond what's needed
-- Link to FPL as authoritative source
+Mini-leagues are the first audience. Build what they need, nothing more. When communities and creators come, add controls then - not before.
 
 **Examples:**
-- ✅ Show "Score from FPL" with link to official source
-- ✅ If FPL API has an issue, we wait for it to resolve
-- ❌ Never allow manual score entry or override
-- ❌ Don't build score dispute resolution (FPL is right)
-
-**Trade-off accepted:** If FPL has errors, so do we. We accept this dependency.
+- ✅ One tournament format that works for 8-20 people
+- ✅ Default settings that make sense for friends competing
+- ❌ Don't build admin controls "just in case"
+- ❌ Don't add customization until users ask repeatedly
 
 ---
 
-### 3. Ship to Learn
+## 3. North Star or No
 
-> "Launch early, iterate fast. Real user feedback beats speculation."
+**If it doesn't improve the North Star Metric, don't build it.**
 
-**What this means:**
-- Bias toward shipping over perfecting
-- Small releases, quick iterations
-- Measure, learn, adjust
-- "Good enough" today beats "perfect" next month
+Every feature must connect to the metric that matters. "Nice to have" isn't a reason. "Users might like it" isn't a reason. Will it measurably move the thing we're measuring?
+
+The North Star Metric is **Page Views** - see [metrics.md](./metrics.md).
 
 **Examples:**
-- ✅ Launch with basic bracket display; improve based on feedback
-- ✅ Release MVP without notifications; add if users request
-- ❌ Don't delay launch to add "nice to have" features
-- ❌ Don't over-engineer for hypothetical scale
-
-**Trade-off accepted:** Some users will see rough edges. That's okay.
+- ✅ Build what increases the NSM
+- ❌ Don't add features because competitors have them
+- ❌ Don't build for hypothetical users
 
 ---
 
-### 4. Respect the Mini-League
+## 4. FPL is Truth, Cache for Debugging
 
-> "Strengthen existing FPL communities; don't try to replace them."
+**Trust the FPL API completely. Keep local copies only for debugging.**
 
-**What this means:**
-- We complement FPL mini-leagues, not compete
-- Keep the social dynamic within existing groups
-- Don't try to build our own social network
-- Tournament value comes from playing with people you know
+We don't dispute FPL scores. We don't build manual overrides. If FPL says 47 points, it's 47 points. Store local copies to debug issues, not to second-guess the source.
 
 **Examples:**
-- ✅ Import existing mini-league members
-- ✅ Focus on private tournaments, not public matchmaking
-- ❌ Don't build global leaderboards of strangers
-- ❌ Don't add chat/social features (they have WhatsApp)
-
-**Trade-off accepted:** Slower growth than a social platform, but deeper engagement.
+- ✅ Display scores directly from FPL with link to source
+- ✅ Cache locally for debugging and performance
+- ❌ Never allow manual score entry
+- ❌ Don't build "dispute" flows
 
 ---
 
-### 5. Mobile-First Mindset
+## 5. Responsive Web, Mobile-First
 
-> "Most FPL users are on phones. Design for thumbs."
+**One web app. Design for phones, ensure it works on desktop.**
 
-**What this means:**
-- Test on mobile before desktop
-- Touch-friendly UI, readable text, fast loading
-- Core flows must work perfectly on mobile
-- Desktop is "also good," not the primary target
+Not a native app. A responsive website that feels great on mobile because that's where FPL managers live. Desktop is supported, not prioritized.
 
 **Examples:**
-- ✅ Large tap targets, bottom navigation
-- ✅ Bracket view optimized for portrait orientation
+- ✅ Test every feature on mobile first
+- ✅ Touch-friendly, thumb-reachable UI
 - ❌ Don't build features that only work on desktop
-- ❌ Don't use hover states for critical information
-
-**Trade-off accepted:** Desktop experience may be "fine" rather than "optimized."
+- ❌ Don't build a native app (yet)
 
 ---
 
-### 6. Free Until Proven
+## 6. Free Now, Paid at Scale
 
-> "Don't monetize until we've proven real value."
+**No monetization until we've proven value. Then charge for volume, not features.**
 
-**What this means:**
-- Build audience and trust before revenue
-- Free removes friction for viral growth
-- Monetization is a future problem, not a current one
-- When we do monetize, don't degrade free experience
+Stay free to remove friction and enable word-of-mouth growth. When monetization comes, it's for large-scale usage (big tournaments, many participants) - not gating core features behind paywalls.
 
 **Examples:**
-- ✅ All core features free
-- ✅ No ads (they degrade experience)
-- ❌ Don't gate features behind paywall prematurely
-- ❌ Don't add "premium" tiers until we have scale
-
-**Trade-off accepted:** No revenue in short term. This is a side project, not a business (yet).
+- ✅ All core features free for typical mini-league use
+- ✅ Charge for 100+ participant tournaments when the time comes
+- ❌ Don't paywall features that make the core experience better
+- ❌ Don't add ads
 
 ---
 
-## Principles in Tension (DRAFT)
+## 7. Ship Fast for Experiments, Quality for Core
 
-<!-- TODO: Add examples as we encounter them -->
+**Experiments can be rough. Core features must be solid.**
 
-When principles conflict, here's how to think about it:
+When testing a hypothesis, speed beats polish. When building something that's staying, take the time to do it right.
 
-| Conflict | Resolution |
-|----------|------------|
-| Simple vs. Ship to Learn | Ship simple things fast; don't ship complex things half-done |
-| Mobile-First vs. Ship to Learn | Mobile must work; desktop can be "good enough" at launch |
-| FPL Source of Truth vs. Simple | Accept FPL complexity (like bonus points timing) rather than oversimplify |
-
----
-
-## Anti-Principles (DRAFT)
-
-Things we explicitly **don't** prioritize:
-
-| Anti-Principle | Why |
-|----------------|-----|
-| "Build for scale" | We're not at scale; optimize when needed |
-| "Maximize engagement" | We want efficient, not addictive |
-| "Feature parity with competitors" | We don't have competitors; we set our own path |
-| "Enterprise-ready" | This is for friend groups, not corporations |
+**Examples:**
+- ✅ Hack together a prototype to test if users want feature X
+- ✅ Polish and test thoroughly before shipping to everyone
+- ❌ Don't gold-plate an experiment
+- ❌ Don't ship broken core features to "learn"
 
 ---
 
-## Applying Principles (DRAFT)
+## 8. Delete Instead of Fix
 
-### In Product Decisions
+**If it's not worth fixing properly, remove it.**
 
-When evaluating a feature request:
-1. Does it align with our principles?
-2. Which principle does it serve?
-3. Does it conflict with any principle?
-4. If conflict, which principle wins and why?
+Bad code, broken features, half-working experiments - delete them. Don't patch, don't work around, don't leave them rotting. Smaller and working beats larger and fragile.
 
-### In Code Reviews
-
-When reviewing implementation:
-1. Is this simpler than it needs to be? (Principle 1)
-2. Are we storing FPL data we shouldn't? (Principle 2)
-3. Is this over-engineered? (Principle 3)
-4. Does this work on mobile? (Principle 5)
-
-### In Design Reviews
-
-When reviewing UX:
-1. Is there only one obvious way to do this? (Principle 1)
-2. Can this be done in fewer steps? (Principle 1)
-3. Will this work with a thumb on a phone? (Principle 5)
+**Examples:**
+- ✅ Remove a feature that's causing bugs and low usage
+- ✅ Delete dead code rather than commenting it out
+- ❌ Don't keep patching something fundamentally broken
+- ❌ Don't leave experiments running forever
 
 ---
 
-## Evolving Principles
+## 9. Listen, Then Decide
 
-Principles aren't permanent. Review and update when:
+**Do what users ask - if it makes sense.**
 
-- We consistently make exceptions to a principle
-- User feedback contradicts a principle
-- Business context changes significantly
-- A principle no longer serves our vision
+User feedback matters. But filter it through your own judgment and the North Star. "Users asked for it" isn't automatic justification. "Users asked for it AND it moves the NSM" is.
 
-Document any changes with rationale.
+**Examples:**
+- ✅ Build requested features that align with vision
+- ✅ Say "no" or "not yet" to requests that don't
+- ❌ Don't build every feature request
+- ❌ Don't ignore patterns in feedback
 
 ---
 
 ## Related
 
 - [vision.md](./vision.md) - What we're building toward
-- [../product/requirements/core-prd.md](../product/requirements/core-prd.md) - What's in/out of scope
+- [metrics.md](./metrics.md) - The North Star Metric these principles serve

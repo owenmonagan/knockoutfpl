@@ -1,243 +1,149 @@
-# Metrics Framework
+# Metrics
 
-> **Status:** DRAFT - needs validation and refinement
-> **Last Updated:** December 2025
-
----
-
-## Overview
-
-This document defines how we measure success for Knockout FPL. It establishes our North Star Metric, supporting input metrics, and guardrail metrics we won't sacrifice.
+How we measure success for Knockout FPL.
 
 ---
 
-## North Star Metric (DRAFT)
+## North Star Metric
 
-<!-- TODO: Validate this is the right North Star -->
+**Page Views**
 
-### **Completed Tournaments per Week**
+Why page views:
+- Directly correlates to ad revenue (1,000 PV = ~$0.50 at conservative CPM)
+- Measurable from day one without ad integration
+- Captures both acquisition (new users) and engagement (return visits)
 
-**Why this metric:**
-- Directly measures core value delivered (users experiencing knockout drama)
-- Leading indicator of engagement and retention
-- Captures both creation AND completion (not vanity)
-- Aligns team around outcomes, not outputs
+**Phase 1 Target: 240,000 page views**
 
-**Definition:**
-- A tournament is "completed" when a winner is determined
-- Measured weekly (aligns with FPL gameweek cadence)
-- Excludes abandoned tournaments
+| Week | Weekly Target | Cumulative |
+|------|---------------|------------|
+| 1 | 60,000 | 60,000 |
+| 2 | 60,000 | 120,000 |
+| 3 | 60,000 | 180,000 |
+| 4 | 60,000 | 240,000 |
 
-**Target trajectory:**
-| Timeframe | Target | Notes |
-|-----------|--------|-------|
-| Launch week | 10+ | Validate core flow |
-| Month 1 | 50+ | Early traction |
-| Month 3 | 200+ | Growth phase |
-| Season end | 500+/week | Established product |
+Based on: 20,000 active users × 3 visits per gameweek × 4 gameweeks.
 
----
+**Secondary Metric: Page Views per Active User**
 
-## Input Metrics (DRAFT)
-
-<!-- TODO: Set up tracking for all of these -->
-
-These metrics "feed" the North Star. Improving them should improve completed tournaments.
-
-### Acquisition Metrics
-
-| Metric | Definition | Target | Why it matters |
-|--------|------------|--------|----------------|
-| **New signups** | Users completing registration | - | Top of funnel |
-| **Signup conversion** | Visitors → Registered users | >30% | Landing page effectiveness |
-| **FPL connection rate** | Registered → Connected FPL team | >80% | Critical activation step |
-
-### Activation Metrics
-
-| Metric | Definition | Target | Why it matters |
-|--------|------------|--------|----------------|
-| **Tournament creation rate** | Connected users who create a tournament | >20% | Core action |
-| **Time to first tournament** | Time from signup to tournament creation | <5 min | Friction indicator |
-| **Invite sent rate** | Tournaments with invites sent | >90% | Viral loop trigger |
-
-### Engagement Metrics
-
-| Metric | Definition | Target | Why it matters |
-|--------|------------|--------|----------------|
-| **Tournament completion rate** | Created → Completed tournaments | >70% | Quality indicator |
-| **Bracket views per tournament** | Avg views of bracket page | >10 | Engagement depth |
-| **Return visit rate** | Users who return after gameweek | >50% | Stickiness |
-
-### Viral/Growth Metrics
-
-| Metric | Definition | Target | Why it matters |
-|--------|------------|--------|----------------|
-| **Invite acceptance rate** | Invites sent → Accepted | >60% | Viral loop efficiency |
-| **K-factor** | Avg new users from each user | >1.0 | Viral growth indicator |
-| **Multi-league users** | Users in 2+ tournaments | >20% | Cross-pollination |
-
-### Retention Metrics
-
-| Metric | Definition | Target | Why it matters |
-|--------|------------|--------|----------------|
-| **Week 1 retention** | Return within 7 days | >40% | Early retention |
-| **Gameweek retention** | Return next gameweek | >60% | Core retention |
-| **Season retention** | Return next FPL season | >50% | Long-term health |
+Separates engagement from acquisition. Target: 3+ per gameweek.
 
 ---
 
-## Guardrail Metrics (DRAFT)
+## P/L Dashboard
 
-<!-- TODO: Set up alerting for these -->
-
-Metrics we monitor to ensure we don't sacrifice quality for growth.
-
-| Metric | Threshold | Why it matters |
-|--------|-----------|----------------|
-| **Page load time** | <2 seconds | UX quality |
-| **Error rate** | <1% | Reliability |
-| **Score accuracy** | 100% | Trust (must match FPL) |
-| **Support requests** | <5% of users | Product quality |
-| **Bracket disputes** | 0 | Core functionality |
-
----
-
-## Metrics Hierarchy (DRAFT)
+**The Core Equation**
 
 ```
-                    ┌─────────────────────────┐
-                    │   NORTH STAR METRIC     │
-                    │ Completed Tournaments   │
-                    │      per Week           │
-                    └───────────┬─────────────┘
-                                │
-        ┌───────────────────────┼───────────────────────┐
-        │                       │                       │
-        ▼                       ▼                       ▼
-┌───────────────┐     ┌───────────────┐     ┌───────────────┐
-│  ACQUISITION  │     │  ACTIVATION   │     │   RETENTION   │
-│               │     │               │     │               │
-│ • Signups     │     │ • Tournament  │     │ • Return rate │
-│ • Conversion  │     │   creation    │     │ • Multi-tourn │
-│ • FPL connect │     │ • Invites     │     │   users       │
-└───────────────┘     │ • Completion  │     └───────────────┘
-                      └───────────────┘
-                              │
-                              ▼
-                    ┌───────────────┐
-                    │    VIRAL      │
-                    │               │
-                    │ • K-factor    │
-                    │ • Invite rate │
-                    │ • Multi-league│
-                    └───────────────┘
+Profit = (Page Views × $0.0005) - Firebase Costs
 ```
 
----
+**Assumptions**
 
-## OKRs Template (DRAFT)
+| Factor | Value | Notes |
+|--------|-------|-------|
+| Ad CPM | $0.50 | Conservative for sports/hobby niche |
+| Ads per page view | 1 | Single non-intrusive placement |
+| Firebase reads per PV | ~4 | User doc, tournament, bracket |
+| Firebase read cost | $0.036/100k | After free tier |
 
-<!-- TODO: Set actual OKRs each quarter -->
+**Phase 1 P/L Target**
 
-### Example: Launch Quarter OKRs
+| Metric | Target |
+|--------|--------|
+| Page Views | 240,000 |
+| Revenue (at $0.50 CPM) | $120 |
+| Firebase Costs | <$5 |
+| **Net** | ~$115 |
 
-**Objective 1: Validate product-market fit**
-- KR1: 100 tournaments completed
-- KR2: >60% tournament completion rate
-- KR3: >30% of users return for second tournament
+**Budget & Alerts**
 
-**Objective 2: Establish viral growth loop**
-- KR1: >50% invite acceptance rate
-- KR2: K-factor >0.5 (each user brings 0.5 new users)
-- KR3: >15% of users create tournament for second league
+| Alert | Threshold | Action |
+|-------|-----------|--------|
+| Firebase budget | $10/month | Email alert at 50%, 90% |
+| Budget exceeded | 100% | Review architecture |
 
-**Objective 3: Maintain quality bar**
-- KR1: 0 score discrepancies reported
-- KR2: <2s page load time (p95)
-- KR3: <1% error rate
+**Break-even Check**
 
----
-
-## Tracking Implementation (DRAFT)
-
-<!-- TODO: Implement these -->
-
-### Decision: Firebase Analytics
-
-**We will use Firebase Analytics (Google Analytics 4) as our primary analytics tool.**
-
-**Why Firebase Analytics:**
-- Already using Firebase for Auth, Firestore, Hosting - no new vendor
-- Free tier is generous (unlimited events, 500 distinct event types)
-- Built-in integration with Firebase ecosystem
-- GA4 provides funnels, cohorts, retention analysis out of the box
-- BigQuery export available if we need advanced analysis later
-
-**What we won't use (for now):**
-- Amplitude, Mixpanel, PostHog - unnecessary complexity for our stage
-- Custom analytics in Firestore - use Firebase Analytics instead
-
-### Must track from day 1
-
-| Event | Parameters | Maps to Metric |
-|-------|------------|----------------|
-| `sign_up` | method | Acquisition |
-| `fpl_team_connected` | team_id | Activation |
-| `tournament_created` | tournament_id, league_size | North Star input |
-| `tournament_completed` | tournament_id, rounds | North Star |
-| `invite_sent` | tournament_id, count | Viral |
-| `invite_accepted` | tournament_id | Viral |
-| `bracket_viewed` | tournament_id | Engagement |
-
-### Track as we scale
-- [ ] Funnel conversion rates (use GA4 funnel exploration)
-- [ ] Cohort retention (use GA4 cohort analysis)
-- [ ] Viral metrics (K-factor) - may need custom calculation
-- [ ] Feature usage
-
-### Implementation Notes
-
-```typescript
-// Example: Track tournament creation
-import { logEvent } from 'firebase/analytics';
-
-logEvent(analytics, 'tournament_created', {
-  tournament_id: tournament.id,
-  league_size: tournament.participants.length,
-  seeding_method: 'rank'  // for future flexibility
-});
+At $0.50 CPM, break-even requires:
+```
+Page Views > (Firebase Costs ÷ 0.0005)
 ```
 
-<!-- TODO: Create analytics.ts service wrapper for consistent event logging -->
+If Firebase costs $5/month → need >10,000 page views. Phase 1 target gives 24x headroom.
 
 ---
 
-## Review Cadence (DRAFT)
+## Input Metrics
 
-| Review | Frequency | Focus |
-|--------|-----------|-------|
-| **Metrics check** | Daily | North Star, errors |
-| **Weekly review** | Weekly | Input metrics, trends |
-| **OKR review** | Monthly | Progress toward goals |
-| **Strategy review** | Quarterly | Are we measuring the right things? |
+These drive the NSM. If page views are off track, diagnose here.
+
+### Acquisition
+
+| Metric | Definition | Phase 1 Target |
+|--------|------------|----------------|
+| Signups | Users who complete registration | 20,000 |
+| Signup conversion | Visitors → Signups | >50% |
+| Source | Where signups came from | 80%+ Reddit |
+
+### Engagement
+
+| Metric | Definition | Phase 1 Target |
+|--------|------------|----------------|
+| Active users (weekly) | Users who visited that gameweek | 15,000+ |
+| Page views per active user | PV ÷ Active users | 3+ |
+| Return rate | % of users who return next gameweek | >60% |
+
+### Tournament Health
+
+| Metric | Definition | Phase 1 Target |
+|--------|------------|----------------|
+| Bracket completion | Tournament finishes with a winner | 100% |
+| Eliminated user drop-off | % who stop visiting after elimination | <50% |
 
 ---
 
-## Anti-Metrics (DRAFT)
+## Measurement
 
-Metrics we explicitly **won't** optimize for:
+### Weekly Dashboard (Every Monday)
 
-| Anti-Metric | Why we avoid it |
-|-------------|-----------------|
-| Total registered users | Vanity metric; doesn't indicate value |
-| Time in app | We want efficient UX, not addiction |
-| Tournaments started | Completion matters more |
-| Social shares | Doesn't correlate with real value |
+| Section | Metrics | Source |
+|---------|---------|--------|
+| NSM | Page views (weekly, cumulative) | Google Analytics |
+| P/L | Revenue estimate, Firebase costs, net | GA + Firebase Console |
+| Acquisition | New signups, conversion rate, sources | Firebase Auth + GA |
+| Engagement | Active users, PV per user, return rate | GA |
+
+### Where to Find Data
+
+| Metric | Location |
+|--------|----------|
+| Page views | Firebase Analytics or Google Analytics |
+| Firestore reads/writes | Firebase Console → Usage |
+| Cloud Function invocations | Firebase Console → Functions |
+| Estimated costs | Firebase Console → Usage & Billing |
+| Signups | Firebase Console → Authentication |
+
+### Alerts to Configure
+
+| Alert | Threshold | Action |
+|-------|-----------|--------|
+| Firebase budget | $10/month | Email at 50%, 90% |
+| Error rate | >1% of requests | Immediate notification |
+| Signup conversion | <30% | Investigate funnel |
+
+### Weekly Review Questions
+
+1. Are we on track for 240k page views?
+2. Are costs within budget?
+3. Is return rate holding above 60%?
+4. Are eliminated users still checking in?
 
 ---
 
 ## Related
 
-- [vision.md](./vision.md) - Success definition
-- [gtm-strategy.md](./gtm-strategy.md) - Launch metrics
-- [../product/requirements/core-prd.md](../product/requirements/core-prd.md) - Success criteria
+- [vision.md](./vision.md) - What success looks like qualitatively
+- [gtm-strategy.md](./gtm-strategy.md) - Phase 1 launch plan these metrics measure
+- [hypotheses.md](./hypotheses.md) - Assumptions these metrics validate
+- [principles.md](./principles.md) - "North Star or No" principle
