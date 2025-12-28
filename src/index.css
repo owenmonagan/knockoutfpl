@@ -321,3 +321,43 @@
     pointer-events: none;
   }
 }
+
+/* Bracket connector lines */
+.bracket-connector {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  transform: translateX(100%);
+}
+
+.bracket-connector::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1rem;
+  height: 2px;
+  background-color: hsl(var(--border));
+}
+
+.bracket-connector-top::before {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  bottom: 0;
+  width: 2px;
+  background-color: hsl(var(--border));
+}
+
+.bracket-connector-bottom::before {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  top: 0;
+  bottom: 50%;
+  width: 2px;
+  background-color: hsl(var(--border));
+}

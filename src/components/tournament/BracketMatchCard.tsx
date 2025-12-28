@@ -86,10 +86,9 @@ export function BracketMatchCard({
       {showConnector && (
         <div
           className={cn(
-            "absolute right-0 w-4 border-r-2 border-gray-300",
-            isTopHalf ? "top-1/2 h-1/2 border-t-2" : "bottom-1/2 h-1/2 border-b-2"
+            "bracket-connector",
+            isTopHalf ? "bracket-connector-top" : "bracket-connector-bottom"
           )}
-          style={{ transform: 'translateX(100%)' }}
         />
       )}
     </div>
