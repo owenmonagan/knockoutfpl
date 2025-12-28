@@ -257,6 +257,72 @@ const GET_CURRENT_EVENT_QUERY = `
   }
 `;
 
+// Update mutations for bracket progression
+const UPDATE_MATCH_WINNER_MUTATION = `
+  mutation UpdateMatchWinner(
+    $tournamentId: UUID!
+    $matchId: Int!
+    $winnerEntryId: Int!
+    $status: String!
+  ) {
+    match_update(
+      key: { tournamentId: $tournamentId, matchId: $matchId }
+      data: {
+        winnerEntryId: $winnerEntryId
+        status: $status
+      }
+    )
+  }
+`;
+
+const UPDATE_ROUND_STATUS_MUTATION = `
+  mutation UpdateRoundStatus(
+    $tournamentId: UUID!
+    $roundNumber: Int!
+    $status: String!
+  ) {
+    round_update(
+      key: { tournamentId: $tournamentId, roundNumber: $roundNumber }
+      data: {
+        status: $status
+      }
+    )
+  }
+`;
+
+const UPDATE_TOURNAMENT_STATUS_MUTATION = `
+  mutation UpdateTournamentStatus(
+    $id: UUID!
+    $status: String!
+    $winnerEntryId: Int
+  ) {
+    tournament_update(
+      id: $id
+      data: {
+        status: $status
+        winnerEntryId: $winnerEntryId
+      }
+    )
+  }
+`;
+
+const UPDATE_PARTICIPANT_STATUS_MUTATION = `
+  mutation UpdateParticipantStatus(
+    $tournamentId: UUID!
+    $entryId: Int!
+    $status: String!
+    $eliminationRound: Int
+  ) {
+    participant_update(
+      key: { tournamentId: $tournamentId, entryId: $entryId }
+      data: {
+        status: $status
+        eliminationRound: $eliminationRound
+      }
+    )
+  }
+`;
+
 // Type definitions for mutation inputs
 export interface UpsertEntryInput {
   entryId: number;
@@ -474,4 +540,50 @@ export async function getCurrentEvent(season: string): Promise<CurrentEvent | nu
     { variables: { season } }
   );
   return result.data.events[0] || null;
+}
+
+// Update mutation functions for bracket progression
+export async function updateMatchWinner(
+  tournamentId: string,
+  matchId: number,
+  winnerEntryId: number
+): Promise<void> {
+  await dataConnectAdmin.executeGraphql(
+    UPDATE_MATCH_WINNER_MUTATION,
+    { variables: { tournamentId, matchId, winnerEntryId, status: 'complete' } }
+  );
+}
+
+export async function updateRoundStatus(
+  tournamentId: string,
+  roundNumber: number,
+  status: string
+): Promise<void> {
+  await dataConnectAdmin.executeGraphql(
+    UPDATE_ROUND_STATUS_MUTATION,
+    { variables: { tournamentId, roundNumber, status } }
+  );
+}
+
+export async function updateTournamentStatus(
+  tournamentId: string,
+  status: string,
+  winnerEntryId?: number
+): Promise<void> {
+  await dataConnectAdmin.executeGraphql(
+    UPDATE_TOURNAMENT_STATUS_MUTATION,
+    { variables: { id: tournamentId, status, winnerEntryId } }
+  );
+}
+
+export async function updateParticipantStatus(
+  tournamentId: string,
+  entryId: number,
+  status: string,
+  eliminationRound?: number
+): Promise<void> {
+  await dataConnectAdmin.executeGraphql(
+    UPDATE_PARTICIPANT_STATUS_MUTATION,
+    { variables: { tournamentId, entryId, status, eliminationRound } }
+  );
 }
