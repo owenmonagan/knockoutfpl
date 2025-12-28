@@ -11,6 +11,10 @@ vi.mock('../lib/firebase', () => ({
 // Mock Data Connect
 vi.mock('@knockoutfpl/dataconnect', () => ({
   getLeagueTournaments: vi.fn(),
+  getTournamentWithParticipants: vi.fn(),
+  getTournamentRounds: vi.fn(),
+  getRoundMatches: vi.fn(),
+  getMatchPicks: vi.fn(),
 }));
 
 // Mock Firebase Functions
@@ -34,7 +38,12 @@ describe('getTournamentByLeague', () => {
   });
 
   it('should return tournament when one exists', async () => {
-    const { getLeagueTournaments } = await import('@knockoutfpl/dataconnect');
+    const {
+      getLeagueTournaments,
+      getTournamentWithParticipants,
+      getTournamentRounds,
+    } = await import('@knockoutfpl/dataconnect');
+
     vi.mocked(getLeagueTournaments).mockResolvedValue({
       data: {
         tournaments: [{
@@ -45,6 +54,23 @@ describe('getTournamentByLeague', () => {
           totalRounds: 3,
           status: 'active',
         }],
+      },
+    } as any);
+
+    vi.mocked(getTournamentWithParticipants).mockResolvedValue({
+      data: {
+        tournament: {
+          id: 'tournament-123',
+          startEvent: 20,
+          winnerEntryId: null,
+        },
+        participants: [],
+      },
+    } as any);
+
+    vi.mocked(getTournamentRounds).mockResolvedValue({
+      data: {
+        rounds: [],
       },
     } as any);
 

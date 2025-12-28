@@ -1,8 +1,15 @@
 // src/services/tournament.ts
 import { httpsCallable } from 'firebase/functions';
 import { functions, dataConnect } from '../lib/firebase';
-import { getLeagueTournaments } from '@knockoutfpl/dataconnect';
-import type { Tournament } from '../types/tournament';
+import {
+  getLeagueTournaments,
+  getTournamentWithParticipants,
+  getTournamentRounds,
+  getRoundMatches,
+  getMatchPicks,
+} from '@knockoutfpl/dataconnect';
+import type { Tournament, Round, Match, Participant, MatchPlayer } from '../types/tournament';
+import type { UUIDString } from '@knockoutfpl/dataconnect';
 
 // Cloud Function types
 interface CreateTournamentRequest {
@@ -17,29 +24,121 @@ interface CreateTournamentResponse {
 }
 
 /**
+ * Generate round name based on round number and total rounds
+ */
+function getRoundName(roundNumber: number, totalRounds: number): string {
+  const roundsFromEnd = totalRounds - roundNumber;
+  if (roundsFromEnd === 0) return 'Final';
+  if (roundsFromEnd === 1) return 'Semi-Finals';
+  if (roundsFromEnd === 2) return 'Quarter-Finals';
+  return `Round ${roundNumber}`;
+}
+
+/**
  * Get tournament by FPL league ID using Data Connect
+ * Fetches full tournament data including participants, rounds, and matches
  */
 export async function getTournamentByLeague(leagueId: number): Promise<Tournament | null> {
-  const result = await getLeagueTournaments(dataConnect, { fplLeagueId: leagueId });
+  // First, get basic tournament info
+  const tournamentsResult = await getLeagueTournaments(dataConnect, { fplLeagueId: leagueId });
 
-  if (!result.data.tournaments || result.data.tournaments.length === 0) {
+  if (!tournamentsResult.data.tournaments || tournamentsResult.data.tournaments.length === 0) {
     return null;
   }
 
-  // Return the first (most recent) tournament for this league
-  const tournament = result.data.tournaments[0];
+  const basicTournament = tournamentsResult.data.tournaments[0];
+  const tournamentId = basicTournament.id as UUIDString;
+
+  // Fetch participants and rounds in parallel
+  const [participantsResult, roundsResult] = await Promise.all([
+    getTournamentWithParticipants(dataConnect, { id: tournamentId }),
+    getTournamentRounds(dataConnect, { tournamentId }),
+  ]);
+
+  // Map participants to our type
+  const participants: Participant[] = (participantsResult.data.participants || []).map((p) => ({
+    fplTeamId: p.entryId,
+    fplTeamName: p.teamName,
+    managerName: p.managerName,
+    seed: p.seed,
+  }));
+
+  // Create a lookup map for participants by entryId
+  const participantMap = new Map(participants.map((p) => [p.fplTeamId, p]));
+
+  // For each round, fetch matches and match picks
+  const rounds: Round[] = await Promise.all(
+    (roundsResult.data.rounds || []).map(async (r) => {
+      // Get matches for this round
+      const matchesResult = await getRoundMatches(dataConnect, {
+        tournamentId,
+        roundNumber: r.roundNumber,
+      });
+
+      // For each match, get the match picks (players)
+      const matches: Match[] = await Promise.all(
+        (matchesResult.data.matches || []).map(async (m) => {
+          const picksResult = await getMatchPicks(dataConnect, {
+            tournamentId,
+            matchId: m.matchId,
+          });
+
+          const picks = picksResult.data.matchPicks || [];
+          const player1Pick = picks.find((p) => p.slot === 1);
+          const player2Pick = picks.find((p) => p.slot === 2);
+
+          const player1: MatchPlayer | null = player1Pick
+            ? {
+                fplTeamId: player1Pick.entryId,
+                seed: participantMap.get(player1Pick.entryId)?.seed ?? 0,
+                score: null, // Score would come from picks table if needed
+              }
+            : null;
+
+          const player2: MatchPlayer | null = player2Pick
+            ? {
+                fplTeamId: player2Pick.entryId,
+                seed: participantMap.get(player2Pick.entryId)?.seed ?? 0,
+                score: null,
+              }
+            : null;
+
+          return {
+            id: `${m.tournamentId}-${m.matchId}`,
+            player1,
+            player2,
+            winnerId: m.winnerEntryId ?? null,
+            isBye: m.isBye,
+          };
+        })
+      );
+
+      return {
+        roundNumber: r.roundNumber,
+        name: getRoundName(r.roundNumber, basicTournament.totalRounds),
+        gameweek: r.event,
+        matches,
+        isComplete: r.status === 'completed',
+      };
+    })
+  );
+
+  // Get winner from tournament data
+  const tournamentData = participantsResult.data.tournament;
+  const winnerId = tournamentData?.winnerEntryId ?? null;
+
   return {
-    id: tournament.id,
+    id: basicTournament.id,
     fplLeagueId: leagueId,
-    fplLeagueName: tournament.fplLeagueName,
-    creatorUserId: tournament.creatorUid,
-    startGameweek: tournament.currentRound, // Using currentRound as startGameweek approximation
-    currentRound: tournament.currentRound,
-    totalRounds: tournament.totalRounds,
-    status: tournament.status as 'active' | 'completed',
-    participants: [], // Will be loaded separately if needed
-    rounds: [], // Will be loaded separately if needed
-    winnerId: null, // Will be loaded separately if needed
+    fplLeagueName: basicTournament.fplLeagueName,
+    creatorUserId: basicTournament.creatorUid,
+    startGameweek: tournamentData?.startEvent ?? basicTournament.currentRound,
+    currentRound: basicTournament.currentRound,
+    totalRounds: basicTournament.totalRounds,
+    status: basicTournament.status as 'active' | 'completed',
+    participants,
+    rounds,
+    winnerId,
   };
 }
 
