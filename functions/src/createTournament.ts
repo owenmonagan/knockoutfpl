@@ -5,7 +5,56 @@ import {
   calculateTotalRounds,
   generateBracketStructure,
   assignParticipantsToMatches,
+  BracketMatch,
+  MatchAssignment,
 } from './bracketGenerator';
+
+// Database entity types (matching Data Connect schema)
+interface TournamentRecord {
+  fplLeagueId: number;
+  fplLeagueName: string;
+  creatorUid: string;
+  participantCount: number;
+  totalRounds: number;
+  startEvent: number;
+  seedingMethod: string;
+}
+
+interface RoundRecord {
+  tournamentId: string;
+  roundNumber: number;
+  event: number;
+  status: string;
+}
+
+interface ParticipantRecord {
+  tournamentId: string;
+  entryId: number;
+  teamName: string;
+  managerName: string;
+  seed: number;
+  leagueRank: number;
+  leaguePoints: number;
+  rawJson: string;
+}
+
+interface MatchRecord {
+  tournamentId: string;
+  matchId: number;
+  roundNumber: number;
+  positionInRound: number;
+  qualifiesToMatchId: number | null;
+  isBye: boolean;
+  status: string;
+  winnerEntryId?: number;
+}
+
+interface MatchPickRecord {
+  tournamentId: string;
+  matchId: number;
+  entryId: number;
+  slot: number;
+}
 
 export interface CreateTournamentRequest {
   fplLeagueId: number;
@@ -58,6 +107,116 @@ export function getCurrentGameweek(bootstrapData: any): number {
     throw new HttpsError('failed-precondition', 'Could not determine current gameweek');
   }
   return currentEvent.id;
+}
+
+/**
+ * Build all database records for a tournament
+ */
+export function buildTournamentRecords(
+  tournamentId: string,
+  uid: string,
+  standings: any,
+  bracketSize: number,
+  totalRounds: number,
+  startEvent: number,
+  matches: BracketMatch[],
+  matchAssignments: MatchAssignment[]
+): {
+  tournament: TournamentRecord;
+  rounds: RoundRecord[];
+  participants: ParticipantRecord[];
+  matchRecords: MatchRecord[];
+  matchPicks: MatchPickRecord[];
+} {
+  const leagueData = standings.league;
+  const standingsResults = standings.standings.results;
+
+  // Tournament
+  const tournament: TournamentRecord = {
+    fplLeagueId: leagueData.id,
+    fplLeagueName: leagueData.name,
+    creatorUid: uid,
+    participantCount: standingsResults.length,
+    totalRounds,
+    startEvent,
+    seedingMethod: 'league_rank',
+  };
+
+  // Rounds
+  const rounds: RoundRecord[] = [];
+  for (let r = 1; r <= totalRounds; r++) {
+    rounds.push({
+      tournamentId,
+      roundNumber: r,
+      event: startEvent + r - 1,
+      status: r === 1 ? 'active' : 'pending',
+    });
+  }
+
+  // Participants (seed = rank in league)
+  const participants: ParticipantRecord[] = standingsResults.map((p: any, index: number) => ({
+    tournamentId,
+    entryId: p.entry,
+    teamName: p.entry_name,
+    managerName: p.player_name,
+    seed: index + 1,
+    leagueRank: p.rank,
+    leaguePoints: p.total,
+    rawJson: JSON.stringify(p),
+  }));
+
+  // Create entry lookup by seed
+  const seedToEntry = new Map<number, number>();
+  participants.forEach(p => seedToEntry.set(p.seed, p.entryId));
+
+  // Matches
+  const matchRecords: MatchRecord[] = matches.map(m => ({
+    tournamentId,
+    matchId: m.matchId,
+    roundNumber: m.roundNumber,
+    positionInRound: m.positionInRound,
+    qualifiesToMatchId: m.qualifiesToMatchId,
+    isBye: false, // Updated below
+    status: m.roundNumber === 1 ? 'active' : 'pending',
+  }));
+
+  // Match picks (round 1 only)
+  const matchPicks: MatchPickRecord[] = [];
+  for (const assignment of matchAssignments) {
+    const match = matchRecords.find(m => m.roundNumber === 1 && m.positionInRound === assignment.position);
+    if (!match) continue;
+
+    // Add slot 1 (higher seed)
+    const entry1 = seedToEntry.get(assignment.seed1);
+    if (entry1) {
+      matchPicks.push({
+        tournamentId,
+        matchId: match.matchId,
+        entryId: entry1,
+        slot: 1,
+      });
+    }
+
+    // Add slot 2 (lower seed) if not a bye
+    if (assignment.seed2 !== null) {
+      const entry2 = seedToEntry.get(assignment.seed2);
+      if (entry2) {
+        matchPicks.push({
+          tournamentId,
+          matchId: match.matchId,
+          entryId: entry2,
+          slot: 2,
+        });
+      }
+    } else {
+      // Mark as bye and set winner
+      match.isBye = true;
+      match.status = 'complete';
+      match.winnerEntryId = entry1;
+    }
+  }
+
+  return { tournament, rounds, participants, matchRecords, matchPicks };
 }
 
 /**
