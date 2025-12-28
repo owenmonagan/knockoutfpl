@@ -25,3 +25,56 @@ export function calculateByeCount(bracketSize: number, participantCount: number)
 export function getMatchCountForRound(bracketSize: number, roundNumber: number): number {
   return bracketSize / Math.pow(2, roundNumber);
 }
+
+export interface SeedPairing {
+  position: number;  // 1-indexed position in round 1
+  seed1: number;     // Higher seed (slot 1)
+  seed2: number;     // Lower seed (slot 2)
+}
+
+/**
+ * Generate standard bracket seed pairings.
+ * Uses recursive algorithm: in each region, top seed plays bottom seed.
+ * Result: 1v16, 8v9, 4v13, 5v12, 2v15, 7v10, 3v14, 6v11 (for 16)
+ */
+export function generateSeedPairings(bracketSize: number): SeedPairing[] {
+  const pairings: SeedPairing[] = [];
+  const matchCount = bracketSize / 2;
+
+  // Generate seed order using recursive splitting
+  const seedOrder = generateSeedOrder(bracketSize);
+
+  for (let i = 0; i < matchCount; i++) {
+    const seed1 = seedOrder[i * 2];
+    const seed2 = seedOrder[i * 2 + 1];
+    pairings.push({
+      position: i + 1,
+      seed1: Math.min(seed1, seed2),
+      seed2: Math.max(seed1, seed2),
+    });
+  }
+
+  return pairings;
+}
+
+/**
+ * Generate seed order for standard bracket.
+ * For 8: [1,8,4,5,2,7,3,6] - ensures 1v8 winner meets 4v5 winner, etc.
+ */
+function generateSeedOrder(bracketSize: number): number[] {
+  if (bracketSize === 2) {
+    return [1, 2];
+  }
+
+  const halfSize = bracketSize / 2;
+  const topHalf = generateSeedOrder(halfSize);
+  const bottomHalf = topHalf.map(seed => bracketSize + 1 - seed);
+
+  // Interleave: [top[0], bottom[0], top[1], bottom[1], ...]
+  const result: number[] = [];
+  for (let i = 0; i < halfSize; i++) {
+    result.push(topHalf[i], bottomHalf[i]);
+  }
+
+  return result;
+}
