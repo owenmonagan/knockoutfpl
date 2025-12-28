@@ -1,7 +1,7 @@
 // src/components/tournament/BracketView.tsx
 import { Badge } from '../ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { RoundSection } from './RoundSection';
+import { BracketLayout } from './BracketLayout';
 import type { Tournament } from '../../types/tournament';
 
 interface BracketViewProps {
@@ -22,14 +22,17 @@ export function BracketView({ tournament }: BracketViewProps) {
           Starting Gameweek {tournament.startGameweek} • {tournament.totalRounds} rounds
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {tournament.rounds.map((round) => (
-          <RoundSection
-            key={round.roundNumber}
-            round={round}
+      <CardContent>
+        {tournament.rounds.length > 0 ? (
+          <BracketLayout
+            rounds={tournament.rounds}
             participants={tournament.participants}
           />
-        ))}
+        ) : (
+          <p className="text-muted-foreground text-center py-8">
+            Bracket will appear when the tournament starts.
+          </p>
+        )}
       </CardContent>
     </Card>
   );
