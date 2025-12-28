@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { validateTournamentRequest, validateLeagueStandings, getCurrentGameweek } from './createTournament';
+import { validateTournamentRequest, validateLeagueStandings, getCurrentGameweek, buildTournamentRecords } from './createTournament';
+import { generateBracketStructure, assignParticipantsToMatches, calculateBracketSize, calculateTotalRounds } from './bracketGenerator';
 
 describe('createTournament', () => {
   describe('validateTournamentRequest', () => {
@@ -59,6 +60,110 @@ describe('createTournament', () => {
         ],
       };
       expect(getCurrentGameweek(bootstrapData)).toBe(2);
+    });
+  });
+
+  describe('buildTournamentRecords', () => {
+    const mockStandings = {
+      league: { id: 12345, name: 'Test League' },
+      standings: {
+        results: [
+          { entry: 100, entry_name: 'Team A', player_name: 'Player A', rank: 1, total: 500 },
+          { entry: 101, entry_name: 'Team B', player_name: 'Player B', rank: 2, total: 450 },
+          { entry: 102, entry_name: 'Team C', player_name: 'Player C', rank: 3, total: 400 },
+          { entry: 103, entry_name: 'Team D', player_name: 'Player D', rank: 4, total: 350 },
+        ]
+      }
+    };
+
+    it('builds correct tournament record', () => {
+      const bracketSize = calculateBracketSize(4);
+      const totalRounds = calculateTotalRounds(bracketSize);
+      const matches = generateBracketStructure(bracketSize);
+      const assignments = assignParticipantsToMatches(bracketSize, 4);
+
+      const records = buildTournamentRecords(
+        'test-uuid',
+        'user-123',
+        mockStandings,
+        bracketSize,
+        totalRounds,
+        10, // startEvent
+        matches,
+        assignments
+      );
+
+      expect(records.tournament.fplLeagueId).toBe(12345);
+      expect(records.tournament.fplLeagueName).toBe('Test League');
+      expect(records.tournament.creatorUid).toBe('user-123');
+      expect(records.tournament.participantCount).toBe(4);
+      expect(records.tournament.totalRounds).toBe(2);
+    });
+
+    it('creates correct number of rounds', () => {
+      const bracketSize = calculateBracketSize(4);
+      const totalRounds = calculateTotalRounds(bracketSize);
+      const matches = generateBracketStructure(bracketSize);
+      const assignments = assignParticipantsToMatches(bracketSize, 4);
+
+      const records = buildTournamentRecords('test-uuid', 'user-123', mockStandings, bracketSize, totalRounds, 10, matches, assignments);
+
+      expect(records.rounds).toHaveLength(2);
+      expect(records.rounds[0].status).toBe('active');
+      expect(records.rounds[1].status).toBe('pending');
+    });
+
+    it('creates participants with correct seeds', () => {
+      const bracketSize = calculateBracketSize(4);
+      const totalRounds = calculateTotalRounds(bracketSize);
+      const matches = generateBracketStructure(bracketSize);
+      const assignments = assignParticipantsToMatches(bracketSize, 4);
+
+      const records = buildTournamentRecords('test-uuid', 'user-123', mockStandings, bracketSize, totalRounds, 10, matches, assignments);
+
+      expect(records.participants).toHaveLength(4);
+      expect(records.participants[0].seed).toBe(1);
+      expect(records.participants[0].entryId).toBe(100);
+      expect(records.participants[3].seed).toBe(4);
+    });
+
+    it('creates match picks for round 1', () => {
+      const bracketSize = calculateBracketSize(4);
+      const totalRounds = calculateTotalRounds(bracketSize);
+      const matches = generateBracketStructure(bracketSize);
+      const assignments = assignParticipantsToMatches(bracketSize, 4);
+
+      const records = buildTournamentRecords('test-uuid', 'user-123', mockStandings, bracketSize, totalRounds, 10, matches, assignments);
+
+      // 4 participants = 2 matches = 4 match picks
+      expect(records.matchPicks).toHaveLength(4);
+    });
+
+    it('handles byes correctly', () => {
+      // 3 participants in 4-bracket = 1 bye
+      const threePlayerStandings = {
+        league: { id: 12345, name: 'Test League' },
+        standings: {
+          results: [
+            { entry: 100, entry_name: 'Team A', player_name: 'Player A', rank: 1, total: 500 },
+            { entry: 101, entry_name: 'Team B', player_name: 'Player B', rank: 2, total: 450 },
+            { entry: 102, entry_name: 'Team C', player_name: 'Player C', rank: 3, total: 400 },
+          ]
+        }
+      };
+
+      const bracketSize = calculateBracketSize(3);
+      const totalRounds = calculateTotalRounds(bracketSize);
+      const matches = generateBracketStructure(bracketSize);
+      const assignments = assignParticipantsToMatches(bracketSize, 3);
+
+      const records = buildTournamentRecords('test-uuid', 'user-123', threePlayerStandings, bracketSize, totalRounds, 10, matches, assignments);
+
+      // One match should be a bye
+      const byeMatches = records.matchRecords.filter(m => m.isBye);
+      expect(byeMatches).toHaveLength(1);
+      expect(byeMatches[0].status).toBe('complete');
+      expect(byeMatches[0].winnerEntryId).toBe(100); // Seed 1 gets bye
     });
   });
 });
