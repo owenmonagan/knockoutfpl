@@ -77,7 +77,7 @@ export function LeaguesPage() {
                 key={league.id}
                 league={league}
                 memberCount={league.memberCount}
-                onStartKnockout={() => navigate(`/knockout/${league.id}`)}
+                onStartKnockout={() => navigate(`/league/${league.id}`)}
               />
             ))}
           </div>
