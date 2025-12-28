@@ -142,53 +142,26 @@ test.describe('Onboarding Journey @journey @onboarding', () => {
      * 1. Start Firebase emulators: firebase emulators:start
      * 2. Seed test user with tournaments in Firestore
      * 3. Run tests with emulator configuration
-     *
-     * When emulators are not available, these tests are skipped.
      */
 
-    test('should display existing tournaments if user is in any @critical', async ({ page }) => {
-      // Skip if Firebase emulators are not running
-      // This test requires a user with active tournaments in the database
-      test.skip(true, 'Requires Firebase emulators with seeded tournament data');
-
-      // TODO: When emulators are configured:
-      // 1. Login as user who is in active tournaments
-      // 2. Navigate to dashboard
-      // 3. Verify tournament cards are displayed
-      // 4. Verify tournament status (active/completed) is shown
-
-      await page.goto('/login');
-      await page.getByLabel('Email').fill(TEST_USERS.creator.email);
-      await page.getByLabel('Password').fill(TEST_USERS.creator.password);
-      await page.getByRole('button', { name: /log in/i }).click();
-
-      await page.waitForURL(/\/dashboard|\/leagues/, { timeout: 10000 });
-
-      // With seeded data, tournaments should be visible
-      // await expect(page.getByText(/your tournaments/i)).toBeVisible();
-      // await expect(page.locator('[data-testid="tournament-card"]')).toBeVisible();
+    // TODO: Implement when Firebase emulators are configured with seeded tournament data
+    // Test should:
+    // 1. Login as user who is in active tournaments
+    // 2. Navigate to dashboard
+    // 3. Verify tournament cards are displayed
+    // 4. Verify tournament status (active/completed) is shown
+    test.fixme('should display existing tournaments if user is in any @critical', async () => {
+      // Requires Firebase emulators with seeded tournament data
     });
 
-    test('should show "arena awaits" state when no tournaments exist', async ({ page }) => {
-      // Skip if Firebase emulators are not running
-      // This test requires a user with no tournaments
-      test.skip(true, 'Requires Firebase emulators with seeded user data (no tournaments)');
-
-      // TODO: When emulators are configured:
-      // 1. Login as user with no tournaments
-      // 2. Navigate to dashboard/leagues
-      // 3. Verify empty state message is shown
-      // 4. Verify CTA to create tournament is visible
-
-      await page.goto('/login');
-      await page.getByLabel('Email').fill('newuser@knockoutfpl.com');
-      await page.getByLabel('Password').fill('TestPass123!');
-      await page.getByRole('button', { name: /log in/i }).click();
-
-      await page.waitForURL(/\/dashboard|\/leagues/, { timeout: 10000 });
-
-      // Empty state should show prompting user to start
-      // await expect(page.getByText(/arena awaits|no tournaments|get started/i)).toBeVisible();
+    // TODO: Implement when Firebase emulators are configured with fresh user data
+    // Test should:
+    // 1. Login as user with no tournaments
+    // 2. Navigate to dashboard/leagues
+    // 3. Verify "arena awaits" empty state message is shown
+    // 4. Verify CTA to create tournament is visible
+    test.fixme('should show "arena awaits" state when no tournaments exist', async () => {
+      // Requires Firebase emulators with seeded user data (no tournaments)
     });
   });
 
