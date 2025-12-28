@@ -1,0 +1,387 @@
+# Knockout FPL Mutations
+# Using upserts and filter-based updates for custom-keyed tables
+
+# =============================================================================
+# USER MUTATIONS
+# =============================================================================
+
+# Create or update user on first sign-in
+mutation UpsertUser($uid: String!, $email: String!) @auth(level: USER) {
+  user_upsert(
+    data: {
+      uid: $uid
+      email: $email
+    }
+  )
+}
+
+# Connect FPL entry to user (using upsert to update)
+mutation ConnectFplEntry($uid: String!, $email: String!, $entryId: Int!) @auth(level: USER) {
+  user_upsert(
+    data: {
+      uid: $uid
+      email: $email
+      entryId2025: $entryId
+    }
+  )
+}
+
+# =============================================================================
+# ENTRY MUTATIONS (FPL Team Data Cache)
+# =============================================================================
+
+# Upsert entry from FPL API
+mutation UpsertEntry(
+  $entryId: Int!
+  $season: String!
+  $name: String!
+  $playerFirstName: String
+  $playerLastName: String
+  $summaryOverallPoints: Int
+  $summaryOverallRank: Int
+  $summaryEventPoints: Int
+  $summaryEventRank: Int
+  $rawJson: String!
+) @auth(level: PUBLIC) {
+  entry_upsert(
+    data: {
+      entryId: $entryId
+      season: $season
+      name: $name
+      playerFirstName: $playerFirstName
+      playerLastName: $playerLastName
+      summaryOverallPoints: $summaryOverallPoints
+      summaryOverallRank: $summaryOverallRank
+      summaryEventPoints: $summaryEventPoints
+      summaryEventRank: $summaryEventRank
+      rawJson: $rawJson
+    }
+  )
+}
+
+# =============================================================================
+# PICKS MUTATIONS
+# =============================================================================
+
+# Upsert picks from FPL API
+mutation UpsertPick(
+  $entryId: Int!
+  $event: Int!
+  $points: Int!
+  $totalPoints: Int
+  $rank: Int
+  $overallRank: Int
+  $eventTransfersCost: Int
+  $activeChip: String
+  $rawJson: String!
+  $isFinal: Boolean!
+) @auth(level: PUBLIC) {
+  pick_upsert(
+    data: {
+      entryId: $entryId
+      event: $event
+      points: $points
+      totalPoints: $totalPoints
+      rank: $rank
+      overallRank: $overallRank
+      eventTransfersCost: $eventTransfersCost
+      activeChip: $activeChip
+      rawJson: $rawJson
+      isFinal: $isFinal
+      entryEntryId: $entryId
+    }
+  )
+}
+
+# =============================================================================
+# LEAGUE MUTATIONS
+# =============================================================================
+
+# Upsert league from FPL API
+mutation UpsertLeague(
+  $leagueId: Int!
+  $season: String!
+  $name: String!
+  $created: Timestamp
+  $adminEntry: Int
+  $rawJson: String!
+) @auth(level: PUBLIC) {
+  league_upsert(
+    data: {
+      leagueId: $leagueId
+      season: $season
+      name: $name
+      created: $created
+      adminEntry: $adminEntry
+      rawJson: $rawJson
+    }
+  )
+}
+
+# =============================================================================
+# EVENT MUTATIONS
+# =============================================================================
+
+# Upsert event from FPL API
+mutation UpsertEvent(
+  $event: Int!
+  $season: String!
+  $name: String!
+  $deadlineTime: Timestamp!
+  $finished: Boolean!
+  $isCurrent: Boolean!
+  $isNext: Boolean!
+  $rawJson: String!
+) @auth(level: PUBLIC) {
+  event_upsert(
+    data: {
+      event: $event
+      season: $season
+      name: $name
+      deadlineTime: $deadlineTime
+      finished: $finished
+      isCurrent: $isCurrent
+      isNext: $isNext
+      rawJson: $rawJson
+    }
+  )
+}
+
+# =============================================================================
+# TOURNAMENT MUTATIONS
+# =============================================================================
+
+# Create tournament
+mutation CreateTournament(
+  $fplLeagueId: Int!
+  $fplLeagueName: String!
+  $creatorUid: String!
+  $participantCount: Int!
+  $totalRounds: Int!
+  $startEvent: Int!
+  $seedingMethod: String!
+) @auth(level: USER) {
+  tournament_insert(
+    data: {
+      fplLeagueId: $fplLeagueId
+      fplLeagueName: $fplLeagueName
+      creatorUid: $creatorUid
+      participantCount: $participantCount
+      totalRounds: $totalRounds
+      startEvent: $startEvent
+      seedingMethod: $seedingMethod
+    }
+  )
+}
+
+# Update tournament status
+mutation UpdateTournamentStatus($id: UUID!, $status: String!) @auth(level: PUBLIC) {
+  tournament_update(
+    id: $id
+    data: {
+      status: $status
+    }
+  )
+}
+
+# Set tournament winner
+mutation SetTournamentWinner($id: UUID!, $winnerEntryId: Int!) @auth(level: PUBLIC) {
+  tournament_update(
+    id: $id
+    data: {
+      status: "completed"
+      winnerEntryId: $winnerEntryId
+    }
+  )
+}
+
+# Advance tournament to next round
+mutation AdvanceTournamentRound($id: UUID!, $nextRound: Int!) @auth(level: PUBLIC) {
+  tournament_update(
+    id: $id
+    data: {
+      currentRound: $nextRound
+    }
+  )
+}
+
+# =============================================================================
+# ROUND MUTATIONS
+# =============================================================================
+
+# Create round
+mutation CreateRound(
+  $tournamentId: UUID!
+  $roundNumber: Int!
+  $event: Int!
+  $status: String!
+) @auth(level: PUBLIC) {
+  round_insert(
+    data: {
+      tournamentId: $tournamentId
+      roundNumber: $roundNumber
+      event: $event
+      status: $status
+    }
+  )
+}
+
+# Update round via upsert
+mutation UpdateRound(
+  $tournamentId: UUID!
+  $roundNumber: Int!
+  $event: Int!
+  $status: String!
+) @auth(level: PUBLIC) {
+  round_upsert(
+    data: {
+      tournamentId: $tournamentId
+      roundNumber: $roundNumber
+      event: $event
+      status: $status
+    }
+  )
+}
+
+# =============================================================================
+# PARTICIPANT MUTATIONS
+# =============================================================================
+
+# Create participant
+mutation CreateParticipant(
+  $tournamentId: UUID!
+  $entryId: Int!
+  $teamName: String!
+  $managerName: String!
+  $seed: Int!
+  $leagueRank: Int
+  $leaguePoints: Int
+  $rawJson: String!
+) @auth(level: PUBLIC) {
+  participant_insert(
+    data: {
+      tournamentId: $tournamentId
+      entryId: $entryId
+      teamName: $teamName
+      managerName: $managerName
+      seed: $seed
+      leagueRank: $leagueRank
+      leaguePoints: $leaguePoints
+      rawJson: $rawJson
+      entryEntryId: $entryId
+    }
+  )
+}
+
+# Update participant via upsert (for elimination, claiming, etc.)
+mutation UpdateParticipant(
+  $tournamentId: UUID!
+  $entryId: Int!
+  $teamName: String!
+  $managerName: String!
+  $seed: Int!
+  $leagueRank: Int
+  $leaguePoints: Int
+  $rawJson: String!
+  $status: String!
+  $eliminationRound: Int
+  $uid: String
+) @auth(level: PUBLIC) {
+  participant_upsert(
+    data: {
+      tournamentId: $tournamentId
+      entryId: $entryId
+      teamName: $teamName
+      managerName: $managerName
+      seed: $seed
+      leagueRank: $leagueRank
+      leaguePoints: $leaguePoints
+      rawJson: $rawJson
+      status: $status
+      eliminationRound: $eliminationRound
+      uid: $uid
+      entryEntryId: $entryId
+    }
+  )
+}
+
+# =============================================================================
+# MATCH MUTATIONS
+# =============================================================================
+
+# Create match
+mutation CreateMatch(
+  $tournamentId: UUID!
+  $matchId: Int!
+  $roundNumber: Int!
+  $positionInRound: Int!
+  $qualifiesToMatchId: Int
+  $isBye: Boolean!
+) @auth(level: PUBLIC) {
+  match_insert(
+    data: {
+      tournamentId: $tournamentId
+      matchId: $matchId
+      roundNumber: $roundNumber
+      positionInRound: $positionInRound
+      qualifiesToMatchId: $qualifiesToMatchId
+      isBye: $isBye
+    }
+  )
+}
+
+# Update match via upsert (for activation, completion, etc.)
+mutation UpdateMatch(
+  $tournamentId: UUID!
+  $matchId: Int!
+  $roundNumber: Int!
+  $positionInRound: Int!
+  $qualifiesToMatchId: Int
+  $isBye: Boolean!
+  $status: String!
+  $winnerEntryId: Int
+) @auth(level: PUBLIC) {
+  match_upsert(
+    data: {
+      tournamentId: $tournamentId
+      matchId: $matchId
+      roundNumber: $roundNumber
+      positionInRound: $positionInRound
+      qualifiesToMatchId: $qualifiesToMatchId
+      isBye: $isBye
+      status: $status
+      winnerEntryId: $winnerEntryId
+    }
+  )
+}
+
+# =============================================================================
+# MATCH PICK MUTATIONS
+# =============================================================================
+
+# Add player to match
+mutation CreateMatchPick(
+  $tournamentId: UUID!
+  $matchId: Int!
+  $entryId: Int!
+  $slot: Int!
+) @auth(level: PUBLIC) {
+  matchPick_insert(
+    data: {
+      tournamentId: $tournamentId
+      matchId: $matchId
+      entryId: $entryId
+      slot: $slot
+      entryEntryId: $entryId
+    }
+  )
+}
+
+# =============================================================================
+# CLEANUP MUTATIONS
+# =============================================================================
+
+# Delete tournament (cascades to rounds, matches, participants, match_picks)
+mutation DeleteTournament($id: UUID!) @auth(level: USER) {
+  tournament_delete(id: $id)
+}

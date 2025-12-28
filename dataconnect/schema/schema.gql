@@ -1,0 +1,211 @@
+# Knockout FPL Data Schema
+# Based on docs/business/technical/data/data-dictionary.md
+#
+# 10 tables across 4 layers:
+# - FPL Cache (2): events, leagues
+# - FPL Records (2): entries, picks
+# - User (1): users
+# - Tournament (5): tournaments, rounds, participants, matches, match_picks
+
+# =============================================================================
+# USER LAYER
+# =============================================================================
+
+# Firebase Auth user accounts. Minimal - just identity and entry references.
+type User @table(key: "uid") {
+  uid: String!
+  email: String!
+  entryId2025: Int @col(name: "entry_id_2025")
+  createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
+  updatedAt: Timestamp! @col(name: "updated_at") @default(expr: "request.time")
+}
+
+# =============================================================================
+# FPL RECORDS LAYER (Authoritative - must retain)
+# =============================================================================
+
+# Cached FPL manager/entry data with raw API response
+type Entry @table(name: "entries", key: "entryId") {
+  entryId: Int! @col(name: "entry_id")
+  season: String!
+
+  # Extracted fields (indexed, commonly queried)
+  name: String!
+  playerFirstName: String @col(name: "player_first_name")
+  playerLastName: String @col(name: "player_last_name")
+  summaryOverallPoints: Int @col(name: "summary_overall_points")
+  summaryOverallRank: Int @col(name: "summary_overall_rank")
+  summaryEventPoints: Int @col(name: "summary_event_points")
+  summaryEventRank: Int @col(name: "summary_event_rank")
+
+  # Raw API response (complete data, future-proof)
+  rawJson: String! @col(name: "raw_json")
+
+  cachedAt: Timestamp! @col(name: "cached_at") @default(expr: "request.time")
+}
+
+# Cached event picks with raw API response
+type Pick @table(name: "picks", key: ["entryId", "event"]) {
+  entryId: Int! @col(name: "entry_id")
+  event: Int!
+
+  # Extracted fields (indexed, commonly queried)
+  points: Int!
+  totalPoints: Int @col(name: "total_points")
+  rank: Int
+  overallRank: Int @col(name: "overall_rank")
+  eventTransfersCost: Int @col(name: "event_transfers_cost") @default(value: 0)
+  activeChip: String @col(name: "active_chip")
+
+  # Raw API response (complete data, future-proof)
+  rawJson: String! @col(name: "raw_json")
+
+  isFinal: Boolean! @col(name: "is_final") @default(value: false)
+  cachedAt: Timestamp! @col(name: "cached_at") @default(expr: "request.time")
+
+  # Relations
+  entry: Entry!
+}
+
+# =============================================================================
+# FPL CACHE LAYER (Can re-fetch from API)
+# =============================================================================
+
+# Cached FPL classic league data with raw API response
+type League @table(name: "leagues", key: ["leagueId", "season"]) {
+  leagueId: Int! @col(name: "league_id")
+  season: String!
+
+  # Extracted fields (commonly queried)
+  name: String!
+  created: Timestamp
+  adminEntry: Int @col(name: "admin_entry")
+
+  # Raw API response (complete data, future-proof)
+  rawJson: String! @col(name: "raw_json")
+
+  cachedAt: Timestamp! @col(name: "cached_at") @default(expr: "request.time")
+}
+
+# Cached FPL event/gameweek data
+type Event @table(name: "events", key: ["event", "season"]) {
+  event: Int!
+  season: String!
+
+  # Extracted fields (commonly queried)
+  name: String!
+  deadlineTime: Timestamp! @col(name: "deadline_time")
+  finished: Boolean! @default(value: false)
+  isCurrent: Boolean! @col(name: "is_current") @default(value: false)
+  isNext: Boolean! @col(name: "is_next") @default(value: false)
+
+  # Raw API response (complete data, future-proof)
+  rawJson: String! @col(name: "raw_json")
+
+  cachedAt: Timestamp! @col(name: "cached_at") @default(expr: "request.time")
+}
+
+# =============================================================================
+# TOURNAMENT LAYER
+# =============================================================================
+
+# Knockout tournaments
+type Tournament @table(name: "tournaments") {
+  id: UUID! @default(expr: "uuidV4()")
+  fplLeagueId: Int! @col(name: "fpl_league_id")
+  fplLeagueName: String! @col(name: "fpl_league_name")
+  creatorUid: String! @col(name: "creator_uid")
+
+  participantCount: Int! @col(name: "participant_count")
+  totalRounds: Int! @col(name: "total_rounds")
+  currentRound: Int! @col(name: "current_round") @default(value: 1)
+  startEvent: Int! @col(name: "start_event")
+
+  seedingMethod: String! @col(name: "seeding_method") @default(value: "league_rank")
+  status: String! @default(value: "active")
+  winnerEntryId: Int @col(name: "winner_entry_id")
+
+  createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
+  updatedAt: Timestamp! @col(name: "updated_at") @default(expr: "request.time")
+
+  # Relations
+  creator: User!
+}
+
+# Tournament rounds
+type Round @table(name: "rounds", key: ["tournamentId", "roundNumber"]) {
+  tournamentId: UUID! @col(name: "tournament_id")
+  roundNumber: Int! @col(name: "round_number")
+
+  event: Int!  # FPL gameweek for this round
+  status: String! @default(value: "pending")
+
+  startedAt: Timestamp @col(name: "started_at")
+  completedAt: Timestamp @col(name: "completed_at")
+
+  # Relations
+  tournament: Tournament!
+}
+
+# Tournament participants (snapshot from league standings)
+type Participant @table(name: "participants", key: ["tournamentId", "entryId"]) {
+  tournamentId: UUID! @col(name: "tournament_id")
+  entryId: Int! @col(name: "entry_id")
+
+  # Extracted fields (commonly queried)
+  teamName: String! @col(name: "team_name")
+  managerName: String! @col(name: "manager_name")
+  seed: Int!
+  leagueRank: Int @col(name: "league_rank")
+  leaguePoints: Int @col(name: "league_points")
+
+  # Raw league standings entry (complete data, future-proof)
+  rawJson: String! @col(name: "raw_json")
+
+  # Tournament state
+  status: String! @default(value: "active")
+  eliminationRound: Int @col(name: "elimination_round")
+  uid: String  # Firebase UID if user claimed this entry
+
+  # Relations
+  tournament: Tournament!
+  entry: Entry!
+  user: User
+}
+
+# Individual knockout matches
+type Match @table(name: "matches", key: ["tournamentId", "matchId"]) {
+  tournamentId: UUID! @col(name: "tournament_id")
+  matchId: Int! @col(name: "match_id")
+
+  # Reference to round (provides event/gameweek)
+  roundNumber: Int! @col(name: "round_number")
+
+  # Position in bracket
+  positionInRound: Int! @col(name: "position_in_round")
+
+  # Match state
+  status: String! @default(value: "pending")
+  winnerEntryId: Int @col(name: "winner_entry_id")
+  isBye: Boolean! @col(name: "is_bye") @default(value: false)
+  completedAt: Timestamp @col(name: "completed_at")
+
+  # Bracket navigation (explicit, not computed)
+  qualifiesToMatchId: Int @col(name: "qualifies_to_match_id")
+
+  # Relations
+  tournament: Tournament!
+  winner: Entry
+}
+
+# Junction table linking matches to participants
+type MatchPick @table(name: "match_picks", key: ["tournamentId", "matchId", "entryId"]) {
+  tournamentId: UUID! @col(name: "tournament_id")
+  matchId: Int! @col(name: "match_id")
+  entryId: Int! @col(name: "entry_id")
+
+  slot: Int!  # Player 1 or Player 2
+
+  # Relations
+  entry: Entry!
+}

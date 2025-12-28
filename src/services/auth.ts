@@ -6,20 +6,25 @@ import {
   GoogleAuthProvider,
 } from 'firebase/auth';
 import type { User, UserCredential } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { auth, dataConnect } from '../lib/firebase';
+import { upsertUser } from '@knockoutfpl/dataconnect';
 
 /**
  * Sign up a new user with email and password
  */
 export async function signUpWithEmail(email: string, password: string): Promise<UserCredential> {
-  return createUserWithEmailAndPassword(auth, email, password);
+  const credential = await createUserWithEmailAndPassword(auth, email, password);
+  await upsertUser(dataConnect, { uid: credential.user.uid, email: credential.user.email! });
+  return credential;
 }
 
 /**
  * Sign in an existing user with email and password
  */
 export async function signInWithEmail(email: string, password: string): Promise<UserCredential> {
-  return signInWithEmailAndPassword(auth, email, password);
+  const credential = await signInWithEmailAndPassword(auth, email, password);
+  await upsertUser(dataConnect, { uid: credential.user.uid, email: credential.user.email! });
+  return credential;
 }
 
 /**
@@ -34,7 +39,9 @@ export async function signOut(): Promise<void> {
  */
 export async function signInWithGoogle(): Promise<UserCredential> {
   const provider = new GoogleAuthProvider();
-  return signInWithPopup(auth, provider);
+  const credential = await signInWithPopup(auth, provider);
+  await upsertUser(dataConnect, { uid: credential.user.uid, email: credential.user.email! });
+  return credential;
 }
 
 /**

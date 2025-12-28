@@ -1,0 +1,6 @@
+connectorId: "default"
+generate:
+  javascriptSdk:
+    outputDir: "../dataconnect-generated"
+    package: "@knockoutfpl/dataconnect"
+    packageJsonDir: "../../"

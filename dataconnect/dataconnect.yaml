@@ -1,0 +1,11 @@
+specVersion: "v1beta"
+serviceId: "knockoutfpl-dev-service"
+location: "us-east1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "knockoutfpl-dev-database"
+      cloudSql:
+        instanceId: "knockoutfpl-dev-instance"
+connectorDirs: ["./connector"]

@@ -1,0 +1,401 @@
+# Knockout FPL Queries
+# Using filter-based lookups for custom-keyed tables
+
+# =============================================================================
+# USER QUERIES
+# =============================================================================
+
+# Get current user by Firebase UID
+query GetUser($uid: String!) @auth(level: USER) {
+  users(where: { uid: { eq: $uid } }, limit: 1) {
+    uid
+    email
+    entryId2025
+    createdAt
+    updatedAt
+  }
+}
+
+# =============================================================================
+# ENTRY QUERIES (FPL Team Data)
+# =============================================================================
+
+# Get entry by ID
+query GetEntry($entryId: Int!) @auth(level: PUBLIC) {
+  entries(where: { entryId: { eq: $entryId } }, limit: 1) {
+    entryId
+    season
+    name
+    playerFirstName
+    playerLastName
+    summaryOverallPoints
+    summaryOverallRank
+    summaryEventPoints
+    summaryEventRank
+    rawJson
+    cachedAt
+  }
+}
+
+# Get multiple entries by IDs
+query GetEntries($entryIds: [Int!]!) @auth(level: PUBLIC) {
+  entries(where: { entryId: { in: $entryIds } }) {
+    entryId
+    season
+    name
+    playerFirstName
+    playerLastName
+    summaryOverallPoints
+    summaryOverallRank
+    cachedAt
+  }
+}
+
+# =============================================================================
+# PICKS QUERIES
+# =============================================================================
+
+# Get picks for an entry and event
+query GetPick($entryId: Int!, $event: Int!) @auth(level: PUBLIC) {
+  picks(where: { entryId: { eq: $entryId }, event: { eq: $event } }, limit: 1) {
+    entryId
+    event
+    points
+    totalPoints
+    rank
+    overallRank
+    activeChip
+    isFinal
+    rawJson
+    cachedAt
+  }
+}
+
+# Get all final picks for an event
+query GetFinalPicksForEvent($event: Int!) @auth(level: PUBLIC) {
+  picks(where: { event: { eq: $event }, isFinal: { eq: true } }) {
+    entryId
+    event
+    points
+    totalPoints
+    rank
+    isFinal
+  }
+}
+
+# =============================================================================
+# LEAGUE QUERIES
+# =============================================================================
+
+# Get league by ID and season
+query GetLeague($leagueId: Int!, $season: String!) @auth(level: PUBLIC) {
+  leagues(where: { leagueId: { eq: $leagueId }, season: { eq: $season } }, limit: 1) {
+    leagueId
+    season
+    name
+    created
+    adminEntry
+    rawJson
+    cachedAt
+  }
+}
+
+# =============================================================================
+# EVENT QUERIES
+# =============================================================================
+
+# Get current event
+query GetCurrentEvent($season: String!) @auth(level: PUBLIC) {
+  events(where: { season: { eq: $season }, isCurrent: { eq: true } }, limit: 1) {
+    event
+    season
+    name
+    deadlineTime
+    finished
+    isCurrent
+    isNext
+  }
+}
+
+# Get event by number
+query GetEvent($event: Int!, $season: String!) @auth(level: PUBLIC) {
+  events(where: { event: { eq: $event }, season: { eq: $season } }, limit: 1) {
+    event
+    season
+    name
+    deadlineTime
+    finished
+    isCurrent
+    isNext
+    rawJson
+    cachedAt
+  }
+}
+
+# Get all events for a season
+query GetSeasonEvents($season: String!) @auth(level: PUBLIC) {
+  events(where: { season: { eq: $season } }, orderBy: { event: ASC }) {
+    event
+    season
+    name
+    deadlineTime
+    finished
+    isCurrent
+    isNext
+  }
+}
+
+# =============================================================================
+# TOURNAMENT QUERIES
+# =============================================================================
+
+# Get tournament by ID (basic)
+query GetTournament($id: UUID!) @auth(level: PUBLIC) {
+  tournament(id: $id) {
+    id
+    fplLeagueId
+    fplLeagueName
+    creatorUid
+    participantCount
+    totalRounds
+    currentRound
+    startEvent
+    seedingMethod
+    status
+    winnerEntryId
+    createdAt
+    updatedAt
+    creator {
+      uid
+      email
+    }
+  }
+}
+
+# Get tournament with participants
+query GetTournamentWithParticipants($id: UUID!) @auth(level: PUBLIC) {
+  tournament(id: $id) {
+    id
+    fplLeagueId
+    fplLeagueName
+    participantCount
+    totalRounds
+    currentRound
+    startEvent
+    status
+    winnerEntryId
+  }
+  participants(where: { tournamentId: { eq: $id } }, orderBy: { seed: ASC }) {
+    tournamentId
+    entryId
+    teamName
+    managerName
+    seed
+    leagueRank
+    leaguePoints
+    status
+    eliminationRound
+    uid
+  }
+}
+
+# Get tournaments created by user
+query GetUserTournaments($creatorUid: String!) @auth(level: USER) {
+  tournaments(where: { creatorUid: { eq: $creatorUid } }, orderBy: { createdAt: DESC }) {
+    id
+    fplLeagueId
+    fplLeagueName
+    participantCount
+    totalRounds
+    currentRound
+    status
+    createdAt
+  }
+}
+
+# Get tournaments for an FPL league
+query GetLeagueTournaments($fplLeagueId: Int!) @auth(level: PUBLIC) {
+  tournaments(where: { fplLeagueId: { eq: $fplLeagueId } }, orderBy: { createdAt: DESC }) {
+    id
+    fplLeagueName
+    participantCount
+    totalRounds
+    currentRound
+    status
+    createdAt
+    creatorUid
+  }
+}
+
+# =============================================================================
+# ROUND QUERIES
+# =============================================================================
+
+# Get rounds for a tournament
+query GetTournamentRounds($tournamentId: UUID!) @auth(level: PUBLIC) {
+  rounds(where: { tournamentId: { eq: $tournamentId } }, orderBy: { roundNumber: ASC }) {
+    tournamentId
+    roundNumber
+    event
+    status
+    startedAt
+    completedAt
+  }
+}
+
+# Get a specific round
+query GetRound($tournamentId: UUID!, $roundNumber: Int!) @auth(level: PUBLIC) {
+  rounds(where: { tournamentId: { eq: $tournamentId }, roundNumber: { eq: $roundNumber } }, limit: 1) {
+    tournamentId
+    roundNumber
+    event
+    status
+    startedAt
+    completedAt
+  }
+}
+
+# Get active rounds (for scheduled function)
+query GetActiveRounds($event: Int!) @auth(level: PUBLIC) {
+  rounds(where: { event: { eq: $event }, status: { eq: "active" } }) {
+    tournamentId
+    roundNumber
+    event
+    status
+    tournament {
+      id
+      fplLeagueName
+      currentRound
+    }
+  }
+}
+
+# =============================================================================
+# MATCH QUERIES
+# =============================================================================
+
+# Get matches for a round
+query GetRoundMatches($tournamentId: UUID!, $roundNumber: Int!) @auth(level: PUBLIC) {
+  matches(
+    where: { tournamentId: { eq: $tournamentId }, roundNumber: { eq: $roundNumber } }
+    orderBy: { positionInRound: ASC }
+  ) {
+    tournamentId
+    matchId
+    roundNumber
+    positionInRound
+    status
+    winnerEntryId
+    isBye
+    completedAt
+    qualifiesToMatchId
+    winner {
+      entryId
+      name
+    }
+  }
+}
+
+# Get single match
+query GetMatch($tournamentId: UUID!, $matchId: Int!) @auth(level: PUBLIC) {
+  matches(where: { tournamentId: { eq: $tournamentId }, matchId: { eq: $matchId } }, limit: 1) {
+    tournamentId
+    matchId
+    roundNumber
+    positionInRound
+    status
+    winnerEntryId
+    isBye
+    completedAt
+    qualifiesToMatchId
+    tournament {
+      fplLeagueName
+      currentRound
+    }
+    winner {
+      entryId
+      name
+    }
+  }
+}
+
+# Get match picks (players in a match)
+query GetMatchPicks($tournamentId: UUID!, $matchId: Int!) @auth(level: PUBLIC) {
+  matchPicks(where: { tournamentId: { eq: $tournamentId }, matchId: { eq: $matchId } }, orderBy: { slot: ASC }) {
+    tournamentId
+    matchId
+    entryId
+    slot
+    entry {
+      entryId
+      name
+      playerFirstName
+      playerLastName
+    }
+  }
+}
+
+# Find user's matches by entry
+query GetUserMatches($entryId: Int!) @auth(level: PUBLIC) {
+  matchPicks(where: { entryId: { eq: $entryId } }) {
+    tournamentId
+    matchId
+    entryId
+    slot
+  }
+}
+
+# =============================================================================
+# PARTICIPANT QUERIES
+# =============================================================================
+
+# Get participant
+query GetParticipant($tournamentId: UUID!, $entryId: Int!) @auth(level: PUBLIC) {
+  participants(where: { tournamentId: { eq: $tournamentId }, entryId: { eq: $entryId } }, limit: 1) {
+    tournamentId
+    entryId
+    teamName
+    managerName
+    seed
+    leagueRank
+    leaguePoints
+    status
+    eliminationRound
+    uid
+    rawJson
+  }
+}
+
+# Get active participants in a tournament
+query GetActiveParticipants($tournamentId: UUID!) @auth(level: PUBLIC) {
+  participants(
+    where: { tournamentId: { eq: $tournamentId }, status: { eq: "active" } }
+    orderBy: { seed: ASC }
+  ) {
+    tournamentId
+    entryId
+    teamName
+    managerName
+    seed
+    leagueRank
+    status
+  }
+}
+
+# Get user's tournament participations
+query GetUserParticipations($uid: String!) @auth(level: USER) {
+  participants(where: { uid: { eq: $uid } }) {
+    tournamentId
+    entryId
+    teamName
+    seed
+    status
+    eliminationRound
+    tournament {
+      id
+      fplLeagueName
+      status
+      currentRound
+    }
+  }
+}

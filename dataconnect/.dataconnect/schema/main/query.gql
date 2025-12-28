@@ -1,0 +1,487 @@
+extend type Query {
+  """
+  ✨ Look up a single `Entry` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  entry(
+    """
+    The key used to identify the object.
+    """
+    key: Entry_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Entry_FirstRow
+  ): Entry @fdc_generated(from: "Entry", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `Event` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  event(
+    """
+    The key used to identify the object.
+    """
+    key: Event_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Event_FirstRow
+  ): Event @fdc_generated(from: "Event", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `League` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  league(
+    """
+    The key used to identify the object.
+    """
+    key: League_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: League_FirstRow
+  ): League @fdc_generated(from: "League", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `Match` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  match(
+    """
+    The key used to identify the object.
+    """
+    key: Match_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Match_FirstRow
+  ): Match @fdc_generated(from: "Match", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `MatchPick` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  matchPick(
+    """
+    The key used to identify the object.
+    """
+    key: MatchPick_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: MatchPick_FirstRow
+  ): MatchPick @fdc_generated(from: "MatchPick", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `Participant` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  participant(
+    """
+    The key used to identify the object.
+    """
+    key: Participant_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Participant_FirstRow
+  ): Participant @fdc_generated(from: "Participant", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `Pick` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  pick(
+    """
+    The key used to identify the object.
+    """
+    key: Pick_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Pick_FirstRow
+  ): Pick @fdc_generated(from: "Pick", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `Round` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  round(
+    """
+    The key used to identify the object.
+    """
+    key: Round_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Round_FirstRow
+  ): Round @fdc_generated(from: "Round", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `Tournament` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  tournament(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: Tournament_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Tournament_FirstRow
+  ): Tournament @fdc_generated(from: "Tournament", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `User` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  user(
+    """
+    The key used to identify the object.
+    """
+    key: User_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: User_FirstRow
+  ): User @fdc_generated(from: "User", purpose: QUERY_SINGLE)
+  """
+  ✨ List `Entry` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  entries(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: Entry_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [Entry_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: Entry_Having
+  ): [Entry!]! @fdc_generated(from: "Entry", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `Event` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  events(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: Event_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [Event_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: Event_Having
+  ): [Event!]! @fdc_generated(from: "Event", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `League` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  leagues(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: League_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [League_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: League_Having
+  ): [League!]! @fdc_generated(from: "League", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `Match` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  matches(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: Match_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [Match_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: Match_Having
+  ): [Match!]! @fdc_generated(from: "Match", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `MatchPick` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  matchPicks(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: MatchPick_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [MatchPick_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: MatchPick_Having
+  ): [MatchPick!]! @fdc_generated(from: "MatchPick", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `Participant` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  participants(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: Participant_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [Participant_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: Participant_Having
+  ): [Participant!]! @fdc_generated(from: "Participant", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `Pick` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  picks(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: Pick_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [Pick_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: Pick_Having
+  ): [Pick!]! @fdc_generated(from: "Pick", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `Round` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  rounds(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: Round_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [Round_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: Round_Having
+  ): [Round!]! @fdc_generated(from: "Round", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `Tournament` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  tournaments(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: Tournament_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [Tournament_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: Tournament_Having
+  ): [Tournament!]! @fdc_generated(from: "Tournament", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `User` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  users(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: User_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [User_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: User_Having
+  ): [User!]! @fdc_generated(from: "User", purpose: QUERY_MULTIPLE)
+}
