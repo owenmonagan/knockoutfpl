@@ -11,14 +11,13 @@ export function BracketLayout({ rounds, participants }: BracketLayoutProps) {
   return (
     <div
       data-testid="bracket-layout"
-      className="flex flex-col gap-6 md:flex-row md:gap-4 md:overflow-x-auto"
+      className="flex flex-col gap-6 md:flex-row md:gap-8 md:overflow-x-auto overflow-visible"
     >
       {rounds.map((round) => (
         <BracketRound
           key={round.roundNumber}
           round={round}
           participants={participants}
-          totalRounds={rounds.length}
         />
       ))}
     </div>

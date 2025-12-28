@@ -1,20 +1,16 @@
 // src/components/tournament/BracketMatchCard.tsx
 import { Card } from '../ui/card';
 import type { Match, Participant } from '../../types/tournament';
-import { cn } from '../../lib/utils';
+import { cn } from '../../lib/utils'; // Used for player slot styling
 
 interface BracketMatchCardProps {
   match: Match;
   participants: Participant[];
-  showConnector?: boolean;
-  isTopHalf?: boolean;
 }
 
 export function BracketMatchCard({
   match,
   participants,
-  showConnector = false,
-  isTopHalf = true,
 }: BracketMatchCardProps) {
   const getParticipant = (fplTeamId: number | null): Participant | null => {
     if (!fplTeamId) return null;
@@ -73,24 +69,13 @@ export function BracketMatchCard({
   };
 
   return (
-    <div className="relative">
-      <Card className="w-44 overflow-hidden">
-        {renderPlayerSlot(match.player1, player1)}
-        <div className="border-t" />
-        {match.isBye && !match.player2
-          ? renderPlayerSlot(null, null, true)
-          : renderPlayerSlot(match.player2, player2)
-        }
-      </Card>
-
-      {showConnector && (
-        <div
-          className={cn(
-            "bracket-connector",
-            isTopHalf ? "bracket-connector-top" : "bracket-connector-bottom"
-          )}
-        />
-      )}
-    </div>
+    <Card className="w-44 overflow-hidden">
+      {renderPlayerSlot(match.player1, player1)}
+      <div className="border-t" />
+      {match.isBye && !match.player2
+        ? renderPlayerSlot(null, null, true)
+        : renderPlayerSlot(match.player2, player2)
+      }
+    </Card>
   );
 }

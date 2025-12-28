@@ -6,12 +6,11 @@ import type { Round, Participant } from '../../types/tournament';
 interface BracketRoundProps {
   round: Round;
   participants: Participant[];
-  totalRounds: number;
 }
 
-export function BracketRound({ round, participants, totalRounds }: BracketRoundProps) {
+export function BracketRound({ round, participants }: BracketRoundProps) {
   return (
-    <div className="flex flex-col" data-testid={`bracket-round-${round.roundNumber}`}>
+    <div className="flex flex-col overflow-visible" data-testid={`bracket-round-${round.roundNumber}`}>
       <div className="flex items-center justify-between mb-3 px-2">
         <div>
           <h3 className="text-sm font-semibold">{round.name}</h3>
@@ -23,13 +22,11 @@ export function BracketRound({ round, participants, totalRounds }: BracketRoundP
       </div>
 
       <div className="flex flex-col justify-around flex-1 gap-2">
-        {round.matches.map((match, index) => (
+        {round.matches.map((match) => (
           <BracketMatchCard
             key={match.id}
             match={match}
             participants={participants}
-            showConnector={round.roundNumber < totalRounds}
-            isTopHalf={index % 2 === 0}
           />
         ))}
       </div>
