@@ -7,6 +7,63 @@ import { dataConnectAdmin } from './dataconnect-admin';
 export type AuthClaims = { [key: string]: unknown };
 
 // GraphQL mutations matching dataconnect/connector/mutations.gql
+const UPSERT_ENTRY_MUTATION = `
+  mutation UpsertEntry(
+    $entryId: Int!
+    $season: String!
+    $name: String!
+    $playerFirstName: String
+    $playerLastName: String
+    $summaryOverallPoints: Int
+    $summaryOverallRank: Int
+    $rawJson: String!
+  ) {
+    entry_upsert(
+      data: {
+        entryId: $entryId
+        season: $season
+        name: $name
+        playerFirstName: $playerFirstName
+        playerLastName: $playerLastName
+        summaryOverallPoints: $summaryOverallPoints
+        summaryOverallRank: $summaryOverallRank
+        rawJson: $rawJson
+      }
+    )
+  }
+`;
+
+const UPSERT_PICK_MUTATION = `
+  mutation UpsertPick(
+    $entryId: Int!
+    $event: Int!
+    $points: Int!
+    $totalPoints: Int
+    $rank: Int
+    $overallRank: Int
+    $eventTransfersCost: Int
+    $activeChip: String
+    $rawJson: String!
+    $isFinal: Boolean!
+  ) {
+    pick_upsert(
+      data: {
+        entryId: $entryId
+        event: $event
+        points: $points
+        totalPoints: $totalPoints
+        rank: $rank
+        overallRank: $overallRank
+        eventTransfersCost: $eventTransfersCost
+        activeChip: $activeChip
+        rawJson: $rawJson
+        isFinal: $isFinal
+        entryEntryId: $entryId
+      }
+    )
+  }
+`;
+
 const CREATE_TOURNAMENT_MUTATION = `
   mutation CreateTournament(
     $id: UUID!
@@ -72,6 +129,7 @@ const CREATE_PARTICIPANT_MUTATION = `
         leagueRank: $leagueRank
         leaguePoints: $leaguePoints
         rawJson: $rawJson
+        entryEntryId: $entryId
       }
     )
   }
@@ -138,12 +196,37 @@ const CREATE_MATCH_PICK_MUTATION = `
         matchId: $matchId
         entryId: $entryId
         slot: $slot
+        entryEntryId: $entryId
       }
     )
   }
 `;
 
 // Type definitions for mutation inputs
+export interface UpsertEntryInput {
+  entryId: number;
+  season: string;
+  name: string;
+  playerFirstName?: string;
+  playerLastName?: string;
+  summaryOverallPoints?: number;
+  summaryOverallRank?: number;
+  rawJson: string;
+}
+
+export interface UpsertPickInput {
+  entryId: number;
+  event: number;
+  points: number;
+  totalPoints?: number;
+  rank?: number;
+  overallRank?: number;
+  eventTransfersCost?: number;
+  activeChip?: string;
+  rawJson: string;
+  isFinal: boolean;
+}
+
 export interface CreateTournamentInput {
   id: string;
   fplLeagueId: number;
@@ -196,6 +279,26 @@ export interface CreateMatchPickInput {
 
 // Mutation functions - execute as admin (internal mutations use NO_ACCESS auth)
 // authClaims parameter kept for API compatibility but not used
+export async function upsertEntryAdmin(
+  input: UpsertEntryInput,
+  _authClaims: AuthClaims
+): Promise<void> {
+  await dataConnectAdmin.executeGraphql(
+    UPSERT_ENTRY_MUTATION,
+    { variables: input }
+  );
+}
+
+export async function upsertPickAdmin(
+  input: UpsertPickInput,
+  _authClaims: AuthClaims
+): Promise<void> {
+  await dataConnectAdmin.executeGraphql(
+    UPSERT_PICK_MUTATION,
+    { variables: input }
+  );
+}
+
 export async function createTournamentAdmin(
   input: CreateTournamentInput,
   _authClaims: AuthClaims
