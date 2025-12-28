@@ -15,14 +15,16 @@ This document defines the FPL API response shapes needed for testing tournament 
 
 ### 1. Live FPL API Snapshots
 
-Captured via `functions/src/snapshotCapture.ts` and stored in `test-fixtures/snapshots/`.
+Captured via `scripts/capture-snapshot.ts` and stored in `test-fixtures/snapshots/`.
 
 **Current snapshots:**
-- `gw16-2025-12-15T23-00.json` - GW16 in-progress (5.5MB)
+- `gw16-2025-12-15T23-00.json` - GW16 in-progress (5.5MB, legacy format)
+- `gw18-2025-12-28T17-48.json` - GW18 in-progress (229KB, compact format)
 
-**To capture:**
-- GW18 in-progress (current state)
-- GW18 finished (after bonus added)
+**To capture more:**
+```bash
+npx tsx scripts/capture-snapshot.ts
+```
 
 ### 2. Historical Picks
 

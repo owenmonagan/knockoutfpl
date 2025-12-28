@@ -66,9 +66,6 @@ export const getFPLGameweekScore = onCall(async (request) => {
 // Export proxy function
 export { fplProxy } from './proxy';
 
-// Export FPL snapshot capture functions
-export { captureFloawoSnapshot, triggerSnapshotCapture } from './captureFloawoSnapshot';
-
 // Export tournament creation function
 export { createTournament } from './createTournament';
 

@@ -72,7 +72,7 @@ async function listSnapshots() {
 
   if (snapshot.empty) {
     console.log('No snapshots found in Firestore.');
-    console.log('Run the triggerSnapshotCapture function to capture a snapshot.');
+    console.log('Use scripts/capture-snapshot.ts to capture data locally instead.');
     return;
   }
 
