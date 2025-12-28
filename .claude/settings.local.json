@@ -59,7 +59,8 @@
       "Bash(firebase emulators:start --only auth,firestore --project demo-knockoutfpl)",
       "Bash(./node_modules/.bin/firebase emulators:start:*)",
       "Bash(git -C /Users/owen/work/knockoutfpl add docs/)",
-      "Bash(git -C /Users/owen/work/knockoutfpl status --short)"
+      "Bash(git -C /Users/owen/work/knockoutfpl status --short)",
+      "Skill(superpowers:brainstorming)"
     ],
     "deny": [],
     "ask": []

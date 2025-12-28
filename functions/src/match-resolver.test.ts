@@ -1,4 +1,4 @@
-import { describe, it, expect, test } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { resolveMatch, getNextRoundSlot, canPopulateNextMatch } from './match-resolver';
 import { RoundMatch } from './dataconnect-mutations';
 
@@ -181,25 +181,3 @@ describe('canPopulateNextMatch', () => {
   });
 });
 
-/**
- * Bracket Generation Logic Tests
- *
- * These tests cover seeding and bye assignment logic.
- * TODO: Implement when bracket generation is refactored.
- */
-describe('Bracket Generation Logic', () => {
-  describe('seeding', () => {
-    test.todo('should assign seeds 1-N based on league rank');
-    test.todo('should pair seed 1 vs seed N in round 1');
-    test.todo('should pair seed 2 vs seed N-1 in round 1');
-    test.todo('should maintain seeding structure for 8 players');
-    test.todo('should maintain seeding structure for 16 players');
-  });
-
-  describe('bye assignment', () => {
-    test.todo('should calculate correct bye count for 12 players (4 byes)');
-    test.todo('should assign byes to top seeds first');
-    test.todo('should place bye recipients in round 2 slots');
-    test.todo('should not create bye matches for power-of-2 counts');
-  });
-});
