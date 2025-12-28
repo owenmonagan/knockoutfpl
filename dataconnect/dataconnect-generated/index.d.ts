@@ -282,10 +282,6 @@ export interface GetMatchData {
       fplLeagueName: string;
       currentRound: number;
     };
-      winner?: {
-        entryId: number;
-        name: string;
-      } & Entry_Key;
   } & Match_Key)[];
 }
 
@@ -377,10 +373,6 @@ export interface GetRoundMatchesData {
     isBye: boolean;
     completedAt?: TimestampString | null;
     qualifiesToMatchId?: number | null;
-    winner?: {
-      entryId: number;
-      name: string;
-    } & Entry_Key;
   } & Match_Key)[];
 }
 

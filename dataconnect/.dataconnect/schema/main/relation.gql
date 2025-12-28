@@ -1,39 +1,5 @@
 extend type Entry {
   """
-  ✨ List `Match` objects in a one-to-many relationship (where `Match`.`winner` is this object).
-  """
-  matches_on_winner(
-    """
-    Filter condition to narrow down the query results.
-    """
-    where: Match_Filter
-
-    """
-    Order the query results by specific fields.
-    """
-    orderBy: [Match_Order!]
-
-    """
-    Number of rows to skip before starting to return the results.
-    """
-    offset: Int
-
-    """
-    Maximum number of rows to return (defaults to 100 rows).
-    """
-    limit: Int = 100
-
-    """
-    Set to true to return distinct results.
-    """
-    distinct: Boolean = false
-
-    """
-    Filter condition to apply to the groups of aggregate queries.
-    """
-    having: Match_Having
-  ): [Match!]! @fdc_generated(from: "Match.winner", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
-  """
   ✨ List `MatchPick` objects in a one-to-many relationship (where `MatchPick`.`entry` is this object).
   """
   matchPicks_on_entry(

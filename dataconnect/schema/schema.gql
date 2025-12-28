@@ -195,7 +195,7 @@ type Match @table(name: "matches", key: ["tournamentId", "matchId"]) {
 
   # Relations
   tournament: Tournament!
-  winner: Entry
+  # Note: winner relation removed - use winnerEntryId directly (entries may not exist)
 }
 
 # Junction table linking matches to participants

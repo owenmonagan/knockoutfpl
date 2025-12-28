@@ -20,7 +20,7 @@ vi.mock('react-router-dom', async () => {
 // Mock AuthContext
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => ({
-    user: { uid: 'test-user-id', displayName: 'Test User' },
+    user: { uid: 'test-user-id', email: 'test@example.com', displayName: 'Test User' },
   }),
 }));
 
@@ -190,7 +190,7 @@ describe('ConnectPage', () => {
     await user.click(screen.getByRole('button', { name: 'Find My Team' }));
 
     await waitFor(() => {
-      expect(connectFPLTeam).toHaveBeenCalledWith('test-user-id', 158256);
+      expect(connectFPLTeam).toHaveBeenCalledWith('test-user-id', 'test@example.com', 158256);
     });
 
     // Advance timer for auto-redirect (1.5s)

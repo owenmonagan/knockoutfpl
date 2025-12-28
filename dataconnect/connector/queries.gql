@@ -289,10 +289,6 @@ query GetRoundMatches($tournamentId: UUID!, $roundNumber: Int!) @auth(level: PUB
     isBye
     completedAt
     qualifiesToMatchId
-    winner {
-      entryId
-      name
-    }
   }
 }
 
@@ -311,10 +307,6 @@ query GetMatch($tournamentId: UUID!, $matchId: Int!) @auth(level: PUBLIC) {
     tournament {
       fplLeagueName
       currentRound
-    }
-    winner {
-      entryId
-      name
     }
   }
 }

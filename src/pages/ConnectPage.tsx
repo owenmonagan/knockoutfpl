@@ -40,13 +40,13 @@ export function ConnectPage() {
   });
 
   const handleSubmit = async () => {
-    if (!user?.uid) return;
+    if (!user?.uid || !user?.email) return;
 
     setIsLoading(true);
     setError('');
     try {
       const info = await getFPLTeamInfo(Number(teamId));
-      await connectFPLTeam(user.uid, info.teamId);
+      await connectFPLTeam(user.uid, user.email, info.teamId);
       // Persist to sessionStorage so it survives component remounts
       sessionStorage.setItem(SUCCESS_STORAGE_KEY, JSON.stringify(info));
       setTeamInfo(info);

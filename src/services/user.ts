@@ -1,68 +1,86 @@
-import { doc, setDoc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import type { CreateUserData, User } from '../types/user';
+import { dataConnect } from '../lib/firebase';
+import { connectFplEntry, getUser as getUserQuery, upsertUser } from '@knockoutfpl/dataconnect';
+import type { User, CreateUserData } from '../types/user';
 import { getFPLTeamInfo } from './fpl';
 
 /**
- * Create a new user profile in Firestore
- */
-export async function createUserProfile(userData: CreateUserData): Promise<void> {
-  const userRef = doc(db, 'users', userData.userId);
-  const now = Timestamp.now();
-
-  await setDoc(userRef, {
-    userId: userData.userId,
-    email: userData.email,
-    displayName: userData.displayName,
-    fplTeamId: 0,
-    fplTeamName: '',
-    wins: 0,
-    losses: 0,
-    createdAt: now,
-    updatedAt: now,
-  });
-}
-
-/**
- * Get a user profile from Firestore
+ * Get user profile from Data Connect
+ * Returns a User-compatible object or null if not found
  */
 export async function getUserProfile(userId: string): Promise<User | null> {
-  const userRef = doc(db, 'users', userId);
-  const userSnap = await getDoc(userRef);
-
-  if (!userSnap.exists()) {
+  try {
+    const result = await getUserQuery(dataConnect, { uid: userId });
+    const users = result.data?.users;
+    if (users && users.length > 0) {
+      const dcUser = users[0];
+      // Convert Data Connect user to legacy User type
+      // Note: fplTeamName is fetched separately if needed
+      return {
+        userId: dcUser.uid,
+        email: dcUser.email,
+        fplTeamId: dcUser.entryId2025 ?? 0,
+        fplTeamName: '', // Not stored in Data Connect, fetch from FPL API if needed
+        displayName: dcUser.email.split('@')[0], // Derive from email
+        wins: 0,
+        losses: 0,
+        createdAt: dcUser.createdAt,
+        updatedAt: dcUser.updatedAt,
+      } as User;
+    }
+    return null;
+  } catch {
     return null;
   }
-
-  return userSnap.data() as User;
 }
 
 /**
- * Update a user profile in Firestore
+ * Create a new user profile via Data Connect
+ */
+export async function createUserProfile(userData: CreateUserData): Promise<void> {
+  await upsertUser(dataConnect, { uid: userData.userId, email: userData.email });
+}
+
+/**
+ * Update user profile (limited - mainly for FPL team connection)
  */
 export async function updateUserProfile(
   userId: string,
   updates: Partial<Omit<User, 'userId' | 'createdAt'>>
 ): Promise<void> {
-  const userRef = doc(db, 'users', userId);
-  const now = Timestamp.now();
+  // Get current user to get email (required for upsert)
+  const currentUser = await getUserProfile(userId);
+  if (!currentUser) {
+    throw new Error('User not found');
+  }
 
-  await updateDoc(userRef, {
-    ...updates,
-    updatedAt: now,
-  });
+  // If updating FPL team, use connectFplEntry
+  if (updates.fplTeamId) {
+    await connectFplEntry(dataConnect, {
+      uid: userId,
+      email: currentUser.email,
+      entryId: updates.fplTeamId,
+    });
+  }
 }
 
 /**
- * Connect FPL team to user profile
+ * Get user's FPL entry ID from Data Connect
  */
-export async function connectFPLTeam(userId: string, fplTeamId: number): Promise<void> {
-  // Fetch team info from FPL API to verify team exists
-  const teamInfo = await getFPLTeamInfo(fplTeamId);
+export async function getUserEntryId(uid: string): Promise<number | null> {
+  const result = await getUserQuery(dataConnect, { uid });
+  const users = result.data?.users;
+  if (users && users.length > 0) {
+    return users[0].entryId2025 ?? null;
+  }
+  return null;
+}
 
-  // Update user profile with FPL team info
-  await updateUserProfile(userId, {
-    fplTeamId: teamInfo.teamId,
-    fplTeamName: teamInfo.teamName,
-  });
+/**
+ * Connect FPL team to user profile via Data Connect
+ */
+export async function connectFPLTeam(uid: string, email: string, fplTeamId: number): Promise<void> {
+  // Verify team exists by fetching from FPL API
+  await getFPLTeamInfo(fplTeamId);
+  // Update user profile with FPL team ID
+  await connectFplEntry(dataConnect, { uid, email, entryId: fplTeamId });
 }
