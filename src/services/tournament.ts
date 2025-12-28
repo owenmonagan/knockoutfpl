@@ -1,61 +1,60 @@
 // src/services/tournament.ts
-import { collection, query, where, getDocs, addDoc, updateDoc, doc, Timestamp } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { functions, dataConnect } from '../lib/firebase';
+import { getLeagueTournaments } from '@knockoutfpl/dataconnect';
 import type { Tournament } from '../types/tournament';
 
-const TOURNAMENTS_COLLECTION = 'tournaments';
+// Cloud Function types
+interface CreateTournamentRequest {
+  fplLeagueId: number;
+}
 
+interface CreateTournamentResponse {
+  tournamentId: string;
+  participantCount: number;
+  totalRounds: number;
+  startEvent: number;
+}
+
+/**
+ * Get tournament by FPL league ID using Data Connect
+ */
 export async function getTournamentByLeague(leagueId: number): Promise<Tournament | null> {
-  const tournamentsRef = collection(db, TOURNAMENTS_COLLECTION);
-  const q = query(tournamentsRef, where('fplLeagueId', '==', leagueId));
-  const snapshot = await getDocs(q);
+  const result = await getLeagueTournaments(dataConnect, { fplLeagueId: leagueId });
 
-  if (snapshot.empty) {
+  if (!result.data.tournaments || result.data.tournaments.length === 0) {
     return null;
   }
 
-  const docSnap = snapshot.docs[0];
+  // Return the first (most recent) tournament for this league
+  const tournament = result.data.tournaments[0];
   return {
-    id: docSnap.id,
-    ...docSnap.data(),
-  } as Tournament;
-}
-
-export interface CreateTournamentData {
-  fplLeagueId: number;
-  fplLeagueName: string;
-  creatorUserId: string;
-  startGameweek: number;
-  currentRound: number;
-  totalRounds: number;
-  status: 'active' | 'completed';
-  participants: Tournament['participants'];
-  rounds: Tournament['rounds'];
-  winnerId: number | null;
-}
-
-export async function createTournament(data: CreateTournamentData): Promise<Tournament> {
-  const tournamentsRef = collection(db, TOURNAMENTS_COLLECTION);
-
-  const now = Timestamp.now();
-  const tournamentData = {
-    ...data,
-    createdAt: now,
-    updatedAt: now,
+    id: tournament.id,
+    fplLeagueId: leagueId,
+    fplLeagueName: tournament.fplLeagueName,
+    creatorUserId: tournament.creatorUid,
+    startGameweek: tournament.currentRound, // Using currentRound as startGameweek approximation
+    currentRound: tournament.currentRound,
+    totalRounds: tournament.totalRounds,
+    status: tournament.status as 'active' | 'completed',
+    participants: [], // Will be loaded separately if needed
+    rounds: [], // Will be loaded separately if needed
+    winnerId: null, // Will be loaded separately if needed
   };
-
-  const docRef = await addDoc(tournamentsRef, tournamentData);
-
-  return {
-    id: docRef.id,
-    ...tournamentData,
-  } as Tournament;
 }
 
-export async function updateTournament(tournament: Tournament): Promise<void> {
-  const tournamentRef = doc(db, TOURNAMENTS_COLLECTION, tournament.id);
-  await updateDoc(tournamentRef, {
-    ...tournament,
-    updatedAt: Timestamp.now(),
-  });
+/**
+ * Call the createTournament Cloud Function
+ * This replaces the client-side bracket generation with server-side logic
+ */
+export async function callCreateTournament(
+  fplLeagueId: number
+): Promise<CreateTournamentResponse> {
+  const createTournamentFn = httpsCallable<
+    CreateTournamentRequest,
+    CreateTournamentResponse
+  >(functions, 'createTournament');
+
+  const result = await createTournamentFn({ fplLeagueId });
+  return result.data;
 }

@@ -5,18 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Skeleton } from '../components/ui/skeleton';
 import { BracketView } from '../components/tournament/BracketView';
 import { CreateTournamentButton } from '../components/tournament/CreateTournamentButton';
-import { getLeagueStandings, getCurrentGameweek } from '../services/fpl';
-import { getTournamentByLeague, createTournament } from '../services/tournament';
-import { generateBracket } from '../lib/bracket';
+import { getTournamentByLeague, callCreateTournament } from '../services/tournament';
 import { useAuth } from '../contexts/AuthContext';
-import type { Tournament, Participant } from '../types/tournament';
+import type { Tournament } from '../types/tournament';
 
 export function LeaguePage() {
   const { leagueId } = useParams<{ leagueId: string }>();
   const { user } = useAuth();
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [leagueName, setLeagueName] = useState('');
 
   useEffect(() => {
     async function loadData() {
@@ -28,7 +25,6 @@ export function LeaguePage() {
         const existingTournament = await getTournamentByLeague(Number(leagueId));
         if (existingTournament) {
           setTournament(existingTournament);
-          setLeagueName(existingTournament.fplLeagueName);
         }
       } catch (error) {
         console.error('Error loading tournament:', error);
@@ -43,41 +39,14 @@ export function LeaguePage() {
   const handleCreateTournament = async () => {
     if (!leagueId || !user) return;
 
-    // Fetch league standings
-    const standings = await getLeagueStandings(Number(leagueId));
-    const gameweekData = await getCurrentGameweek();
+    // Call the Cloud Function to create the tournament
+    await callCreateTournament(Number(leagueId));
 
-    // Create participants from standings
-    const participants: Participant[] = standings.map((standing, index) => ({
-      fplTeamId: standing.fplTeamId,
-      fplTeamName: standing.teamName,
-      managerName: standing.managerName,
-      seed: index + 1, // Seed by league rank
-    }));
-
-    // Generate bracket
-    const startGameweek = gameweekData.id + 1; // Start next gameweek
-    const rounds = generateBracket(participants, startGameweek);
-    const totalRounds = rounds.length;
-
-    // Get league name from first standing or use default
-    const leagueNameFromStandings = standings.length > 0 ? `League ${leagueId}` : `League ${leagueId}`;
-
-    // Create tournament
-    const newTournament = await createTournament({
-      fplLeagueId: Number(leagueId),
-      fplLeagueName: leagueNameFromStandings,
-      creatorUserId: user.uid,
-      startGameweek,
-      currentRound: 1,
-      totalRounds,
-      status: 'active',
-      participants,
-      rounds,
-      winnerId: null,
-    });
-
-    setTournament(newTournament);
+    // Reload tournament data
+    const newTournament = await getTournamentByLeague(Number(leagueId));
+    if (newTournament) {
+      setTournament(newTournament);
+    }
   };
 
   if (isLoading) {

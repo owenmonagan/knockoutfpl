@@ -8,6 +8,15 @@ import {
   BracketMatch,
   MatchAssignment,
 } from './bracketGenerator';
+import { dataConnect } from './dataconnect';
+import {
+  createTournament as dcCreateTournament,
+  createRound,
+  createParticipant,
+  createMatch,
+  createMatchPick,
+  updateMatch,
+} from './generated/dataconnect';
 
 // Database entity types (matching Data Connect schema)
 interface TournamentRecord {
@@ -220,24 +229,82 @@ export function buildTournamentRecords(
 }
 
 /**
- * Write tournament records to database
- * TODO: Replace with actual Data Connect SDK calls
+ * Write tournament records to database using Data Connect
  */
-async function writeTournamentToDatabase(records: ReturnType<typeof buildTournamentRecords>): Promise<void> {
-  // Placeholder - will be replaced with Data Connect mutations
-  console.log('Writing tournament:', records.tournament);
-  console.log('Writing rounds:', records.rounds.length);
-  console.log('Writing participants:', records.participants.length);
-  console.log('Writing matches:', records.matchRecords.length);
-  console.log('Writing match picks:', records.matchPicks.length);
+async function writeTournamentToDatabase(
+  tournamentId: string,
+  records: ReturnType<typeof buildTournamentRecords>
+): Promise<void> {
+  // 1. Create tournament
+  await dcCreateTournament(dataConnect, {
+    fplLeagueId: records.tournament.fplLeagueId,
+    fplLeagueName: records.tournament.fplLeagueName,
+    creatorUid: records.tournament.creatorUid,
+    participantCount: records.tournament.participantCount,
+    totalRounds: records.tournament.totalRounds,
+    startEvent: records.tournament.startEvent,
+    seedingMethod: records.tournament.seedingMethod,
+  });
 
-  // TODO: Call Data Connect mutations:
-  // 1. CreateTournament
-  // 2. CreateRound (for each round)
-  // 3. UpsertEntry (for each participant's entry)
-  // 4. CreateParticipant (for each participant)
-  // 5. CreateMatch (for each match)
-  // 6. CreateMatchPick (for each match pick)
+  // 2. Create rounds
+  for (const round of records.rounds) {
+    await createRound(dataConnect, {
+      tournamentId,
+      roundNumber: round.roundNumber,
+      event: round.event,
+      status: round.status,
+    });
+  }
+
+  // 3. Create participants
+  for (const participant of records.participants) {
+    await createParticipant(dataConnect, {
+      tournamentId,
+      entryId: participant.entryId,
+      teamName: participant.teamName,
+      managerName: participant.managerName,
+      seed: participant.seed,
+      leagueRank: participant.leagueRank,
+      leaguePoints: participant.leaguePoints,
+      rawJson: participant.rawJson,
+    });
+  }
+
+  // 4. Create matches
+  for (const match of records.matchRecords) {
+    await createMatch(dataConnect, {
+      tournamentId,
+      matchId: match.matchId,
+      roundNumber: match.roundNumber,
+      positionInRound: match.positionInRound,
+      qualifiesToMatchId: match.qualifiesToMatchId,
+      isBye: match.isBye,
+    });
+
+    // Update bye matches with status and winner
+    if (match.isBye && match.winnerEntryId) {
+      await updateMatch(dataConnect, {
+        tournamentId,
+        matchId: match.matchId,
+        roundNumber: match.roundNumber,
+        positionInRound: match.positionInRound,
+        qualifiesToMatchId: match.qualifiesToMatchId,
+        isBye: true,
+        status: 'complete',
+        winnerEntryId: match.winnerEntryId,
+      });
+    }
+  }
+
+  // 5. Create match picks
+  for (const pick of records.matchPicks) {
+    await createMatchPick(dataConnect, {
+      tournamentId,
+      matchId: pick.matchId,
+      entryId: pick.entryId,
+      slot: pick.slot,
+    });
+  }
 }
 
 /**
@@ -288,7 +355,7 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
   );
 
   // 8. Write to database
-  await writeTournamentToDatabase(records);
+  await writeTournamentToDatabase(tournamentId, records);
 
   return {
     tournamentId,

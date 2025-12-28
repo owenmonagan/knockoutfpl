@@ -165,5 +165,47 @@ describe('createTournament', () => {
       expect(byeMatches[0].status).toBe('complete');
       expect(byeMatches[0].winnerEntryId).toBe(100); // Seed 1 gets bye
     });
+
+    it('creates correct record counts for 8 participants', () => {
+      // This test documents the expected database write counts for Data Connect
+      const eightPlayerStandings = {
+        league: { id: 123, name: 'Test League' },
+        standings: {
+          results: Array(8).fill(null).map((_, i) => ({
+            entry: 1000 + i,
+            entry_name: `Team ${i + 1}`,
+            player_name: `Manager ${i + 1}`,
+            rank: i + 1,
+            total: 1000 - i * 10,
+          })),
+        },
+      };
+
+      const bracketSize = calculateBracketSize(8);
+      const totalRounds = calculateTotalRounds(bracketSize);
+      const matches = generateBracketStructure(bracketSize);
+      const assignments = assignParticipantsToMatches(bracketSize, 8);
+
+      const records = buildTournamentRecords(
+        'tour-1',
+        'user123',
+        eightPlayerStandings,
+        bracketSize,
+        totalRounds,
+        20,
+        matches,
+        assignments
+      );
+
+      // Document expected counts for Data Connect writes
+      expect(records.rounds).toHaveLength(3); // 8 -> 4 -> 2 -> 1
+      expect(records.participants).toHaveLength(8);
+      expect(records.matchRecords).toHaveLength(7); // 4 + 2 + 1
+      expect(records.matchPicks).toHaveLength(8); // 4 matches * 2 picks each
+
+      // Verify no byes with exactly 8 participants
+      const byeMatches = records.matchRecords.filter(m => m.isBye);
+      expect(byeMatches).toHaveLength(0);
+    });
   });
 });

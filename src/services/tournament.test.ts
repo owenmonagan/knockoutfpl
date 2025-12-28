@@ -1,24 +1,21 @@
 // src/services/tournament.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getTournamentByLeague, createTournament, updateTournament } from './tournament';
-import type { Tournament } from '../types/tournament';
+import { getTournamentByLeague, callCreateTournament } from './tournament';
 
 // Mock Firebase
 vi.mock('../lib/firebase', () => ({
-  db: {},
+  functions: {},
+  dataConnect: {},
 }));
 
-vi.mock('firebase/firestore', () => ({
-  collection: vi.fn(),
-  query: vi.fn(),
-  where: vi.fn(),
-  getDocs: vi.fn(),
-  addDoc: vi.fn(),
-  updateDoc: vi.fn(),
-  doc: vi.fn(),
-  Timestamp: {
-    now: () => ({ seconds: 0, nanoseconds: 0 }),
-  },
+// Mock Data Connect
+vi.mock('@knockoutfpl/dataconnect', () => ({
+  getLeagueTournaments: vi.fn(),
+}));
+
+// Mock Firebase Functions
+vi.mock('firebase/functions', () => ({
+  httpsCallable: vi.fn(() => vi.fn()),
 }));
 
 describe('getTournamentByLeague', () => {
@@ -27,10 +24,9 @@ describe('getTournamentByLeague', () => {
   });
 
   it('should return null when no tournament exists', async () => {
-    const { getDocs } = await import('firebase/firestore');
-    vi.mocked(getDocs).mockResolvedValue({
-      empty: true,
-      docs: [],
+    const { getLeagueTournaments } = await import('@knockoutfpl/dataconnect');
+    vi.mocked(getLeagueTournaments).mockResolvedValue({
+      data: { tournaments: [] },
     } as any);
 
     const result = await getTournamentByLeague(123);
@@ -38,70 +34,47 @@ describe('getTournamentByLeague', () => {
   });
 
   it('should return tournament when one exists', async () => {
-    const { getDocs } = await import('firebase/firestore');
-    vi.mocked(getDocs).mockResolvedValue({
-      empty: false,
-      docs: [{
-        id: 'tournament-123',
-        data: () => ({
-          fplLeagueId: 123,
+    const { getLeagueTournaments } = await import('@knockoutfpl/dataconnect');
+    vi.mocked(getLeagueTournaments).mockResolvedValue({
+      data: {
+        tournaments: [{
+          id: 'tournament-123',
           fplLeagueName: 'Test League',
-        }),
-      }],
+          creatorUid: 'user-123',
+          currentRound: 1,
+          totalRounds: 3,
+          status: 'active',
+        }],
+      },
     } as any);
 
     const result = await getTournamentByLeague(123);
     expect(result?.id).toBe('tournament-123');
-    expect(result?.fplLeagueId).toBe(123);
+    expect(result?.fplLeagueName).toBe('Test League');
   });
 });
 
-describe('createTournament', () => {
+describe('callCreateTournament', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should create tournament and return it with id', async () => {
-    const { addDoc } = await import('firebase/firestore');
-    vi.mocked(addDoc).mockResolvedValue({ id: 'new-tournament-id' } as any);
+  it('should call the Cloud Function with league ID', async () => {
+    const { httpsCallable } = await import('firebase/functions');
+    const mockCallable = vi.fn().mockResolvedValue({
+      data: {
+        tournamentId: 'new-tournament-123',
+        participantCount: 8,
+        totalRounds: 3,
+        startEvent: 20,
+      },
+    });
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable);
 
-    const tournamentData = {
-      fplLeagueId: 123,
-      fplLeagueName: 'Test League',
-      creatorUserId: 'user-123',
-      startGameweek: 16,
-      currentRound: 1,
-      totalRounds: 3,
-      status: 'active' as const,
-      participants: [],
-      rounds: [],
-      winnerId: null,
-    };
+    const result = await callCreateTournament(12345);
 
-    const result = await createTournament(tournamentData);
-
-    expect(result.id).toBe('new-tournament-id');
-    expect(result.fplLeagueId).toBe(123);
-  });
-});
-
-describe('updateTournament', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('should update tournament document', async () => {
-    const { updateDoc, doc } = await import('firebase/firestore');
-    vi.mocked(doc).mockReturnValue({} as any);
-    vi.mocked(updateDoc).mockResolvedValue(undefined);
-
-    const tournament = {
-      id: 'tournament-123',
-      currentRound: 2,
-    } as Tournament;
-
-    await updateTournament(tournament);
-
-    expect(updateDoc).toHaveBeenCalled();
+    expect(result.tournamentId).toBe('new-tournament-123');
+    expect(result.participantCount).toBe(8);
+    expect(mockCallable).toHaveBeenCalledWith({ fplLeagueId: 12345 });
   });
 });
