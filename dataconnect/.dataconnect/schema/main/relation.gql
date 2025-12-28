@@ -346,10 +346,6 @@ extend type Entry {
   ✨ Maximum of the `summaryOverallRank` field in the `Entry` table.
   """
   summaryOverallRank_max: Int @fdc_generated(from: "Entry.summaryOverallRank", purpose: QUERY_MAX)
-  """
-  A generated field that is used for caching results in SDKs.
-  """
-  _id: ID! @fdc_generated(from: "Entry.entryId", purpose: GLOBAL_ID)
 }
 extend type Event {
   """
@@ -483,10 +479,6 @@ extend type Event {
   ✨ Maximum of the `event` field in the `Event` table.
   """
   event_max: Int @fdc_generated(from: "Event.event", purpose: QUERY_MAX)
-  """
-  A generated field that is used for caching results in SDKs.
-  """
-  _id: ID! @fdc_generated(from: "Event.event,season", purpose: GLOBAL_ID)
 }
 extend type League {
   """
@@ -628,10 +620,6 @@ extend type League {
   ✨ Maximum of the `leagueId` field in the `League` table.
   """
   leagueId_max: Int @fdc_generated(from: "League.leagueId", purpose: QUERY_MAX)
-  """
-  A generated field that is used for caching results in SDKs.
-  """
-  _id: ID! @fdc_generated(from: "League.leagueId,season", purpose: GLOBAL_ID)
 }
 extend type Match {
   """
@@ -861,10 +849,6 @@ extend type Match {
   ✨ Maximum of the `winnerEntryId` field in the `Match` table.
   """
   winnerEntryId_max: Int @fdc_generated(from: "Match.winnerEntryId", purpose: QUERY_MAX)
-  """
-  A generated field that is used for caching results in SDKs.
-  """
-  _id: ID! @fdc_generated(from: "Match.tournamentId,matchId", purpose: GLOBAL_ID)
 }
 extend type MatchPick {
   """
@@ -1024,10 +1008,6 @@ extend type MatchPick {
   ✨ Maximum of the `slot` field in the `MatchPick` table.
   """
   slot_max: Int @fdc_generated(from: "MatchPick.slot", purpose: QUERY_MAX)
-  """
-  A generated field that is used for caching results in SDKs.
-  """
-  _id: ID! @fdc_generated(from: "MatchPick.tournamentId,matchId,entryId", purpose: GLOBAL_ID)
 }
 extend type Participant {
   """
@@ -1311,10 +1291,6 @@ extend type Participant {
   ✨ Maximum of the `seed` field in the `Participant` table.
   """
   seed_max: Int @fdc_generated(from: "Participant.seed", purpose: QUERY_MAX)
-  """
-  A generated field that is used for caching results in SDKs.
-  """
-  _id: ID! @fdc_generated(from: "Participant.tournamentId,entryId", purpose: GLOBAL_ID)
 }
 extend type Pick {
   """
@@ -1649,10 +1625,6 @@ extend type Pick {
   ✨ Maximum of the `totalPoints` field in the `Pick` table.
   """
   totalPoints_max: Int @fdc_generated(from: "Pick.totalPoints", purpose: QUERY_MAX)
-  """
-  A generated field that is used for caching results in SDKs.
-  """
-  _id: ID! @fdc_generated(from: "Pick.entryId,event", purpose: GLOBAL_ID)
 }
 extend type Round {
   """
@@ -1785,10 +1757,6 @@ extend type Round {
   ✨ Maximum of the `startedAt` field in the `Round` table.
   """
   startedAt_max: Timestamp @fdc_generated(from: "Round.startedAt", purpose: QUERY_MAX)
-  """
-  A generated field that is used for caching results in SDKs.
-  """
-  _id: ID! @fdc_generated(from: "Round.tournamentId,roundNumber", purpose: GLOBAL_ID)
 }
 extend type Tournament {
   """
@@ -2190,10 +2158,6 @@ extend type Tournament {
   ✨ Maximum of the `winnerEntryId` field in the `Tournament` table.
   """
   winnerEntryId_max: Int @fdc_generated(from: "Tournament.winnerEntryId", purpose: QUERY_MAX)
-  """
-  A generated field that is used for caching results in SDKs.
-  """
-  _id: ID! @fdc_generated(from: "Tournament.id", purpose: GLOBAL_ID)
 }
 extend type User {
   """
@@ -2359,8 +2323,4 @@ extend type User {
   ✨ Maximum of the `updatedAt` field in the `User` table.
   """
   updatedAt_max: Timestamp @fdc_generated(from: "User.updatedAt", purpose: QUERY_MAX)
-  """
-  A generated field that is used for caching results in SDKs.
-  """
-  _id: ID! @fdc_generated(from: "User.uid", purpose: GLOBAL_ID)
 }

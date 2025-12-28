@@ -2,6 +2,7 @@
 import { Badge } from '../ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { BracketLayout } from './BracketLayout';
+import { ParticipantsTable } from './ParticipantsTable';
 import type { Tournament } from '../../types/tournament';
 
 interface BracketViewProps {
@@ -24,10 +25,13 @@ export function BracketView({ tournament }: BracketViewProps) {
       </CardHeader>
       <CardContent>
         {tournament.rounds.length > 0 ? (
-          <BracketLayout
-            rounds={tournament.rounds}
-            participants={tournament.participants}
-          />
+          <>
+            <BracketLayout
+              rounds={tournament.rounds}
+              participants={tournament.participants}
+            />
+            <ParticipantsTable participants={tournament.participants} />
+          </>
         ) : (
           <p className="text-muted-foreground text-center py-8">
             Bracket will appear when the tournament starts.

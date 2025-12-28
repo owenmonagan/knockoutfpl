@@ -61,13 +61,22 @@ describe('BracketView', () => {
     expect(screen.getByText('Final')).toBeInTheDocument();
   });
 
-  it('renders all participants in bracket', () => {
+  it('renders all participants in bracket and table', () => {
     render(<BracketView tournament={mockTournament} />);
 
-    expect(screen.getByText('Team A')).toBeInTheDocument();
-    expect(screen.getByText('Team B')).toBeInTheDocument();
-    expect(screen.getByText('Team C')).toBeInTheDocument();
-    expect(screen.getByText('Team D')).toBeInTheDocument();
+    // Each team appears twice: once in bracket, once in table
+    expect(screen.getAllByText('Team A')).toHaveLength(2);
+    expect(screen.getAllByText('Team B')).toHaveLength(2);
+    expect(screen.getAllByText('Team C')).toHaveLength(2);
+    expect(screen.getAllByText('Team D')).toHaveLength(2);
+  });
+
+  it('renders participants table with seeds', () => {
+    render(<BracketView tournament={mockTournament} />);
+
+    expect(screen.getByText('Participants')).toBeInTheDocument();
+    expect(screen.getByText('Manager A')).toBeInTheDocument();
+    expect(screen.getByText('Manager B')).toBeInTheDocument();
   });
 
   it('shows completed badge when tournament finished', () => {

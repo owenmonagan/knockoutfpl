@@ -2314,7 +2314,7 @@ export interface GetMatchPicksData {
     matchId: number;
     entryId: number;
     slot: number;
-    entry?: {
+    entry: {
       entryId: number;
       name: string;
       playerFirstName?: string | null;

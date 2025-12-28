@@ -48,12 +48,16 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
 
   const basicTournament = tournamentsResult.data.tournaments[0];
   const tournamentId = basicTournament.id as UUIDString;
+  console.log('[DEBUG] Tournament ID:', tournamentId);
 
   // Fetch participants and rounds in parallel
   const [participantsResult, roundsResult] = await Promise.all([
     getTournamentWithParticipants(dataConnect, { id: tournamentId }),
     getTournamentRounds(dataConnect, { tournamentId }),
   ]);
+
+  console.log('[DEBUG] Participants count:', participantsResult.data.participants?.length);
+  console.log('[DEBUG] Rounds count:', roundsResult.data.rounds?.length);
 
   // Map participants to our type
   const participants: Participant[] = (participantsResult.data.participants || []).map((p) => ({
@@ -74,6 +78,7 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
         tournamentId,
         roundNumber: r.roundNumber,
       });
+      console.log(`[DEBUG] Round ${r.roundNumber} matches:`, matchesResult.data.matches?.length);
 
       // For each match, get the match picks (players)
       const matches: Match[] = await Promise.all(
@@ -82,6 +87,7 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
             tournamentId,
             matchId: m.matchId,
           });
+          console.log(`[DEBUG] Match ${m.matchId} picks:`, picksResult.data.matchPicks?.length);
 
           const picks = picksResult.data.matchPicks || [];
           const player1Pick = picks.find((p) => p.slot === 1);

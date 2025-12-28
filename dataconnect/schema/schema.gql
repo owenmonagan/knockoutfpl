@@ -169,7 +169,7 @@ type Participant @table(name: "participants", key: ["tournamentId", "entryId"]) 
 
   # Relations
   tournament: Tournament!
-  entry: Entry  # Optional - entries may not exist yet
+  entry: Entry!
   user: User
 }
 
@@ -207,5 +207,5 @@ type MatchPick @table(name: "match_picks", key: ["tournamentId", "matchId", "ent
   slot: Int!  # Player 1 or Player 2
 
   # Relations
-  entry: Entry  # Optional - entries may not exist yet
+  entry: Entry!
 }
