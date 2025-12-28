@@ -71,3 +71,6 @@ export { captureFloawoSnapshot, triggerSnapshotCapture } from './captureFloawoSn
 
 // Export tournament creation function
 export { createTournament } from './createTournament';
+
+// Export scheduled bracket update function
+export { updateBrackets } from './updateBrackets';
