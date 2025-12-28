@@ -202,6 +202,61 @@ const CREATE_MATCH_PICK_MUTATION = `
   }
 `;
 
+// GraphQL queries for bracket updates
+const GET_ACTIVE_ROUNDS_QUERY = `
+  query GetActiveRounds($event: Int!) {
+    rounds(where: { event: { eq: $event }, status: { eq: "active" } }) {
+      tournamentId
+      roundNumber
+      event
+      status
+      tournament {
+        id
+        status
+        totalRounds
+      }
+    }
+  }
+`;
+
+const GET_ROUND_MATCHES_QUERY = `
+  query GetRoundMatches($tournamentId: UUID!, $roundNumber: Int!) {
+    matches(
+      where: {
+        tournamentId: { eq: $tournamentId }
+        roundNumber: { eq: $roundNumber }
+        status: { eq: "active" }
+      }
+    ) {
+      tournamentId
+      matchId
+      roundNumber
+      positionInRound
+      qualifiesToMatchId
+      isBye
+      status
+      matchPicks {
+        entryId
+        slot
+        participant {
+          seed
+        }
+      }
+    }
+  }
+`;
+
+const GET_CURRENT_EVENT_QUERY = `
+  query GetCurrentEvent($season: String!) {
+    events(where: { season: { eq: $season }, isCurrent: { eq: true } }) {
+      event
+      season
+      finished
+      isCurrent
+    }
+  }
+`;
+
 // Type definitions for mutation inputs
 export interface UpsertEntryInput {
   entryId: number;
@@ -275,6 +330,43 @@ export interface CreateMatchPickInput {
   matchId: number;
   entryId: number;
   slot: number;
+}
+
+// Type definitions for query results
+export interface ActiveRound {
+  tournamentId: string;
+  roundNumber: number;
+  event: number;
+  status: string;
+  tournament: {
+    id: string;
+    status: string;
+    totalRounds: number;
+  };
+}
+
+export interface RoundMatch {
+  tournamentId: string;
+  matchId: number;
+  roundNumber: number;
+  positionInRound: number;
+  qualifiesToMatchId: number | null;
+  isBye: boolean;
+  status: string;
+  matchPicks: Array<{
+    entryId: number;
+    slot: number;
+    participant: {
+      seed: number;
+    };
+  }>;
+}
+
+export interface CurrentEvent {
+  event: number;
+  season: string;
+  finished: boolean;
+  isCurrent: boolean;
 }
 
 // Mutation functions - execute as admin (internal mutations use NO_ACCESS auth)
@@ -357,4 +449,29 @@ export async function createMatchPickAdmin(
     CREATE_MATCH_PICK_MUTATION,
     { variables: input }
   );
+}
+
+// Query functions for bracket updates
+export async function getActiveRoundsForEvent(event: number): Promise<ActiveRound[]> {
+  const result = await dataConnectAdmin.executeGraphql<{ rounds: ActiveRound[] }, { event: number }>(
+    GET_ACTIVE_ROUNDS_QUERY,
+    { variables: { event } }
+  );
+  return result.data.rounds;
+}
+
+export async function getRoundMatches(tournamentId: string, roundNumber: number): Promise<RoundMatch[]> {
+  const result = await dataConnectAdmin.executeGraphql<{ matches: RoundMatch[] }, { tournamentId: string; roundNumber: number }>(
+    GET_ROUND_MATCHES_QUERY,
+    { variables: { tournamentId, roundNumber } }
+  );
+  return result.data.matches;
+}
+
+export async function getCurrentEvent(season: string): Promise<CurrentEvent | null> {
+  const result = await dataConnectAdmin.executeGraphql<{ events: CurrentEvent[] }, { season: string }>(
+    GET_CURRENT_EVENT_QUERY,
+    { variables: { season } }
+  );
+  return result.data.events[0] || null;
 }
