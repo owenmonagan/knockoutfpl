@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateTournamentRequest, validateLeagueStandings } from './createTournament';
+import { validateTournamentRequest, validateLeagueStandings, getCurrentGameweek } from './createTournament';
 
 describe('createTournament', () => {
   describe('validateTournamentRequest', () => {
@@ -36,6 +36,29 @@ describe('createTournament', () => {
       const results = Array(20).fill({});
       const standings = { standings: { results } };
       expect(() => validateLeagueStandings(standings)).not.toThrow();
+    });
+  });
+
+  describe('getCurrentGameweek', () => {
+    it('throws if no current gameweek found', () => {
+      const bootstrapData = { events: [] };
+      expect(() => getCurrentGameweek(bootstrapData)).toThrow('Could not determine current gameweek');
+    });
+
+    it('throws if events is undefined', () => {
+      const bootstrapData = {};
+      expect(() => getCurrentGameweek(bootstrapData)).toThrow('Could not determine current gameweek');
+    });
+
+    it('returns current gameweek id', () => {
+      const bootstrapData = {
+        events: [
+          { id: 1, is_current: false },
+          { id: 2, is_current: true },
+          { id: 3, is_current: false },
+        ],
+      };
+      expect(getCurrentGameweek(bootstrapData)).toBe(2);
     });
   });
 });
