@@ -9,247 +9,330 @@
 
 How data moves through the system for key operations.
 
+**Database:** PostgreSQL via Firebase Data Connect
+
+**Data layers:**
+- **FPL Cache** (`events`, `leagues`) - Re-fetchable from FPL API
+- **FPL Records** (`entries`, `picks`) - Authoritative for result verification
+- **User** (`users`) - Firebase Auth accounts
+- **Tournament** (`tournaments`, `rounds`, `participants`, `matches`, `match_picks`) - Tournament structure
+
 ---
 
-## Read Flows (DRAFT)
+## Read Flows
 
 ### Dashboard Load
-
-<!-- TODO: Add sequence diagram -->
 
 ```
 User opens /dashboard
     │
     ▼
-AuthContext checks auth state
+AuthContext checks Firebase Auth state
     │
     ▼
-Fetch user document from Firestore
+Query: users WHERE uid = $auth_uid
     │
     ▼
-Query tournaments where user is participant
+Query: participants WHERE uid = $auth_uid
+    → JOIN tournaments
     │
     ▼
 Render dashboard with tournaments list
 ```
 
-**Data sources:**
-- Firestore: `users/{userId}`
-- Firestore: `tournaments` (where participant matches user)
+**Tables read:**
+- `users` - Get user profile and entry_id
+- `participants` - Find user's tournament participations
+- `tournaments` - Get tournament metadata
 
 ---
 
 ### Tournament View
 
-<!-- TODO: Add sequence diagram -->
-
 ```
-User opens /tournament/:id
+User opens /league/:fpl_league_id
     │
     ▼
-Fetch tournament document from Firestore
+Query: tournaments WHERE fpl_league_id = $id
     │
     ▼
-For each match in current round:
+Query: rounds, matches, match_picks for tournament
+    │
+    ▼
+For each match needing scores:
     │
     ├─ If gameweek not started: Show "GW X"
     │
-    ├─ If gameweek in progress: Fetch scores from FPL API
+    ├─ If gameweek in progress:
+    │   └─ Fetch live scores from FPL API (not cached)
     │
-    └─ If gameweek complete: Show cached scores (or fetch if missing)
+    └─ If gameweek complete:
+        └─ Query picks table (authoritative record)
     │
     ▼
 Render bracket with scores
 ```
 
-**Data sources:**
-- Firestore: `tournaments/{tournamentId}`
-- FPL API: `/api/entry/{teamId}/event/{gameweek}/picks/`
+**Tables read:**
+- `tournaments` - Tournament metadata
+- `rounds` - Round → gameweek mapping
+- `matches` - Match structure and winners
+- `match_picks` - Who plays in each match
+- `picks` - Authoritative scores (FPL Records layer)
+- `entries` - Team names
 
 ---
 
 ### Leagues List
 
-<!-- TODO: Add sequence diagram -->
-
 ```
 User opens /leagues
     │
     ▼
-Get user's FPL Team ID from user document
+Query: users WHERE uid = $auth_uid → get entry_id
     │
     ▼
-Call Cloud Function to fetch mini-leagues from FPL
+Query: entries WHERE entry_id = $entry_id → get raw_json.leagues
+    │
+    ▼
+If stale or missing: Fetch from FPL API, update entries
     │
     ▼
 Render leagues list
 ```
 
-**Data sources:**
-- Firestore: `users/{userId}` → `fplTeamId`
-- FPL API: `/api/entry/{teamId}/` → `leagues.classic[]`
+**Tables read:**
+- `users` - Get user's entry_id
+- `entries` - Get cached league memberships from raw_json
+
+**FPL API (if cache miss):**
+- `/api/entry/{entry_id}/` → leagues.classic[]
 
 ---
 
-## Write Flows (DRAFT)
+## Write Flows
 
 ### User Signup
 
-<!-- TODO: Add sequence diagram -->
-
 ```
-User submits signup form
+User signs in with Google
     │
     ▼
-Firebase Auth: Create user
+Firebase Auth: Create/authenticate user
     │
     ▼
-Firestore: Create user document
+INSERT INTO users (uid, email) ON CONFLICT DO NOTHING
     │
     ▼
-Redirect to /connect
+Redirect to /connect (if no entry_id) or /dashboard
 ```
 
-**Data written:**
-- Firebase Auth: New user
-- Firestore: `users/{userId}` document
+**Tables written:**
+- `users` - New user record
 
 ---
 
 ### FPL Connection
 
-<!-- TODO: Add sequence diagram -->
-
 ```
 User enters FPL Team ID
     │
     ▼
-Cloud Function: Validate team exists in FPL API
+Cloud Function: Fetch /api/entry/{entry_id}/ from FPL
     │
     ▼
-Fetch team name from FPL API
+Validate entry exists
     │
     ▼
-Firestore: Update user document with FPL info
+INSERT INTO entries (entry_id, season, name, raw_json, ...)
+  ON CONFLICT UPDATE
+    │
+    ▼
+UPDATE users SET entry_id_2025 = $entry_id WHERE uid = $auth_uid
     │
     ▼
 Redirect to /dashboard
 ```
 
-**Data written:**
-- Firestore: `users/{userId}` → `fplTeamId`, `fplTeamName`
+**Tables written:**
+- `entries` - Cache entry data (FPL Records - retained for verification)
+- `users` - Link user to entry
 
 ---
 
 ### Tournament Creation
 
-<!-- TODO: Add sequence diagram -->
-
 ```
-User selects league and gameweek
+User selects league → clicks "Create Tournament"
     │
     ▼
-Cloud Function: Fetch league standings from FPL API
+Cloud Function: Fetch /api/leagues-classic/{id}/standings/
     │
     ▼
-Generate bracket (seeding, byes, matches)
+Cache league data:
+  INSERT INTO leagues (league_id, season, name, raw_json)
     │
     ▼
-Firestore: Create tournament document
+For each standing in results[]:
+  INSERT INTO entries (entry_id, ...) ON CONFLICT UPDATE
     │
     ▼
-Redirect to /tournament/:id
+Generate bracket structure:
+  1. INSERT INTO tournaments
+  2. INSERT INTO rounds (one per gameweek)
+  3. INSERT INTO participants (from standings)
+  4. INSERT INTO matches (with qualifies_to links)
+  5. INSERT INTO match_picks (initial round assignments)
+    │
+    ▼
+Return tournament URL
 ```
 
-**Data written:**
-- Firestore: `tournaments/{tournamentId}` document
+**Tables written:**
+- `leagues` - Cache league data (FPL Cache - can re-fetch)
+- `entries` - Cache all participant entries (FPL Records - retained)
+- `tournaments` - Tournament metadata
+- `rounds` - Round definitions
+- `participants` - Participant snapshots
+- `matches` - Match structure
+- `match_picks` - Initial matchups
 
 ---
 
-## Background Flows (DRAFT)
+## Background Flows
 
-### Score Update (Scheduled)
-
-<!-- TODO: Verify this matches Cloud Function implementation -->
+### Score Fetch & Round Resolution (Scheduled)
 
 ```
 Cloud Function triggers (every 2 hours)
     │
     ▼
-Query: Find active tournaments with current GW matches
+Query: events WHERE is_current = true → get current gameweek
     │
     ▼
-For each tournament:
+Query: rounds WHERE event = $current_gw AND status = 'active'
+    → JOIN tournaments WHERE status = 'active'
     │
-    ├─ Check if gameweek is complete (FPL API)
+    ▼
+Check FPL API: Is gameweek finished?
     │
-    ├─ If complete:
-    │   │
-    │   ├─ Fetch scores for all matches
-    │   │
-    │   ├─ Determine winners (handle tiebreaks)
-    │   │
-    │   ├─ Update match results in Firestore
-    │   │
-    │   ├─ If round complete, generate next round
-    │   │
-    │   └─ If tournament complete, set winner
+    ├─ If not finished: Exit (wait for next run)
     │
-    └─ If not complete: Skip
+    └─ If finished:
+        │
+        ▼
+    For each active round:
+        │
+        ▼
+    Query match_picks → get all entry_ids needing scores
+        │
+        ▼
+    Batch fetch from FPL API:
+      /api/entry/{entry_id}/event/{event}/picks/
+        │
+        ▼
+    INSERT INTO picks (entry_id, event, points, raw_json, is_final=true)
+      ON CONFLICT UPDATE
+        │
+        ▼
+    Resolve matches (SQL bulk operation):
+      - Compare points from picks table
+      - Set winner_entry_id (tiebreak by seed from participants)
+      - Update match status = 'complete'
+        │
+        ▼
+    Advance winners:
+      - INSERT INTO match_picks for next round matches
+      - Update next round status = 'active'
+        │
+        ▼
+    If final match complete:
+      - UPDATE tournaments SET status = 'completed', winner_entry_id
 ```
 
-**Data read:**
-- Firestore: `tournaments` (status = active)
-- FPL API: Bootstrap static (gameweek status)
-- FPL API: Team picks (scores)
+**Tables read:**
+- `events` - Current gameweek status
+- `rounds` - Active rounds
+- `tournaments` - Active tournaments
+- `match_picks` - Entries needing scores
+- `participants` - Seeds for tiebreaks
 
-**Data written:**
-- Firestore: `tournaments/{id}` → scores, winners, round progression
-
----
-
-## Caching Strategy (DRAFT)
-
-<!-- TODO: Document caching implementation -->
-
-| Data | Cache Location | TTL | Invalidation |
-|------|----------------|-----|--------------|
-| Bootstrap static (GW info) | <!-- TODO --> | <!-- TODO --> | <!-- TODO --> |
-| Completed GW scores | Firestore | Permanent | Never (final) |
-| Live GW scores | None | N/A | Always fresh |
-| League standings | None | N/A | Fetch at tournament creation |
+**Tables written:**
+- `picks` - Authoritative score records (FPL Records)
+- `matches` - Winners, status
+- `match_picks` - Next round assignments
+- `rounds` - Status updates
+- `tournaments` - Completion status
 
 ---
 
-## Data Freshness (DRAFT)
+## Caching Strategy
 
-<!-- TODO: Document freshness requirements -->
+| Data | Table | Type | TTL | Notes |
+|------|-------|------|-----|-------|
+| Gameweek info | `events` | Cache | 1 hour | Re-fetch from bootstrap-static |
+| League standings | `leagues` | Cache | At creation | Only needed for tournament setup |
+| Entry/team data | `entries` | Record | Permanent | Authoritative for disputes |
+| Gameweek scores | `picks` | Record | Permanent | Authoritative for results |
 
-| Data | Acceptable Staleness |
-|------|----------------------|
-| User profile | Real-time (Firestore sync) |
-| Tournament bracket | Real-time (Firestore sync) |
-| Completed scores | Permanent (cached in Firestore) |
-| Live scores | < 5 minutes during active GW |
-| League standings | Only need at tournament creation |
-| Current gameweek | < 1 hour |
+**Cache vs Records:**
+- **Cache tables** can be truncated and rebuilt from FPL API
+- **Record tables** must be retained - they're the source of truth for tournament results
 
 ---
 
-## Error Handling (DRAFT)
+## Data Freshness
 
-<!-- TODO: Document error recovery -->
+| Data | Source | Acceptable Staleness |
+|------|--------|----------------------|
+| User profile | `users` table | Real-time (Data Connect) |
+| Tournament bracket | `matches` table | Real-time (Data Connect) |
+| Completed scores | `picks` table | Permanent (final) |
+| Live scores | FPL API direct | < 5 minutes during active GW |
+| Current gameweek | `events` table | < 1 hour |
+| League standings | FPL API | Fresh at tournament creation only |
+
+---
+
+## Error Handling
 
 | Failure Point | Impact | Recovery |
 |---------------|--------|----------|
-| FPL API down | Can't fetch scores | Show cached, retry later |
-| Firestore write fails | Data loss | Retry with exponential backoff |
-| Cloud Function timeout | Incomplete processing | Next scheduled run catches up |
+| FPL API down | Can't fetch new scores | Use cached `picks`, retry later |
+| FPL API rate limit | Delayed score updates | Exponential backoff, batch requests |
+| Database write fails | Incomplete transaction | Retry with idempotent operations |
+| Cloud Function timeout | Partial round resolution | Next run picks up incomplete work |
+| Entry not found | Can't verify participant | Log error, skip entry, alert admin |
+
+---
+
+## Audit Trail
+
+The **FPL Records** layer (`entries`, `picks`) provides an audit trail:
+
+1. **Dispute resolution** - If a user claims wrong score, check `picks.raw_json`
+2. **API unavailability** - If FPL API goes down, we have authoritative records
+3. **Historical analysis** - Can replay any tournament from stored data
+
+```sql
+-- Verify a match result
+SELECT
+  mp.slot,
+  e.name as team_name,
+  p.points,
+  p.raw_json->'entry_history' as full_history
+FROM match_picks mp
+JOIN entries e ON e.entry_id = mp.entry_id
+JOIN matches m ON m.tournament_id = mp.tournament_id AND m.match_id = mp.match_id
+JOIN rounds r ON r.tournament_id = m.tournament_id AND r.round_number = m.round_number
+JOIN picks p ON p.entry_id = mp.entry_id AND p.event = r.event
+WHERE mp.tournament_id = $1 AND mp.match_id = $2;
+```
 
 ---
 
 ## Related
 
-- [data-dictionary.md](./data-dictionary.md) - Entity definitions
+- [data-dictionary.md](./data-dictionary.md) - Table definitions and schema
 - [../integrations/fpl-api.md](../integrations/fpl-api.md) - FPL API details
-- [../../product/specs/functional-spec.md](../../product/specs/functional-spec.md) - Business rules
+- [../../product/features/](../../product/features/CLAUDE.md) - Feature specifications
