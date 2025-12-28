@@ -7,6 +7,8 @@ import {
   generateSeedPairings,
   generateBracketStructure,
   BracketMatch,
+  assignParticipantsToMatches,
+  MatchAssignment,
 } from './bracketGenerator';
 
 describe('bracketGenerator', () => {
@@ -120,6 +122,38 @@ describe('bracketGenerator', () => {
       expect(matches.filter(m => m.roundNumber === 2)).toHaveLength(4);
       expect(matches.filter(m => m.roundNumber === 3)).toHaveLength(2);
       expect(matches.filter(m => m.roundNumber === 4)).toHaveLength(1);
+    });
+  });
+
+  describe('assignParticipantsToMatches', () => {
+    it('assigns 8 participants to 8-bracket with no byes', () => {
+      const assignments = assignParticipantsToMatches(8, 8);
+
+      // All matches have 2 players
+      expect(assignments.every(a => a.isBye === false)).toBe(true);
+      expect(assignments.filter(a => a.seed2 !== null)).toHaveLength(4);
+    });
+
+    it('assigns 6 participants to 8-bracket with 2 byes', () => {
+      const assignments = assignParticipantsToMatches(8, 6);
+
+      // Seeds 1 and 2 get byes
+      const byeMatches = assignments.filter(a => a.isBye);
+      expect(byeMatches).toHaveLength(2);
+
+      // Bye matches have only seed1 (top seed)
+      expect(byeMatches.every(a => a.seed2 === null)).toBe(true);
+      expect(byeMatches.map(a => a.seed1).sort((a,b) => a-b)).toEqual([1, 2]);
+    });
+
+    it('assigns 12 participants to 16-bracket with 4 byes', () => {
+      const assignments = assignParticipantsToMatches(16, 12);
+
+      const byeMatches = assignments.filter(a => a.isBye);
+      expect(byeMatches).toHaveLength(4);
+
+      // Top 4 seeds get byes
+      expect(byeMatches.map(a => a.seed1).sort((a,b) => a-b)).toEqual([1, 2, 3, 4]);
     });
   });
 });

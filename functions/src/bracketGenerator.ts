@@ -124,3 +124,33 @@ export function generateBracketStructure(bracketSize: number): BracketMatch[] {
 
   return matches;
 }
+
+export interface MatchAssignment {
+  position: number;
+  seed1: number;
+  seed2: number | null;  // null if bye
+  isBye: boolean;
+}
+
+/**
+ * Assign participants to round 1 matches, handling byes.
+ * Top seeds get byes when participant count < bracket size.
+ */
+export function assignParticipantsToMatches(
+  bracketSize: number,
+  participantCount: number
+): MatchAssignment[] {
+  const pairings = generateSeedPairings(bracketSize);
+
+  return pairings.map(pairing => {
+    // A bye occurs when seed2 would be > participantCount
+    const isBye = pairing.seed2 > participantCount;
+
+    return {
+      position: pairing.position,
+      seed1: pairing.seed1,
+      seed2: isBye ? null : pairing.seed2,
+      isBye,
+    };
+  });
+}
