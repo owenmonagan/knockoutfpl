@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchFPLBootstrapData, fetchFPLTeamInfo, fetchFPLGameweekScore } from './fplApi';
+import { fetchFPLBootstrapData, fetchFPLTeamInfo, fetchFPLGameweekScore, fetchFPLLeagueStandings } from './fplApi';
 
 describe('FPL API', () => {
   beforeEach(() => {
@@ -66,6 +66,33 @@ describe('FPL API', () => {
 
       expect(mockFetch).toHaveBeenCalledWith('https://fantasy.premierleague.com/api/entry/158256/event/7/picks/');
       expect(result.entry_history.points).toBe(78);
+    });
+  });
+
+  describe('fetchFPLLeagueStandings', () => {
+    it('fetches league standings from FPL API', async () => {
+      const mockResponse = {
+        league: { id: 12345, name: 'Test League' },
+        standings: {
+          results: [
+            { entry: 100, entry_name: 'Team A', player_name: 'Player A', rank: 1, total: 500 },
+            { entry: 101, entry_name: 'Team B', player_name: 'Player B', rank: 2, total: 450 },
+          ]
+        }
+      };
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      });
+
+      const result = await fetchFPLLeagueStandings(12345);
+
+      expect(fetch).toHaveBeenCalledWith(
+        'https://fantasy.premierleague.com/api/leagues-classic/12345/standings/'
+      );
+      expect(result.league.name).toBe('Test League');
+      expect(result.standings.results).toHaveLength(2);
     });
   });
 });

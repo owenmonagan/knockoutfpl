@@ -17,3 +17,12 @@ export async function fetchFPLGameweekScore(teamId: number, gameweek: number): P
   const data = await response.json();
   return data;
 }
+
+export async function fetchFPLLeagueStandings(leagueId: number): Promise<any> {
+  const response = await fetch(`${FPL_API_BASE}/leagues-classic/${leagueId}/standings/`);
+  if (!response.ok) {
+    throw new Error(`FPL API error: ${response.status}`);
+  }
+  const data = await response.json();
+  return data;
+}
