@@ -220,6 +220,27 @@ export function buildTournamentRecords(
 }
 
 /**
+ * Write tournament records to database
+ * TODO: Replace with actual Data Connect SDK calls
+ */
+async function writeTournamentToDatabase(records: ReturnType<typeof buildTournamentRecords>): Promise<void> {
+  // Placeholder - will be replaced with Data Connect mutations
+  console.log('Writing tournament:', records.tournament);
+  console.log('Writing rounds:', records.rounds.length);
+  console.log('Writing participants:', records.participants.length);
+  console.log('Writing matches:', records.matchRecords.length);
+  console.log('Writing match picks:', records.matchPicks.length);
+
+  // TODO: Call Data Connect mutations:
+  // 1. CreateTournament
+  // 2. CreateRound (for each round)
+  // 3. UpsertEntry (for each participant's entry)
+  // 4. CreateParticipant (for each participant)
+  // 5. CreateMatch (for each match)
+  // 6. CreateMatchPick (for each match pick)
+}
+
+/**
  * Cloud Function to create a knockout tournament
  */
 export const createTournament = onCall(async (request: CallableRequest<CreateTournamentRequest>) => {
@@ -253,26 +274,26 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
   const matches = generateBracketStructure(bracketSize);
   const matchAssignments = assignParticipantsToMatches(bracketSize, participantCount);
 
-  // 7. TODO: Write to database via Data Connect
-  // For now, return calculated values
+  // 7. Build all records
   const tournamentId = crypto.randomUUID();
-
-  console.log('Tournament created:', {
+  const records = buildTournamentRecords(
     tournamentId,
-    fplLeagueId,
-    creatorUid: uid,
-    participantCount,
+    uid,
+    standings,
     bracketSize,
     totalRounds,
     startEvent,
-    matchCount: matches.length,
-    matchAssignments: matchAssignments.length,
-  });
+    matches,
+    matchAssignments
+  );
+
+  // 8. Write to database
+  await writeTournamentToDatabase(records);
 
   return {
     tournamentId,
-    participantCount,
-    totalRounds,
+    participantCount: records.tournament.participantCount,
+    totalRounds: records.tournament.totalRounds,
     startEvent,
   };
 });
