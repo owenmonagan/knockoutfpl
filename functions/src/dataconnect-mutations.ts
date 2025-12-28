@@ -3,6 +3,9 @@
 
 import { dataConnectAdmin, AuthClaims } from './dataconnect-admin';
 
+// Re-export AuthClaims for convenience
+export { AuthClaims };
+
 // GraphQL mutations matching dataconnect/connector/mutations.gql
 const CREATE_TOURNAMENT_MUTATION = `
   mutation CreateTournament(

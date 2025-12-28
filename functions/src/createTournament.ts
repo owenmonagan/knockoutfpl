@@ -8,15 +8,15 @@ import {
   BracketMatch,
   MatchAssignment,
 } from './bracketGenerator';
-import { dataConnect } from './dataconnect';
 import {
-  createTournament as dcCreateTournament,
-  createRound,
-  createParticipant,
-  createMatch,
-  createMatchPick,
-  updateMatch,
-} from './generated/dataconnect';
+  createTournamentAdmin,
+  createRoundAdmin,
+  createParticipantAdmin,
+  createMatchAdmin,
+  updateMatchAdmin,
+  createMatchPickAdmin,
+  AuthClaims,
+} from './dataconnect-mutations';
 
 // Database entity types (matching Data Connect schema)
 interface TournamentRecord {
@@ -229,81 +229,100 @@ export function buildTournamentRecords(
 }
 
 /**
- * Write tournament records to database using Data Connect
+ * Write tournament records to database using Data Connect Admin SDK with impersonation
  */
 async function writeTournamentToDatabase(
   tournamentId: string,
-  records: ReturnType<typeof buildTournamentRecords>
+  records: ReturnType<typeof buildTournamentRecords>,
+  authClaims: AuthClaims
 ): Promise<void> {
   // 1. Create tournament
-  await dcCreateTournament(dataConnect, {
-    fplLeagueId: records.tournament.fplLeagueId,
-    fplLeagueName: records.tournament.fplLeagueName,
-    creatorUid: records.tournament.creatorUid,
-    participantCount: records.tournament.participantCount,
-    totalRounds: records.tournament.totalRounds,
-    startEvent: records.tournament.startEvent,
-    seedingMethod: records.tournament.seedingMethod,
-  });
+  await createTournamentAdmin(
+    {
+      fplLeagueId: records.tournament.fplLeagueId,
+      fplLeagueName: records.tournament.fplLeagueName,
+      creatorUid: records.tournament.creatorUid,
+      participantCount: records.tournament.participantCount,
+      totalRounds: records.tournament.totalRounds,
+      startEvent: records.tournament.startEvent,
+      seedingMethod: records.tournament.seedingMethod,
+    },
+    authClaims
+  );
 
   // 2. Create rounds
   for (const round of records.rounds) {
-    await createRound(dataConnect, {
-      tournamentId,
-      roundNumber: round.roundNumber,
-      event: round.event,
-      status: round.status,
-    });
+    await createRoundAdmin(
+      {
+        tournamentId,
+        roundNumber: round.roundNumber,
+        event: round.event,
+        status: round.status,
+      },
+      authClaims
+    );
   }
 
   // 3. Create participants
   for (const participant of records.participants) {
-    await createParticipant(dataConnect, {
-      tournamentId,
-      entryId: participant.entryId,
-      teamName: participant.teamName,
-      managerName: participant.managerName,
-      seed: participant.seed,
-      leagueRank: participant.leagueRank,
-      leaguePoints: participant.leaguePoints,
-      rawJson: participant.rawJson,
-    });
+    await createParticipantAdmin(
+      {
+        tournamentId,
+        entryId: participant.entryId,
+        teamName: participant.teamName,
+        managerName: participant.managerName,
+        seed: participant.seed,
+        leagueRank: participant.leagueRank,
+        leaguePoints: participant.leaguePoints,
+        rawJson: participant.rawJson,
+      },
+      authClaims
+    );
   }
 
   // 4. Create matches
   for (const match of records.matchRecords) {
-    await createMatch(dataConnect, {
-      tournamentId,
-      matchId: match.matchId,
-      roundNumber: match.roundNumber,
-      positionInRound: match.positionInRound,
-      qualifiesToMatchId: match.qualifiesToMatchId,
-      isBye: match.isBye,
-    });
-
-    // Update bye matches with status and winner
-    if (match.isBye && match.winnerEntryId) {
-      await updateMatch(dataConnect, {
+    await createMatchAdmin(
+      {
         tournamentId,
         matchId: match.matchId,
         roundNumber: match.roundNumber,
         positionInRound: match.positionInRound,
         qualifiesToMatchId: match.qualifiesToMatchId,
-        isBye: true,
-        status: 'complete',
-        winnerEntryId: match.winnerEntryId,
-      });
+        isBye: match.isBye,
+      },
+      authClaims
+    );
+
+    // Update bye matches with status and winner
+    if (match.isBye && match.winnerEntryId) {
+      await updateMatchAdmin(
+        {
+          tournamentId,
+          matchId: match.matchId,
+          roundNumber: match.roundNumber,
+          positionInRound: match.positionInRound,
+          qualifiesToMatchId: match.qualifiesToMatchId,
+          isBye: true,
+          status: 'complete',
+          winnerEntryId: match.winnerEntryId,
+        },
+        authClaims
+      );
     }
   }
 
   // 5. Create match picks
   for (const pick of records.matchPicks) {
-    await createMatchPick(dataConnect, {
-      tournamentId,
-      matchId: pick.matchId,
-      entryId: pick.entryId,
-      slot: pick.slot,
-    });
+    await createMatchPickAdmin(
+      {
+        tournamentId,
+        matchId: pick.matchId,
+        entryId: pick.entryId,
+        slot: pick.slot,
+      },
+      authClaims
+    );
   }
 }
 
@@ -316,6 +335,13 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
     throw new HttpsError('unauthenticated', 'Must be logged in to create a tournament');
   }
   const uid = request.auth.uid;
+
+  // Extract auth claims for impersonation
+  const authClaims: AuthClaims = {
+    sub: uid,
+    email: request.auth.token.email,
+    email_verified: request.auth.token.email_verified,
+  };
 
   // 2. Validate request
   validateTournamentRequest(request.data);
@@ -354,8 +380,8 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
     matchAssignments
   );
 
-  // 8. Write to database
-  await writeTournamentToDatabase(tournamentId, records);
+  // 8. Write to database with impersonation
+  await writeTournamentToDatabase(tournamentId, records, authClaims);
 
   return {
     tournamentId,
