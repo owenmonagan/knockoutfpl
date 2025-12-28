@@ -1,44 +1,49 @@
 # System Architecture
 
-> **Status:** DRAFT - needs diagrams and implementation verification
 > **Last Updated:** December 2025
 
 ---
 
-## System Diagram (DRAFT)
-
-<!-- TODO: Add proper diagram -->
+## System Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        Client (Browser)                      │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │              React + Vite + TypeScript               │   │
-│  │                    shadcn/ui + Tailwind             │   │
-│  └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        Client (Browser)                          │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │              React + Vite + TypeScript                   │    │
+│  │                  shadcn/ui + Tailwind                    │    │
+│  └─────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                         Firebase                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │  Auth        │  │  Firestore   │  │  Cloud Functions │  │
-│  │  (users)     │  │  (data)      │  │  (FPL proxy)     │  │
-│  └──────────────┘  └──────────────┘  └──────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                         Firebase                                 │
+│                                                                  │
+│  ┌──────────────┐  ┌───────────────────┐  ┌──────────────────┐ │
+│  │     Auth     │  │   Data Connect    │  │ Cloud Functions  │ │
+│  │   (Google)   │  │    (GraphQL)      │  │  (FPL proxy,     │ │
+│  │              │  │                   │  │   scheduled)     │ │
+│  └──────────────┘  └─────────┬─────────┘  └──────────────────┘ │
+│                              │                                   │
+│                              ▼                                   │
+│                    ┌───────────────────┐                        │
+│                    │  Cloud SQL        │                        │
+│                    │  (PostgreSQL)     │                        │
+│                    │                   │                        │
+│                    │  10 tables        │                        │
+│                    └───────────────────┘                        │
+└─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      FPL API (External)                      │
-│            fantasy.premierleague.com/api/                   │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                      FPL API (External)                          │
+│              fantasy.premierleague.com/api/                      │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Frontend (DRAFT)
-
-<!-- TODO: Verify this matches current implementation -->
+## Frontend
 
 ### Stack
 
@@ -50,6 +55,7 @@
 | shadcn/ui | Component library |
 | Tailwind CSS | Styling |
 | React Router | Client-side routing |
+| Firebase Data Connect | Type-safe GraphQL client |
 
 ### Key Directories
 
@@ -66,8 +72,6 @@ src/
 
 ### Routing
 
-<!-- TODO: Verify routes match router.tsx -->
-
 | Route | Page | Auth Required |
 |-------|------|---------------|
 | `/` | Landing | No |
@@ -76,105 +80,126 @@ src/
 | `/dashboard` | Dashboard | Yes |
 | `/connect` | FPL Connection | Yes |
 | `/leagues` | Mini-Leagues List | Yes |
-| `/league/:id` | League Detail | Yes |
-| `/tournament/:id` | Tournament Bracket | Yes |
+| `/league/:fpl_league_id` | Tournament Bracket | No (public) |
+| `/profile` | User Profile | Yes |
 
 ---
 
-## Backend - Firebase (DRAFT)
+## Backend
 
-<!-- TODO: Verify Firebase configuration -->
+### Services
 
-### Services Used
+| Service | Purpose |
+|---------|---------|
+| Firebase Auth | Google authentication |
+| Cloud SQL (PostgreSQL) | Relational database |
+| Firebase Data Connect | GraphQL API layer |
+| Cloud Functions | FPL API proxy, scheduled jobs |
+| Firebase Hosting | Static site hosting |
 
-| Service | Purpose | Free Tier |
-|---------|---------|-----------|
-| Authentication | Email/password auth | Unlimited |
-| Firestore | NoSQL database | 50K reads/day, 20K writes/day |
-| Cloud Functions | FPL API proxy, scheduled tasks | 2M invocations/month |
-| Hosting | Static site hosting | 10GB storage, 360MB/day bandwidth |
+### Database
 
-### Firebase Auth
+**PostgreSQL via Firebase Data Connect**
 
-- Email/password authentication
-- Session persistence
-- Auth state listener in React context
+10 tables across 4 layers:
 
-### Firestore
+| Layer | Tables | Purpose |
+|-------|--------|---------|
+| FPL Cache (2) | `events`, `leagues` | Re-fetchable from FPL API |
+| FPL Records (2) | `entries`, `picks` | Authoritative for result verification |
+| User (1) | `users` | Firebase Auth accounts |
+| Tournament (5) | `tournaments`, `rounds`, `participants`, `matches`, `match_picks` | Tournament structure |
 
-- Collections: `users`, `tournaments`
-- See [data/data-dictionary.md](./data/data-dictionary.md) for schema
+See [data/data-dictionary.md](./data/data-dictionary.md) for full schema.
+
+### Data Connect (GraphQL)
+
+Type-safe GraphQL layer between frontend and PostgreSQL:
+
+- Auto-generated TypeScript types from schema
+- Real-time subscriptions (future)
+- Built-in auth integration with Firebase Auth
 
 ### Cloud Functions
-
-<!-- TODO: Verify function list -->
 
 | Function | Trigger | Purpose |
 |----------|---------|---------|
 | `fplProxy` | HTTP | Proxy FPL API calls (CORS bypass) |
-| `processRounds` | Scheduled | Update scores, advance brackets |
+| `syncGameweek` | Scheduled (hourly) | Update `events` table with current GW |
+| `resolveRounds` | Scheduled (2 hours) | Fetch scores, determine winners, advance brackets |
 
 ---
 
-## External Services (DRAFT)
+## External Services
 
 ### FPL API
 
-- Unofficial public API
+- Unofficial public API at `fantasy.premierleague.com/api/`
 - No authentication required
 - CORS blocked → must proxy via Cloud Functions
-- See [integrations/fpl-api.md](./integrations/fpl-api.md) for details
+- See [integrations/fpl-api.md](./integrations/fpl-api.md) for endpoints
 
 ---
 
-## Key Architectural Decisions (DRAFT)
+## Key Architectural Decisions
 
-<!-- TODO: Document rationale for each -->
+### Why PostgreSQL over Firestore?
 
-### Why Firebase?
+- **Relational power** - JOINs, transactions, bulk operations
+- **Scale** - Handles 1M+ participants per tournament
+- **SQL familiarity** - Standard queries, easy to optimize
+- **Data Connect** - Type-safe GraphQL with Firebase Auth integration
 
-- [x] Free tier sufficient for MVP
-- [x] Integrated auth + database + hosting
-- [x] Real-time capabilities (future)
-- [x] Serverless (no infrastructure management)
-- [ ] Vendor lock-in risk accepted
+### Why Firebase Data Connect?
 
-### Why no dedicated backend?
+- **Type safety** - Auto-generated TypeScript from GraphQL schema
+- **Auth integration** - Row-level security with Firebase Auth
+- **Managed** - No GraphQL server to maintain
+- **Real-time ready** - Subscriptions for future live updates
 
-- [x] Cloud Functions sufficient for API proxying
-- [x] Firestore handles data persistence
-- [x] Reduces complexity
-- [ ] May need to revisit for complex features
+### Why Cloud Functions for FPL API?
 
-### Why Vite over Create React App?
+- **CORS bypass** - FPL API blocks browser requests
+- **Caching** - Can cache responses to reduce API load
+- **Rate limiting** - Control request frequency
+- **Error handling** - Consistent error responses
 
-- [x] Faster development builds
-- [x] Better DX
-- [x] Modern ESM-first approach
+### Why Google Auth only?
 
-### Why shadcn/ui?
-
-- [x] Accessible by default
-- [x] Copy-paste components (no npm dependency)
-- [x] Tailwind-based (consistent styling)
-- [x] Customizable
+- **Simplicity** - One auth flow to maintain
+- **Trust** - Users familiar with Google sign-in
+- **No password management** - Reduces security surface
 
 ---
 
-## Environments (DRAFT)
+## Data Flow Summary
 
-<!-- TODO: Document environment setup -->
+```
+User Action          → Data Flow
+─────────────────────────────────────────────────────────
+Sign in              → Firebase Auth → users table
+Connect FPL          → Cloud Function → FPL API → entries table
+View leagues         → entries.raw_json (cached leagues)
+Create tournament    → Cloud Function → FPL API → 7 tables written
+View bracket         → Data Connect → matches, participants, picks
+Score resolution     → Scheduled Function → FPL API → picks → matches
+```
 
-| Environment | URL | Firebase Project |
-|-------------|-----|------------------|
-| Local | localhost:5173 | Emulators |
-| Development | <!-- TODO --> | knockoutfpl-dev |
-| Production | <!-- TODO --> | knockoutfpl |
+See [data/data-flow.md](./data/data-flow.md) for detailed flows.
+
+---
+
+## Environments
+
+| Environment | URL | Database |
+|-------------|-----|----------|
+| Local | localhost:5173 | Local PostgreSQL or emulator |
+| Production | knockoutfpl.com | Cloud SQL |
 
 ---
 
 ## Related
 
-- [data/](./data/CLAUDE.md) - Data structures
+- [data/](./data/CLAUDE.md) - Data structures and flow
 - [integrations/](./integrations/CLAUDE.md) - External APIs
-- [../product/specs/functional-spec.md](../product/specs/functional-spec.md) - How the system behaves
+- [../product/](../product/CLAUDE.md) - Product specifications
