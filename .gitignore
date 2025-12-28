@@ -45,6 +45,7 @@ functions/lib/
 functions/.eslintrc.js
 *-debug.log
 *.log
+dataconnect-data/
 
 # Environment variables
 .env
