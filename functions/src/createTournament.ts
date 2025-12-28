@@ -9,6 +9,8 @@ import {
   MatchAssignment,
 } from './bracketGenerator';
 import {
+  upsertEntryAdmin,
+  upsertPickAdmin,
   createTournamentAdmin,
   createRoundAdmin,
   createParticipantAdmin,
@@ -19,6 +21,16 @@ import {
 } from './dataconnect-mutations';
 
 // Database entity types (matching Data Connect schema)
+interface EntryRecord {
+  entryId: number;
+  season: string;
+  name: string;
+  playerFirstName?: string;
+  playerLastName?: string;
+  summaryOverallPoints?: number;
+  rawJson: string;
+}
+
 interface TournamentRecord {
   fplLeagueId: number;
   fplLeagueName: string;
@@ -131,6 +143,7 @@ export function buildTournamentRecords(
   matches: BracketMatch[],
   matchAssignments: MatchAssignment[]
 ): {
+  entries: EntryRecord[];
   tournament: TournamentRecord;
   rounds: RoundRecord[];
   participants: ParticipantRecord[];
@@ -139,6 +152,28 @@ export function buildTournamentRecords(
 } {
   const leagueData = standings.league;
   const standingsResults = standings.standings.results;
+
+  // Get current season (e.g., "2024-25")
+  const currentYear = new Date().getFullYear();
+  const season = `${currentYear}-${(currentYear + 1).toString().slice(-2)}`;
+
+  // Entries (FPL team data from league standings)
+  const entries: EntryRecord[] = standingsResults.map((p: any) => {
+    // Parse player name into first/last
+    const nameParts = (p.player_name || '').split(' ');
+    const playerFirstName = nameParts[0] || '';
+    const playerLastName = nameParts.slice(1).join(' ') || '';
+
+    return {
+      entryId: p.entry,
+      season,
+      name: p.entry_name,
+      playerFirstName,
+      playerLastName,
+      summaryOverallPoints: p.total,
+      rawJson: JSON.stringify(p),
+    };
+  });
 
   // Tournament
   const tournament: TournamentRecord = {
@@ -225,7 +260,7 @@ export function buildTournamentRecords(
     }
   }
 
-  return { tournament, rounds, participants, matchRecords, matchPicks };
+  return { entries, tournament, rounds, participants, matchRecords, matchPicks };
 }
 
 /**
@@ -236,7 +271,50 @@ async function writeTournamentToDatabase(
   records: ReturnType<typeof buildTournamentRecords>,
   authClaims: AuthClaims
 ): Promise<void> {
-  // 1. Create tournament
+  console.log('[createTournament] Writing to database:', {
+    tournamentId,
+    entryCount: records.entries.length,
+    roundCount: records.rounds.length,
+    participantCount: records.participants.length,
+    matchCount: records.matchRecords.length,
+    matchPickCount: records.matchPicks.length,
+  });
+
+  // 1. Create entries first (participants have FK to entries)
+  console.log(`[createTournament] Creating ${records.entries.length} entries...`);
+  for (const entry of records.entries) {
+    await upsertEntryAdmin(
+      {
+        entryId: entry.entryId,
+        season: entry.season,
+        name: entry.name,
+        playerFirstName: entry.playerFirstName,
+        playerLastName: entry.playerLastName,
+        summaryOverallPoints: entry.summaryOverallPoints,
+        rawJson: entry.rawJson,
+      },
+      authClaims
+    );
+  }
+
+  // 2. Create placeholder picks for tournament gameweeks
+  console.log(`[createTournament] Creating placeholder picks for ${records.entries.length} entries x ${records.rounds.length} rounds...`);
+  for (const entry of records.entries) {
+    for (const round of records.rounds) {
+      await upsertPickAdmin(
+        {
+          entryId: entry.entryId,
+          event: round.event,
+          points: 0,
+          rawJson: '{}',
+          isFinal: false,
+        },
+        authClaims
+      );
+    }
+  }
+
+  // 3. Create tournament (must exist before rounds/participants reference it)
   await createTournamentAdmin(
     {
       id: tournamentId,
@@ -251,7 +329,7 @@ async function writeTournamentToDatabase(
     authClaims
   );
 
-  // 2. Create rounds
+  // 4. Create rounds
   for (const round of records.rounds) {
     await createRoundAdmin(
       {
@@ -264,7 +342,7 @@ async function writeTournamentToDatabase(
     );
   }
 
-  // 3. Create participants
+  // 5. Create participants
   for (const participant of records.participants) {
     await createParticipantAdmin(
       {
@@ -281,8 +359,10 @@ async function writeTournamentToDatabase(
     );
   }
 
-  // 4. Create matches
+  // 6. Create matches
+  console.log(`[createTournament] Creating ${records.matchRecords.length} matches...`);
   for (const match of records.matchRecords) {
+    console.log(`[createTournament] Creating match ${match.matchId} (round ${match.roundNumber}, pos ${match.positionInRound})`);
     await createMatchAdmin(
       {
         tournamentId,
@@ -313,8 +393,10 @@ async function writeTournamentToDatabase(
     }
   }
 
-  // 5. Create match picks
+  // 7. Create match picks
+  console.log(`[createTournament] Creating ${records.matchPicks.length} match picks...`);
   for (const pick of records.matchPicks) {
+    console.log(`[createTournament] Creating pick for match ${pick.matchId} slot ${pick.slot} entryId ${pick.entryId}`);
     await createMatchPickAdmin(
       {
         tournamentId,
