@@ -11,14 +11,18 @@ import type { Participant } from '../../types/tournament';
 
 interface ParticipantsTableProps {
   participants: Participant[];
+  seedingGameweek: number;
 }
 
-export function ParticipantsTable({ participants }: ParticipantsTableProps) {
+export function ParticipantsTable({ participants, seedingGameweek }: ParticipantsTableProps) {
   const sortedParticipants = [...participants].sort((a, b) => a.seed - b.seed);
 
   return (
-    <div className="mt-6">
-      <h3 className="text-lg font-semibold mb-3">Participants</h3>
+    <div>
+      <h3 className="text-lg font-semibold mb-1">Participants</h3>
+      <p className="text-sm text-muted-foreground mb-3">
+        Initial seeding based on GW{seedingGameweek} league standings
+      </p>
       <Table>
         <TableHeader>
           <TableRow>

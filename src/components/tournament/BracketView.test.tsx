@@ -71,10 +71,11 @@ describe('BracketView', () => {
     expect(screen.getAllByText('Team D')).toHaveLength(2);
   });
 
-  it('renders participants table with seeds', () => {
+  it('renders participants table with seeds and seeding description', () => {
     render(<BracketView tournament={mockTournament} />);
 
     expect(screen.getByText('Participants')).toBeInTheDocument();
+    expect(screen.getByText('Initial seeding based on GW19 league standings')).toBeInTheDocument();
     expect(screen.getByText('Manager A')).toBeInTheDocument();
     expect(screen.getByText('Manager B')).toBeInTheDocument();
   });

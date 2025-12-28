@@ -11,33 +11,43 @@ interface BracketViewProps {
 
 export function BracketView({ tournament }: BracketViewProps) {
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>{tournament.fplLeagueName}</CardTitle>
-          <Badge variant={tournament.status === 'completed' ? 'secondary' : 'default'}>
-            {tournament.status === 'completed' ? 'Completed' : 'Active'}
-          </Badge>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Starting Gameweek {tournament.startGameweek} • {tournament.totalRounds} rounds
-        </p>
-      </CardHeader>
-      <CardContent>
-        {tournament.rounds.length > 0 ? (
-          <>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>{tournament.fplLeagueName}</CardTitle>
+            <Badge variant={tournament.status === 'completed' ? 'secondary' : 'default'}>
+              {tournament.status === 'completed' ? 'Completed' : 'Active'}
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Starting Gameweek {tournament.startGameweek} • {tournament.totalRounds} rounds
+          </p>
+        </CardHeader>
+        <CardContent>
+          {tournament.rounds.length > 0 ? (
             <BracketLayout
               rounds={tournament.rounds}
               participants={tournament.participants}
             />
-            <ParticipantsTable participants={tournament.participants} />
-          </>
-        ) : (
-          <p className="text-muted-foreground text-center py-8">
-            Bracket will appear when the tournament starts.
-          </p>
-        )}
-      </CardContent>
-    </Card>
+          ) : (
+            <p className="text-muted-foreground text-center py-8">
+              Bracket will appear when the tournament starts.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {tournament.rounds.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <ParticipantsTable
+              participants={tournament.participants}
+              seedingGameweek={tournament.startGameweek - 1}
+            />
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
