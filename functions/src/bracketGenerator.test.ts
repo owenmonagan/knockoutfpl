@@ -5,6 +5,8 @@ import {
   calculateByeCount,
   getMatchCountForRound,
   generateSeedPairings,
+  generateBracketStructure,
+  BracketMatch,
 } from './bracketGenerator';
 
 describe('bracketGenerator', () => {
@@ -76,6 +78,48 @@ describe('bracketGenerator', () => {
         { position: 1, seed1: 1, seed2: 4 },
         { position: 2, seed1: 2, seed2: 3 },
       ]);
+    });
+  });
+
+  describe('generateBracketStructure', () => {
+    it('generates all matches with correct qualifies_to links for 8 participants', () => {
+      const matches = generateBracketStructure(8);
+
+      // 8 participants = 7 matches total (4 + 2 + 1)
+      expect(matches).toHaveLength(7);
+
+      // Round 1: matches 1-4
+      expect(matches.filter(m => m.roundNumber === 1)).toHaveLength(4);
+      // Round 2: matches 5-6
+      expect(matches.filter(m => m.roundNumber === 2)).toHaveLength(2);
+      // Round 3 (final): match 7
+      expect(matches.filter(m => m.roundNumber === 3)).toHaveLength(1);
+
+      // Check qualifies_to links
+      // Match 1 (R1, pos 1) -> Match 5 (R2, pos 1)
+      expect(matches[0].qualifiesToMatchId).toBe(5);
+      // Match 2 (R1, pos 2) -> Match 5 (R2, pos 1)
+      expect(matches[1].qualifiesToMatchId).toBe(5);
+      // Match 3 (R1, pos 3) -> Match 6 (R2, pos 2)
+      expect(matches[2].qualifiesToMatchId).toBe(6);
+      // Match 4 (R1, pos 4) -> Match 6 (R2, pos 2)
+      expect(matches[3].qualifiesToMatchId).toBe(6);
+
+      // Final has no qualifies_to
+      expect(matches[6].qualifiesToMatchId).toBeNull();
+    });
+
+    it('generates correct structure for 16 participants', () => {
+      const matches = generateBracketStructure(16);
+
+      // 16 participants = 15 matches (8 + 4 + 2 + 1)
+      expect(matches).toHaveLength(15);
+
+      // Verify round distribution
+      expect(matches.filter(m => m.roundNumber === 1)).toHaveLength(8);
+      expect(matches.filter(m => m.roundNumber === 2)).toHaveLength(4);
+      expect(matches.filter(m => m.roundNumber === 3)).toHaveLength(2);
+      expect(matches.filter(m => m.roundNumber === 4)).toHaveLength(1);
     });
   });
 });

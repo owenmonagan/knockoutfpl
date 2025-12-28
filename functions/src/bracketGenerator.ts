@@ -78,3 +78,49 @@ function generateSeedOrder(bracketSize: number): number[] {
 
   return result;
 }
+
+export interface BracketMatch {
+  matchId: number;
+  roundNumber: number;
+  positionInRound: number;
+  qualifiesToMatchId: number | null;
+}
+
+/**
+ * Generate all matches for a bracket with qualifies_to links.
+ */
+export function generateBracketStructure(bracketSize: number): BracketMatch[] {
+  const totalRounds = calculateTotalRounds(bracketSize);
+  const matches: BracketMatch[] = [];
+  let matchId = 1;
+
+  // Track first match ID of each round for linking
+  const roundStartIds: number[] = [];
+
+  // Create matches for each round
+  for (let round = 1; round <= totalRounds; round++) {
+    roundStartIds[round] = matchId;
+    const matchCount = getMatchCountForRound(bracketSize, round);
+
+    for (let pos = 1; pos <= matchCount; pos++) {
+      matches.push({
+        matchId,
+        roundNumber: round,
+        positionInRound: pos,
+        qualifiesToMatchId: null, // Will be set after all matches created
+      });
+      matchId++;
+    }
+  }
+
+  // Set qualifies_to links
+  for (const match of matches) {
+    if (match.roundNumber < totalRounds) {
+      const nextRoundStart = roundStartIds[match.roundNumber + 1];
+      const nextPosition = Math.ceil(match.positionInRound / 2);
+      match.qualifiesToMatchId = nextRoundStart + nextPosition - 1;
+    }
+  }
+
+  return matches;
+}
