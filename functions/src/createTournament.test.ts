@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateTournamentRequest } from './createTournament';
+import { validateTournamentRequest, validateLeagueStandings } from './createTournament';
 
 describe('createTournament', () => {
   describe('validateTournamentRequest', () => {
@@ -13,6 +13,29 @@ describe('createTournament', () => {
 
     it('passes with valid fplLeagueId', () => {
       expect(() => validateTournamentRequest({ fplLeagueId: 12345 })).not.toThrow();
+    });
+  });
+
+  describe('validateLeagueStandings', () => {
+    it('throws if standings is null', () => {
+      expect(() => validateLeagueStandings(null)).toThrow('League not found');
+    });
+
+    it('throws if less than 4 participants', () => {
+      const standings = { standings: { results: [{}, {}, {}] } };
+      expect(() => validateLeagueStandings(standings)).toThrow('at least 4');
+    });
+
+    it('throws if more than 50 participants', () => {
+      const results = Array(51).fill({});
+      const standings = { standings: { results } };
+      expect(() => validateLeagueStandings(standings)).toThrow('maximum 50');
+    });
+
+    it('passes with valid participant count', () => {
+      const results = Array(20).fill({});
+      const standings = { standings: { results } };
+      expect(() => validateLeagueStandings(standings)).not.toThrow();
     });
   });
 });

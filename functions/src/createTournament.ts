@@ -29,3 +29,22 @@ export function validateTournamentRequest(data: any): asserts data is CreateTour
     throw new HttpsError('invalid-argument', 'fplLeagueId must be a number');
   }
 }
+
+/**
+ * Validate league standings data
+ */
+export function validateLeagueStandings(standings: any): void {
+  if (!standings || !standings.standings?.results) {
+    throw new HttpsError('not-found', 'League not found');
+  }
+
+  const count = standings.standings.results.length;
+
+  if (count < 4) {
+    throw new HttpsError('failed-precondition', 'League must have at least 4 participants');
+  }
+
+  if (count > 50) {
+    throw new HttpsError('failed-precondition', 'League exceeds maximum 50 participants');
+  }
+}
