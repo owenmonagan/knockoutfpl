@@ -2015,19 +2015,19 @@ input MatchPick_Data {
   """
   entryId_update: [Int_Update!]
   """
-  ✨ Generated from Field `MatchPick`.`entryEntryId` of type `Int!`
+  ✨ Generated from Field `MatchPick`.`entryEntryId` of type `Int`
   """
   entryEntryId: Int
   """
-  ✨ `_expr` server value variant of `entryEntryId` (✨ Generated from Field `MatchPick`.`entryEntryId` of type `Int!`)
+  ✨ `_expr` server value variant of `entryEntryId` (✨ Generated from Field `MatchPick`.`entryEntryId` of type `Int`)
   """
   entryEntryId_expr: Int_Expr
   """
-  ✨ `_update` server value variant of `entryEntryId` (✨ Generated from Field `MatchPick`.`entryEntryId` of type `Int!`)
+  ✨ `_update` server value variant of `entryEntryId` (✨ Generated from Field `MatchPick`.`entryEntryId` of type `Int`)
   """
   entryEntryId_update: [Int_Update!]
   """
-  ✨ Generated from Field `MatchPick`.`entry` of type `Entry!`
+  ✨ Generated from Field `MatchPick`.`entry` of type `Entry`
   """
   entry: Entry_Key
   """
@@ -2072,11 +2072,11 @@ input MatchPick_Filter {
   """
   entryId: Int_Filter
   """
-  ✨ Generated from Field `MatchPick`.`entryEntryId` of type `Int!`
+  ✨ Generated from Field `MatchPick`.`entryEntryId` of type `Int`
   """
   entryEntryId: Int_Filter
   """
-  ✨ Generated from Field `MatchPick`.`entry` of type `Entry!`
+  ✨ Generated from Field `MatchPick`.`entry` of type `Entry`
   """
   entry: Entry_Filter
   """
@@ -2265,11 +2265,11 @@ input MatchPick_Order {
   """
   entryId: OrderDirection
   """
-  ✨ Generated from Field `MatchPick`.`entryEntryId` of type `Int!`
+  ✨ Generated from Field `MatchPick`.`entryEntryId` of type `Int`
   """
   entryEntryId: OrderDirection
   """
-  ✨ Generated from Field `MatchPick`.`entry` of type `Entry!`
+  ✨ Generated from Field `MatchPick`.`entry` of type `Entry`
   """
   entry: Entry_Order
   """
@@ -2390,15 +2390,15 @@ input Participant_Data {
   """
   entryId_update: [Int_Update!]
   """
-  ✨ Generated from Field `Participant`.`entryEntryId` of type `Int!`
+  ✨ Generated from Field `Participant`.`entryEntryId` of type `Int`
   """
   entryEntryId: Int
   """
-  ✨ `_expr` server value variant of `entryEntryId` (✨ Generated from Field `Participant`.`entryEntryId` of type `Int!`)
+  ✨ `_expr` server value variant of `entryEntryId` (✨ Generated from Field `Participant`.`entryEntryId` of type `Int`)
   """
   entryEntryId_expr: Int_Expr
   """
-  ✨ `_update` server value variant of `entryEntryId` (✨ Generated from Field `Participant`.`entryEntryId` of type `Int!`)
+  ✨ `_update` server value variant of `entryEntryId` (✨ Generated from Field `Participant`.`entryEntryId` of type `Int`)
   """
   entryEntryId_update: [Int_Update!]
   """
@@ -2410,7 +2410,7 @@ input Participant_Data {
   """
   userUid_expr: String_Expr
   """
-  ✨ Generated from Field `Participant`.`entry` of type `Entry!`
+  ✨ Generated from Field `Participant`.`entry` of type `Entry`
   """
   entry: Entry_Key
   """
@@ -2535,7 +2535,7 @@ input Participant_Filter {
   """
   entryId: Int_Filter
   """
-  ✨ Generated from Field `Participant`.`entryEntryId` of type `Int!`
+  ✨ Generated from Field `Participant`.`entryEntryId` of type `Int`
   """
   entryEntryId: Int_Filter
   """
@@ -2543,7 +2543,7 @@ input Participant_Filter {
   """
   userUid: String_Filter
   """
-  ✨ Generated from Field `Participant`.`entry` of type `Entry!`
+  ✨ Generated from Field `Participant`.`entry` of type `Entry`
   """
   entry: Entry_Filter
   """
@@ -2824,7 +2824,7 @@ input Participant_Order {
   """
   entryId: OrderDirection
   """
-  ✨ Generated from Field `Participant`.`entryEntryId` of type `Int!`
+  ✨ Generated from Field `Participant`.`entryEntryId` of type `Int`
   """
   entryEntryId: OrderDirection
   """
@@ -2832,7 +2832,7 @@ input Participant_Order {
   """
   userUid: OrderDirection
   """
-  ✨ Generated from Field `Participant`.`entry` of type `Entry!`
+  ✨ Generated from Field `Participant`.`entry` of type `Entry`
   """
   entry: Entry_Order
   """

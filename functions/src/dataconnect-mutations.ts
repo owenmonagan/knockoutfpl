@@ -1,14 +1,15 @@
 // functions/src/dataconnect-mutations.ts
-// Admin SDK mutations with impersonation support
+// Admin SDK mutations - execute as admin (no impersonation for internal mutations)
 
-import { dataConnectAdmin, AuthClaims } from './dataconnect-admin';
+import { dataConnectAdmin } from './dataconnect-admin';
 
-// Re-export AuthClaims for convenience
-export { AuthClaims };
+// AuthClaims type for backwards compatibility (not used for internal mutations)
+export type AuthClaims = { [key: string]: unknown };
 
 // GraphQL mutations matching dataconnect/connector/mutations.gql
 const CREATE_TOURNAMENT_MUTATION = `
   mutation CreateTournament(
+    $id: UUID!
     $fplLeagueId: Int!
     $fplLeagueName: String!
     $creatorUid: String!
@@ -19,6 +20,7 @@ const CREATE_TOURNAMENT_MUTATION = `
   ) {
     tournament_insert(
       data: {
+        id: $id
         fplLeagueId: $fplLeagueId
         fplLeagueName: $fplLeagueName
         creatorUid: $creatorUid
@@ -70,7 +72,6 @@ const CREATE_PARTICIPANT_MUTATION = `
         leagueRank: $leagueRank
         leaguePoints: $leaguePoints
         rawJson: $rawJson
-        entryEntryId: $entryId
       }
     )
   }
@@ -137,7 +138,6 @@ const CREATE_MATCH_PICK_MUTATION = `
         matchId: $matchId
         entryId: $entryId
         slot: $slot
-        entryEntryId: $entryId
       }
     )
   }
@@ -145,6 +145,7 @@ const CREATE_MATCH_PICK_MUTATION = `
 
 // Type definitions for mutation inputs
 export interface CreateTournamentInput {
+  id: string;
   fplLeagueId: number;
   fplLeagueName: string;
   creatorUid: string;
@@ -193,81 +194,64 @@ export interface CreateMatchPickInput {
   slot: number;
 }
 
-// Mutation functions with impersonation
+// Mutation functions - execute as admin (internal mutations use NO_ACCESS auth)
+// authClaims parameter kept for API compatibility but not used
 export async function createTournamentAdmin(
   input: CreateTournamentInput,
-  authClaims: AuthClaims
+  _authClaims: AuthClaims
 ): Promise<void> {
   await dataConnectAdmin.executeGraphql(
     CREATE_TOURNAMENT_MUTATION,
-    {
-      variables: input,
-      impersonate: { authClaims },
-    }
+    { variables: input }
   );
 }
 
 export async function createRoundAdmin(
   input: CreateRoundInput,
-  authClaims: AuthClaims
+  _authClaims: AuthClaims
 ): Promise<void> {
   await dataConnectAdmin.executeGraphql(
     CREATE_ROUND_MUTATION,
-    {
-      variables: input,
-      impersonate: { authClaims },
-    }
+    { variables: input }
   );
 }
 
 export async function createParticipantAdmin(
   input: CreateParticipantInput,
-  authClaims: AuthClaims
+  _authClaims: AuthClaims
 ): Promise<void> {
   await dataConnectAdmin.executeGraphql(
     CREATE_PARTICIPANT_MUTATION,
-    {
-      variables: input,
-      impersonate: { authClaims },
-    }
+    { variables: input }
   );
 }
 
 export async function createMatchAdmin(
   input: CreateMatchInput,
-  authClaims: AuthClaims
+  _authClaims: AuthClaims
 ): Promise<void> {
   await dataConnectAdmin.executeGraphql(
     CREATE_MATCH_MUTATION,
-    {
-      variables: input,
-      impersonate: { authClaims },
-    }
+    { variables: input }
   );
 }
 
 export async function updateMatchAdmin(
   input: UpdateMatchInput,
-  authClaims: AuthClaims
+  _authClaims: AuthClaims
 ): Promise<void> {
   await dataConnectAdmin.executeGraphql(
     UPDATE_MATCH_MUTATION,
-    {
-      variables: input,
-      impersonate: { authClaims },
-    }
+    { variables: input }
   );
 }
 
 export async function createMatchPickAdmin(
   input: CreateMatchPickInput,
-  authClaims: AuthClaims
+  _authClaims: AuthClaims
 ): Promise<void> {
   await dataConnectAdmin.executeGraphql(
     CREATE_MATCH_PICK_MUTATION,
-    {
-      variables: input,
-      impersonate: { authClaims },
-    }
+    { variables: input }
   );
 }

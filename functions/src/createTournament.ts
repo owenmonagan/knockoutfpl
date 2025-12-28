@@ -239,6 +239,7 @@ async function writeTournamentToDatabase(
   // 1. Create tournament
   await createTournamentAdmin(
     {
+      id: tournamentId,
       fplLeagueId: records.tournament.fplLeagueId,
       fplLeagueName: records.tournament.fplLeagueName,
       creatorUid: records.tournament.creatorUid,
