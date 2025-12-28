@@ -5,7 +5,6 @@ import { SignUpPage } from './pages/SignUpPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProfilePage } from './pages/ProfilePage';
-import { ComparePage } from './pages/ComparePage';
 import { LeaguePage } from './pages/LeaguePage';
 import { LeaguesPage } from './pages/LeaguesPage';
 import { KnockoutPage } from './pages/KnockoutPage';
@@ -36,10 +35,6 @@ export const router: RouteObject[] = [
         <ConnectPage />
       </ProtectedRoute>
     ),
-  },
-  {
-    path: '/compare',
-    element: <ComparePage />,
   },
   {
     path: '/dashboard',
