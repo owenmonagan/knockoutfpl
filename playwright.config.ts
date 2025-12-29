@@ -70,7 +70,7 @@ export default defineConfig({
   /* Run Firebase emulators and dev server before starting tests */
   webServer: [
     {
-      command: 'JAVA_HOME=/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home npm run emulators',
+      command: 'npm run emulators:e2e',
       url: 'http://127.0.0.1:9099',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
