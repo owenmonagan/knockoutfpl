@@ -219,6 +219,22 @@ const GET_ACTIVE_ROUNDS_QUERY = `
   }
 `;
 
+const GET_PENDING_ACTIVE_ROUNDS_QUERY = `
+  query GetPendingActiveRounds($maxEvent: Int!) {
+    rounds(where: { event: { le: $maxEvent }, status: { eq: "active" } }, orderBy: { event: ASC }) {
+      tournamentId
+      roundNumber
+      event
+      status
+      tournament {
+        id
+        status
+        totalRounds
+      }
+    }
+  }
+`;
+
 const GET_ROUND_MATCHES_QUERY = `
   query GetRoundMatches($tournamentId: UUID!, $roundNumber: Int!) {
     matches(
@@ -522,6 +538,18 @@ export async function getActiveRoundsForEvent(event: number): Promise<ActiveRoun
   const result = await dataConnectAdmin.executeGraphql<{ rounds: ActiveRound[] }, { event: number }>(
     GET_ACTIVE_ROUNDS_QUERY,
     { variables: { event } }
+  );
+  return result.data.rounds;
+}
+
+/**
+ * Get all active rounds for any finished gameweek (catch-up mode)
+ * Returns rounds ordered by event ascending (oldest first)
+ */
+export async function getPendingActiveRounds(maxEvent: number): Promise<ActiveRound[]> {
+  const result = await dataConnectAdmin.executeGraphql<{ rounds: ActiveRound[] }, { maxEvent: number }>(
+    GET_PENDING_ACTIVE_ROUNDS_QUERY,
+    { variables: { maxEvent } }
   );
   return result.data.rounds;
 }
