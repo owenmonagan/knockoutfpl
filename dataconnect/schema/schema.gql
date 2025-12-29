@@ -124,6 +124,7 @@ type Tournament @table(name: "tournaments") {
   seedingMethod: String! @col(name: "seeding_method") @default(value: "league_rank")
   status: String! @default(value: "active")
   winnerEntryId: Int @col(name: "winner_entry_id")
+  isTest: Boolean! @col(name: "is_test") @default(value: false)
 
   createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
   updatedAt: Timestamp! @col(name: "updated_at") @default(expr: "request.time")
