@@ -209,4 +209,6 @@ type MatchPick @table(name: "match_picks", key: ["tournamentId", "matchId", "ent
 
   # Relations
   entry: Entry!
+  match: Match! @ref(fields: ["tournamentId", "matchId"])
+  participant: Participant! @ref(fields: ["tournamentId", "entryId"])
 }
