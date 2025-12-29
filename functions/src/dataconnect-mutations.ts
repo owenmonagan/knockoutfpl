@@ -74,6 +74,7 @@ const CREATE_TOURNAMENT_MUTATION = `
     $totalRounds: Int!
     $startEvent: Int!
     $seedingMethod: String!
+    $isTest: Boolean!
   ) {
     tournament_insert(
       data: {
@@ -85,6 +86,7 @@ const CREATE_TOURNAMENT_MUTATION = `
         totalRounds: $totalRounds
         startEvent: $startEvent
         seedingMethod: $seedingMethod
+        isTest: $isTest
       }
     )
   }
@@ -387,6 +389,7 @@ export interface CreateTournamentInput {
   totalRounds: number;
   startEvent: number;
   seedingMethod: string;
+  isTest?: boolean;
 }
 
 export interface CreateRoundInput {
@@ -503,7 +506,7 @@ export async function createTournamentAdmin(
 ): Promise<void> {
   await dataConnectAdmin.executeGraphql(
     CREATE_TOURNAMENT_MUTATION,
-    { variables: input }
+    { variables: { ...input, isTest: input.isTest ?? false } }
   );
 }
 
