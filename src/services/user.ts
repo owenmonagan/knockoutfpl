@@ -35,9 +35,15 @@ export async function getUserProfile(userId: string): Promise<User | null> {
 
 /**
  * Create a new user profile via Data Connect
+ * Fails gracefully if Data Connect is unavailable
  */
 export async function createUserProfile(userData: CreateUserData): Promise<void> {
-  await upsertUser(dataConnect, { uid: userData.userId, email: userData.email });
+  try {
+    await upsertUser(dataConnect, { uid: userData.userId, email: userData.email });
+  } catch (error) {
+    // Log but don't fail - Data Connect may not be available in all environments
+    console.warn('Failed to create user profile in Data Connect:', error);
+  }
 }
 
 /**
