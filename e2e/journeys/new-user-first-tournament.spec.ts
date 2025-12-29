@@ -201,49 +201,33 @@ test.describe('New User First Tournament Journey @journey @tournament', () => {
     });
 
     /**
-     * NOTE: This test requires Firebase emulators with persistence to properly
-     * test duplicate tournament prevention. The test creates a tournament,
-     * then attempts to create another for the same league.
+     * Duplicate tournament prevention test
      *
-     * TODO: Implement when Firebase emulators are configured with proper data seeding.
-     * Current implementation:
-     * 1. The first "Start Knockout" navigates to /knockout/{leagueId} or /league/{leagueId}
-     * 2. If a tournament already exists, it should show the existing bracket
-     * 3. If no tournament exists, it creates one
+     * This test is currently blocked because:
+     * 1. The signupAndConnect helper fails (signup redirects to /dashboard not /connect)
+     * 2. This is a broader issue affecting all journey tests that use signupAndConnect
      *
-     * The prevention happens at the backend (Cloud Function) level where
-     * getTournamentByLeague checks for existing tournaments before creation.
+     * Enable this test when the signup flow is fixed to properly redirect new users
+     * to the /connect page after signup.
      */
     test.fixme(
       'should prevent duplicate tournament for same league @tournament',
       async ({ page }) => {
-        // This test requires Firebase emulators with data persistence
-        // Steps to implement:
-        // 1. Signup and connect FPL
-        // 2. Navigate to a league and create tournament
-        // 3. Navigate back to leagues
-        // 4. Try to create another tournament for the same league
-        // 5. Verify the existing tournament is shown (not a new creation flow)
-        // 6. OR verify an error/warning message about duplicate tournament
-
-        // Placeholder implementation:
         await signupAndConnect(page, 'Duplicate Preventer');
 
-        // First creation
+        // First navigation
         const leagueCard = page.locator(`text=${TEST_LEAGUE_NAME}`).locator('..').locator('..');
         await leagueCard.getByRole('button', { name: 'Start Knockout' }).click();
         await page.waitForLoadState('networkidle');
 
-        // Navigate back and try again
+        // Second navigation - should show same tournament
         await page.goto('/leagues');
         await expect(page.getByText(TEST_LEAGUE_NAME)).toBeVisible({ timeout: 15000 });
 
-        // Second attempt should show existing tournament or prevent creation
         const leagueCardAgain = page.locator(`text=${TEST_LEAGUE_NAME}`).locator('..').locator('..');
         await leagueCardAgain.getByRole('button', { name: 'Start Knockout' }).click();
 
-        // Expected: Should see existing tournament, not a "Create" option
-        // This assertion needs to be updated based on actual implementation
+        // Should show existing tournament (same bracket)
         await expect(page.getByText(/Active|16 REMAIN|\d+ teams/)).toBeVisible({ timeout: 10000 });
       }
     );
