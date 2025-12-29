@@ -11,6 +11,15 @@ export interface TestUser {
 }
 
 export const TEST_USERS = {
+  // Standard test user for most E2E tests
+  standard: {
+    uid: 'test-user-uid',
+    email: 'testuser@knockoutfpl.com',
+    password: 'TestPass123!',
+    displayName: 'Test User',
+    fplTeamId: 158256,
+    fplTeamName: 'o-win',
+  },
   creator: {
     uid: 'test-creator-uid',
     email: 'creator@knockoutfpl.com',
@@ -30,74 +39,69 @@ export const TEST_USERS = {
 };
 
 /**
- * Seeds test users in BOTH Firebase Auth AND Firestore
- * This ensures users can login AND have profile data
+ * Seeds a single test user in BOTH Firebase Auth AND Firestore
  */
-export async function seedTestUsers(): Promise<void> {
+async function seedUser(user: TestUser): Promise<void> {
   const auth = getAuth();
   const db = getFirestore();
-  
-  // Seed Creator
+
   try {
     // Create in Auth
     await auth.createUser({
-      uid: TEST_USERS.creator.uid,
-      email: TEST_USERS.creator.email,
-      password: TEST_USERS.creator.password,
-      displayName: TEST_USERS.creator.displayName,
+      uid: user.uid,
+      email: user.email,
+      password: user.password,
+      displayName: user.displayName,
     });
-    
+
     // Create in Firestore
-    await db.collection('users').doc(TEST_USERS.creator.uid).set({
-      userId: TEST_USERS.creator.uid,
-      fplTeamId: TEST_USERS.creator.fplTeamId,
-      fplTeamName: TEST_USERS.creator.fplTeamName,
-      email: TEST_USERS.creator.email,
-      displayName: TEST_USERS.creator.displayName,
+    await db.collection('users').doc(user.uid).set({
+      userId: user.uid,
+      fplTeamId: user.fplTeamId,
+      fplTeamName: user.fplTeamName,
+      email: user.email,
+      displayName: user.displayName,
       wins: 0,
       losses: 0,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
-    
-    console.log('✅ Creator user seeded (Auth + Firestore)');
+
+    console.log(`✅ ${user.displayName} seeded (Auth + Firestore)`);
   } catch (error: any) {
     if (error.code === 'auth/uid-already-exists') {
-      console.log('ℹ️  Creator user already exists');
+      console.log(`ℹ️  ${user.displayName} already exists`);
     } else {
       throw error;
     }
   }
-  
-  // Seed Opponent
+}
+
+/**
+ * Seeds test users in BOTH Firebase Auth AND Firestore
+ * This ensures users can login AND have profile data
+ */
+export async function seedTestUsers(): Promise<void> {
+  // Seed all test users
+  await seedUser(TEST_USERS.standard);
+  await seedUser(TEST_USERS.creator);
+  await seedUser(TEST_USERS.opponent);
+}
+
+/**
+ * Cleans up a single test user from BOTH Auth AND Firestore
+ */
+async function cleanupUser(user: TestUser): Promise<void> {
+  const auth = getAuth();
+  const db = getFirestore();
+
   try {
-    // Create in Auth
-    await auth.createUser({
-      uid: TEST_USERS.opponent.uid,
-      email: TEST_USERS.opponent.email,
-      password: TEST_USERS.opponent.password,
-      displayName: TEST_USERS.opponent.displayName,
-    });
-    
-    // Create in Firestore
-    await db.collection('users').doc(TEST_USERS.opponent.uid).set({
-      userId: TEST_USERS.opponent.uid,
-      fplTeamId: TEST_USERS.opponent.fplTeamId,
-      fplTeamName: TEST_USERS.opponent.fplTeamName,
-      email: TEST_USERS.opponent.email,
-      displayName: TEST_USERS.opponent.displayName,
-      wins: 0,
-      losses: 0,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    });
-    
-    console.log('✅ Opponent user seeded (Auth + Firestore)');
+    await auth.deleteUser(user.uid);
+    await db.collection('users').doc(user.uid).delete();
+    console.log(`✅ ${user.displayName} cleaned up`);
   } catch (error: any) {
-    if (error.code === 'auth/uid-already-exists') {
-      console.log('ℹ️  Opponent user already exists');
-    } else {
-      throw error;
+    if (error.code !== 'auth/user-not-found') {
+      console.error(`Error cleaning up ${user.displayName}:`, error);
     }
   }
 }
@@ -106,28 +110,7 @@ export async function seedTestUsers(): Promise<void> {
  * Cleans up test users from BOTH Auth AND Firestore
  */
 export async function cleanupTestUsers(): Promise<void> {
-  const auth = getAuth();
-  const db = getFirestore();
-  
-  // Cleanup Creator
-  try {
-    await auth.deleteUser(TEST_USERS.creator.uid);
-    await db.collection('users').doc(TEST_USERS.creator.uid).delete();
-    console.log('✅ Creator user cleaned up');
-  } catch (error: any) {
-    if (error.code !== 'auth/user-not-found') {
-      console.error('Error cleaning up creator:', error);
-    }
-  }
-  
-  // Cleanup Opponent
-  try {
-    await auth.deleteUser(TEST_USERS.opponent.uid);
-    await db.collection('users').doc(TEST_USERS.opponent.uid).delete();
-    console.log('✅ Opponent user cleaned up');
-  } catch (error: any) {
-    if (error.code !== 'auth/user-not-found') {
-      console.error('Error cleaning up opponent:', error);
-    }
-  }
+  await cleanupUser(TEST_USERS.standard);
+  await cleanupUser(TEST_USERS.creator);
+  await cleanupUser(TEST_USERS.opponent);
 }

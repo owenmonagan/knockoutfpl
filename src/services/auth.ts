@@ -10,11 +10,24 @@ import { auth, dataConnect } from '../lib/firebase';
 import { upsertUser } from '@knockoutfpl/dataconnect';
 
 /**
+ * Sync user to Data Connect (non-blocking, logs errors)
+ */
+async function syncUserToDataConnect(uid: string, email: string): Promise<void> {
+  try {
+    await upsertUser(dataConnect, { uid, email });
+  } catch (error) {
+    // Log but don't fail auth if Data Connect is unavailable
+    console.warn('Failed to sync user to Data Connect:', error);
+  }
+}
+
+/**
  * Sign up a new user with email and password
  */
 export async function signUpWithEmail(email: string, password: string): Promise<UserCredential> {
   const credential = await createUserWithEmailAndPassword(auth, email, password);
-  await upsertUser(dataConnect, { uid: credential.user.uid, email: credential.user.email! });
+  // Fire-and-forget sync to Data Connect (don't block auth)
+  syncUserToDataConnect(credential.user.uid, credential.user.email!);
   return credential;
 }
 
@@ -23,7 +36,8 @@ export async function signUpWithEmail(email: string, password: string): Promise<
  */
 export async function signInWithEmail(email: string, password: string): Promise<UserCredential> {
   const credential = await signInWithEmailAndPassword(auth, email, password);
-  await upsertUser(dataConnect, { uid: credential.user.uid, email: credential.user.email! });
+  // Fire-and-forget sync to Data Connect (don't block auth)
+  syncUserToDataConnect(credential.user.uid, credential.user.email!);
   return credential;
 }
 
@@ -40,7 +54,8 @@ export async function signOut(): Promise<void> {
 export async function signInWithGoogle(): Promise<UserCredential> {
   const provider = new GoogleAuthProvider();
   const credential = await signInWithPopup(auth, provider);
-  await upsertUser(dataConnect, { uid: credential.user.uid, email: credential.user.email! });
+  // Fire-and-forget sync to Data Connect (don't block auth)
+  syncUserToDataConnect(credential.user.uid, credential.user.email!);
   return credential;
 }
 

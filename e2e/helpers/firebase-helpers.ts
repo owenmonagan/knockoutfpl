@@ -16,7 +16,7 @@ export async function connectToFirebaseEmulator(): Promise<Firestore> {
   process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
 
   adminApp = initializeApp({
-    projectId: 'demo-knockoutfpl',
+    projectId: 'knockoutfpl-dev',
   });
 
   firestoreInstance = getFirestore(adminApp);
