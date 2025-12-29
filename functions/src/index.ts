@@ -74,3 +74,6 @@ export { updateBrackets } from './updateBrackets';
 
 // Export scheduled test tournament creator (dev only)
 export { createTestTournaments } from './createTestTournaments';
+
+// Export scheduled stuck tournament checker
+export { checkStuckTournaments } from './checkStuckTournaments';
