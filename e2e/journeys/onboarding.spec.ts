@@ -144,24 +144,35 @@ test.describe('Onboarding Journey @journey @onboarding', () => {
      * 3. Run tests with emulator configuration
      */
 
-    // TODO: Implement when Firebase emulators are configured with seeded tournament data
-    // Test should:
-    // 1. Login as user who is in active tournaments
-    // 2. Navigate to dashboard
-    // 3. Verify tournament cards are displayed
-    // 4. Verify tournament status (active/completed) is shown
-    test.fixme('should display existing tournaments if user is in any @critical', async () => {
-      // Requires Firebase emulators with seeded tournament data
+    test('should display existing tournaments if user is in any @critical', async ({ page }) => {
+      // Login as test user who has tournaments (seeded via test-data.ts)
+      await page.goto('/login');
+      await page.getByLabel('Email').fill(TEST_USERS.standard.email);
+      await page.getByLabel('Password').fill(TEST_USERS.standard.password);
+      await page.getByRole('button', { name: /log in/i }).click();
+
+      await page.waitForURL(/\/(connect|leagues|dashboard)/, { timeout: 10000 });
+      await page.goto('/dashboard');
+      await page.waitForLoadState('networkidle');
+
+      // Verify tournament cards are displayed
+      // The test user is a participant in seeded tournaments
+      await expect(page.getByText(/active|tournament/i)).toBeVisible({ timeout: 10000 });
     });
 
-    // TODO: Implement when Firebase emulators are configured with fresh user data
-    // Test should:
-    // 1. Login as user with no tournaments
-    // 2. Navigate to dashboard/leagues
-    // 3. Verify "arena awaits" empty state message is shown
-    // 4. Verify CTA to create tournament is visible
-    test.fixme('should show "arena awaits" state when no tournaments exist', async () => {
-      // Requires Firebase emulators with seeded user data (no tournaments)
+    test('should show "arena awaits" state when no tournaments exist', async ({ page }) => {
+      // Login as user with no tournaments
+      await page.goto('/login');
+      await page.getByLabel('Email').fill(TEST_USERS.withNoTournaments.email);
+      await page.getByLabel('Password').fill(TEST_USERS.withNoTournaments.password);
+      await page.getByRole('button', { name: /log in/i }).click();
+
+      await page.waitForURL(/\/(connect|leagues|dashboard)/, { timeout: 10000 });
+      await page.goto('/dashboard');
+      await page.waitForLoadState('networkidle');
+
+      // Verify empty state - dashboard should show "arena awaits" or similar message
+      await expect(page.getByText(/arena awaits|no tournaments/i)).toBeVisible();
     });
   });
 

@@ -205,68 +205,33 @@ test.describe('Returning User Journey @journey @dashboard', () => {
      * 3. Tournament state set to specific conditions (user eliminated, tournament complete)
      */
 
-    test.fixme('should indicate eliminated status when user is out @dashboard @critical', async ({ page }) => {
-      // TODO: Implement when Firebase emulators are configured with seeded tournament data
-      //
-      // This test requires:
-      // 1. A tournament where the test user participated
-      // 2. The test user's match has been resolved
-      // 3. The test user lost their match (eliminated)
-      //
-      // Expected behavior:
-      // 1. Login as test user
+    test('should indicate eliminated status when user is out @dashboard @critical', async ({ page }) => {
+      // Login as test user
       await loginAndWait(page);
 
-      // 2. Navigate to tournament/knockout page
-      await page.goto('/leagues');
+      // Navigate to the eliminated tournament (fplLeagueId: 315)
+      // In this tournament, test user (158256) lost in Round 1 with score 45 vs 67
+      await page.goto('/knockout/315');
       await page.waitForLoadState('networkidle');
 
-      // 3. Access a tournament where user is eliminated
-      // The UI should show:
-      // - User's match with losing status (opacity-50 or similar styling)
-      // - "Eliminated" badge or status indicator
-      // - Match result showing the user lost
-      //
-      // Verification:
-      // await expect(page.getByText(/eliminated|knocked out|lost/i)).toBeVisible();
-      // - OR -
-      // await expect(page.locator('.opacity-50, [data-eliminated="true"]')).toBeVisible();
-      //
-      // Current workaround: Check for loser styling in MatchCard
+      // Verify user's match shows losing status
       // The MatchCard applies "opacity-50" class to the losing player
-      // When user is eliminated, their row in their match should have this styling
+      // Test user's team name is "o-win"
+      await expect(page.locator('.opacity-50').filter({ hasText: /o-win/i })).toBeVisible();
     });
 
-    test.fixme('should show winner celebration when tournament complete @dashboard @critical', async ({ page }) => {
-      // TODO: Implement when Firebase emulators are configured with seeded tournament data
-      //
-      // This test requires:
-      // 1. A completed tournament where the test user participated
-      // 2. The test user won the tournament (reached and won the final)
-      // 3. Tournament status is set to "completed"
-      //
-      // Expected behavior:
-      // 1. Login as test user
+    test('should show winner celebration when tournament complete @dashboard @critical', async ({ page }) => {
+      // Login as test user
       await loginAndWait(page);
 
-      // 2. Navigate to leagues/tournaments
-      await page.goto('/leagues');
+      // Navigate to the completed tournament where user won (fplLeagueId: 316)
+      // Test user (158256) won all 4 rounds and is the tournament winner
+      await page.goto('/knockout/316');
       await page.waitForLoadState('networkidle');
 
-      // 3. Access the completed tournament
-      // The UI should show:
-      // - Tournament marked as "Completed"
-      // - Winner celebration/trophy UI
-      // - Final match with winner highlighted
-      // - User's victory status
-      //
-      // Verification patterns when implemented:
-      // await expect(page.getByText(/champion|winner|congratulations/i)).toBeVisible();
-      // await expect(page.locator('[data-testid="trophy-icon"], .trophy, .celebration')).toBeVisible();
-      // await expect(page.getByText(/tournament complete/i)).toBeVisible();
-      //
-      // Note: The tournament.status === 'completed' and tournament.winnerId
-      // would need to match the test user's FPL team ID for this to display
+      // Verify tournament complete status
+      // The UI should show champion/winner status or completed tournament indicator
+      await expect(page.getByText(/champion|winner|completed/i)).toBeVisible();
     });
   });
 });

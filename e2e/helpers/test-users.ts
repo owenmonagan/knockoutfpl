@@ -36,6 +36,15 @@ export const TEST_USERS = {
     fplTeamId: 2780009,
     fplTeamName: 'Opponent FC',
   },
+  // User with no tournaments - used for empty state testing
+  withNoTournaments: {
+    uid: 'no-tournament-user-uid',
+    email: 'notournaments@knockoutfpl.com',
+    password: 'TestPass123!',
+    displayName: 'No Tournament User',
+    fplTeamId: 158257,
+    fplTeamName: 'Empty User',
+  },
 };
 
 /**
@@ -86,6 +95,7 @@ export async function seedTestUsers(): Promise<void> {
   await seedUser(TEST_USERS.standard);
   await seedUser(TEST_USERS.creator);
   await seedUser(TEST_USERS.opponent);
+  await seedUser(TEST_USERS.withNoTournaments);
 }
 
 /**
@@ -113,4 +123,5 @@ export async function cleanupTestUsers(): Promise<void> {
   await cleanupUser(TEST_USERS.standard);
   await cleanupUser(TEST_USERS.creator);
   await cleanupUser(TEST_USERS.opponent);
+  await cleanupUser(TEST_USERS.withNoTournaments);
 }
