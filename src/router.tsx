@@ -62,18 +62,10 @@ export const router: RouteObject[] = [
   },
   {
     path: '/league/:leagueId',
-    element: (
-      <ProtectedRoute>
-        <LeaguePage />
-      </ProtectedRoute>
-    ),
+    element: <LeaguePage />,
   },
   {
     path: '/knockout/:leagueId',
-    element: (
-      <ProtectedRoute>
-        <KnockoutPage />
-      </ProtectedRoute>
-    ),
+    element: <KnockoutPage />,
   },
 ];

@@ -6,6 +6,7 @@ import { getUserProfile } from '../services/user';
 import { getUserMiniLeagues, getLeagueStandings, getCurrentGameweek, getFPLGameweekScore } from '../services/fpl';
 import type { Participant, Match, Round } from '../types/tournament';
 import { MatchCard } from '../components/tournament/MatchCard';
+import { Button } from '../components/ui/button';
 
 interface Bracket {
   participants: Participant[];
@@ -22,20 +23,21 @@ export function KnockoutPage() {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!user) return;
+      // Load user-specific data if authenticated
+      if (user) {
+        const profile = await getUserProfile(user.uid);
+        if (profile?.fplTeamId) {
+          setUserFplTeamId(profile.fplTeamId);
 
-      const profile = await getUserProfile(user.uid);
-      if (!profile?.fplTeamId) return;
-
-      setUserFplTeamId(profile.fplTeamId);
-
-      const leagues = await getUserMiniLeagues(profile.fplTeamId);
-      const league = leagues.find((l) => l.id === Number(leagueId));
-      if (league) {
-        setLeagueName(league.name);
+          const leagues = await getUserMiniLeagues(profile.fplTeamId);
+          const league = leagues.find((l) => l.id === Number(leagueId));
+          if (league) {
+            setLeagueName(league.name);
+          }
+        }
       }
 
-      // Load bracket
+      // Load bracket data (works for both authenticated and anonymous users)
       const standings = await getLeagueStandings(Number(leagueId));
       const top16 = standings.slice(0, 16);
       const currentGw = await getCurrentGameweek();
@@ -85,9 +87,6 @@ export function KnockoutPage() {
       // Update match scores
       for (const match of matches) {
         if (match.player1) {
-          const scoreData = scores.find((s) =>
-            participants.find((p) => p.fplTeamId === match.player1!.fplTeamId)
-          );
           const participantIndex = participants.findIndex(
             (p) => p.fplTeamId === match.player1!.fplTeamId
           );
@@ -150,8 +149,23 @@ export function KnockoutPage() {
 
   return (
     <div>
-      <Link to="/leagues">← Back to Leagues</Link>
+      {user ? (
+        <Link to="/leagues">← Back to Leagues</Link>
+      ) : (
+        <Link to="/">← Back to Home</Link>
+      )}
       {leagueName && <h1>{leagueName.toUpperCase()}</h1>}
+
+      {/* Sign-up CTA for anonymous users */}
+      {!user && (
+        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-4">
+          <p className="text-yellow-800 mb-2">Sign in to claim your team and track your progress!</p>
+          <Link to="/signup">
+            <Button>Enter the Arena</Button>
+          </Link>
+        </div>
+      )}
+
       {bracket && (
         <div>
           <p>16 REMAIN</p>

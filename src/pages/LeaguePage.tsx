@@ -1,8 +1,9 @@
 // src/pages/LeaguePage.tsx
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
+import { Button } from '../components/ui/button';
 import { BracketView } from '../components/tournament/BracketView';
 import { CreateTournamentButton } from '../components/tournament/CreateTournamentButton';
 import { getTournamentByLeague, callCreateTournament } from '../services/tournament';
@@ -61,6 +62,16 @@ export function LeaguePage() {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
+      {/* Sign-up CTA for anonymous users */}
+      {!user && (
+        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+          <p className="text-yellow-800 mb-2">Sign in to claim your team and track your progress!</p>
+          <Link to="/signup">
+            <Button>Enter the Arena</Button>
+          </Link>
+        </div>
+      )}
+
       {tournament ? (
         <BracketView tournament={tournament} />
       ) : (
@@ -72,7 +83,18 @@ export function LeaguePage() {
             </p>
           </CardHeader>
           <CardContent>
-            <CreateTournamentButton onCreate={handleCreateTournament} />
+            {user ? (
+              <CreateTournamentButton onCreate={handleCreateTournament} />
+            ) : (
+              <div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Sign in to create a knockout tournament for this league.
+                </p>
+                <Link to="/signup">
+                  <Button variant="outline">Sign Up to Create Tournament</Button>
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
