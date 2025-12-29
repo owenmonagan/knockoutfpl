@@ -13,7 +13,7 @@
 
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import {
-  getActiveRoundsForEvent,
+  getPendingActiveRounds,
   getRoundMatches,
   upsertPickAdmin,
   updateMatchWinner,
@@ -25,6 +25,7 @@ import {
   RoundMatch,
   AuthClaims,
 } from './dataconnect-mutations';
+import { sendDiscordAlert } from './discord';
 import { fetchCurrentGameweek, fetchScoresForEntries } from './fpl-scores';
 import { resolveMatch, getNextRoundSlot, MatchResult } from './match-resolver';
 
@@ -34,6 +35,9 @@ const SYSTEM_AUTH_CLAIMS: AuthClaims = {
   email: 'system@knockoutfpl.com',
   email_verified: true,
 };
+
+// Discord webhook URL from environment config
+const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || '';
 
 /**
  * Process a single round: fetch scores, resolve matches, advance winners
@@ -192,6 +196,7 @@ async function advanceWinnersToNextRound(
 
 /**
  * Main scheduled function - runs every 2 hours
+ * Enhanced with catch-up mode to process all pending rounds
  */
 export const updateBrackets = onSchedule(
   {
@@ -202,40 +207,79 @@ export const updateBrackets = onSchedule(
   async () => {
     console.log('[updateBrackets] Starting bracket update check...');
 
-    // 1. Check current gameweek status
-    const currentGW = await fetchCurrentGameweek();
+    try {
+      // 1. Check current gameweek status
+      const currentGW = await fetchCurrentGameweek();
 
-    if (!currentGW) {
-      console.log('[updateBrackets] Could not fetch current gameweek');
-      return;
-    }
-
-    console.log(`[updateBrackets] Current gameweek: ${currentGW.event}, finished: ${currentGW.finished}`);
-
-    if (!currentGW.finished) {
-      console.log('[updateBrackets] Gameweek not finished yet, skipping');
-      return;
-    }
-
-    // 2. Find active rounds for this gameweek
-    const activeRounds = await getActiveRoundsForEvent(currentGW.event);
-    console.log(`[updateBrackets] Found ${activeRounds.length} active rounds for GW${currentGW.event}`);
-
-    if (activeRounds.length === 0) {
-      console.log('[updateBrackets] No active rounds to process');
-      return;
-    }
-
-    // 3. Process each round
-    for (const round of activeRounds) {
-      try {
-        await processRound(round, currentGW.event);
-      } catch (error) {
-        console.error(`[updateBrackets] Error processing round ${round.roundNumber} of ${round.tournamentId}:`, error);
-        // Continue with other rounds
+      if (!currentGW) {
+        console.log('[updateBrackets] Could not fetch current gameweek');
+        return;
       }
-    }
 
-    console.log('[updateBrackets] Bracket update complete');
+      console.log(`[updateBrackets] Current gameweek: ${currentGW.event}, finished: ${currentGW.finished}`);
+
+      // 2. Catch-up mode: find ALL active rounds for finished gameweeks
+      const maxEvent = currentGW.finished ? currentGW.event : currentGW.event - 1;
+
+      if (maxEvent < 1) {
+        console.log('[updateBrackets] No finished gameweeks yet, skipping');
+        return;
+      }
+
+      // 3. Loop to process all pending rounds (max 10 iterations for safety)
+      const MAX_ITERATIONS = 10;
+      let iteration = 0;
+      let totalRoundsProcessed = 0;
+
+      while (iteration < MAX_ITERATIONS) {
+        iteration++;
+        console.log(`[updateBrackets] Catch-up iteration ${iteration}...`);
+
+        // Find active rounds for any finished gameweek
+        const pendingRounds = await getPendingActiveRounds(maxEvent);
+        console.log(`[updateBrackets] Found ${pendingRounds.length} pending active rounds`);
+
+        if (pendingRounds.length === 0) {
+          console.log('[updateBrackets] No more pending rounds, catch-up complete');
+          break;
+        }
+
+        // Process each round
+        for (const round of pendingRounds) {
+          try {
+            await processRound(round, round.event);
+            totalRoundsProcessed++;
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error(`[updateBrackets] Error processing round ${round.roundNumber} of ${round.tournamentId}:`, error);
+
+            // Send Discord alert for processing errors
+            await sendDiscordAlert(
+              `🔴 updateBrackets error: Round ${round.roundNumber} of tournament ${round.tournamentId} failed: ${errorMessage}`,
+              DISCORD_WEBHOOK_URL
+            );
+            // Continue with other rounds
+          }
+        }
+      }
+
+      if (iteration >= MAX_ITERATIONS) {
+        console.warn('[updateBrackets] Hit max iterations, may have more rounds to process');
+        await sendDiscordAlert(
+          `⚠️ updateBrackets hit max iterations (${MAX_ITERATIONS}), may have more rounds pending`,
+          DISCORD_WEBHOOK_URL
+        );
+      }
+
+      console.log(`[updateBrackets] Bracket update complete. Processed ${totalRoundsProcessed} rounds in ${iteration} iterations.`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('[updateBrackets] Fatal error:', error);
+      await sendDiscordAlert(
+        `🔴 updateBrackets crashed: ${errorMessage}`,
+        DISCORD_WEBHOOK_URL
+      );
+      throw error; // Re-throw for retry
+    }
   }
 );
