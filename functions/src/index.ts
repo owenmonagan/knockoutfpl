@@ -71,3 +71,6 @@ export { createTournament } from './createTournament';
 
 // Export scheduled bracket update function
 export { updateBrackets } from './updateBrackets';
+
+// Export scheduled test tournament creator (dev only)
+export { createTestTournaments } from './createTestTournaments';
