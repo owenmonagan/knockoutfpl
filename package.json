@@ -40,6 +40,8 @@
     "fixtures:list": "npx tsx scripts/fixtures-list.ts",
     "fixtures:download": "npx tsx scripts/fixtures-download.ts",
     "fixtures:scenario": "npx tsx scripts/fixtures-scenario.ts",
+    "e2e:seed": "FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 npx tsx e2e/fixtures/seed-tournaments.ts",
+    "e2e:seed:clear": "FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 npx tsx e2e/fixtures/seed-tournaments.ts --clear",
     "prepare": "husky"
   },
   "dependencies": {
