@@ -24,7 +24,10 @@ const TEST_FPL_TEAM_ID = '158256';
 const TEST_LEAGUE_NAME = 'Overall';
 
 test.describe('Phase 1 Demo Flow @critical @smoke', () => {
-  test('complete flow: signup → connect → leagues → knockout', async ({ page }) => {
+  // These tests require Data Connect + FPL API to be fully functional
+  // They verify the complete user journey but need the full backend stack
+
+  test('complete flow: signup → connect → leagues → knockout @critical @smoke', async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
@@ -44,11 +47,12 @@ test.describe('Phase 1 Demo Flow @critical @smoke', () => {
     await page.getByLabel(/^Password$/).fill(TEST_PASSWORD);
     await page.getByLabel('Confirm Password').fill(TEST_PASSWORD);
 
-    // Step 3: Submit signup - should redirect to /connect
+    // Step 3: Submit signup - should redirect to /dashboard
     await page.getByRole('button', { name: 'Sign Up' }).click();
-    await expect(page).toHaveURL('/connect', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
 
-    // Step 4: Verify Connect page
+    // Step 4: Navigate to Connect page to link FPL team
+    await page.goto('/connect');
     await expect(page.getByRole('heading', { name: 'Connect Your FPL Team' })).toBeVisible();
 
     // Step 5: Enter FPL Team ID and submit
@@ -88,7 +92,7 @@ test.describe('Phase 1 Demo Flow @critical @smoke', () => {
     expect(consoleErrors).toHaveLength(0);
   });
 
-  test('login flow: existing user → dashboard → leagues', async ({ page }) => {
+  test('login flow: existing user → dashboard → leagues @critical', async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
@@ -105,8 +109,10 @@ test.describe('Phase 1 Demo Flow @critical @smoke', () => {
     await page.getByLabel(/^Password$/).fill(TEST_PASSWORD);
     await page.getByLabel('Confirm Password').fill(TEST_PASSWORD);
     await page.getByRole('button', { name: 'Sign Up' }).click();
-    await expect(page).toHaveURL('/connect', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
 
+    // Navigate to Connect page to link FPL team
+    await page.goto('/connect');
     await page.getByLabel('FPL Team ID').pressSequentially(TEST_FPL_TEAM_ID);
     await page.getByRole('button', { name: 'Find My Team' }).click();
 
@@ -150,8 +156,9 @@ test.describe('Knockout Page Features @demo', () => {
     await page.getByLabel(/^Password$/).fill(TEST_PASSWORD);
     await page.getByLabel('Confirm Password').fill(TEST_PASSWORD);
     await page.getByRole('button', { name: 'Sign Up' }).click();
-    await expect(page).toHaveURL('/connect', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
 
+    await page.goto('/connect');
     await page.getByLabel('FPL Team ID').pressSequentially(TEST_FPL_TEAM_ID);
     await page.getByRole('button', { name: 'Find My Team' }).click();
 
@@ -194,8 +201,9 @@ test.describe('Knockout Page Features @demo', () => {
     await page.getByLabel(/^Password$/).fill(TEST_PASSWORD);
     await page.getByLabel('Confirm Password').fill(TEST_PASSWORD);
     await page.getByRole('button', { name: 'Sign Up' }).click();
-    await expect(page).toHaveURL('/connect', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
 
+    await page.goto('/connect');
     await page.getByLabel('FPL Team ID').pressSequentially(TEST_FPL_TEAM_ID);
     await page.getByRole('button', { name: 'Find My Team' }).click();
 
@@ -272,8 +280,9 @@ test.describe('Leagues Page @demo', () => {
     await page.getByLabel(/^Password$/).fill(TEST_PASSWORD);
     await page.getByLabel('Confirm Password').fill(TEST_PASSWORD);
     await page.getByRole('button', { name: 'Sign Up' }).click();
-    await expect(page).toHaveURL('/connect', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
 
+    await page.goto('/connect');
     await page.getByLabel('FPL Team ID').pressSequentially(TEST_FPL_TEAM_ID);
     await page.getByRole('button', { name: 'Find My Team' }).click();
 
