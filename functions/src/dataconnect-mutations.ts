@@ -235,6 +235,20 @@ const GET_PENDING_ACTIVE_ROUNDS_QUERY = `
   }
 `;
 
+const GET_STUCK_TEST_TOURNAMENTS_QUERY = `
+  query GetStuckTestTournaments($cutoffTime: Timestamp!) {
+    tournaments(where: { isTest: { eq: true }, status: { ne: "completed" }, createdAt: { lt: $cutoffTime } }) {
+      id
+      fplLeagueName
+      status
+      createdAt
+      participantCount
+      totalRounds
+      currentRound
+    }
+  }
+`;
+
 const GET_ROUND_MATCHES_QUERY = `
   query GetRoundMatches($tournamentId: UUID!, $roundNumber: Int!) {
     matches(
@@ -451,6 +465,16 @@ export interface CurrentEvent {
   isCurrent: boolean;
 }
 
+export interface StuckTournament {
+  id: string;
+  fplLeagueName: string;
+  status: string;
+  createdAt: string;
+  participantCount: number;
+  totalRounds: number;
+  currentRound: number;
+}
+
 // Mutation functions - execute as admin (internal mutations use NO_ACCESS auth)
 // authClaims parameter kept for API compatibility but not used
 export async function upsertEntryAdmin(
@@ -552,6 +576,17 @@ export async function getPendingActiveRounds(maxEvent: number): Promise<ActiveRo
     { variables: { maxEvent } }
   );
   return result.data.rounds;
+}
+
+/**
+ * Get test tournaments that haven't completed within the timeout period
+ */
+export async function getStuckTestTournaments(cutoffTime: Date): Promise<StuckTournament[]> {
+  const result = await dataConnectAdmin.executeGraphql<{ tournaments: StuckTournament[] }, { cutoffTime: string }>(
+    GET_STUCK_TEST_TOURNAMENTS_QUERY,
+    { variables: { cutoffTime: cutoffTime.toISOString() } }
+  );
+  return result.data.tournaments;
 }
 
 export async function getRoundMatches(tournamentId: string, roundNumber: number): Promise<RoundMatch[]> {
