@@ -27,85 +27,70 @@ const INVALID_LEAGUE_ID = '999999999999';
 test.describe('Shared Link Viewer Journey @journey @bracket', () => {
   test.describe('Anonymous Viewer', () => {
     /**
-     * NOTE: Current implementation has /league/:id as a protected route.
-     * Anonymous users are redirected to /login.
-     *
-     * The journey vision (docs/business/product/journeys/shared-link-viewer.md)
-     * expects anonymous users to:
+     * Public bracket viewing is now enabled.
+     * Anonymous users can:
      * 1. View bracket without authentication
-     * 2. See "Claim team" buttons on participants
-     * 3. Click claim -> sign in with Google -> land on dashboard
+     * 2. See all participants and scores
+     * 3. View current round status
      *
-     * These tests document the expected behavior once public bracket viewing
-     * is implemented.
+     * Future: "Claim team" feature will allow users to claim their FPL team.
      */
 
-    test('should redirect anonymous users to login (current behavior) @smoke', async ({
-      page,
-    }) => {
+    test('should NOT redirect anonymous users to login @smoke', async ({ page }) => {
       // Navigate to a league page as an anonymous user
       await page.goto(`/league/${TEST_LEAGUE_ID}`);
       await page.waitForLoadState('networkidle');
 
-      // Currently, protected route redirects to login
-      await expect(page).toHaveURL(/\/login/);
+      // Should stay on league page (not redirect to login)
+      await expect(page).toHaveURL(`/league/${TEST_LEAGUE_ID}`);
     });
 
-    test('should redirect anonymous users from knockout page to login @smoke', async ({
+    test('should NOT redirect anonymous users from knockout page @smoke', async ({
       page,
     }) => {
       // Navigate to knockout page as an anonymous user
       await page.goto(`/knockout/${TEST_LEAGUE_ID}`);
       await page.waitForLoadState('networkidle');
 
-      // Currently, protected route redirects to login
-      await expect(page).toHaveURL(/\/login/);
+      // Should stay on knockout page (not redirect to login)
+      await expect(page).toHaveURL(`/knockout/${TEST_LEAGUE_ID}`);
     });
 
     /**
-     * Future implementation tests - require public route access
-     * These tests document the expected behavior from the journey doc
+     * Public bracket viewing tests - verify anonymous users can view brackets
      */
 
-    // TODO: Implement when public bracket viewing is enabled
-    // The /league/:id route needs to allow anonymous access to show the bracket
-    test.fixme(
-      'should display bracket without authentication @critical',
-      async () => {
-        // When public viewing is implemented:
-        // 1. Navigate to /league/{id} without login
-        // 2. Verify bracket layout is visible (data-testid="bracket-layout")
-        // 3. Verify league name is displayed
-        // 4. Verify participant count and round info shown
-      }
-    );
+    test('should display bracket without authentication @critical', async ({ page }) => {
+      await page.goto(`/knockout/${TEST_LEAGUE_ID}`);
+      await page.waitForLoadState('networkidle');
 
-    // TODO: Implement when public bracket viewing is enabled
-    test.fixme(
-      'should show all participants and matchups',
-      async () => {
-        // When public viewing is implemented:
-        // 1. Navigate to /league/{id} or /knockout/{id} without login
-        // 2. Verify all participant names are visible
-        // 3. Verify matchups are displayed with seeds (e.g., "(1)" vs "(16)")
-        // 4. Verify BYE displayed for odd brackets
-      }
-    );
+      // Should NOT redirect to login
+      await expect(page).toHaveURL(`/knockout/${TEST_LEAGUE_ID}`);
 
-    // TODO: Implement when public bracket viewing and Firebase emulators are ready
-    test.fixme(
-      'should display current round status and scores',
-      async () => {
-        // Requires:
-        // - Public route access
-        // - Firebase emulators with seeded tournament data
-        // Test should:
-        // 1. Navigate to public bracket
-        // 2. Verify current round is highlighted
-        // 3. Verify scores are displayed (if gameweek complete)
-        // 4. Verify round status badge (Active/Complete)
-      }
-    );
+      // Bracket should be visible - shows teams remaining count
+      await expect(page.getByText(/REMAIN|\d+ teams/i).first()).toBeVisible({ timeout: 15000 });
+    });
+
+    test('should show all participants and matchups', async ({ page }) => {
+      await page.goto(`/knockout/${TEST_LEAGUE_ID}`);
+      await page.waitForLoadState('networkidle');
+
+      // Verify seeds are displayed
+      await expect(page.getByText('(1)')).toBeVisible();
+      await expect(page.getByText('(16)')).toBeVisible();
+    });
+
+    test('should display current round status and scores', async ({ page }) => {
+      await page.goto(`/knockout/${TEST_LEAGUE_ID}`);
+      await page.waitForLoadState('networkidle');
+
+      // Verify gameweek info (use .first() since multiple GW badges exist)
+      await expect(page.getByText(/GW\s*\d+/).first()).toBeVisible({ timeout: 15000 });
+
+      // Verify scores are displayed (2-3 digit numbers)
+      const scores = page.locator('text=/^\\d{2,3}$/');
+      await expect(scores.first()).toBeVisible();
+    });
 
     // TODO: Implement when claim team feature is built
     test.fixme(
@@ -124,9 +109,8 @@ test.describe('Shared Link Viewer Journey @journey @bracket', () => {
       await page.goto(`/league/${INVALID_LEAGUE_ID}`);
       await page.waitForLoadState('networkidle');
 
-      // For anonymous users, should redirect to login first
-      // (Once public viewing is enabled, this should show an error state)
-      await expect(page).toHaveURL(/\/login/);
+      // Should stay on the page (public viewing enabled) and show appropriate state
+      await expect(page).toHaveURL(`/league/${INVALID_LEAGUE_ID}`);
     });
   });
 
@@ -257,9 +241,10 @@ test.describe('Shared Link Viewer Journey @journey @bracket', () => {
       // Should show either:
       // - Tournament bracket (if tournament exists)
       // - "No tournament" message with create button
-      const content = page.locator(
-        'text=/loading|no tournament|bracket/i, [data-testid="bracket-layout"]'
-      );
+      // - Loading state
+      const content = page
+        .locator('text=/loading|no tournament|bracket/i')
+        .or(page.locator('[data-testid="bracket-layout"]'));
       await expect(content.first()).toBeVisible({ timeout: 10000 });
     });
 
