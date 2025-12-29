@@ -7,6 +7,17 @@ import { dataConnectAdmin } from './dataconnect-admin';
 export type AuthClaims = { [key: string]: unknown };
 
 // GraphQL mutations matching dataconnect/connector/mutations.gql
+const UPSERT_USER_MUTATION = `
+  mutation UpsertUser($uid: String!, $email: String!) {
+    user_upsert(
+      data: {
+        uid: $uid
+        email: $email
+      }
+    )
+  }
+`;
+
 const UPSERT_ENTRY_MUTATION = `
   mutation UpsertEntry(
     $entryId: Int!
@@ -480,6 +491,14 @@ export interface StuckTournament {
 
 // Mutation functions - execute as admin (internal mutations use NO_ACCESS auth)
 // authClaims parameter kept for API compatibility but not used
+
+export async function upsertUserAdmin(uid: string, email: string): Promise<void> {
+  await dataConnectAdmin.executeGraphql(
+    UPSERT_USER_MUTATION,
+    { variables: { uid, email } }
+  );
+}
+
 export async function upsertEntryAdmin(
   input: UpsertEntryInput,
   _authClaims: AuthClaims

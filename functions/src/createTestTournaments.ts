@@ -18,6 +18,7 @@ import {
   MatchAssignment,
 } from './bracketGenerator';
 import {
+  upsertUserAdmin,
   upsertEntryAdmin,
   upsertPickAdmin,
   createTournamentAdmin,
@@ -40,10 +41,12 @@ const CONFIG = {
   maxAttempts: 50,
 };
 
-// Auth claims for admin operations
+// Auth claims for admin operations - uses real user ID to satisfy FK constraint
+const SYSTEM_TEST_USER_ID = '1B0uIvuiGmaQUoMVFCu5Lh8jzlz1'; // owen@trylayup.com
+
 const SYSTEM_AUTH_CLAIMS: AuthClaims = {
-  sub: 'system-test-creator',
-  email: 'test-creator@knockoutfpl.com',
+  sub: SYSTEM_TEST_USER_ID,
+  email: 'owen@trylayup.com',
   email_verified: true,
 };
 
@@ -191,7 +194,7 @@ function buildTournamentRecords(
   const tournament: TournamentRecord = {
     fplLeagueId: leagueData.id,
     fplLeagueName: leagueData.name,
-    creatorUid: 'system-test-creator',
+    creatorUid: SYSTEM_TEST_USER_ID,
     participantCount: standingsResults.length,
     totalRounds,
     startEvent,
@@ -485,6 +488,10 @@ export const createTestTournaments = onSchedule(
     }
 
     try {
+      // 0. Ensure test user exists in Data Connect (FK constraint)
+      console.log('[createTestTournaments] Ensuring test user exists in database...');
+      await upsertUserAdmin(SYSTEM_TEST_USER_ID, 'owen@trylayup.com');
+
       // 1. Fetch current gameweek from bootstrap data
       const bootstrapData = await fetchFPLBootstrapData();
       const currentGameweek = getCurrentGameweek(bootstrapData);
