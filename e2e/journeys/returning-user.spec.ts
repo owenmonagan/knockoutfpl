@@ -211,7 +211,7 @@ test.describe('Returning User Journey @journey @dashboard', () => {
 
       // Navigate to the eliminated tournament (fplLeagueId: 315)
       // In this tournament, test user (158256) lost in Round 1 with score 45 vs 67
-      await page.goto('/knockout/315');
+      await page.goto('/league/315');
       await page.waitForLoadState('networkidle');
 
       // Verify user's match shows losing status
@@ -226,7 +226,7 @@ test.describe('Returning User Journey @journey @dashboard', () => {
 
       // Navigate to the completed tournament where user won (fplLeagueId: 316)
       // Test user (158256) won all 4 rounds and is the tournament winner
-      await page.goto('/knockout/316');
+      await page.goto('/league/316');
       await page.waitForLoadState('networkidle');
 
       // Verify tournament complete status
