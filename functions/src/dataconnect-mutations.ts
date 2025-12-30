@@ -278,12 +278,23 @@ const GET_ROUND_MATCHES_QUERY = `
       qualifiesToMatchId
       isBye
       status
-      matchPicks {
-        entryId
-        slot
-        participant {
-          seed
-        }
+    }
+  }
+`;
+
+const GET_ROUND_MATCH_PICKS_QUERY = `
+  query GetRoundMatchPicks($tournamentId: UUID!, $matchIds: [Int!]!) {
+    matchPicks(
+      where: {
+        tournamentId: { eq: $tournamentId }
+        matchId: { in: $matchIds }
+      }
+    ) {
+      matchId
+      entryId
+      slot
+      participant {
+        seed
       }
     }
   }
@@ -455,6 +466,27 @@ export interface ActiveRound {
   };
 }
 
+// Raw match data from query (without matchPicks)
+interface RawMatch {
+  tournamentId: string;
+  matchId: number;
+  roundNumber: number;
+  positionInRound: number;
+  qualifiesToMatchId: number | null;
+  isBye: boolean;
+  status: string;
+}
+
+// Match pick from separate query
+interface RawMatchPick {
+  matchId: number;
+  entryId: number;
+  slot: number;
+  participant: {
+    seed: number;
+  };
+}
+
 export interface RoundMatch {
   tournamentId: string;
   matchId: number;
@@ -612,11 +644,37 @@ export async function getStuckTestTournaments(cutoffTime: Date): Promise<StuckTo
 }
 
 export async function getRoundMatches(tournamentId: string, roundNumber: number): Promise<RoundMatch[]> {
-  const result = await dataConnectAdmin.executeGraphql<{ matches: RoundMatch[] }, { tournamentId: string; roundNumber: number }>(
+  // Query matches without matchPicks
+  const matchesResult = await dataConnectAdmin.executeGraphql<{ matches: RawMatch[] }, { tournamentId: string; roundNumber: number }>(
     GET_ROUND_MATCHES_QUERY,
     { variables: { tournamentId, roundNumber } }
   );
-  return result.data.matches;
+
+  const matches = matchesResult.data.matches;
+  if (matches.length === 0) {
+    return [];
+  }
+
+  // Query match picks separately
+  const matchIds = matches.map(m => m.matchId);
+  const picksResult = await dataConnectAdmin.executeGraphql<{ matchPicks: RawMatchPick[] }, { tournamentId: string; matchIds: number[] }>(
+    GET_ROUND_MATCH_PICKS_QUERY,
+    { variables: { tournamentId, matchIds } }
+  );
+
+  // Group picks by matchId
+  const picksByMatch = new Map<number, RawMatchPick[]>();
+  for (const pick of picksResult.data.matchPicks) {
+    const existing = picksByMatch.get(pick.matchId) || [];
+    existing.push(pick);
+    picksByMatch.set(pick.matchId, existing);
+  }
+
+  // Merge matches with their picks
+  return matches.map(match => ({
+    ...match,
+    matchPicks: picksByMatch.get(match.matchId) || [],
+  }));
 }
 
 export async function getCurrentEvent(season: string): Promise<CurrentEvent | null> {
