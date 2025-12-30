@@ -30,7 +30,7 @@ const TEST_LEAGUE_NAME = 'FLOAWO';
 // - Signup now redirects to /connect (not /dashboard)
 // - FPL connection happens on /connect page (not dashboard)
 // - Leagues are viewed at /leagues (not dashboard)
-// - Knockout brackets are at /knockout/{id} (not /league/{id})
+// - Knockout brackets are at /league/{id}
 test.describe.skip('Tournament Flow', () => {
   test.describe.configure({ mode: 'serial' });
 
