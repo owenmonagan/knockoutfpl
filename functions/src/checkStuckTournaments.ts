@@ -62,7 +62,8 @@ export const checkStuckTournaments = onSchedule(
         const currentRound = tournament.currentRound ?? 1;
 
         const message = [
-          `\u26a0\ufe0f Tournament stuck - ${tournament.fplLeagueName} (${tournament.id})`,
+          `\u26a0\ufe0f Tournament stuck - ${tournament.fplLeagueName} (League #${tournament.fplLeagueId})`,
+          `Tournament ID: ${tournament.id}`,
           `Status: ${tournament.status}, Round ${currentRound}/${tournament.totalRounds}`,
           `Created: ${timeSince}`,
         ].join('\n');

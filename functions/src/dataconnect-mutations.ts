@@ -227,6 +227,8 @@ const GET_ACTIVE_ROUNDS_QUERY = `
         id
         status
         totalRounds
+        fplLeagueId
+        fplLeagueName
       }
     }
   }
@@ -243,6 +245,8 @@ const GET_PENDING_ACTIVE_ROUNDS_QUERY = `
         id
         status
         totalRounds
+        fplLeagueId
+        fplLeagueName
       }
     }
   }
@@ -252,6 +256,7 @@ const GET_STUCK_TEST_TOURNAMENTS_QUERY = `
   query GetStuckTestTournaments($cutoffTime: Timestamp!) {
     tournaments(where: { isTest: { eq: true }, status: { ne: "completed" }, createdAt: { lt: $cutoffTime } }) {
       id
+      fplLeagueId
       fplLeagueName
       status
       createdAt
@@ -463,6 +468,8 @@ export interface ActiveRound {
     id: string;
     status: string;
     totalRounds: number;
+    fplLeagueId: number;
+    fplLeagueName: string;
   };
 }
 
@@ -513,6 +520,7 @@ export interface CurrentEvent {
 
 export interface StuckTournament {
   id: string;
+  fplLeagueId: number;
   fplLeagueName: string;
   status: string;
   createdAt: string;

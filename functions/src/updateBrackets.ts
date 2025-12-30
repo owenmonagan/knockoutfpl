@@ -255,7 +255,7 @@ export const updateBrackets = onSchedule(
 
             // Send Discord alert for processing errors
             await sendDiscordAlert(
-              `🔴 updateBrackets error: Round ${round.roundNumber} of tournament ${round.tournamentId} failed: ${errorMessage}`,
+              `🔴 updateBrackets error: Round ${round.roundNumber} of tournament ${round.tournamentId} (League: ${round.tournament.fplLeagueName} #${round.tournament.fplLeagueId}) failed: ${errorMessage}`,
               DISCORD_WEBHOOK_URL
             );
             // Continue with other rounds
