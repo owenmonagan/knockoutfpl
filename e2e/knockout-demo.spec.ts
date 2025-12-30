@@ -76,7 +76,7 @@ test.describe('Phase 1 Demo Flow @critical @smoke', () => {
     await overallCard.getByRole('button', { name: 'Start Knockout' }).click();
 
     // Step 9: Verify knockout page
-    await expect(page).toHaveURL(/\/knockout\/\d+/);
+    await expect(page).toHaveURL(/\/league\/\d+/);
     await expect(page.getByText('16 REMAIN')).toBeVisible({ timeout: 30000 });
     await expect(page.getByText(/\d+ teams · GW\d+ scores/)).toBeVisible();
 
@@ -171,7 +171,7 @@ test.describe('Knockout Page Features @demo', () => {
     const overallCard = page.locator(`text=${TEST_LEAGUE_NAME}`).locator('..').locator('..');
     await overallCard.getByRole('button', { name: 'Start Knockout' }).click();
 
-    await expect(page).toHaveURL(/\/knockout\/\d+/);
+    await expect(page).toHaveURL(/\/league\/\d+/);
 
     // Verify header
     await expect(page.getByText(TEST_LEAGUE_NAME.toUpperCase())).toBeVisible({ timeout: 10000 });
@@ -216,7 +216,7 @@ test.describe('Knockout Page Features @demo', () => {
     const overallCard = page.locator(`text=${TEST_LEAGUE_NAME}`).locator('..').locator('..');
     await overallCard.getByRole('button', { name: 'Start Knockout' }).click();
 
-    await expect(page).toHaveURL(/\/knockout\/\d+/);
+    await expect(page).toHaveURL(/\/league\/\d+/);
     await expect(page.getByText('16 REMAIN')).toBeVisible({ timeout: 30000 });
 
     // Winners should have green checkmark
