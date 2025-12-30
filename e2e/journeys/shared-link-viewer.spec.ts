@@ -13,8 +13,8 @@ import { test, expect } from '@playwright/test';
  *
  * Entry point: knockoutfpl.com/league/{fpl_league_id} (shared link format)
  *
- * Note: The current implementation has /league/:id and /knockout/:id as protected
- * routes. The journey doc envisions anonymous viewing with "claim team" CTAs.
+ * Note: The current implementation has /league/:id as a public route.
+ * The journey doc envisions anonymous viewing with "claim team" CTAs.
  * Tests marked with test.fixme() require either:
  * - Public route implementation for anonymous bracket viewing
  * - Firebase emulators with seeded tournament data
@@ -45,34 +45,23 @@ test.describe('Shared Link Viewer Journey @journey @bracket', () => {
       await expect(page).toHaveURL(`/league/${TEST_LEAGUE_ID}`);
     });
 
-    test('should NOT redirect anonymous users from knockout page @smoke', async ({
-      page,
-    }) => {
-      // Navigate to knockout page as an anonymous user
-      await page.goto(`/knockout/${TEST_LEAGUE_ID}`);
-      await page.waitForLoadState('networkidle');
-
-      // Should stay on knockout page (not redirect to login)
-      await expect(page).toHaveURL(`/knockout/${TEST_LEAGUE_ID}`);
-    });
-
     /**
      * Public bracket viewing tests - verify anonymous users can view brackets
      */
 
     test('should display bracket without authentication @critical', async ({ page }) => {
-      await page.goto(`/knockout/${TEST_LEAGUE_ID}`);
+      await page.goto(`/league/${TEST_LEAGUE_ID}`);
       await page.waitForLoadState('networkidle');
 
       // Should NOT redirect to login
-      await expect(page).toHaveURL(`/knockout/${TEST_LEAGUE_ID}`);
+      await expect(page).toHaveURL(`/league/${TEST_LEAGUE_ID}`);
 
       // Bracket should be visible - shows teams remaining count
       await expect(page.getByText(/REMAIN|\d+ teams/i).first()).toBeVisible({ timeout: 15000 });
     });
 
     test('should show all participants and matchups', async ({ page }) => {
-      await page.goto(`/knockout/${TEST_LEAGUE_ID}`);
+      await page.goto(`/league/${TEST_LEAGUE_ID}`);
       await page.waitForLoadState('networkidle');
 
       // Verify seeds are displayed
@@ -81,7 +70,7 @@ test.describe('Shared Link Viewer Journey @journey @bracket', () => {
     });
 
     test('should display current round status and scores', async ({ page }) => {
-      await page.goto(`/knockout/${TEST_LEAGUE_ID}`);
+      await page.goto(`/league/${TEST_LEAGUE_ID}`);
       await page.waitForLoadState('networkidle');
 
       // Verify gameweek info (use .first() since multiple GW badges exist)
@@ -120,7 +109,7 @@ test.describe('Shared Link Viewer Journey @journey @bracket', () => {
      * These require:
      * 1. Test user to be logged in
      * 2. User's FPL team to be connected
-     * 3. Navigation to knockout page with bracket data
+     * 3. Navigation to league page with bracket data
      */
 
     test.beforeEach(async ({ page }) => {
@@ -137,12 +126,12 @@ test.describe('Shared Link Viewer Journey @journey @bracket', () => {
     });
 
     test('should display bracket with user context @critical', async ({ page }) => {
-      // Navigate to knockout page for a large league
-      await page.goto(`/knockout/${TEST_LEAGUE_ID}`);
+      // Navigate to league page for a large league
+      await page.goto(`/league/${TEST_LEAGUE_ID}`);
       await page.waitForLoadState('networkidle');
 
-      // Should be on knockout page (not redirected)
-      await expect(page).toHaveURL(/\/knockout/);
+      // Should be on league page (not redirected)
+      await expect(page).toHaveURL(/\/league/);
 
       // Wait for bracket to load
       // Either show bracket content OR show loading/error state
@@ -164,8 +153,8 @@ test.describe('Shared Link Viewer Journey @journey @bracket', () => {
     });
 
     test('should highlight user own team in bracket @critical', async ({ page }) => {
-      // Navigate to knockout page
-      await page.goto(`/knockout/${TEST_LEAGUE_ID}`);
+      // Navigate to league page
+      await page.goto(`/league/${TEST_LEAGUE_ID}`);
       await page.waitForLoadState('networkidle');
 
       // Wait for bracket to load
@@ -207,8 +196,8 @@ test.describe('Shared Link Viewer Journey @journey @bracket', () => {
     );
 
     test('should navigate to dashboard after viewing', async ({ page }) => {
-      // Navigate to knockout page
-      await page.goto(`/knockout/${TEST_LEAGUE_ID}`);
+      // Navigate to league page
+      await page.goto(`/league/${TEST_LEAGUE_ID}`);
       await page.waitForLoadState('networkidle');
 
       // Click back to leagues link
