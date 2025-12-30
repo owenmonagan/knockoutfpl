@@ -112,8 +112,8 @@ test.describe('New User First Tournament Journey @journey @tournament', () => {
       const leagueCard = page.locator(`text=${TEST_LEAGUE_NAME}`).locator('..').locator('..');
       await leagueCard.getByRole('button', { name: 'Start Knockout' }).click();
 
-      // Step 7: Should be on knockout page with bracket
-      await expect(page).toHaveURL(/\/knockout\/\d+|\/league\/\d+/);
+      // Step 7: Should be on league page with bracket
+      await expect(page).toHaveURL(/\/league\/\d+/);
       await page.waitForLoadState('networkidle');
 
       // Verify bracket elements are visible (either via KnockoutPage or LeaguePage)

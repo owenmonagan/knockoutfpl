@@ -138,8 +138,8 @@ test.describe('Returning User Journey @journey @dashboard', () => {
       // Wait for bracket data to load
       await page.waitForTimeout(3000);
 
-      // Should be on knockout or league page
-      await expect(page).toHaveURL(/\/(knockout|league)\/\d+/);
+      // Should be on league page
+      await expect(page).toHaveURL(/\/league\/\d+/);
 
       // Check for bracket elements with scores
       // Look for gameweek badge (e.g., "GW 15")
