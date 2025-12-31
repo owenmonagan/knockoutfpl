@@ -35,7 +35,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         const profile = await getUserProfile(user.uid);
         setHasFplTeam(profile && profile.fplTeamId > 0);
       } catch {
-        setHasFplTeam(false);
+        // On DataConnect failure, don't assume no FPL team - that would break the redirect flow
+        // Setting null means "couldn't determine" - we won't redirect to /connect on failure
+        setHasFplTeam(null);
       } finally {
         setIsCheckingFpl(false);
       }

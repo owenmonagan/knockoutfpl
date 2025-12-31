@@ -105,10 +105,10 @@ describe('Navbar', () => {
       expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
     });
 
-    it('logo links to dashboard', () => {
+    it('logo links to leagues', () => {
       renderNavbar('authenticated');
       const logoLink = screen.getByRole('link', { name: /knockout fpl/i });
-      expect(logoLink).toHaveAttribute('href', '/dashboard');
+      expect(logoLink).toHaveAttribute('href', '/leagues');
     });
 
     it('has light background with border', () => {

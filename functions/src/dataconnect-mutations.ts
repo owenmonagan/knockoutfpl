@@ -75,6 +75,32 @@ const UPSERT_PICK_MUTATION = `
   }
 `;
 
+const UPSERT_EVENT_MUTATION = `
+  mutation UpsertEvent(
+    $event: Int!
+    $season: String!
+    $name: String!
+    $deadlineTime: Timestamp!
+    $finished: Boolean!
+    $isCurrent: Boolean!
+    $isNext: Boolean!
+    $rawJson: String!
+  ) {
+    event_upsert(
+      data: {
+        event: $event
+        season: $season
+        name: $name
+        deadlineTime: $deadlineTime
+        finished: $finished
+        isCurrent: $isCurrent
+        isNext: $isNext
+        rawJson: $rawJson
+      }
+    )
+  }
+`;
+
 const CREATE_TOURNAMENT_MUTATION = `
   mutation CreateTournament(
     $id: UUID!
@@ -424,6 +450,17 @@ export interface UpsertPickInput {
   isFinal: boolean;
 }
 
+export interface UpsertEventInput {
+  event: number;
+  season: string;
+  name: string;
+  deadlineTime: string; // ISO 8601 string
+  finished: boolean;
+  isCurrent: boolean;
+  isNext: boolean;
+  rawJson: string;
+}
+
 export interface CreateTournamentInput {
   id: string;
   fplLeagueId: number;
@@ -572,6 +609,15 @@ export async function upsertPickAdmin(
 ): Promise<void> {
   await dataConnectAdmin.executeGraphql(
     UPSERT_PICK_MUTATION,
+    { variables: input }
+  );
+}
+
+export async function upsertEventAdmin(
+  input: UpsertEventInput
+): Promise<void> {
+  await dataConnectAdmin.executeGraphql(
+    UPSERT_EVENT_MUTATION,
     { variables: input }
   );
 }

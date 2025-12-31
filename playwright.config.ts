@@ -18,7 +18,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
 
-  /* Opt out of parallel tests on CI. */
+  /* Use default workers locally, single worker on CI */
   workers: process.env.CI ? 1 : undefined,
 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -74,7 +74,9 @@ export default defineConfig({
   webServer: [
     {
       command: 'npm run emulators:e2e',
-      url: 'http://127.0.0.1:9099',
+      // Check Emulator Hub (4400) - ensures Firebase emulators are running
+      // Hub returns 200 and indicates all configured emulators are available
+      url: 'http://127.0.0.1:4400',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
     },

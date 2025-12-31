@@ -12,7 +12,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetEntry*](#getentry)
   - [*GetEntries*](#getentries)
   - [*GetPick*](#getpick)
-  - [*GetFinalPicksForEvent*](#getfinalpicksforevent)
+  - [*GetPicksForEvent*](#getpicksforevent)
   - [*GetLeague*](#getleague)
   - [*GetCurrentEvent*](#getcurrentevent)
   - [*GetEvent*](#getevent)
@@ -573,49 +573,50 @@ executeQuery(ref).then((response) => {
 });
 ```
 
-## GetFinalPicksForEvent
-You can execute the `GetFinalPicksForEvent` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+## GetPicksForEvent
+You can execute the `GetPicksForEvent` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
-getFinalPicksForEvent(vars: GetFinalPicksForEventVariables): QueryPromise<GetFinalPicksForEventData, GetFinalPicksForEventVariables>;
+getPicksForEvent(vars: GetPicksForEventVariables): QueryPromise<GetPicksForEventData, GetPicksForEventVariables>;
 
-interface GetFinalPicksForEventRef {
+interface GetPicksForEventRef {
   ...
   /* Allow users to create refs without passing in DataConnect */
-  (vars: GetFinalPicksForEventVariables): QueryRef<GetFinalPicksForEventData, GetFinalPicksForEventVariables>;
+  (vars: GetPicksForEventVariables): QueryRef<GetPicksForEventData, GetPicksForEventVariables>;
 }
-export const getFinalPicksForEventRef: GetFinalPicksForEventRef;
+export const getPicksForEventRef: GetPicksForEventRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getFinalPicksForEvent(dc: DataConnect, vars: GetFinalPicksForEventVariables): QueryPromise<GetFinalPicksForEventData, GetFinalPicksForEventVariables>;
+getPicksForEvent(dc: DataConnect, vars: GetPicksForEventVariables): QueryPromise<GetPicksForEventData, GetPicksForEventVariables>;
 
-interface GetFinalPicksForEventRef {
+interface GetPicksForEventRef {
   ...
-  (dc: DataConnect, vars: GetFinalPicksForEventVariables): QueryRef<GetFinalPicksForEventData, GetFinalPicksForEventVariables>;
+  (dc: DataConnect, vars: GetPicksForEventVariables): QueryRef<GetPicksForEventData, GetPicksForEventVariables>;
 }
-export const getFinalPicksForEventRef: GetFinalPicksForEventRef;
+export const getPicksForEventRef: GetPicksForEventRef;
 ```
 
-If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getFinalPicksForEventRef:
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getPicksForEventRef:
 ```typescript
-const name = getFinalPicksForEventRef.operationName;
+const name = getPicksForEventRef.operationName;
 console.log(name);
 ```
 
 ### Variables
-The `GetFinalPicksForEvent` query requires an argument of type `GetFinalPicksForEventVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+The `GetPicksForEvent` query requires an argument of type `GetPicksForEventVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
 
 ```typescript
-export interface GetFinalPicksForEventVariables {
+export interface GetPicksForEventVariables {
   event: number;
+  entryIds: number[];
 }
 ```
 ### Return Type
-Recall that executing the `GetFinalPicksForEvent` query returns a `QueryPromise` that resolves to an object with a `data` property.
+Recall that executing the `GetPicksForEvent` query returns a `QueryPromise` that resolves to an object with a `data` property.
 
-The `data` property is an object of type `GetFinalPicksForEventData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+The `data` property is an object of type `GetPicksForEventData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
 ```typescript
-export interface GetFinalPicksForEventData {
+export interface GetPicksForEventData {
   picks: ({
     entryId: number;
     event: number;
@@ -626,55 +627,57 @@ export interface GetFinalPicksForEventData {
   } & Pick_Key)[];
 }
 ```
-### Using `GetFinalPicksForEvent`'s action shortcut function
+### Using `GetPicksForEvent`'s action shortcut function
 
 ```typescript
 import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, getFinalPicksForEvent, GetFinalPicksForEventVariables } from '@knockoutfpl/dataconnect';
+import { connectorConfig, getPicksForEvent, GetPicksForEventVariables } from '@knockoutfpl/dataconnect';
 
-// The `GetFinalPicksForEvent` query requires an argument of type `GetFinalPicksForEventVariables`:
-const getFinalPicksForEventVars: GetFinalPicksForEventVariables = {
+// The `GetPicksForEvent` query requires an argument of type `GetPicksForEventVariables`:
+const getPicksForEventVars: GetPicksForEventVariables = {
   event: ..., 
+  entryIds: ..., 
 };
 
-// Call the `getFinalPicksForEvent()` function to execute the query.
+// Call the `getPicksForEvent()` function to execute the query.
 // You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await getFinalPicksForEvent(getFinalPicksForEventVars);
+const { data } = await getPicksForEvent(getPicksForEventVars);
 // Variables can be defined inline as well.
-const { data } = await getFinalPicksForEvent({ event: ..., });
+const { data } = await getPicksForEvent({ event: ..., entryIds: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
-const { data } = await getFinalPicksForEvent(dataConnect, getFinalPicksForEventVars);
+const { data } = await getPicksForEvent(dataConnect, getPicksForEventVars);
 
 console.log(data.picks);
 
 // Or, you can use the `Promise` API.
-getFinalPicksForEvent(getFinalPicksForEventVars).then((response) => {
+getPicksForEvent(getPicksForEventVars).then((response) => {
   const data = response.data;
   console.log(data.picks);
 });
 ```
 
-### Using `GetFinalPicksForEvent`'s `QueryRef` function
+### Using `GetPicksForEvent`'s `QueryRef` function
 
 ```typescript
 import { getDataConnect, executeQuery } from 'firebase/data-connect';
-import { connectorConfig, getFinalPicksForEventRef, GetFinalPicksForEventVariables } from '@knockoutfpl/dataconnect';
+import { connectorConfig, getPicksForEventRef, GetPicksForEventVariables } from '@knockoutfpl/dataconnect';
 
-// The `GetFinalPicksForEvent` query requires an argument of type `GetFinalPicksForEventVariables`:
-const getFinalPicksForEventVars: GetFinalPicksForEventVariables = {
+// The `GetPicksForEvent` query requires an argument of type `GetPicksForEventVariables`:
+const getPicksForEventVars: GetPicksForEventVariables = {
   event: ..., 
+  entryIds: ..., 
 };
 
-// Call the `getFinalPicksForEventRef()` function to get a reference to the query.
-const ref = getFinalPicksForEventRef(getFinalPicksForEventVars);
+// Call the `getPicksForEventRef()` function to get a reference to the query.
+const ref = getPicksForEventRef(getPicksForEventVars);
 // Variables can be defined inline as well.
-const ref = getFinalPicksForEventRef({ event: ..., });
+const ref = getPicksForEventRef({ event: ..., entryIds: ..., });
 
 // You can also pass in a `DataConnect` instance to the `QueryRef` function.
 const dataConnect = getDataConnect(connectorConfig);
-const ref = getFinalPicksForEventRef(dataConnect, getFinalPicksForEventVars);
+const ref = getPicksForEventRef(dataConnect, getPicksForEventVars);
 
 // Call `executeQuery()` on the reference to execute the query.
 // You can use the `await` keyword to wait for the promise to resolve.

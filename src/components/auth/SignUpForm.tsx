@@ -34,7 +34,7 @@ export function SignUpForm() {
         email: userCredential.user.email || email,
         displayName,
       });
-      navigate('/dashboard');
+      navigate('/connect');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during sign up');
     } finally {
@@ -53,7 +53,7 @@ export function SignUpForm() {
         email: userCredential.user.email || '',
         displayName: userCredential.user.displayName || '',
       });
-      navigate('/dashboard');
+      navigate('/connect');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during Google sign-in');
     } finally {

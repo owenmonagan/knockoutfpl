@@ -8,6 +8,7 @@ import {
   getRoundMatches,
   getMatchPicks,
   getPicksForEvent,
+  getCurrentEvent,
 } from '@knockoutfpl/dataconnect';
 import type { Tournament, Round, Match, Participant, MatchPlayer } from '../types/tournament';
 import type { UUIDString } from '@knockoutfpl/dataconnect';
@@ -44,7 +45,7 @@ interface RefreshTournamentRequest {
   tournamentId: string;
 }
 
-interface RefreshTournamentResponse {
+export interface RefreshTournamentResponse {
   picksRefreshed: number;
   matchesResolved: number;
 }
@@ -75,15 +76,18 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
   const basicTournament = tournamentsResult.data.tournaments[0];
   const tournamentId = basicTournament.id as UUIDString;
 
-  // Trigger refresh to update picks and resolve matches (eager update on view)
-  // This is fire-and-forget from the user's perspective - they just see fresh data
-  await callRefreshTournament(tournamentId);
-
-  // Fetch participants and rounds in parallel
-  const [participantsResult, roundsResult] = await Promise.all([
+  // Fetch participants, rounds, and current gameweek in parallel
+  const [participantsResult, roundsResult, currentEventResult] = await Promise.all([
     getTournamentWithParticipants(dataConnect, { id: tournamentId }),
     getTournamentRounds(dataConnect, { tournamentId }),
+    getCurrentEvent(dataConnect, { season: '2024-25' }),
   ]);
+
+  // Get current FPL gameweek from Events table
+  // Fallback: if no event data, assume we're before the tournament starts (startGameweek - 1)
+  // This ensures future rounds show seeds, not "0" scores
+  const startEvent = participantsResult.data.tournament?.startEvent ?? basicTournament.currentRound;
+  const currentGameweek = currentEventResult.data.events?.[0]?.event ?? (startEvent - 1);
 
   // Map participants to our type
   const participants: Participant[] = (participantsResult.data.participants || []).map((p) => ({
@@ -99,9 +103,13 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
   // Collect unique gameweeks from rounds and fetch scores for each
   const uniqueEvents = [...new Set((roundsResult.data.rounds || []).map((r) => r.event))];
 
+  // Get all participant entry IDs to filter picks query
+  const entryIds = participants.map((p) => p.fplTeamId);
+
   // Fetch picks for all unique events in parallel (includes provisional scores)
+  // Filter by tournament participant entry IDs to avoid default pagination limits
   const picksResults = await Promise.all(
-    uniqueEvents.map((event) => getPicksForEvent(dataConnect, { event }))
+    uniqueEvents.map((event) => getPicksForEvent(dataConnect, { event, entryIds }))
   );
 
   // Create a score lookup map: key = "entryId-event", value = points
@@ -189,6 +197,7 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
     creatorUserId: basicTournament.creatorUid,
     startGameweek: tournamentData?.startEvent ?? basicTournament.currentRound,
     currentRound: basicTournament.currentRound,
+    currentGameweek,
     totalRounds: basicTournament.totalRounds,
     status: basicTournament.status as 'active' | 'completed',
     participants,
@@ -216,9 +225,9 @@ export async function callCreateTournament(
 /**
  * Call the refreshTournament Cloud Function
  * Updates picks and resolves matches for a tournament
- * This is called before fetching tournament data to ensure fresh state
+ * Returns refresh statistics or null on failure (fails silently)
  */
-async function callRefreshTournament(
+export async function callRefreshTournament(
   tournamentId: string
 ): Promise<RefreshTournamentResponse | null> {
   try {

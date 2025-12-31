@@ -86,4 +86,23 @@ describe('BracketView', () => {
 
     expect(screen.getByText('Completed')).toBeInTheDocument();
   });
+
+  it('shows updating indicator when isRefreshing is true', () => {
+    render(<BracketView tournament={mockTournament} isRefreshing={true} />);
+
+    expect(screen.getByText('Updating...')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument(); // Spinner has role="status"
+  });
+
+  it('does not show updating indicator when isRefreshing is false', () => {
+    render(<BracketView tournament={mockTournament} isRefreshing={false} />);
+
+    expect(screen.queryByText('Updating...')).not.toBeInTheDocument();
+  });
+
+  it('does not show updating indicator by default (prop not provided)', () => {
+    render(<BracketView tournament={mockTournament} />);
+
+    expect(screen.queryByText('Updating...')).not.toBeInTheDocument();
+  });
 });

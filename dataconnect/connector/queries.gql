@@ -71,9 +71,9 @@ query GetPick($entryId: Int!, $event: Int!) @auth(level: PUBLIC) {
   }
 }
 
-# Get all final picks for an event
-query GetFinalPicksForEvent($event: Int!) @auth(level: PUBLIC) {
-  picks(where: { event: { eq: $event }, isFinal: { eq: true } }) {
+# Get picks for specific entries in an event (includes provisional scores during live gameweeks)
+query GetPicksForEvent($event: Int!, $entryIds: [Int!]!) @auth(level: PUBLIC) {
+  picks(where: { event: { eq: $event }, entryId: { in: $entryIds } }) {
     entryId
     event
     points

@@ -1,12 +1,16 @@
 // src/pages/LeaguePage.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
 import { Button } from '../components/ui/button';
 import { BracketView } from '../components/tournament/BracketView';
 import { CreateTournamentButton } from '../components/tournament/CreateTournamentButton';
-import { getTournamentByLeague, callCreateTournament } from '../services/tournament';
+import {
+  getTournamentByLeague,
+  callCreateTournament,
+  callRefreshTournament,
+} from '../services/tournament';
 import { useAuth } from '../contexts/AuthContext';
 import type { Tournament } from '../types/tournament';
 
@@ -15,26 +19,64 @@ export function LeaguePage() {
   const { user } = useAuth();
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
+    // Reset mounted ref on mount
+    mountedRef.current = true;
+
     async function loadData() {
       if (!leagueId) return;
 
       setIsLoading(true);
       try {
-        // Check for existing tournament
+        // Step 1: Fetch cached bracket data immediately
         const existingTournament = await getTournamentByLeague(Number(leagueId));
+
+        if (!mountedRef.current) return;
+
         if (existingTournament) {
           setTournament(existingTournament);
+
+          // Step 2: Trigger background refresh (fire-and-forget)
+          setIsRefreshing(true);
+          callRefreshTournament(existingTournament.id)
+            .then(async (result) => {
+              if (!mountedRef.current) return;
+
+              // Step 3: If refresh made changes, re-fetch data
+              if (result && (result.picksRefreshed > 0 || result.matchesResolved > 0)) {
+                const updatedTournament = await getTournamentByLeague(Number(leagueId));
+                if (mountedRef.current && updatedTournament) {
+                  setTournament(updatedTournament);
+                }
+              }
+            })
+            .catch(() => {
+              // Silent failure - don't break the UI
+            })
+            .finally(() => {
+              if (mountedRef.current) {
+                setIsRefreshing(false);
+              }
+            });
         }
       } catch (error) {
         console.error('Error loading tournament:', error);
       } finally {
-        setIsLoading(false);
+        if (mountedRef.current) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadData();
+
+    // Cleanup on unmount
+    return () => {
+      mountedRef.current = false;
+    };
   }, [leagueId]);
 
   const handleCreateTournament = async () => {
@@ -55,10 +97,6 @@ export function LeaguePage() {
       <div className="container mx-auto p-4 space-y-4">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-64 w-full" />
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
-          <p>Refreshing scores and loading bracket...</p>
-        </div>
       </div>
     );
   }
@@ -76,7 +114,7 @@ export function LeaguePage() {
       )}
 
       {tournament ? (
-        <BracketView tournament={tournament} />
+        <BracketView tournament={tournament} isRefreshing={isRefreshing} />
       ) : (
         <Card>
           <CardHeader>

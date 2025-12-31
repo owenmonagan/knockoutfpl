@@ -5,9 +5,10 @@ import { BracketRound } from './BracketRound';
 interface BracketLayoutProps {
   rounds: Round[];
   participants: Participant[];
+  currentGameweek: number;
 }
 
-export function BracketLayout({ rounds, participants }: BracketLayoutProps) {
+export function BracketLayout({ rounds, participants, currentGameweek }: BracketLayoutProps) {
   return (
     <div
       data-testid="bracket-layout"
@@ -18,6 +19,7 @@ export function BracketLayout({ rounds, participants }: BracketLayoutProps) {
           key={round.roundNumber}
           round={round}
           participants={participants}
+          currentGameweek={currentGameweek}
         />
       ))}
     </div>

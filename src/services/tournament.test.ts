@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   getTournamentByLeague,
   callCreateTournament,
+  callRefreshTournament,
   getTournamentSummaryForLeague,
 } from './tournament';
 
@@ -20,6 +21,7 @@ vi.mock('@knockoutfpl/dataconnect', () => ({
   getRoundMatches: vi.fn(),
   getMatchPicks: vi.fn(),
   getPicksForEvent: vi.fn(),
+  getCurrentEvent: vi.fn(),
 }));
 
 // Mock Firebase Functions
@@ -47,6 +49,7 @@ describe('getTournamentByLeague', () => {
       getLeagueTournaments,
       getTournamentWithParticipants,
       getTournamentRounds,
+      getCurrentEvent,
     } = await import('@knockoutfpl/dataconnect');
 
     vi.mocked(getLeagueTournaments).mockResolvedValue({
@@ -79,9 +82,16 @@ describe('getTournamentByLeague', () => {
       },
     } as any);
 
+    vi.mocked(getCurrentEvent).mockResolvedValue({
+      data: {
+        events: [{ event: 19 }],
+      },
+    } as any);
+
     const result = await getTournamentByLeague(123);
     expect(result?.id).toBe('tournament-123');
     expect(result?.fplLeagueName).toBe('Test League');
+    expect(result?.currentGameweek).toBe(19);
   });
 });
 
@@ -107,6 +117,35 @@ describe('callCreateTournament', () => {
     expect(result.tournamentId).toBe('new-tournament-123');
     expect(result.participantCount).toBe(8);
     expect(mockCallable).toHaveBeenCalledWith({ fplLeagueId: 12345 });
+  });
+});
+
+describe('callRefreshTournament', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should return null on error without throwing', async () => {
+    const { httpsCallable } = await import('firebase/functions');
+    const mockCallable = vi.fn().mockRejectedValue(new Error('Network error'));
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable);
+
+    const result = await callRefreshTournament('tournament-123');
+
+    expect(result).toBeNull();
+  });
+
+  it('should return refresh result on success', async () => {
+    const { httpsCallable } = await import('firebase/functions');
+    const mockCallable = vi.fn().mockResolvedValue({
+      data: { picksRefreshed: 5, matchesResolved: 2 },
+    });
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable);
+
+    const result = await callRefreshTournament('tournament-123');
+
+    expect(result).toEqual({ picksRefreshed: 5, matchesResolved: 2 });
+    expect(mockCallable).toHaveBeenCalledWith({ tournamentId: 'tournament-123' });
   });
 });
 

@@ -35,14 +35,14 @@ describe('BracketLayout', () => {
   ];
 
   it('renders all rounds as columns', () => {
-    render(<BracketLayout rounds={mockRounds} participants={mockParticipants} />);
+    render(<BracketLayout rounds={mockRounds} participants={mockParticipants} currentGameweek={20} />);
 
     expect(screen.getByText('Semi-Finals')).toBeInTheDocument();
     expect(screen.getByText('Final')).toBeInTheDocument();
   });
 
   it('renders matches within each round', () => {
-    render(<BracketLayout rounds={mockRounds} participants={mockParticipants} />);
+    render(<BracketLayout rounds={mockRounds} participants={mockParticipants} currentGameweek={20} />);
 
     expect(screen.getByText('Team A')).toBeInTheDocument();
     expect(screen.getByText('Team B')).toBeInTheDocument();
@@ -51,14 +51,14 @@ describe('BracketLayout', () => {
   });
 
   it('has horizontal layout on desktop', () => {
-    render(<BracketLayout rounds={mockRounds} participants={mockParticipants} />);
+    render(<BracketLayout rounds={mockRounds} participants={mockParticipants} currentGameweek={20} />);
 
     const container = screen.getByTestId('bracket-layout');
     expect(container).toHaveClass('md:flex-row');
   });
 
   it('stacks vertically on mobile', () => {
-    render(<BracketLayout rounds={mockRounds} participants={mockParticipants} />);
+    render(<BracketLayout rounds={mockRounds} participants={mockParticipants} currentGameweek={20} />);
 
     const container = screen.getByTestId('bracket-layout');
     // Default (mobile) should be vertical, md: becomes horizontal

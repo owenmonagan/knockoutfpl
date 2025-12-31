@@ -13,6 +13,7 @@ import { dataConnectAdmin } from './dataconnect-admin';
 import {
   getRoundMatches,
   upsertPickAdmin,
+  upsertEventAdmin,
   updateMatchWinner,
   updateRoundStatus,
   updateTournamentStatus,
@@ -246,6 +247,24 @@ export const refreshTournament = onCall(
       if (!gwStatus) {
         logWarn('refresh_skipped', 'could_not_fetch_gameweek', { tournamentId });
         return { picksRefreshed: 0, matchesResolved: 0 };
+      }
+
+      // 2a. Store current event in database (so frontend can get accurate current gameweek)
+      try {
+        await upsertEventAdmin({
+          event: gwStatus.event,
+          season: '2024-25',
+          name: gwStatus.name,
+          deadlineTime: gwStatus.deadlineTime,
+          finished: gwStatus.finished,
+          isCurrent: gwStatus.isCurrent,
+          isNext: gwStatus.isNext,
+          rawJson: JSON.stringify(gwStatus),
+        });
+        logInfo('event_upserted', { event: gwStatus.event, name: gwStatus.name });
+      } catch (error) {
+        // Log but don't fail - this is a best-effort update
+        logWarn('event_upsert_failed', String(error), { event: gwStatus.event });
       }
 
       // Determine if this round's gameweek is finished

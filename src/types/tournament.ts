@@ -39,6 +39,7 @@ export interface Tournament {
   creatorUserId: string;
   startGameweek: number; // First round GW (auto-set to next GW)
   currentRound: number; // 1-indexed
+  currentGameweek: number; // Actual current FPL gameweek (from Events table)
   totalRounds: number; // Calculated from participant count
   status: TournamentStatus;
   participants: Participant[];

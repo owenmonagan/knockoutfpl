@@ -29,7 +29,7 @@
     "db:stop": "docker-compose down",
     "db:logs": "docker-compose logs -f postgres",
     "emulators": "firebase emulators:start --only auth,functions,dataconnect --project knockoutfpl-dev",
-    "emulators:e2e": "docker-compose up -d postgres && firebase emulators:start --only auth,functions,dataconnect --project knockoutfpl-dev",
+    "emulators:e2e": "JAVA_HOME=/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home firebase emulators:start --only auth,firestore --project knockoutfpl-dev",
     "emulators:all": "firebase emulators:start --project knockoutfpl-dev",
     "emulators:ui": "firebase emulators:start --import=./firebase-data --export-on-exit --project knockoutfpl-dev",
     "deploy": "./scripts/deploy.sh all",

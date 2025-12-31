@@ -272,6 +272,17 @@ function buildTournamentRecords(
       match.isBye = true;
       match.status = 'complete';
       match.winnerEntryId = entry1;
+
+      // Advance BYE winner to next round
+      if (match.qualifiesToMatchId && entry1) {
+        const slot = assignment.position % 2 === 1 ? 1 : 2; // Odd positions → slot 1, even → slot 2
+        matchPicks.push({
+          tournamentId,
+          matchId: match.qualifiesToMatchId,
+          entryId: entry1,
+          slot,
+        });
+      }
     }
   }
 
@@ -383,6 +394,7 @@ async function writeTournamentToDatabase(
         positionInRound: match.positionInRound,
         qualifiesToMatchId: match.qualifiesToMatchId,
         isBye: match.isBye,
+        status: match.isBye ? 'complete' : 'active',
       },
       SYSTEM_AUTH_CLAIMS
     );

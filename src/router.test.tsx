@@ -83,7 +83,7 @@ describe('Router', () => {
     expect(screen.getByRole('heading', { name: /reset password/i })).toBeInTheDocument();
   });
 
-  it('should render dashboard page at /dashboard when authenticated', () => {
+  it('should redirect /dashboard to /leagues when authenticated', () => {
     // Set authenticated user before rendering
     mockAuthenticatedUser = { uid: 'test-uid', email: 'test@example.com' };
 
@@ -92,7 +92,8 @@ describe('Router', () => {
     });
 
     renderWithAuth(<RouterProvider router={testRouter} />);
-    expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
+    // Dashboard now redirects to leagues
+    expect(screen.getByText(/your mini leagues/i)).toBeInTheDocument();
   });
 
   it('should render profile page at /profile when authenticated', async () => {

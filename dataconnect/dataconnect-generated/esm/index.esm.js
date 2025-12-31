@@ -248,15 +248,15 @@ export function getPick(dcOrVars, vars) {
   return executeQuery(getPickRef(dcOrVars, vars));
 }
 
-export const getFinalPicksForEventRef = (dcOrVars, vars) => {
+export const getPicksForEventRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetFinalPicksForEvent', inputVars);
+  return queryRef(dcInstance, 'GetPicksForEvent', inputVars);
 }
-getFinalPicksForEventRef.operationName = 'GetFinalPicksForEvent';
+getPicksForEventRef.operationName = 'GetPicksForEvent';
 
-export function getFinalPicksForEvent(dcOrVars, vars) {
-  return executeQuery(getFinalPicksForEventRef(dcOrVars, vars));
+export function getPicksForEvent(dcOrVars, vars) {
+  return executeQuery(getPicksForEventRef(dcOrVars, vars));
 }
 
 export const getLeagueRef = (dcOrVars, vars) => {

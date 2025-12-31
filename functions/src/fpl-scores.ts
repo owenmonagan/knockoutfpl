@@ -33,13 +33,19 @@ export async function fetchEntryPicks(
   }
 }
 
+export interface GameweekStatus {
+  event: number;
+  finished: boolean;
+  name: string;
+  deadlineTime: string;
+  isCurrent: boolean;
+  isNext: boolean;
+}
+
 /**
  * Fetch current gameweek status from bootstrap-static
  */
-export async function fetchCurrentGameweek(): Promise<{
-  event: number;
-  finished: boolean;
-} | null> {
+export async function fetchCurrentGameweek(): Promise<GameweekStatus | null> {
   try {
     const url = `${FPL_API_BASE}/bootstrap-static/`;
     const response = await fetch(url);
@@ -59,6 +65,10 @@ export async function fetchCurrentGameweek(): Promise<{
     return {
       event: currentEvent.id,
       finished: currentEvent.finished,
+      name: currentEvent.name,
+      deadlineTime: currentEvent.deadline_time,
+      isCurrent: currentEvent.is_current,
+      isNext: currentEvent.is_next,
     };
   } catch (error) {
     console.error('Failed to fetch current gameweek:', error);

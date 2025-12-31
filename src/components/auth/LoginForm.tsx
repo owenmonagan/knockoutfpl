@@ -21,7 +21,7 @@ export function LoginForm() {
 
     try {
       await signInWithEmail(email, password);
-      navigate('/dashboard');
+      navigate('/connect');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during login');
     } finally {
@@ -35,7 +35,7 @@ export function LoginForm() {
 
     try {
       await signInWithGoogle();
-      navigate('/dashboard');
+      navigate('/connect');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during Google sign-in');
     } finally {

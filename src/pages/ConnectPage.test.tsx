@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
@@ -27,12 +27,16 @@ vi.mock('../contexts/AuthContext', () => ({
 // Mock user service
 vi.mock('../services/user', () => ({
   connectFPLTeam: vi.fn(),
+  getUserProfile: vi.fn().mockResolvedValue(null), // No existing profile by default
 }));
 
 // Mock FPL service
 vi.mock('../services/fpl', () => ({
   getFPLTeamInfo: vi.fn(),
 }));
+
+// Store original location
+const originalLocation = window.location;
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -41,6 +45,19 @@ beforeEach(() => {
   (connectFPLTeam as ReturnType<typeof vi.fn>).mockReset();
   // Clear sessionStorage to prevent state leaking between tests
   sessionStorage.clear();
+  // Mock window.location.href
+  Object.defineProperty(window, 'location', {
+    writable: true,
+    value: { ...originalLocation, href: '' },
+  });
+});
+
+afterEach(() => {
+  // Restore original location
+  Object.defineProperty(window, 'location', {
+    writable: true,
+    value: originalLocation,
+  });
 });
 
 describe('ConnectPage', () => {
@@ -197,7 +214,7 @@ describe('ConnectPage', () => {
     vi.advanceTimersByTime(1500);
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/leagues', { replace: true });
+      expect(window.location.href).toBe('/leagues');
     });
 
     vi.useRealTimers();

@@ -205,7 +205,7 @@ describe('SignUpForm', () => {
     // Wait for async operations
     await screen.findByRole('button', { name: /sign up/i });
 
-    expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+    expect(mockNavigate).toHaveBeenCalledWith('/connect');
   });
 
   it('should display link to log in page', () => {

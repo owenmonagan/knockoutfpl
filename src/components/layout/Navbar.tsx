@@ -15,7 +15,7 @@ export function Navbar({ variant }: NavbarProps) {
   };
 
   const isDark = variant === 'landing' || variant === 'auth';
-  const logoHref = variant === 'authenticated' ? '/dashboard' : '/';
+  const logoHref = variant === 'authenticated' ? '/leagues' : '/';
 
   return (
     <nav

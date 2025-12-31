@@ -1,39 +1,12 @@
 /**
- * DashboardPage - Simplified tournament-focused hub
+ * DashboardPage - Redirects to /leagues
  *
- * Displays:
- * - Welcome header with user's display name
- * - Quick link to view leagues and start knockouts
- *
- * Note: FPL connection is now handled by /connect via ProtectedRoute redirect
+ * Kept for backward compatibility with bookmarks and external links.
+ * All authenticated users should use /leagues as their home.
  */
 
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from '../components/ui/button';
+import { Navigate } from 'react-router-dom';
 
 export function DashboardPage() {
-  const { user: authUser } = useAuth();
-  const navigate = useNavigate();
-
-  return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Welcome back{authUser?.displayName ? `, ${authUser.displayName}` : ''}!
-          </p>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="space-y-4">
-          <Button onClick={() => navigate('/leagues')} size="lg">
-            View Your Leagues
-          </Button>
-        </div>
-      </div>
-    </main>
-  );
+  return <Navigate to="/leagues" replace />;
 }

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
@@ -14,13 +13,15 @@ import {
 } from '../components/ui/dialog';
 import { getFPLTeamInfo, type FPLTeamInfo } from '../services/fpl';
 import { useAuth } from '../contexts/AuthContext';
-import { connectFPLTeam } from '../services/user';
+import { connectFPLTeam, getUserProfile } from '../services/user';
 
 // Session storage key for persisting success state across remounts
 const SUCCESS_STORAGE_KEY = 'connectPage_successTeamInfo';
 
+// Module-level flag to prevent duplicate redirects across unmount/remount cycles
+let redirectScheduled = false;
+
 export function ConnectPage() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [teamId, setTeamId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +39,22 @@ export function ConnectPage() {
     }
     return null;
   });
+
+  // Check if user already has FPL team connected - redirect to /leagues if so
+  useEffect(() => {
+    const checkExistingConnection = async () => {
+      if (!user?.uid) return;
+      try {
+        const profile = await getUserProfile(user.uid);
+        if (profile && profile.fplTeamId && profile.fplTeamId !== 0) {
+          window.location.href = '/leagues';
+        }
+      } catch {
+        // Ignore errors - user may not have profile yet
+      }
+    };
+    checkExistingConnection();
+  }, [user?.uid]);
 
   const handleSubmit = async () => {
     if (!user?.uid || !user?.email) return;
@@ -57,17 +74,27 @@ export function ConnectPage() {
     }
   };
 
-  // Auto-redirect after success - persisted state survives remounts
+  // Auto-redirect after success - uses module-level flag to survive unmount/remount cycles
   useEffect(() => {
-    if (teamInfo) {
-      const timer = setTimeout(() => {
-        // Don't clear sessionStorage here - let it persist in case we get redirected back
-        // LeaguesPage will clear it once it successfully loads
-        navigate('/leagues', { replace: true });
+    if (teamInfo && !redirectScheduled) {
+      redirectScheduled = true;
+      window.setTimeout(() => {
+        sessionStorage.removeItem(SUCCESS_STORAGE_KEY);
+        window.location.href = '/leagues';
       }, 1500);
-      return () => clearTimeout(timer);
+      // No cleanup - we never want to cancel this redirect once scheduled
     }
-  }, [teamInfo, navigate]);
+  }, [teamInfo]);
+
+  // Reset module flag when component unmounts after successful navigation
+  useEffect(() => {
+    return () => {
+      // Only reset if we're leaving /connect (user manually navigated or redirect completed)
+      if (window.location.pathname !== '/connect') {
+        redirectScheduled = false;
+      }
+    };
+  }, []);
 
   if (teamInfo) {
     return (

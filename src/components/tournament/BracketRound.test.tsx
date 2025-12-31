@@ -21,19 +21,19 @@ describe('BracketRound', () => {
   };
 
   it('renders round name as header', () => {
-    render(<BracketRound round={mockRound} participants={mockParticipants} totalRounds={1} />);
+    render(<BracketRound round={mockRound} participants={mockParticipants} currentGameweek={20} />);
 
     expect(screen.getByRole('heading', { name: 'Final' })).toBeInTheDocument();
   });
 
   it('renders gameweek info', () => {
-    render(<BracketRound round={mockRound} participants={mockParticipants} totalRounds={1} />);
+    render(<BracketRound round={mockRound} participants={mockParticipants} currentGameweek={20} />);
 
     expect(screen.getByText('GW 20')).toBeInTheDocument();
   });
 
   it('renders all matches in the round', () => {
-    render(<BracketRound round={mockRound} participants={mockParticipants} totalRounds={1} />);
+    render(<BracketRound round={mockRound} participants={mockParticipants} currentGameweek={20} />);
 
     expect(screen.getByText('Team A')).toBeInTheDocument();
     expect(screen.getByText('Team B')).toBeInTheDocument();
@@ -41,7 +41,7 @@ describe('BracketRound', () => {
 
   it('shows complete badge when round is complete', () => {
     const completeRound = { ...mockRound, isComplete: true };
-    render(<BracketRound round={completeRound} participants={mockParticipants} totalRounds={1} />);
+    render(<BracketRound round={completeRound} participants={mockParticipants} currentGameweek={20} />);
 
     expect(screen.getByText('Complete')).toBeInTheDocument();
   });

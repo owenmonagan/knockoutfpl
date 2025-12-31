@@ -218,21 +218,6 @@ export interface GetEventVariables {
   season: string;
 }
 
-export interface GetFinalPicksForEventData {
-  picks: ({
-    entryId: number;
-    event: number;
-    points: number;
-    totalPoints?: number | null;
-    rank?: number | null;
-    isFinal: boolean;
-  } & Pick_Key)[];
-}
-
-export interface GetFinalPicksForEventVariables {
-  event: number;
-}
-
 export interface GetLeagueData {
   leagues: ({
     leagueId: number;
@@ -349,6 +334,22 @@ export interface GetPickData {
 export interface GetPickVariables {
   entryId: number;
   event: number;
+}
+
+export interface GetPicksForEventData {
+  picks: ({
+    entryId: number;
+    event: number;
+    points: number;
+    totalPoints?: number | null;
+    rank?: number | null;
+    isFinal: boolean;
+  } & Pick_Key)[];
+}
+
+export interface GetPicksForEventVariables {
+  event: number;
+  entryIds: number[];
 }
 
 export interface GetRoundData {
@@ -982,17 +983,17 @@ export const getPickRef: GetPickRef;
 export function getPick(vars: GetPickVariables): QueryPromise<GetPickData, GetPickVariables>;
 export function getPick(dc: DataConnect, vars: GetPickVariables): QueryPromise<GetPickData, GetPickVariables>;
 
-interface GetFinalPicksForEventRef {
+interface GetPicksForEventRef {
   /* Allow users to create refs without passing in DataConnect */
-  (vars: GetFinalPicksForEventVariables): QueryRef<GetFinalPicksForEventData, GetFinalPicksForEventVariables>;
+  (vars: GetPicksForEventVariables): QueryRef<GetPicksForEventData, GetPicksForEventVariables>;
   /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetFinalPicksForEventVariables): QueryRef<GetFinalPicksForEventData, GetFinalPicksForEventVariables>;
+  (dc: DataConnect, vars: GetPicksForEventVariables): QueryRef<GetPicksForEventData, GetPicksForEventVariables>;
   operationName: string;
 }
-export const getFinalPicksForEventRef: GetFinalPicksForEventRef;
+export const getPicksForEventRef: GetPicksForEventRef;
 
-export function getFinalPicksForEvent(vars: GetFinalPicksForEventVariables): QueryPromise<GetFinalPicksForEventData, GetFinalPicksForEventVariables>;
-export function getFinalPicksForEvent(dc: DataConnect, vars: GetFinalPicksForEventVariables): QueryPromise<GetFinalPicksForEventData, GetFinalPicksForEventVariables>;
+export function getPicksForEvent(vars: GetPicksForEventVariables): QueryPromise<GetPicksForEventData, GetPicksForEventVariables>;
+export function getPicksForEvent(dc: DataConnect, vars: GetPicksForEventVariables): QueryPromise<GetPicksForEventData, GetPicksForEventVariables>;
 
 interface GetLeagueRef {
   /* Allow users to create refs without passing in DataConnect */

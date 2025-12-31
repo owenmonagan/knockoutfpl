@@ -16,7 +16,8 @@ vi.mock('../services/fpl', () => ({
 
 vi.mock('../services/tournament', () => ({
   getTournamentByLeague: vi.fn(),
-  createTournament: vi.fn(),
+  callCreateTournament: vi.fn(),
+  callRefreshTournament: vi.fn(),
 }));
 
 const mockUser = { uid: 'user-123', email: 'test@example.com' } as FirebaseUser;
@@ -44,11 +45,14 @@ describe('LeaguePage', () => {
     vi.clearAllMocks();
   });
 
-  it('should render loading state initially', () => {
+  it('should render loading skeleton initially', () => {
     vi.mocked(tournamentService.getTournamentByLeague).mockImplementation(() => new Promise(() => {}));
 
-    renderLeaguePage();
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    const { container } = renderLeaguePage();
+
+    // Check for skeleton elements (loading state shows skeletons)
+    const skeletons = container.querySelectorAll('.animate-pulse');
+    expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('should show CreateTournamentButton when no tournament exists', async () => {
@@ -72,6 +76,12 @@ describe('LeaguePage', () => {
       startGameweek: 16,
       totalRounds: 2,
     } as any);
+
+    // Mock refresh to return no changes
+    vi.mocked(tournamentService.callRefreshTournament).mockResolvedValue({
+      picksRefreshed: 0,
+      matchesResolved: 0,
+    });
 
     renderLeaguePage();
 

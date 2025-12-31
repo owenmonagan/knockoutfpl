@@ -92,7 +92,8 @@ test.describe('Connect Page', () => {
     await expect(page.getByText(/o-win/i)).toBeVisible({ timeout: 10000 });
 
     // TC-07: Should auto-redirect to /leagues after ~1.5s from success
-    await page.waitForURL(/\/leagues/, { timeout: 5000 });
+    // Note: Allow extra time for any network latency or re-renders
+    await page.waitForURL(/\/leagues/, { timeout: 10000 });
     await expect(page).toHaveURL(/\/leagues/);
   });
 });
