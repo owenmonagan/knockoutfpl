@@ -9,7 +9,6 @@ let mockAuthenticatedUser: { uid: string; email: string } | null = null;
 
 vi.mock('./lib/firebase', () => ({
   auth: {},
-  db: {},
 }));
 
 vi.mock('firebase/auth', async () => {
