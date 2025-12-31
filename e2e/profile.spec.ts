@@ -37,8 +37,10 @@ test.describe('Profile Page', () => {
     // Save
     await accountSection.getByRole('button', { name: /save/i }).click();
 
-    // Verify edit mode exits and new name shows
+    // Verify edit mode exits (input no longer visible) and new name shows
     await expect(input).not.toBeVisible();
+    // Wait for the edit button to reappear (confirms we're back in view mode)
+    await expect(accountSection.getByRole('button', { name: /edit/i })).toBeVisible();
     await expect(accountSection.getByText('Updated Test User')).toBeVisible();
   });
 
@@ -58,9 +60,20 @@ test.describe('Profile Page', () => {
     // Cancel
     await accountSection.getByRole('button', { name: /cancel/i }).click();
 
-    // Verify original name is still shown
+    // Verify edit mode exits (input no longer visible)
     await expect(input).not.toBeVisible();
-    await expect(accountSection.getByText(originalName)).toBeVisible();
+    // Wait for the edit button to reappear (confirms we're back in view mode)
+    await expect(accountSection.getByRole('button', { name: /edit/i })).toBeVisible();
+
+    // Verify the changed name ("Should Not Save") is NOT visible
+    await expect(accountSection.getByText('Should Not Save')).not.toBeVisible();
+
+    // If originalName is not empty, verify it's still shown
+    if (originalName) {
+      await expect(accountSection.getByText(originalName)).toBeVisible();
+    }
+    // The "Display Name" label should always be visible in view mode
+    await expect(accountSection.getByText('Display Name')).toBeVisible();
   });
 
   test('shows FPL connection card on profile @profile', async ({ page }) => {
@@ -113,7 +126,12 @@ test.describe('Profile Page', () => {
       });
     }
 
-    // Wait for success - card should show team stats
-    await expect(fplSection.getByText('GW Points')).toBeVisible({ timeout: 10000 });
+    // Wait for success - after connect/update, the card should show team stats
+    // The "GW Points" label appears when isConnected && fplData && !isEditing
+    // Wait up to 15s for FPL data to load (API can be slow)
+    await expect(fplSection.getByText('GW Points')).toBeVisible({ timeout: 15000 });
+
+    // Additionally verify the grid layout is showing (confirms fplData loaded)
+    await expect(fplSection.getByText('Overall Points')).toBeVisible();
   });
 });
