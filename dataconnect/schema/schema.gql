@@ -190,6 +190,7 @@ type Match @table(name: "matches", key: ["tournamentId", "matchId"]) {
   winnerEntryId: Int @col(name: "winner_entry_id")
   isBye: Boolean! @col(name: "is_bye") @default(value: false)
   completedAt: Timestamp @col(name: "completed_at")
+  updatedAt: Timestamp! @col(name: "updated_at") @default(expr: "request.time")
 
   # Bracket navigation (explicit, not computed)
   qualifiesToMatchId: Int @col(name: "qualifies_to_match_id")
