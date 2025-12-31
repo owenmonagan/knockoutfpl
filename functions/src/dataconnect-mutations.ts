@@ -156,6 +156,7 @@ const CREATE_MATCH_MUTATION = `
     $positionInRound: Int!
     $qualifiesToMatchId: Int
     $isBye: Boolean!
+    $status: String!
   ) {
     match_insert(
       data: {
@@ -165,6 +166,7 @@ const CREATE_MATCH_MUTATION = `
         positionInRound: $positionInRound
         qualifiesToMatchId: $qualifiesToMatchId
         isBye: $isBye
+        status: $status
       }
     )
   }
@@ -203,7 +205,7 @@ const CREATE_MATCH_PICK_MUTATION = `
     $entryId: Int!
     $slot: Int!
   ) {
-    matchPick_insert(
+    matchPick_upsert(
       data: {
         tournamentId: $tournamentId
         matchId: $matchId
@@ -273,7 +275,8 @@ const GET_ROUND_MATCHES_QUERY = `
       where: {
         tournamentId: { eq: $tournamentId }
         roundNumber: { eq: $roundNumber }
-        status: { eq: "active" }
+        status: { ne: "complete" }
+        isBye: { eq: false }
       }
     ) {
       tournamentId
@@ -365,6 +368,20 @@ const UPDATE_TOURNAMENT_STATUS_MUTATION = `
   }
 `;
 
+const UPDATE_TOURNAMENT_CURRENT_ROUND_MUTATION = `
+  mutation UpdateTournamentCurrentRound(
+    $id: UUID!
+    $currentRound: Int!
+  ) {
+    tournament_update(
+      id: $id
+      data: {
+        currentRound: $currentRound
+      }
+    )
+  }
+`;
+
 const UPDATE_PARTICIPANT_STATUS_MUTATION = `
   mutation UpdateParticipantStatus(
     $tournamentId: UUID!
@@ -444,10 +461,10 @@ export interface CreateMatchInput {
   positionInRound: number;
   qualifiesToMatchId?: number | null;
   isBye: boolean;
+  status: string;
 }
 
 export interface UpdateMatchInput extends CreateMatchInput {
-  status: string;
   winnerEntryId?: number | null;
 }
 
@@ -736,5 +753,15 @@ export async function updateParticipantStatus(
   await dataConnectAdmin.executeGraphql(
     UPDATE_PARTICIPANT_STATUS_MUTATION,
     { variables: { tournamentId, entryId, status, eliminationRound } }
+  );
+}
+
+export async function updateTournamentCurrentRound(
+  tournamentId: string,
+  currentRound: number
+): Promise<void> {
+  await dataConnectAdmin.executeGraphql(
+    UPDATE_TOURNAMENT_CURRENT_ROUND_MUTATION,
+    { variables: { id: tournamentId, currentRound } }
   );
 }

@@ -16,6 +16,7 @@ import {
   updateMatchWinner,
   updateRoundStatus,
   updateTournamentStatus,
+  updateTournamentCurrentRound,
   updateParticipantStatus,
   createMatchPickAdmin,
   RoundMatch,
@@ -90,7 +91,7 @@ interface TournamentMatch {
 }
 
 interface RefreshResult {
-  matchesRefreshed: number;
+  picksRefreshed: number;
   matchesResolved: number;
 }
 
@@ -216,7 +217,7 @@ export const refreshTournament = onCall(
 
     logInfo('refresh_start', { tournamentId, userId: request.auth.uid });
 
-    let matchesRefreshed = 0;
+    let picksRefreshed = 0;
     let matchesResolved = 0;
 
     try {
@@ -229,7 +230,7 @@ export const refreshTournament = onCall(
 
       if (tournament.status === 'completed') {
         logInfo('tournament_already_complete', { tournamentId });
-        return { matchesRefreshed: 0, matchesResolved: 0 };
+        return { picksRefreshed: 0, matchesResolved: 0 };
       }
 
       // Find the current round info
@@ -244,7 +245,7 @@ export const refreshTournament = onCall(
       const gwStatus = await fetchCurrentGameweek();
       if (!gwStatus) {
         logWarn('refresh_skipped', 'could_not_fetch_gameweek', { tournamentId });
-        return { matchesRefreshed: 0, matchesResolved: 0 };
+        return { picksRefreshed: 0, matchesResolved: 0 };
       }
 
       // Determine if this round's gameweek is finished
@@ -265,7 +266,7 @@ export const refreshTournament = onCall(
 
       if (matches.length === 0) {
         logInfo('no_active_matches', { tournamentId, round: tournament.currentRound });
-        return { matchesRefreshed: 0, matchesResolved: 0 };
+        return { picksRefreshed: 0, matchesResolved: 0 };
       }
 
       // 4. Collect all entry IDs that need scores
@@ -296,7 +297,7 @@ export const refreshTournament = onCall(
             },
             SYSTEM_AUTH_CLAIMS
           );
-          matchesRefreshed++;
+          picksRefreshed++;
         } catch (error) {
           logError('pick_upsert_failed', String(error), { tournamentId, entryId, event });
           // Continue with other entries
@@ -307,10 +308,10 @@ export const refreshTournament = onCall(
       if (!isEventFinished) {
         logInfo('refresh_complete_pending', {
           tournamentId,
-          matchesRefreshed,
+          picksRefreshed,
           reason: 'gameweek_not_finished',
         });
-        return { matchesRefreshed, matchesResolved: 0 };
+        return { picksRefreshed, matchesResolved: 0 };
       }
 
       // 8. Gameweek is finished - try to resolve matches
@@ -414,22 +415,24 @@ export const refreshTournament = onCall(
           // Advance winners to next round
           await advanceWinnersToNextRound(tournamentId, tournament.currentRound, matches, results);
 
-          // Activate next round
-          await updateRoundStatus(tournamentId, tournament.currentRound + 1, 'active');
+          // Activate next round and update tournament's currentRound
+          const nextRound = tournament.currentRound + 1;
+          await updateRoundStatus(tournamentId, nextRound, 'active');
+          await updateTournamentCurrentRound(tournamentId, nextRound);
           logInfo('next_round_activated', {
             tournamentId,
-            nextRound: tournament.currentRound + 1,
+            nextRound,
           });
         }
       }
 
       logInfo('refresh_complete', {
         tournamentId,
-        matchesRefreshed,
+        picksRefreshed,
         matchesResolved,
       });
 
-      return { matchesRefreshed, matchesResolved };
+      return { picksRefreshed, matchesResolved };
     } catch (error) {
       if (error instanceof HttpsError) {
         throw error;
