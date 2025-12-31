@@ -18,16 +18,16 @@ test.describe('Navigation & Routing', () => {
     await expect(page.locator('body')).toBeVisible();
   });
 
-  test('should navigate from landing page to signup via Get Started button @navigation @critical', async ({ page }) => {
+  test('should navigate from landing page to signup via Enter the Arena button @navigation @critical', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Verify Get Started button is visible
-    const getStartedButton = page.getByRole('link', { name: 'Get Started' });
-    await expect(getStartedButton).toBeVisible();
+    // Verify Enter the Arena button is visible
+    const enterArenaButton = page.getByRole('link', { name: 'Enter the Arena' });
+    await expect(enterArenaButton).toBeVisible();
 
     // Click and verify navigation
-    await getStartedButton.click();
+    await enterArenaButton.click();
     await page.waitForLoadState('networkidle');
 
     // Verify we're on the signup page
@@ -35,16 +35,16 @@ test.describe('Navigation & Routing', () => {
     await expect(page.getByRole('button', { name: 'Sign Up' })).toBeVisible();
   });
 
-  test('should navigate from landing page to login via Log In button @navigation @critical', async ({ page }) => {
+  test('should navigate from landing page to login via Login link @navigation @critical', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Verify Log In button is visible
-    const logInButton = page.getByRole('link', { name: 'Log In' });
-    await expect(logInButton).toBeVisible();
+    // Verify Login link is visible
+    const loginLink = page.getByRole('link', { name: 'Login' });
+    await expect(loginLink).toBeVisible();
 
     // Click and verify navigation
-    await logInButton.click();
+    await loginLink.click();
     await page.waitForLoadState('networkidle');
 
     // Verify we're on the login page
