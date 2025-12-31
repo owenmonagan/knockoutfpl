@@ -1,4 +1,4 @@
-import { Navbar } from '../components/landing/Navbar';
+import { Navbar } from '../components/layout/Navbar';
 import { Hero } from '../components/landing/Hero';
 import { ValueProps } from '../components/landing/ValueProps';
 import { SocialProof } from '../components/landing/SocialProof';
