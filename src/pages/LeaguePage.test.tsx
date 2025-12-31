@@ -12,6 +12,7 @@ import * as tournamentService from '../services/tournament';
 vi.mock('../services/fpl', () => ({
   getLeagueStandings: vi.fn(),
   getCurrentGameweek: vi.fn(),
+  getFPLBootstrapData: vi.fn(),
 }));
 
 vi.mock('../services/tournament', () => ({
@@ -43,6 +44,8 @@ const renderLeaguePage = (leagueId: string = '123') => {
 describe('LeaguePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default mock for bootstrap data
+    vi.mocked(fplService.getFPLBootstrapData).mockResolvedValue({ currentGameweek: 20 });
   });
 
   it('should render loading skeleton initially', () => {

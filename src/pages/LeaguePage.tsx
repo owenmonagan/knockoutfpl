@@ -79,11 +79,11 @@ export function LeaguePage() {
     };
   }, [leagueId]);
 
-  const handleCreateTournament = async () => {
+  const handleCreateTournament = async (startEvent: number) => {
     if (!leagueId || !user) return;
 
-    // Call the Cloud Function to create the tournament
-    await callCreateTournament(Number(leagueId));
+    // Call the Cloud Function to create the tournament with the selected start gameweek
+    await callCreateTournament(Number(leagueId), startEvent);
 
     // Reload tournament data
     const newTournament = await getTournamentByLeague(Number(leagueId));

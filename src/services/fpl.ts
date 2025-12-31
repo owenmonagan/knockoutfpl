@@ -79,3 +79,23 @@ export async function getLeagueStandings(leagueId: number): Promise<LeagueStandi
     totalPoints: entry.total,
   }));
 }
+
+export interface FPLBootstrapData {
+  currentGameweek: number;
+}
+
+export async function getFPLBootstrapData(): Promise<FPLBootstrapData> {
+  const response = await fetch('/api/fpl/bootstrap-static/');
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch FPL bootstrap data');
+  }
+
+  const data = await response.json();
+  const events = data.events || [];
+  const currentEvent = events.find((event: any) => event.is_current === true);
+
+  return {
+    currentGameweek: currentEvent?.id || 1,
+  };
+}

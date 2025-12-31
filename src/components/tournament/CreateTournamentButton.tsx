@@ -1,17 +1,45 @@
 // src/components/tournament/CreateTournamentButton.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Trophy } from 'lucide-react';
 import { CreationProgressChecklist } from './CreationProgressChecklist';
+import { Label } from '../ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
+import { getFPLBootstrapData } from '../../services/fpl';
 
 interface CreateTournamentButtonProps {
-  onCreate: () => Promise<void>;
+  onCreate: (startEvent: number) => Promise<void>;
 }
 
 export function CreateTournamentButton({ onCreate }: CreateTournamentButtonProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentGameweek, setCurrentGameweek] = useState<number | null>(null);
+  const [selectedGameweek, setSelectedGameweek] = useState<number>(1);
+
+  useEffect(() => {
+    async function loadBootstrapData() {
+      try {
+        const data = await getFPLBootstrapData();
+        setCurrentGameweek(data.currentGameweek);
+        // Default to next gameweek, but cap at 38
+        const nextGameweek = Math.min(data.currentGameweek + 1, 38);
+        setSelectedGameweek(nextGameweek);
+      } catch {
+        // On error, default to GW 1
+        setCurrentGameweek(null);
+        setSelectedGameweek(1);
+      }
+    }
+    loadBootstrapData();
+  }, []);
 
   const handleClick = async () => {
     setIsCreating(true);
@@ -19,7 +47,7 @@ export function CreateTournamentButton({ onCreate }: CreateTournamentButtonProps
     setError(null);
 
     try {
-      await onCreate();
+      await onCreate(selectedGameweek);
       setIsComplete(true);
       // Brief pause to show completion state before parent handles navigation
       await new Promise((r) => setTimeout(r, 500));
@@ -47,15 +75,39 @@ export function CreateTournamentButton({ onCreate }: CreateTournamentButtonProps
     );
   }
 
+  const gameweeks = Array.from({ length: 38 }, (_, i) => i + 1);
+
   return (
-    <Button
-      onClick={handleClick}
-      disabled={isCreating}
-      size="lg"
-      className="w-full"
-    >
-      <Trophy className="mr-2 h-4 w-4" />
-      Create Tournament
-    </Button>
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="gameweek-select">Starting Gameweek</Label>
+        <Select
+          value={selectedGameweek.toString()}
+          onValueChange={(value) => setSelectedGameweek(parseInt(value, 10))}
+          disabled={isCreating}
+        >
+          <SelectTrigger id="gameweek-select">
+            <SelectValue placeholder="Select gameweek" />
+          </SelectTrigger>
+          <SelectContent>
+            {gameweeks.map((gw) => (
+              <SelectItem key={gw} value={gw.toString()}>
+                GW {gw}{gw === currentGameweek ? ' (current)' : ''}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Button
+        onClick={handleClick}
+        disabled={isCreating}
+        size="lg"
+        className="w-full"
+      >
+        <Trophy className="mr-2 h-4 w-4" />
+        Create Tournament
+      </Button>
+    </div>
   );
 }
