@@ -77,3 +77,18 @@ export { createTestTournaments } from './createTestTournaments';
 
 // Export scheduled stuck tournament checker
 export { checkStuckTournaments } from './checkStuckTournaments';
+
+// Export one-time BYE migration function
+export { migrateByes } from './migrateByes';
+
+// Export debug function for BYE matches
+export { debugByes } from './debugByes';
+
+// Export fix function for specific tournament BYEs
+export { fixTournamentByes } from './fixTournamentByes';
+
+// Export fix function for ALL tournament BYEs
+export { fixAllTournamentByes } from './fixAllTournamentByes';
+
+// Export eager refresh function for tournament viewing
+export { refreshTournament } from './refreshTournament';
