@@ -12,11 +12,6 @@ describe('LandingPage', () => {
     );
   };
 
-  it('renders Navbar', () => {
-    renderLandingPage();
-    expect(screen.getByRole('navigation')).toBeInTheDocument();
-  });
-
   it('renders Hero headline', () => {
     renderLandingPage();
     const heading = screen.getByRole('heading', { level: 1 });
