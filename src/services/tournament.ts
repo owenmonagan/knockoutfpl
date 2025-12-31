@@ -32,6 +32,7 @@ export interface UserProgress {
 // Cloud Function types
 interface CreateTournamentRequest {
   fplLeagueId: number;
+  startEvent?: number;
 }
 
 interface CreateTournamentResponse {
@@ -211,14 +212,20 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
  * This replaces the client-side bracket generation with server-side logic
  */
 export async function callCreateTournament(
-  fplLeagueId: number
+  fplLeagueId: number,
+  startEvent?: number
 ): Promise<CreateTournamentResponse> {
   const createTournamentFn = httpsCallable<
     CreateTournamentRequest,
     CreateTournamentResponse
   >(functions, 'createTournament');
 
-  const result = await createTournamentFn({ fplLeagueId });
+  const request: CreateTournamentRequest = { fplLeagueId };
+  if (startEvent !== undefined) {
+    request.startEvent = startEvent;
+  }
+
+  const result = await createTournamentFn(request);
   return result.data;
 }
 

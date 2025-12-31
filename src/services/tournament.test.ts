@@ -100,7 +100,7 @@ describe('callCreateTournament', () => {
     vi.clearAllMocks();
   });
 
-  it('should call the Cloud Function with league ID', async () => {
+  it('should call the Cloud Function with league ID only when startEvent not provided', async () => {
     const { httpsCallable } = await import('firebase/functions');
     const mockCallable = vi.fn().mockResolvedValue({
       data: {
@@ -116,6 +116,45 @@ describe('callCreateTournament', () => {
 
     expect(result.tournamentId).toBe('new-tournament-123');
     expect(result.participantCount).toBe(8);
+    expect(mockCallable).toHaveBeenCalledWith({ fplLeagueId: 12345 });
+  });
+
+  it('should call the Cloud Function with league ID and startEvent when provided', async () => {
+    const { httpsCallable } = await import('firebase/functions');
+    const mockCallable = vi.fn().mockResolvedValue({
+      data: {
+        tournamentId: 'new-tournament-456',
+        participantCount: 16,
+        totalRounds: 4,
+        startEvent: 25,
+      },
+    });
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable);
+
+    const result = await callCreateTournament(12345, 25);
+
+    expect(result.tournamentId).toBe('new-tournament-456');
+    expect(result.participantCount).toBe(16);
+    expect(result.totalRounds).toBe(4);
+    expect(result.startEvent).toBe(25);
+    expect(mockCallable).toHaveBeenCalledWith({ fplLeagueId: 12345, startEvent: 25 });
+  });
+
+  it('should not include startEvent in request when undefined', async () => {
+    const { httpsCallable } = await import('firebase/functions');
+    const mockCallable = vi.fn().mockResolvedValue({
+      data: {
+        tournamentId: 'new-tournament-789',
+        participantCount: 8,
+        totalRounds: 3,
+        startEvent: 20,
+      },
+    });
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable);
+
+    const result = await callCreateTournament(12345, undefined);
+
+    expect(result.tournamentId).toBe('new-tournament-789');
     expect(mockCallable).toHaveBeenCalledWith({ fplLeagueId: 12345 });
   });
 });
