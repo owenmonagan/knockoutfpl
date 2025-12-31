@@ -7,6 +7,7 @@ import {
   getTournamentRounds,
   getRoundMatches,
   getMatchPicks,
+  getFinalPicksForEvent,
 } from '@knockoutfpl/dataconnect';
 import type { Tournament, Round, Match, Participant, MatchPlayer } from '../types/tournament';
 import type { UUIDString } from '@knockoutfpl/dataconnect';
@@ -21,6 +22,15 @@ interface CreateTournamentResponse {
   participantCount: number;
   totalRounds: number;
   startEvent: number;
+}
+
+interface RefreshTournamentRequest {
+  tournamentId: string;
+}
+
+interface RefreshTournamentResponse {
+  picksRefreshed: number;
+  matchesResolved: number;
 }
 
 /**
@@ -50,6 +60,10 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
   const tournamentId = basicTournament.id as UUIDString;
   console.log('[DEBUG] Tournament ID:', tournamentId);
 
+  // Trigger refresh to update picks and resolve matches (eager update on view)
+  // This is fire-and-forget from the user's perspective - they just see fresh data
+  await callRefreshTournament(tournamentId);
+
   // Fetch participants and rounds in parallel
   const [participantsResult, roundsResult] = await Promise.all([
     getTournamentWithParticipants(dataConnect, { id: tournamentId }),
@@ -69,6 +83,25 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
 
   // Create a lookup map for participants by entryId
   const participantMap = new Map(participants.map((p) => [p.fplTeamId, p]));
+
+  // Collect unique gameweeks from rounds and fetch scores for each
+  const uniqueEvents = [...new Set((roundsResult.data.rounds || []).map((r) => r.event))];
+  console.log('[DEBUG] Unique events to fetch scores for:', uniqueEvents);
+
+  // Fetch picks for all unique events in parallel
+  const picksResults = await Promise.all(
+    uniqueEvents.map((event) => getFinalPicksForEvent(dataConnect, { event }))
+  );
+
+  // Create a score lookup map: key = "entryId-event", value = points
+  const scoreMap = new Map<string, number>();
+  picksResults.forEach((result, index) => {
+    const event = uniqueEvents[index];
+    for (const pick of result.data.picks || []) {
+      scoreMap.set(`${pick.entryId}-${event}`, pick.points);
+    }
+  });
+  console.log('[DEBUG] Score map size:', scoreMap.size);
 
   // For each round, fetch matches and match picks
   const rounds: Round[] = await Promise.all(
@@ -93,11 +126,24 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
           const player1Pick = picks.find((p) => p.slot === 1);
           const player2Pick = picks.find((p) => p.slot === 2);
 
+          // Look up scores from the picks table using entryId and round's event
+          const player1Score = player1Pick
+            ? scoreMap.get(`${player1Pick.entryId}-${r.event}`) ?? null
+            : null;
+          const player2Score = player2Pick
+            ? scoreMap.get(`${player2Pick.entryId}-${r.event}`) ?? null
+            : null;
+
+          // Debug: log score lookups for non-bye matches
+          if (player1Pick && player2Pick) {
+            console.log(`[DEBUG] Match ${m.matchId} (GW ${r.event}): entry ${player1Pick.entryId} score=${player1Score}, entry ${player2Pick.entryId} score=${player2Score}`);
+          }
+
           const player1: MatchPlayer | null = player1Pick
             ? {
                 fplTeamId: player1Pick.entryId,
                 seed: participantMap.get(player1Pick.entryId)?.seed ?? 0,
-                score: null, // Score would come from picks table if needed
+                score: player1Score,
               }
             : null;
 
@@ -105,7 +151,7 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
             ? {
                 fplTeamId: player2Pick.entryId,
                 seed: participantMap.get(player2Pick.entryId)?.seed ?? 0,
-                score: null,
+                score: player2Score,
               }
             : null;
 
@@ -162,4 +208,29 @@ export async function callCreateTournament(
 
   const result = await createTournamentFn({ fplLeagueId });
   return result.data;
+}
+
+/**
+ * Call the refreshTournament Cloud Function
+ * Updates picks and resolves matches for a tournament
+ * This is called before fetching tournament data to ensure fresh state
+ */
+async function callRefreshTournament(
+  tournamentId: string
+): Promise<RefreshTournamentResponse | null> {
+  try {
+    const refreshTournamentFn = httpsCallable<
+      RefreshTournamentRequest,
+      RefreshTournamentResponse
+    >(functions, 'refreshTournament');
+
+    const result = await refreshTournamentFn({ tournamentId });
+    console.log('[DEBUG] Tournament refresh result:', result.data);
+    return result.data;
+  } catch (error) {
+    // Log warning but don't fail - user may not be authenticated
+    // or there may be a transient error
+    console.warn('[WARN] Failed to refresh tournament:', error);
+    return null;
+  }
 }
