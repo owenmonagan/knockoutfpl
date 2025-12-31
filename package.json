@@ -25,6 +25,8 @@
     "test:e2e:selective": "node scripts/e2e-watch.js",
     "test:all": "npm test -- --run && npm run test:e2e",
     "test:critical": "npm test -- --run && npm run test:e2e:smoke",
+    "test:integration": "vitest run integration/",
+    "test:integration:watch": "vitest watch integration/",
     "db:start": "docker-compose up -d postgres",
     "db:stop": "docker-compose down",
     "db:logs": "docker-compose logs -f postgres",

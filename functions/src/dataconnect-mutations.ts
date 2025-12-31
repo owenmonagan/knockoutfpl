@@ -902,7 +902,6 @@ export async function createRoundsBatch(
         roundNumber: ${round.roundNumber}
         event: ${round.event}
         status: "${round.status}"
-        tournamentTournamentId: "${round.tournamentId}"
       })
     `).join('\n');
 
@@ -933,7 +932,6 @@ export async function createParticipantsBatch(
         leagueRank: ${p.leagueRank ?? 'null'}
         leaguePoints: ${p.leaguePoints ?? 'null'}
         rawJson: ${JSON.stringify(p.rawJson)}
-        tournamentTournamentId: "${p.tournamentId}"
         entryEntryId: ${p.entryId}
       })
     `).join('\n');
@@ -964,7 +962,6 @@ export async function createMatchesBatch(
         qualifiesToMatchId: ${m.qualifiesToMatchId ?? 'null'}
         isBye: ${m.isBye}
         status: "${m.status ?? 'pending'}"
-        tournamentTournamentId: "${m.tournamentId}"
       })
     `).join('\n');
 
