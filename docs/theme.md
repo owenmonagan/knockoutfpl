@@ -10,25 +10,26 @@ This document defines the visual design system for Knockout FPL. Reference this 
 
 These colors are defined as CSS custom properties in `src/index.css` and referenced via Tailwind.
 
-| Token | Tailwind Class | Hex | Usage |
-|-------|----------------|-----|-------|
-| Background | `bg-background` | `#0B1210` | Page backgrounds |
-| Foreground | `text-foreground` | `#FFFFFF` | Primary text |
-| Card | `bg-card` | `#131C18` | Card/surface backgrounds |
-| Card Foreground | `text-card-foreground` | `#FFFFFF` | Text on cards |
-| Primary | `bg-primary`, `text-primary` | `#00FF87` | CTAs, accents, highlights |
-| Primary Foreground | `text-primary-foreground` | `#0B1210` | Text on primary backgrounds |
-| Muted | `bg-muted` | `#18241F` | Subtle backgrounds |
-| Muted Foreground | `text-muted-foreground` | `#9ABCAC` | Secondary/subtle text |
-| Border | `border-border` | `#20332A` | Borders, dividers |
-| Ring | `ring-ring` | `#00FF87` | Focus rings |
+| Token | HSL | Hex (approx) | Tailwind Class | Usage |
+|-------|-----|--------------|----------------|-------|
+| Background | `160 18% 4%` | `#0B1210` | `bg-background` | Page backgrounds |
+| Foreground | `0 0% 100%` | `#FFFFFF` | `text-foreground` | Primary text |
+| Card | `160 16% 9%` | `#131C18` | `bg-card` | Card/surface backgrounds |
+| Card Foreground | `0 0% 100%` | `#FFFFFF` | `text-card-foreground` | Text on cards |
+| Primary | `153 100% 50%` | `#00FF87` | `bg-primary`, `text-primary` | CTAs, accents, highlights |
+| Primary Foreground | `160 18% 4%` | `#0B1210` | `text-primary-foreground` | Text on primary backgrounds |
+| Muted | `150 18% 12%` | `#18241F` | `bg-muted` | Subtle backgrounds |
+| Muted Foreground | `158 22% 64%` | `#9ABCAC` | `text-muted-foreground` | Secondary/subtle text |
+| Border | `157 18% 15%` | `#20332A` | `border-border` | Borders, dividers |
+| Ring | `153 100% 50%` | `#00FF87` | `ring-ring` | Focus rings |
 
 ### Extended Colors (Tailwind Config)
 
-| Name | Tailwind Class | Hex | Usage |
-|------|----------------|-----|-------|
-| Primary Hover | `hover:bg-primary-hover` | `#00CC6A` | Primary button hover |
-| Text Dim | `text-text-dim` | `#6B8A7A` | Tertiary text, placeholders |
+| Name | Hex | Tailwind Class | Usage |
+|------|-----|----------------|-------|
+| Primary Hover | `#00CC6A` | `hover:bg-primary-hover` | Primary button hover |
+| Surface Card | `#18241F` | `bg-surface-card` | Alternative card background |
+| Text Dim | `#6B8A7A` | `text-text-dim` | Tertiary text, placeholders |
 
 ### Usage Examples
 

@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Lexend', 'sans-serif'],
       },
       colors: {
         // Brand colors
@@ -19,6 +19,10 @@ export default {
           light: '#E8D5A3',
         },
         'near-black': '#1A1A1A',
+        // New theme colors
+        'primary-hover': '#00CC6A',
+        'surface-card': '#18241F',
+        'text-dim': '#6B8A7A',
         // shadcn semantic colors (HSL format)
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
