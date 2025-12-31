@@ -6,9 +6,13 @@ import type { Round, Participant } from '../../types/tournament';
 interface BracketRoundProps {
   round: Round;
   participants: Participant[];
+  currentGameweek: number;
 }
 
-export function BracketRound({ round, participants }: BracketRoundProps) {
+export function BracketRound({ round, participants, currentGameweek }: BracketRoundProps) {
+  // Round has started if its gameweek is at or before the current FPL gameweek
+  const roundStarted = round.gameweek <= currentGameweek;
+
   return (
     <div className="flex flex-col overflow-visible" data-testid={`bracket-round-${round.roundNumber}`}>
       <div className="flex items-center justify-between mb-3 px-2">
@@ -27,6 +31,8 @@ export function BracketRound({ round, participants }: BracketRoundProps) {
             key={match.id}
             match={match}
             participants={participants}
+            roundStarted={roundStarted}
+            gameweek={round.gameweek}
           />
         ))}
       </div>

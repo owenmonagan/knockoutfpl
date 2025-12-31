@@ -19,28 +19,58 @@ describe('BracketMatchCard', () => {
   };
 
   it('renders both player names', () => {
-    render(<BracketMatchCard match={mockMatch} participants={mockParticipants} />);
+    render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     expect(screen.getByText('Team A')).toBeInTheDocument();
     expect(screen.getByText('Team B')).toBeInTheDocument();
   });
 
-  it('renders seeds', () => {
-    render(<BracketMatchCard match={mockMatch} participants={mockParticipants} />);
+  it('renders seeds when no scores available', () => {
+    const matchWithoutScores: Match = {
+      id: 'r1-m1',
+      player1: { fplTeamId: 1, seed: 1, score: null },
+      player2: { fplTeamId: 2, seed: 2, score: null },
+      winnerId: null,
+      isBye: false,
+    };
+    render(<BracketMatchCard match={matchWithoutScores} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     expect(screen.getByText('(1)')).toBeInTheDocument();
     expect(screen.getByText('(2)')).toBeInTheDocument();
   });
 
-  it('renders scores when available', () => {
-    render(<BracketMatchCard match={mockMatch} participants={mockParticipants} />);
+  it('hides seeds when scores are available and round started', () => {
+    render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+
+    expect(screen.queryByText('(1)')).not.toBeInTheDocument();
+    expect(screen.queryByText('(2)')).not.toBeInTheDocument();
+  });
+
+  it('renders scores when available and round started', () => {
+    render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     expect(screen.getByText('65')).toBeInTheDocument();
     expect(screen.getByText('58')).toBeInTheDocument();
   });
 
+  it('shows seeds instead of scores when round has not started', () => {
+    const matchWithZeroScores: Match = {
+      id: 'r4-m1',
+      player1: { fplTeamId: 1, seed: 1, score: 0 },
+      player2: { fplTeamId: 2, seed: 2, score: 0 },
+      winnerId: null,
+      isBye: false,
+    };
+    render(<BracketMatchCard match={matchWithZeroScores} participants={mockParticipants} roundStarted={false} gameweek={15} />);
+
+    // Should show seeds, not scores
+    expect(screen.getByText('(1)')).toBeInTheDocument();
+    expect(screen.getByText('(2)')).toBeInTheDocument();
+    expect(screen.queryByText('0')).not.toBeInTheDocument();
+  });
+
   it('highlights winner', () => {
-    render(<BracketMatchCard match={mockMatch} participants={mockParticipants} />);
+    render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     const winnerRow = screen.getByText('Team A').closest('[data-winner]');
     expect(winnerRow).toHaveAttribute('data-winner', 'true');
@@ -54,7 +84,7 @@ describe('BracketMatchCard', () => {
       winnerId: 1,
       isBye: true,
     };
-    render(<BracketMatchCard match={byeMatch} participants={mockParticipants} />);
+    render(<BracketMatchCard match={byeMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     expect(screen.getByText('Team A')).toBeInTheDocument();
     expect(screen.getByText('BYE')).toBeInTheDocument();
@@ -68,8 +98,90 @@ describe('BracketMatchCard', () => {
       winnerId: null,
       isBye: false,
     };
-    render(<BracketMatchCard match={emptyMatch} participants={mockParticipants} />);
+    render(<BracketMatchCard match={emptyMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     expect(screen.getAllByText('TBD')).toHaveLength(2);
+  });
+
+  describe('clickable player rows', () => {
+    it('links to FPL gameweek page when round has started', () => {
+      render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+
+      const links = screen.getAllByRole('link');
+      expect(links).toHaveLength(2);
+
+      // Player 1 (fplTeamId: 1) should link to gameweek 10
+      expect(links[0]).toHaveAttribute('href', 'https://fantasy.premierleague.com/entry/1/event/10');
+      // Player 2 (fplTeamId: 2) should link to gameweek 10
+      expect(links[1]).toHaveAttribute('href', 'https://fantasy.premierleague.com/entry/2/event/10');
+    });
+
+    it('links to FPL history page when round has not started', () => {
+      const matchWithoutScores: Match = {
+        id: 'r1-m1',
+        player1: { fplTeamId: 1, seed: 1, score: null },
+        player2: { fplTeamId: 2, seed: 2, score: null },
+        winnerId: null,
+        isBye: false,
+      };
+      render(<BracketMatchCard match={matchWithoutScores} participants={mockParticipants} roundStarted={false} gameweek={15} />);
+
+      const links = screen.getAllByRole('link');
+      expect(links).toHaveLength(2);
+
+      // Both players should link to history page
+      expect(links[0]).toHaveAttribute('href', 'https://fantasy.premierleague.com/entry/1/history');
+      expect(links[1]).toHaveAttribute('href', 'https://fantasy.premierleague.com/entry/2/history');
+    });
+
+    it('opens links in new tab with security attributes', () => {
+      render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+
+      const links = screen.getAllByRole('link');
+
+      links.forEach((link) => {
+        expect(link).toHaveAttribute('target', '_blank');
+        expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+      });
+    });
+
+    it('does not render links for TBD slots', () => {
+      const emptyMatch: Match = {
+        id: 'r2-m1',
+        player1: null,
+        player2: null,
+        winnerId: null,
+        isBye: false,
+      };
+      render(<BracketMatchCard match={emptyMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    });
+
+    it('does not render link for BYE slot', () => {
+      const byeMatch: Match = {
+        id: 'r1-m1',
+        player1: { fplTeamId: 1, seed: 1, score: null },
+        player2: null,
+        winnerId: 1,
+        isBye: true,
+      };
+      render(<BracketMatchCard match={byeMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+
+      // Only player1 should have a link, BYE slot should not
+      const links = screen.getAllByRole('link');
+      expect(links).toHaveLength(1);
+      expect(links[0]).toHaveAttribute('href', 'https://fantasy.premierleague.com/entry/1/event/10');
+    });
+
+    it('player row links have cursor-pointer class', () => {
+      render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+
+      const links = screen.getAllByRole('link');
+
+      links.forEach((link) => {
+        expect(link).toHaveClass('cursor-pointer');
+      });
+    });
   });
 });

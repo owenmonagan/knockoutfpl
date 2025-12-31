@@ -6,11 +6,28 @@ import { cn } from '../../lib/utils'; // Used for player slot styling
 interface BracketMatchCardProps {
   match: Match;
   participants: Participant[];
+  roundStarted: boolean;
+  gameweek: number;
+}
+
+/**
+ * Generate URL to a team's FPL page.
+ * - If the round has started, link to the specific gameweek view
+ * - Otherwise, link to the team's history page
+ */
+function getFplTeamUrl(fplTeamId: number, gameweek: number, roundStarted: boolean): string {
+  const base = 'https://fantasy.premierleague.com/entry';
+  if (roundStarted) {
+    return `${base}/${fplTeamId}/event/${gameweek}`;
+  }
+  return `${base}/${fplTeamId}/history`;
 }
 
 export function BracketMatchCard({
   match,
   participants,
+  roundStarted,
+  gameweek,
 }: BracketMatchCardProps) {
   const getParticipant = (fplTeamId: number | null): Participant | null => {
     if (!fplTeamId) return null;
@@ -44,7 +61,11 @@ export function BracketMatchCard({
       );
     }
 
-    return (
+    const hasScore = player?.score !== null && player?.score !== undefined;
+    // Only show score if the round has started AND we have a score
+    const showScore = roundStarted && hasScore;
+
+    const rowContent = (
       <div
         className={cn(
           "flex justify-between items-center px-2 py-1.5 text-sm",
@@ -55,17 +76,35 @@ export function BracketMatchCard({
       >
         <div className="flex items-center gap-1.5 truncate">
           <span className="truncate">{participant?.fplTeamName || 'TBD'}</span>
-          {participant && (
+          {/* Show seed when round hasn't started or no score available */}
+          {participant && !showScore && (
             <span className="text-muted-foreground text-xs">({participant.seed})</span>
           )}
         </div>
-        {player?.score !== null && player?.score !== undefined && (
-          <span className={cn("tabular-nums", isWinner && "text-green-600 dark:text-green-400")}>
+        {/* Show score only when round has started and score is available */}
+        {showScore && (
+          <span className={cn("tabular-nums font-medium", isWinner && "text-green-600 dark:text-green-400")}>
             {player.score}
           </span>
         )}
       </div>
     );
+
+    // Wrap in anchor tag for real players (not TBD/BYE)
+    if (player && player.fplTeamId) {
+      return (
+        <a
+          href={getFplTeamUrl(player.fplTeamId, gameweek, roundStarted)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block cursor-pointer hover:bg-muted/50 transition-colors"
+        >
+          {rowContent}
+        </a>
+      );
+    }
+
+    return rowContent;
   };
 
   return (
