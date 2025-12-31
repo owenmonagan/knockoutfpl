@@ -1,6 +1,10 @@
 // src/services/tournament.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getTournamentByLeague, callCreateTournament } from './tournament';
+import {
+  getTournamentByLeague,
+  callCreateTournament,
+  getTournamentSummaryForLeague,
+} from './tournament';
 
 // Mock Firebase
 vi.mock('../lib/firebase', () => ({
@@ -15,6 +19,7 @@ vi.mock('@knockoutfpl/dataconnect', () => ({
   getTournamentRounds: vi.fn(),
   getRoundMatches: vi.fn(),
   getMatchPicks: vi.fn(),
+  getPicksForEvent: vi.fn(),
 }));
 
 // Mock Firebase Functions
@@ -102,5 +107,230 @@ describe('callCreateTournament', () => {
     expect(result.tournamentId).toBe('new-tournament-123');
     expect(result.participantCount).toBe(8);
     expect(mockCallable).toHaveBeenCalledWith({ fplLeagueId: 12345 });
+  });
+});
+
+describe('getTournamentSummaryForLeague', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should return null when no tournament exists', async () => {
+    const { getLeagueTournaments } = await import('@knockoutfpl/dataconnect');
+    vi.mocked(getLeagueTournaments).mockResolvedValue({
+      data: { tournaments: [] },
+    } as any);
+
+    const result = await getTournamentSummaryForLeague(123, null);
+
+    expect(result.tournament).toBeNull();
+    expect(result.userProgress).toBeNull();
+  });
+
+  it('should return tournament summary without user progress when userFplTeamId is null', async () => {
+    const { getLeagueTournaments } = await import('@knockoutfpl/dataconnect');
+    vi.mocked(getLeagueTournaments).mockResolvedValue({
+      data: {
+        tournaments: [
+          {
+            id: 'tournament-123',
+            fplLeagueName: 'Test League',
+            currentRound: 2,
+            totalRounds: 4,
+            status: 'active',
+          },
+        ],
+      },
+    } as any);
+
+    const result = await getTournamentSummaryForLeague(123, null);
+
+    expect(result.tournament).toEqual({
+      id: 'tournament-123',
+      status: 'active',
+      currentRound: 2,
+      totalRounds: 4,
+    });
+    expect(result.userProgress).toBeNull();
+  });
+
+  it('should return user as active when not eliminated and not winner', async () => {
+    const { getLeagueTournaments, getTournamentWithParticipants } = await import(
+      '@knockoutfpl/dataconnect'
+    );
+
+    vi.mocked(getLeagueTournaments).mockResolvedValue({
+      data: {
+        tournaments: [
+          {
+            id: 'tournament-123',
+            fplLeagueName: 'Test League',
+            currentRound: 2,
+            totalRounds: 4,
+            status: 'active',
+          },
+        ],
+      },
+    } as any);
+
+    vi.mocked(getTournamentWithParticipants).mockResolvedValue({
+      data: {
+        tournament: {
+          id: 'tournament-123',
+          winnerEntryId: null,
+        },
+        participants: [
+          {
+            entryId: 12345,
+            teamName: 'Test Team',
+            status: 'active',
+            eliminationRound: null,
+          },
+        ],
+      },
+    } as any);
+
+    const result = await getTournamentSummaryForLeague(123, 12345);
+
+    expect(result.tournament).toEqual({
+      id: 'tournament-123',
+      status: 'active',
+      currentRound: 2,
+      totalRounds: 4,
+    });
+    expect(result.userProgress).toEqual({
+      status: 'active',
+      eliminationRound: null,
+    });
+  });
+
+  it('should return user as eliminated when eliminationRound is set', async () => {
+    const { getLeagueTournaments, getTournamentWithParticipants } = await import(
+      '@knockoutfpl/dataconnect'
+    );
+
+    vi.mocked(getLeagueTournaments).mockResolvedValue({
+      data: {
+        tournaments: [
+          {
+            id: 'tournament-123',
+            fplLeagueName: 'Test League',
+            currentRound: 3,
+            totalRounds: 4,
+            status: 'active',
+          },
+        ],
+      },
+    } as any);
+
+    vi.mocked(getTournamentWithParticipants).mockResolvedValue({
+      data: {
+        tournament: {
+          id: 'tournament-123',
+          winnerEntryId: null,
+        },
+        participants: [
+          {
+            entryId: 12345,
+            teamName: 'Test Team',
+            status: 'eliminated',
+            eliminationRound: 2,
+          },
+        ],
+      },
+    } as any);
+
+    const result = await getTournamentSummaryForLeague(123, 12345);
+
+    expect(result.userProgress).toEqual({
+      status: 'eliminated',
+      eliminationRound: 2,
+    });
+  });
+
+  it('should return user as winner when tournament winnerEntryId matches', async () => {
+    const { getLeagueTournaments, getTournamentWithParticipants } = await import(
+      '@knockoutfpl/dataconnect'
+    );
+
+    vi.mocked(getLeagueTournaments).mockResolvedValue({
+      data: {
+        tournaments: [
+          {
+            id: 'tournament-123',
+            fplLeagueName: 'Test League',
+            currentRound: 4,
+            totalRounds: 4,
+            status: 'completed',
+          },
+        ],
+      },
+    } as any);
+
+    vi.mocked(getTournamentWithParticipants).mockResolvedValue({
+      data: {
+        tournament: {
+          id: 'tournament-123',
+          winnerEntryId: 12345,
+        },
+        participants: [
+          {
+            entryId: 12345,
+            teamName: 'Test Team',
+            status: 'active',
+            eliminationRound: null,
+          },
+        ],
+      },
+    } as any);
+
+    const result = await getTournamentSummaryForLeague(123, 12345);
+
+    expect(result.userProgress).toEqual({
+      status: 'winner',
+      eliminationRound: null,
+    });
+  });
+
+  it('should return null userProgress when user is not a participant', async () => {
+    const { getLeagueTournaments, getTournamentWithParticipants } = await import(
+      '@knockoutfpl/dataconnect'
+    );
+
+    vi.mocked(getLeagueTournaments).mockResolvedValue({
+      data: {
+        tournaments: [
+          {
+            id: 'tournament-123',
+            fplLeagueName: 'Test League',
+            currentRound: 2,
+            totalRounds: 4,
+            status: 'active',
+          },
+        ],
+      },
+    } as any);
+
+    vi.mocked(getTournamentWithParticipants).mockResolvedValue({
+      data: {
+        tournament: {
+          id: 'tournament-123',
+          winnerEntryId: null,
+        },
+        participants: [
+          {
+            entryId: 99999, // Different entryId
+            teamName: 'Other Team',
+            status: 'active',
+            eliminationRound: null,
+          },
+        ],
+      },
+    } as any);
+
+    const result = await getTournamentSummaryForLeague(123, 12345);
+
+    expect(result.tournament).not.toBeNull();
+    expect(result.userProgress).toBeNull();
   });
 });

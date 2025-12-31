@@ -7,10 +7,26 @@ import {
   getTournamentRounds,
   getRoundMatches,
   getMatchPicks,
-  getFinalPicksForEvent,
+  getPicksForEvent,
 } from '@knockoutfpl/dataconnect';
 import type { Tournament, Round, Match, Participant, MatchPlayer } from '../types/tournament';
 import type { UUIDString } from '@knockoutfpl/dataconnect';
+
+// ============================================================================
+// Types for Tournament Summary
+// ============================================================================
+
+export interface TournamentSummary {
+  id: string;
+  status: 'active' | 'completed';
+  currentRound: number;
+  totalRounds: number;
+}
+
+export interface UserProgress {
+  status: 'active' | 'eliminated' | 'winner';
+  eliminationRound: number | null;
+}
 
 // Cloud Function types
 interface CreateTournamentRequest {
@@ -83,9 +99,9 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
   // Collect unique gameweeks from rounds and fetch scores for each
   const uniqueEvents = [...new Set((roundsResult.data.rounds || []).map((r) => r.event))];
 
-  // Fetch picks for all unique events in parallel
+  // Fetch picks for all unique events in parallel (includes provisional scores)
   const picksResults = await Promise.all(
-    uniqueEvents.map((event) => getFinalPicksForEvent(dataConnect, { event }))
+    uniqueEvents.map((event) => getPicksForEvent(dataConnect, { event }))
   );
 
   // Create a score lookup map: key = "entryId-event", value = points
@@ -219,4 +235,72 @@ async function callRefreshTournament(
     console.warn('[WARN] Failed to refresh tournament:', error);
     return null;
   }
+}
+
+/**
+ * Get a lightweight tournament summary for displaying on the leagues page.
+ * Does NOT fetch full bracket data - just tournament status and user's progress.
+ * Does NOT call refreshTournament - this is a read-only summary.
+ */
+export async function getTournamentSummaryForLeague(
+  fplLeagueId: number,
+  userFplTeamId: number | null
+): Promise<{
+  tournament: TournamentSummary | null;
+  userProgress: UserProgress | null;
+}> {
+  // Step 1: Check if tournament exists for this league
+  const tournamentsResult = await getLeagueTournaments(dataConnect, { fplLeagueId });
+
+  if (!tournamentsResult.data.tournaments || tournamentsResult.data.tournaments.length === 0) {
+    return { tournament: null, userProgress: null };
+  }
+
+  // Get the first (most recent) tournament for this league
+  const basicTournament = tournamentsResult.data.tournaments[0];
+
+  // Build the tournament summary
+  const tournamentSummary: TournamentSummary = {
+    id: basicTournament.id,
+    status: basicTournament.status as 'active' | 'completed',
+    currentRound: basicTournament.currentRound,
+    totalRounds: basicTournament.totalRounds,
+  };
+
+  // Step 2: If no user team ID provided, return tournament only
+  if (userFplTeamId === null) {
+    return { tournament: tournamentSummary, userProgress: null };
+  }
+
+  // Step 3: Fetch participant data to determine user's progress
+  const tournamentId = basicTournament.id as UUIDString;
+  const participantsResult = await getTournamentWithParticipants(dataConnect, { id: tournamentId });
+
+  // Find the user's participant record
+  const participants = participantsResult.data.participants || [];
+  const userParticipant = participants.find((p) => p.entryId === userFplTeamId);
+
+  // If user is not a participant, return null userProgress
+  if (!userParticipant) {
+    return { tournament: tournamentSummary, userProgress: null };
+  }
+
+  // Step 4: Determine user's status
+  const winnerEntryId = participantsResult.data.tournament?.winnerEntryId ?? null;
+
+  let userStatus: 'active' | 'eliminated' | 'winner';
+  if (winnerEntryId === userFplTeamId) {
+    userStatus = 'winner';
+  } else if (userParticipant.eliminationRound !== null) {
+    userStatus = 'eliminated';
+  } else {
+    userStatus = 'active';
+  }
+
+  const userProgress: UserProgress = {
+    status: userStatus,
+    eliminationRound: userParticipant.eliminationRound ?? null,
+  };
+
+  return { tournament: tournamentSummary, userProgress };
 }
