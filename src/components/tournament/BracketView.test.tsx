@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { BracketView } from './BracketView';
 import type { Tournament } from '../../types/tournament';
-import { Timestamp } from 'firebase/firestore';
 
 describe('BracketView', () => {
   const mockTournament: Tournament = {
@@ -43,8 +42,8 @@ describe('BracketView', () => {
       },
     ],
     winnerId: null,
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   it('renders tournament header', () => {

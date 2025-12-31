@@ -1,5 +1,4 @@
 // src/types/tournament.ts
-import { Timestamp } from 'firebase/firestore';
 
 export type TournamentStatus = 'active' | 'completed';
 
@@ -45,6 +44,6 @@ export interface Tournament {
   participants: Participant[];
   rounds: Round[];
   winnerId: number | null; // FPL team ID of winner
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: string;
+  updatedAt: string;
 }

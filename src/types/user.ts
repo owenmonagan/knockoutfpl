@@ -1,5 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
-
 /**
  * User document structure in Firestore (/users/{userId})
  */
@@ -11,8 +9,8 @@ export interface User {
   displayName: string;
   wins: number;
   losses: number;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
