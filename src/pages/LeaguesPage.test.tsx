@@ -5,6 +5,7 @@ import { LeaguesPage } from './LeaguesPage';
 import * as AuthContext from '../contexts/AuthContext';
 import * as userService from '../services/user';
 import * as fplService from '../services/fpl';
+import * as tournamentService from '../services/tournament';
 
 // Helper to render with router
 const renderWithRouter = (component: React.ReactElement) => {
@@ -24,6 +25,10 @@ vi.mock('../services/fpl', () => ({
   getLeagueStandings: vi.fn(),
 }));
 
+vi.mock('../services/tournament', () => ({
+  getTournamentSummaryForLeague: vi.fn(),
+}));
+
 describe('LeaguesPage', () => {
   beforeEach(() => {
     // Default: user not authenticated
@@ -31,6 +36,12 @@ describe('LeaguesPage', () => {
       user: null,
       loading: false,
       isAuthenticated: false,
+    });
+
+    // Default: no tournament data
+    vi.mocked(tournamentService.getTournamentSummaryForLeague).mockResolvedValue({
+      tournament: null,
+      userProgress: null,
     });
   });
 
@@ -117,10 +128,12 @@ describe('LeaguesPage', () => {
 
       renderWithRouter(<LeaguesPage />);
 
-      const league1 = await screen.findByText('Test League');
-      const league2 = await screen.findByText('Another League');
-      expect(league1).toBeInTheDocument();
-      expect(league2).toBeInTheDocument();
+      // Note: LeaguesTable renders both desktop table and mobile view,
+      // so each league name appears twice (in table cell and mobile card)
+      const league1Elements = await screen.findAllByText('Test League');
+      const league2Elements = await screen.findAllByText('Another League');
+      expect(league1Elements.length).toBeGreaterThan(0);
+      expect(league2Elements.length).toBeGreaterThan(0);
     });
 
     it('displays league member counts', async () => {
@@ -190,7 +203,8 @@ describe('LeaguesPage', () => {
 
       renderWithRouter(<LeaguesPage />);
 
-      const emptyMessage = await screen.findByText(/no mini leagues found/i);
+      // LeaguesTable component shows this message when no leagues
+      const emptyMessage = await screen.findByText(/no leagues found/i);
       expect(emptyMessage).toBeInTheDocument();
     });
   });

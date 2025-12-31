@@ -2,20 +2,17 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserProfile } from '../services/user';
-import { getUserMiniLeagues, getLeagueStandings, type FPLMiniLeague } from '../services/fpl';
-import { LeaguePickerCard } from '../components/leagues/LeaguePickerCard';
+import { getUserMiniLeagues, getLeagueStandings } from '../services/fpl';
+import { LeaguesTable, type LeagueWithTournament } from '../components/leagues/LeaguesTable';
+import { getTournamentSummaryForLeague } from '../services/tournament';
 
 // Session storage key used by ConnectPage for persisting success state
 const CONNECT_SUCCESS_STORAGE_KEY = 'connectPage_successTeamInfo';
 
-interface LeagueWithMembers extends FPLMiniLeague {
-  memberCount: number;
-}
-
 export function LeaguesPage() {
   const { user: authUser } = useAuth();
   const navigate = useNavigate();
-  const [leagues, setLeagues] = useState<LeagueWithMembers[]>([]);
+  const [leagues, setLeagues] = useState<LeagueWithTournament[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Clear ConnectPage's sessionStorage on successful load
@@ -40,23 +37,34 @@ export function LeaguesPage() {
       // Fetch leagues (isLoading already true from initial state)
       const miniLeagues = await getUserMiniLeagues(userProfile.fplTeamId);
 
-      // Fetch member counts for each league
-      const leaguesWithMembers = await Promise.all(
+      // Fetch member counts and tournament data for each league in parallel
+      const leaguesWithTournaments = await Promise.all(
         miniLeagues.map(async (league) => {
-          const standings = await getLeagueStandings(league.id);
+          const [standings, tournamentData] = await Promise.all([
+            getLeagueStandings(league.id),
+            getTournamentSummaryForLeague(league.id, userProfile.fplTeamId).catch(() => ({
+              tournament: null,
+              userProgress: null,
+            })),
+          ]);
           return {
             ...league,
             memberCount: standings.length,
+            ...tournamentData, // adds tournament and userProgress
           };
         })
       );
 
-      setLeagues(leaguesWithMembers);
+      setLeagues(leaguesWithTournaments);
       setIsLoading(false);
     }
 
     loadLeagues();
   }, [authUser]);
+
+  const handleLeagueAction = (league: LeagueWithTournament) => {
+    navigate(`/league/${league.id}`);
+  };
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -68,26 +76,11 @@ export function LeaguesPage() {
           </p>
         </div>
 
-        {isLoading && <p>Loading leagues...</p>}
-
-        {!isLoading && leagues.length > 0 && (
-          <div className="space-y-4">
-            {leagues.map((league) => (
-              <LeaguePickerCard
-                key={league.id}
-                league={league}
-                memberCount={league.memberCount}
-                onStartKnockout={() => navigate(`/league/${league.id}`)}
-              />
-            ))}
-          </div>
-        )}
-
-        {!isLoading && leagues.length === 0 && (
-          <p className="text-muted-foreground">
-            No mini leagues found. Join a league on the FPL website to get started!
-          </p>
-        )}
+        <LeaguesTable
+          leagues={leagues}
+          onLeagueAction={handleLeagueAction}
+          isLoading={isLoading}
+        />
       </div>
     </main>
   );
