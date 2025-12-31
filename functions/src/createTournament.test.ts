@@ -15,6 +15,34 @@ describe('createTournament', () => {
     it('passes with valid fplLeagueId', () => {
       expect(() => validateTournamentRequest({ fplLeagueId: 12345 })).not.toThrow();
     });
+
+    it('passes with valid fplLeagueId and startEvent', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 12345, startEvent: 10 })).not.toThrow();
+    });
+
+    it('passes with startEvent of 1 (minimum)', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 12345, startEvent: 1 })).not.toThrow();
+    });
+
+    it('passes with startEvent of 38 (maximum)', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 12345, startEvent: 38 })).not.toThrow();
+    });
+
+    it('throws if startEvent is less than 1', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 12345, startEvent: 0 })).toThrow('startEvent must be between 1 and 38');
+    });
+
+    it('throws if startEvent is greater than 38', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 12345, startEvent: 39 })).toThrow('startEvent must be between 1 and 38');
+    });
+
+    it('throws if startEvent is not a number', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 12345, startEvent: 'ten' })).toThrow('startEvent must be a number');
+    });
+
+    it('passes when startEvent is undefined (optional)', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 12345, startEvent: undefined })).not.toThrow();
+    });
   });
 
   describe('validateLeagueStandings', () => {

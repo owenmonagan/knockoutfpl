@@ -80,6 +80,7 @@ interface MatchPickRecord {
 
 export interface CreateTournamentRequest {
   fplLeagueId: number;
+  startEvent?: number;  // Optional, defaults to currentGW + 1
 }
 
 export interface CreateTournamentResponse {
@@ -98,6 +99,15 @@ export function validateTournamentRequest(data: any): asserts data is CreateTour
   }
   if (typeof data.fplLeagueId !== 'number') {
     throw new HttpsError('invalid-argument', 'fplLeagueId must be a number');
+  }
+  // Validate optional startEvent if provided
+  if (data.startEvent !== undefined) {
+    if (typeof data.startEvent !== 'number') {
+      throw new HttpsError('invalid-argument', 'startEvent must be a number');
+    }
+    if (data.startEvent < 1 || data.startEvent > 38) {
+      throw new HttpsError('invalid-argument', 'startEvent must be between 1 and 38');
+    }
   }
 }
 
@@ -433,7 +443,9 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
 
   // 2. Validate request
   validateTournamentRequest(request.data);
-  const { fplLeagueId } = request.data;
+  const { fplLeagueId, startEvent: requestedStartEvent } = request.data;
+
+  console.log(`[createTournament] Request received: fplLeagueId=${fplLeagueId}, startEvent=${requestedStartEvent ?? 'auto'}, uid=${uid}`);
 
   // 3. Fetch FPL data
   const [standings, bootstrapData] = await Promise.all([
@@ -449,7 +461,8 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
   const bracketSize = calculateBracketSize(participantCount);
   const totalRounds = calculateTotalRounds(bracketSize);
   const currentGW = getCurrentGameweek(bootstrapData);
-  const startEvent = currentGW + 1;
+  // Use provided startEvent or default to next gameweek
+  const startEvent = requestedStartEvent ?? currentGW + 1;
 
   // 6. Generate bracket
   const matches = generateBracketStructure(bracketSize);
