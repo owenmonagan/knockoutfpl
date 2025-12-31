@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveMatch, getNextRoundSlot, canPopulateNextMatch, validateFeedersComplete } from './match-resolver';
+import { resolveMatch, getNextRoundSlot, canPopulateNextMatch, validateFeedersComplete, MinimalMatch } from './match-resolver';
 import { RoundMatch } from './dataconnect-mutations';
 
 describe('resolveMatch', () => {
@@ -206,12 +206,6 @@ describe('canPopulateNextMatch', () => {
 });
 
 describe('validateFeedersComplete', () => {
-  interface MinimalMatch {
-    matchId: number;
-    status: string;
-    qualifiesToMatchId?: number | null;
-  }
-
   it('should return ready=true for round 1 matches (no feeders)', () => {
     const allMatches: MinimalMatch[] = [
       { matchId: 1, status: 'pending', qualifiesToMatchId: 5 },

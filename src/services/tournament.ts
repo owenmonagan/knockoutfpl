@@ -58,7 +58,6 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
 
   const basicTournament = tournamentsResult.data.tournaments[0];
   const tournamentId = basicTournament.id as UUIDString;
-  console.log('[DEBUG] Tournament ID:', tournamentId);
 
   // Trigger refresh to update picks and resolve matches (eager update on view)
   // This is fire-and-forget from the user's perspective - they just see fresh data
@@ -69,9 +68,6 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
     getTournamentWithParticipants(dataConnect, { id: tournamentId }),
     getTournamentRounds(dataConnect, { tournamentId }),
   ]);
-
-  console.log('[DEBUG] Participants count:', participantsResult.data.participants?.length);
-  console.log('[DEBUG] Rounds count:', roundsResult.data.rounds?.length);
 
   // Map participants to our type
   const participants: Participant[] = (participantsResult.data.participants || []).map((p) => ({
@@ -86,7 +82,6 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
 
   // Collect unique gameweeks from rounds and fetch scores for each
   const uniqueEvents = [...new Set((roundsResult.data.rounds || []).map((r) => r.event))];
-  console.log('[DEBUG] Unique events to fetch scores for:', uniqueEvents);
 
   // Fetch picks for all unique events in parallel
   const picksResults = await Promise.all(
@@ -101,7 +96,6 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
       scoreMap.set(`${pick.entryId}-${event}`, pick.points);
     }
   });
-  console.log('[DEBUG] Score map size:', scoreMap.size);
 
   // For each round, fetch matches and match picks
   const rounds: Round[] = await Promise.all(
@@ -111,7 +105,6 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
         tournamentId,
         roundNumber: r.roundNumber,
       });
-      console.log(`[DEBUG] Round ${r.roundNumber} matches:`, matchesResult.data.matches?.length);
 
       // For each match, get the match picks (players)
       const matches: Match[] = await Promise.all(
@@ -120,7 +113,6 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
             tournamentId,
             matchId: m.matchId,
           });
-          console.log(`[DEBUG] Match ${m.matchId} picks:`, picksResult.data.matchPicks?.length);
 
           const picks = picksResult.data.matchPicks || [];
           const player1Pick = picks.find((p) => p.slot === 1);
@@ -133,11 +125,6 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
           const player2Score = player2Pick
             ? scoreMap.get(`${player2Pick.entryId}-${r.event}`) ?? null
             : null;
-
-          // Debug: log score lookups for non-bye matches
-          if (player1Pick && player2Pick) {
-            console.log(`[DEBUG] Match ${m.matchId} (GW ${r.event}): entry ${player1Pick.entryId} score=${player1Score}, entry ${player2Pick.entryId} score=${player2Score}`);
-          }
 
           const player1: MatchPlayer | null = player1Pick
             ? {
@@ -225,7 +212,6 @@ async function callRefreshTournament(
     >(functions, 'refreshTournament');
 
     const result = await refreshTournamentFn({ tournamentId });
-    console.log('[DEBUG] Tournament refresh result:', result.data);
     return result.data;
   } catch (error) {
     // Log warning but don't fail - user may not be authenticated
