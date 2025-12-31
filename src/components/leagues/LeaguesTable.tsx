@@ -62,11 +62,38 @@ function getButtonText(tournament: LeagueWithTournament['tournament']): string {
   return tournament ? 'View Tournament' : 'Create Tournament';
 }
 
+/**
+ * Get sort priority for a league (lower = higher priority)
+ * 1. Active in tournament - you're playing!
+ * 2. Won tournament - celebrate!
+ * 3. Eliminated - can still watch
+ * 4. Tournament exists, not participating
+ * 5. No tournament yet
+ */
+function getSortPriority(league: LeagueWithTournament): number {
+  if (league.userProgress?.status === 'active') return 1;
+  if (league.userProgress?.status === 'winner') return 2;
+  if (league.userProgress?.status === 'eliminated') return 3;
+  if (league.tournament && !league.userProgress) return 4;
+  return 5; // No tournament
+}
+
+function sortLeagues(leagues: LeagueWithTournament[]): LeagueWithTournament[] {
+  return [...leagues].sort((a, b) => {
+    const priorityDiff = getSortPriority(a) - getSortPriority(b);
+    if (priorityDiff !== 0) return priorityDiff;
+    // Within same priority, sort alphabetically
+    return a.name.localeCompare(b.name);
+  });
+}
+
 export function LeaguesTable({
   leagues,
   onLeagueAction,
   isLoading = false,
 }: LeaguesTableProps) {
+  const sortedLeagues = sortLeagues(leagues);
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -78,7 +105,7 @@ export function LeaguesTable({
     );
   }
 
-  if (leagues.length === 0) {
+  if (sortedLeagues.length === 0) {
     return (
       <p className="text-muted-foreground text-center py-8">
         No leagues found. Connect your FPL team to see your leagues.
@@ -101,7 +128,7 @@ export function LeaguesTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {leagues.map((league) => (
+            {sortedLeagues.map((league) => (
               <TableRow key={league.id}>
                 <TableCell className="font-medium">{league.name}</TableCell>
                 <TableCell>{league.memberCount}</TableCell>
@@ -124,7 +151,7 @@ export function LeaguesTable({
 
       {/* Mobile view - Stacked rows */}
       <div className="md:hidden space-y-3">
-        {leagues.map((league) => (
+        {sortedLeagues.map((league) => (
           <div
             key={league.id}
             className="border rounded-lg p-4 space-y-2"

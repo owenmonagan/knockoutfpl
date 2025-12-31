@@ -227,24 +227,87 @@ describe('LeaguesTable', () => {
   describe('click handling', () => {
     it('should call onLeagueAction with the correct league when button is clicked', () => {
       const handleAction = vi.fn();
-      render(<LeaguesTable leagues={mockLeagues} onLeagueAction={handleAction} />);
+      const singleLeague: LeagueWithTournament[] = [mockLeagues[0]];
+      render(<LeaguesTable leagues={singleLeague} onLeagueAction={handleAction} />);
 
       const buttons = screen.getAllByRole('button');
       fireEvent.click(buttons[0]);
 
       expect(handleAction).toHaveBeenCalledTimes(1);
-      expect(handleAction).toHaveBeenCalledWith(mockLeagues[0]);
+      expect(handleAction).toHaveBeenCalledWith(singleLeague[0]);
     });
 
-    it('should call onLeagueAction with the second league when its button is clicked', () => {
+    it('should call onLeagueAction when clicking a View Tournament button', () => {
+      const handleAction = vi.fn();
+      const leagueWithTournament: LeagueWithTournament[] = [mockLeagues[1]]; // USA - has tournament
+      render(<LeaguesTable leagues={leagueWithTournament} onLeagueAction={handleAction} />);
+
+      const buttons = screen.getAllByRole('button', { name: 'View Tournament' });
+      fireEvent.click(buttons[0]);
+
+      expect(handleAction).toHaveBeenCalledTimes(1);
+      expect(handleAction).toHaveBeenCalledWith(leagueWithTournament[0]);
+    });
+  });
+
+  describe('sorting', () => {
+    it('should sort leagues by priority: active > winner > eliminated > no participation > no tournament', () => {
       const handleAction = vi.fn();
       render(<LeaguesTable leagues={mockLeagues} onLeagueAction={handleAction} />);
 
-      const buttons = screen.getAllByRole('button');
-      fireEvent.click(buttons[1]);
+      // Get all league names in order (desktop table has them in order)
+      const rows = screen.getAllByRole('row');
+      // Skip header row, get cell content
+      const leagueNames = rows.slice(1).map(row => {
+        const cells = row.querySelectorAll('td');
+        return cells[0]?.textContent;
+      }).filter(Boolean);
 
-      expect(handleAction).toHaveBeenCalledTimes(1);
-      expect(handleAction).toHaveBeenCalledWith(mockLeagues[1]);
+      // Expected order after sorting:
+      // 1. USA (active) - priority 1
+      // 2. Champions League (winner) - priority 2
+      // 3. Gameweek 1 (eliminated) - priority 3
+      // 4. Man City (no tournament) - priority 5
+      expect(leagueNames).toEqual(['USA', 'Champions League', 'Gameweek 1', 'Man City']);
+    });
+
+    it('should sort alphabetically within same priority', () => {
+      const handleAction = vi.fn();
+      const leaguesWithSamePriority: LeagueWithTournament[] = [
+        {
+          id: 1,
+          name: 'Zebra League',
+          entryRank: 1,
+          memberCount: 10,
+          tournament: null,
+          userProgress: null,
+        },
+        {
+          id: 2,
+          name: 'Alpha League',
+          entryRank: 2,
+          memberCount: 10,
+          tournament: null,
+          userProgress: null,
+        },
+        {
+          id: 3,
+          name: 'Beta League',
+          entryRank: 3,
+          memberCount: 10,
+          tournament: null,
+          userProgress: null,
+        },
+      ];
+      render(<LeaguesTable leagues={leaguesWithSamePriority} onLeagueAction={handleAction} />);
+
+      const rows = screen.getAllByRole('row');
+      const leagueNames = rows.slice(1).map(row => {
+        const cells = row.querySelectorAll('td');
+        return cells[0]?.textContent;
+      }).filter(Boolean);
+
+      expect(leagueNames).toEqual(['Alpha League', 'Beta League', 'Zebra League']);
     });
   });
 
