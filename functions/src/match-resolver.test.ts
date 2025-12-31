@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveMatch, getNextRoundSlot, canPopulateNextMatch } from './match-resolver';
+import { resolveMatch, getNextRoundSlot, canPopulateNextMatch, validateFeedersComplete } from './match-resolver';
 import { RoundMatch } from './dataconnect-mutations';
 
 describe('resolveMatch', () => {
@@ -80,12 +80,36 @@ describe('resolveMatch', () => {
     expect(result).toBeNull();
   });
 
-  it('should handle missing scores by defaulting to 0', () => {
+  it('should return null when one player score is missing', () => {
     const match = createMatch(1, [
       { entryId: 100, slot: 1, seed: 1 },
       { entryId: 200, slot: 2, seed: 2 },
     ]);
     const scores = new Map([[100, 50]]); // Only player 100 has a score
+
+    const result = resolveMatch(match, scores);
+
+    expect(result).toBeNull();
+  });
+
+  it('should return null when both player scores are missing', () => {
+    const match = createMatch(1, [
+      { entryId: 100, slot: 1, seed: 1 },
+      { entryId: 200, slot: 2, seed: 2 },
+    ]);
+    const scores = new Map<number, number>(); // No scores
+
+    const result = resolveMatch(match, scores);
+
+    expect(result).toBeNull();
+  });
+
+  it('should resolve match when both scores are present (including zero)', () => {
+    const match = createMatch(1, [
+      { entryId: 100, slot: 1, seed: 1 },
+      { entryId: 200, slot: 2, seed: 2 },
+    ]);
+    const scores = new Map([[100, 50], [200, 0]]); // Both scores present, one is zero
 
     const result = resolveMatch(match, scores);
 
@@ -178,6 +202,80 @@ describe('canPopulateNextMatch', () => {
 
     expect(result.ready).toBe(false);
     expect(result.feederMatchIds).toEqual([]);
+  });
+});
+
+describe('validateFeedersComplete', () => {
+  interface MinimalMatch {
+    matchId: number;
+    status: string;
+    qualifiesToMatchId?: number | null;
+  }
+
+  it('should return ready=true for round 1 matches (no feeders)', () => {
+    const allMatches: MinimalMatch[] = [
+      { matchId: 1, status: 'pending', qualifiesToMatchId: 5 },
+      { matchId: 2, status: 'pending', qualifiesToMatchId: 5 },
+      { matchId: 5, status: 'pending', qualifiesToMatchId: null },
+    ];
+
+    // Match 1 is in round 1 - no matches feed into it
+    const result = validateFeedersComplete(1, allMatches);
+
+    expect(result.ready).toBe(true);
+    expect(result.incompleteFeederIds).toEqual([]);
+  });
+
+  it('should return ready=true when all feeder matches are complete', () => {
+    const allMatches: MinimalMatch[] = [
+      { matchId: 1, status: 'complete', qualifiesToMatchId: 5 },
+      { matchId: 2, status: 'complete', qualifiesToMatchId: 5 },
+      { matchId: 5, status: 'pending', qualifiesToMatchId: null },
+    ];
+
+    const result = validateFeedersComplete(5, allMatches);
+
+    expect(result.ready).toBe(true);
+    expect(result.incompleteFeederIds).toEqual([]);
+  });
+
+  it('should return ready=false with incomplete feeder IDs when feeders not complete', () => {
+    const allMatches: MinimalMatch[] = [
+      { matchId: 1, status: 'complete', qualifiesToMatchId: 5 },
+      { matchId: 2, status: 'active', qualifiesToMatchId: 5 },
+      { matchId: 5, status: 'pending', qualifiesToMatchId: null },
+    ];
+
+    const result = validateFeedersComplete(5, allMatches);
+
+    expect(result.ready).toBe(false);
+    expect(result.incompleteFeederIds).toEqual([2]);
+  });
+
+  it('should return all incomplete feeder IDs when multiple feeders are incomplete', () => {
+    const allMatches: MinimalMatch[] = [
+      { matchId: 1, status: 'pending', qualifiesToMatchId: 5 },
+      { matchId: 2, status: 'active', qualifiesToMatchId: 5 },
+      { matchId: 5, status: 'pending', qualifiesToMatchId: null },
+    ];
+
+    const result = validateFeedersComplete(5, allMatches);
+
+    expect(result.ready).toBe(false);
+    expect(result.incompleteFeederIds).toEqual([1, 2]);
+  });
+
+  it('should handle matches with undefined qualifiesToMatchId', () => {
+    const allMatches: MinimalMatch[] = [
+      { matchId: 1, status: 'complete' }, // undefined qualifiesToMatchId
+      { matchId: 2, status: 'complete', qualifiesToMatchId: null },
+    ];
+
+    // No matches feed into match 1
+    const result = validateFeedersComplete(1, allMatches);
+
+    expect(result.ready).toBe(true);
+    expect(result.incompleteFeederIds).toEqual([]);
   });
 });
 

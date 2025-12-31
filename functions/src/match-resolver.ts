@@ -52,12 +52,24 @@ export function resolveMatch(
     return null;
   }
 
-  // Get player scores
+  // Check for missing scores before proceeding
+  const missingScoreEntryIds = picks
+    .filter(pick => !scores.has(pick.entryId))
+    .map(pick => pick.entryId);
+
+  if (missingScoreEntryIds.length > 0) {
+    console.warn(
+      `Match ${match.matchId}: Cannot resolve - missing scores for entry IDs: ${missingScoreEntryIds.join(', ')}`
+    );
+    return null;
+  }
+
+  // Get player scores (we've verified all scores exist above)
   const players: PlayerScore[] = picks.map(pick => ({
     entryId: pick.entryId,
     slot: pick.slot,
     seed: pick.participant.seed,
-    points: scores.get(pick.entryId) ?? 0,
+    points: scores.get(pick.entryId)!,
   }));
 
   const [player1, player2] = players;
@@ -124,5 +136,49 @@ export function canPopulateNextMatch(
   return {
     ready: allFeedersComplete,
     feederMatchIds,
+  };
+}
+
+/**
+ * Minimal match interface for validateFeedersComplete
+ * Works with simple match arrays without requiring full RoundMatch type
+ */
+export interface MinimalMatch {
+  matchId: number;
+  status: string;
+  qualifiesToMatchId?: number | null;
+}
+
+/**
+ * Validate that all feeder matches for a target match are complete
+ *
+ * @param targetMatchId - The match ID to check feeders for
+ * @param allMatches - Array of all matches with matchId, status, and qualifiesToMatchId
+ * @returns { ready: boolean, incompleteFeederIds: number[] }
+ *   - ready: true if all feeders are complete (or no feeders exist for round 1)
+ *   - incompleteFeederIds: IDs of feeder matches that are not complete
+ */
+export function validateFeedersComplete(
+  targetMatchId: number,
+  allMatches: MinimalMatch[]
+): { ready: boolean; incompleteFeederIds: number[] } {
+  // Find matches that feed into this one
+  const feederMatches = allMatches.filter(
+    m => m.qualifiesToMatchId === targetMatchId
+  );
+
+  // Round 1 matches have no feeders - always ready
+  if (feederMatches.length === 0) {
+    return { ready: true, incompleteFeederIds: [] };
+  }
+
+  // Find which feeders are not complete
+  const incompleteFeederIds = feederMatches
+    .filter(m => m.status !== 'complete')
+    .map(m => m.matchId);
+
+  return {
+    ready: incompleteFeederIds.length === 0,
+    incompleteFeederIds,
   };
 }
