@@ -9,15 +9,16 @@ import {
   MatchAssignment,
 } from './bracketGenerator';
 import {
-  upsertEntryAdmin,
-  upsertPickAdmin,
   createTournamentAdmin,
-  createRoundAdmin,
-  createParticipantAdmin,
-  createMatchAdmin,
-  updateMatchAdmin,
-  createMatchPickAdmin,
+  upsertEntriesBatch,
+  upsertPicksBatch,
+  createRoundsBatch,
+  createParticipantsBatch,
+  createMatchesBatch,
+  updateMatchesBatch,
+  createMatchPicksBatch,
   AuthClaims,
+  UpdateMatchInput,
 } from './dataconnect-mutations';
 
 // Database entity types (matching Data Connect schema)
@@ -282,7 +283,7 @@ async function writeTournamentToDatabase(
   records: ReturnType<typeof buildTournamentRecords>,
   authClaims: AuthClaims
 ): Promise<void> {
-  console.log('[createTournament] Writing to database:', {
+  console.log('[createTournament] Writing to database (batched):', {
     tournamentId,
     entryCount: records.entries.length,
     roundCount: records.rounds.length,
@@ -292,40 +293,36 @@ async function writeTournamentToDatabase(
   });
 
   // 1. Create entries first (participants have FK to entries)
-  console.log(`[createTournament] Creating ${records.entries.length} entries...`);
-  for (const entry of records.entries) {
-    await upsertEntryAdmin(
-      {
-        entryId: entry.entryId,
-        season: entry.season,
-        name: entry.name,
-        playerFirstName: entry.playerFirstName,
-        playerLastName: entry.playerLastName,
-        summaryOverallPoints: entry.summaryOverallPoints,
-        rawJson: entry.rawJson,
-      },
-      authClaims
-    );
-  }
+  console.log(`[createTournament] Batch upserting ${records.entries.length} entries...`);
+  await upsertEntriesBatch(
+    records.entries.map(entry => ({
+      entryId: entry.entryId,
+      season: entry.season,
+      name: entry.name,
+      playerFirstName: entry.playerFirstName,
+      playerLastName: entry.playerLastName,
+      summaryOverallPoints: entry.summaryOverallPoints,
+      rawJson: entry.rawJson,
+    })),
+    authClaims
+  );
 
   // 2. Create placeholder picks for tournament gameweeks
-  console.log(`[createTournament] Creating placeholder picks for ${records.entries.length} entries x ${records.rounds.length} rounds...`);
-  for (const entry of records.entries) {
-    for (const round of records.rounds) {
-      await upsertPickAdmin(
-        {
-          entryId: entry.entryId,
-          event: round.event,
-          points: 0,
-          rawJson: '{}',
-          isFinal: false,
-        },
-        authClaims
-      );
-    }
-  }
+  const pickCount = records.entries.length * records.rounds.length;
+  console.log(`[createTournament] Batch upserting ${pickCount} placeholder picks...`);
+  const allPicks = records.entries.flatMap(entry =>
+    records.rounds.map(round => ({
+      entryId: entry.entryId,
+      event: round.event,
+      points: 0,
+      rawJson: '{}',
+      isFinal: false,
+    }))
+  );
+  await upsertPicksBatch(allPicks, authClaims);
 
   // 3. Create tournament (must exist before rounds/participants reference it)
+  console.log('[createTournament] Creating tournament record...');
   await createTournamentAdmin(
     {
       id: tournamentId,
@@ -340,85 +337,81 @@ async function writeTournamentToDatabase(
     authClaims
   );
 
-  // 4. Create rounds
-  for (const round of records.rounds) {
-    await createRoundAdmin(
-      {
-        tournamentId,
-        roundNumber: round.roundNumber,
-        event: round.event,
-        status: round.status,
-      },
-      authClaims
-    );
+  // 4. Create rounds (batch)
+  console.log(`[createTournament] Batch creating ${records.rounds.length} rounds...`);
+  await createRoundsBatch(
+    records.rounds.map(round => ({
+      tournamentId,
+      roundNumber: round.roundNumber,
+      event: round.event,
+      status: round.status,
+    })),
+    authClaims
+  );
+
+  // 5. Create participants (batch)
+  console.log(`[createTournament] Batch creating ${records.participants.length} participants...`);
+  await createParticipantsBatch(
+    records.participants.map(participant => ({
+      tournamentId,
+      entryId: participant.entryId,
+      teamName: participant.teamName,
+      managerName: participant.managerName,
+      seed: participant.seed,
+      leagueRank: participant.leagueRank,
+      leaguePoints: participant.leaguePoints,
+      rawJson: participant.rawJson,
+    })),
+    authClaims
+  );
+
+  // 6. Create matches (batch)
+  console.log(`[createTournament] Batch creating ${records.matchRecords.length} matches...`);
+  await createMatchesBatch(
+    records.matchRecords.map(match => ({
+      tournamentId,
+      matchId: match.matchId,
+      roundNumber: match.roundNumber,
+      positionInRound: match.positionInRound,
+      qualifiesToMatchId: match.qualifiesToMatchId,
+      isBye: match.isBye,
+      status: match.isBye ? 'complete' : 'active',
+    })),
+    authClaims
+  );
+
+  // 6b. Update bye matches with winners (batch)
+  const byeMatchUpdates: UpdateMatchInput[] = records.matchRecords
+    .filter(match => match.isBye && match.winnerEntryId)
+    .map(match => ({
+      tournamentId,
+      matchId: match.matchId,
+      roundNumber: match.roundNumber,
+      positionInRound: match.positionInRound,
+      qualifiesToMatchId: match.qualifiesToMatchId,
+      isBye: true,
+      status: 'complete',
+      winnerEntryId: match.winnerEntryId,
+    }));
+
+  if (byeMatchUpdates.length > 0) {
+    console.log(`[createTournament] Batch updating ${byeMatchUpdates.length} bye matches with winners...`);
+    await updateMatchesBatch(byeMatchUpdates, authClaims);
   }
 
-  // 5. Create participants
-  for (const participant of records.participants) {
-    await createParticipantAdmin(
-      {
-        tournamentId,
-        entryId: participant.entryId,
-        teamName: participant.teamName,
-        managerName: participant.managerName,
-        seed: participant.seed,
-        leagueRank: participant.leagueRank,
-        leaguePoints: participant.leaguePoints,
-        rawJson: participant.rawJson,
-      },
-      authClaims
-    );
-  }
+  // 7. Create match picks (batch)
+  console.log(`[createTournament] Batch creating ${records.matchPicks.length} match picks...`);
+  await createMatchPicksBatch(
+    records.matchPicks.map(pick => ({
+      tournamentId,
+      matchId: pick.matchId,
+      entryId: pick.entryId,
+      slot: pick.slot,
+    })),
+    authClaims
+  );
 
-  // 6. Create matches
-  console.log(`[createTournament] Creating ${records.matchRecords.length} matches...`);
-  for (const match of records.matchRecords) {
-    console.log(`[createTournament] Creating match ${match.matchId} (round ${match.roundNumber}, pos ${match.positionInRound})`);
-    await createMatchAdmin(
-      {
-        tournamentId,
-        matchId: match.matchId,
-        roundNumber: match.roundNumber,
-        positionInRound: match.positionInRound,
-        qualifiesToMatchId: match.qualifiesToMatchId,
-        isBye: match.isBye,
-        status: match.isBye ? 'complete' : 'active',
-      },
-      authClaims
-    );
-
-    // Update bye matches with status and winner
-    if (match.isBye && match.winnerEntryId) {
-      await updateMatchAdmin(
-        {
-          tournamentId,
-          matchId: match.matchId,
-          roundNumber: match.roundNumber,
-          positionInRound: match.positionInRound,
-          qualifiesToMatchId: match.qualifiesToMatchId,
-          isBye: true,
-          status: 'complete',
-          winnerEntryId: match.winnerEntryId,
-        },
-        authClaims
-      );
-    }
-  }
-
-  // 7. Create match picks
-  console.log(`[createTournament] Creating ${records.matchPicks.length} match picks...`);
-  for (const pick of records.matchPicks) {
-    console.log(`[createTournament] Creating pick for match ${pick.matchId} slot ${pick.slot} entryId ${pick.entryId}`);
-    await createMatchPickAdmin(
-      {
-        tournamentId,
-        matchId: pick.matchId,
-        entryId: pick.entryId,
-        slot: pick.slot,
-      },
-      authClaims
-    );
-  }
+  console.log('[createTournament] Database writes complete');
 }
 
 /**

@@ -150,7 +150,7 @@ Ads pay for infrastructure. Volume pricing captures value from power users. Core
 | Resource | Notes |
 |----------|-------|
 | FPL API access | Public, unofficial. No auth required. Must handle rate limits and caching. |
-| Firebase infrastructure | Auth, Firestore, Functions, Hosting. Costs scale with usage. |
+| Firebase infrastructure | Auth, Data Connect (PostgreSQL), Functions, Hosting. Costs scale with usage. |
 | Domain | knockoutfpl.com or similar |
 | Ad integration | Google AdSense or equivalent for revenue |
 | Development time | Side project capacity |
@@ -160,7 +160,7 @@ Ads pay for infrastructure. Volume pricing captures value from power users. Core
 ## Key Risks
 
 - **FPL API changes** - Unofficial API could break. No fallback. Monitor closely.
-- **Firebase costs at scale** - 30k tournament = significant reads/writes. Ads must offset.
+- **Firebase/Cloud SQL costs at scale** - 30k tournament = significant database load. Ads must offset.
 - **Gameweek timing** - Must reliably detect when gameweeks finish to fetch final scores.
 
 ---

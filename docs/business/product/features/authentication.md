@@ -25,7 +25,7 @@ See [../overview.md](../overview.md) for context.
   - No `manager_id` → FPL Connection page
 
 ### First-Time User
-- User record created in Firestore on first sign-in
+- User record created in DataConnect (PostgreSQL) on first sign-in
 - Fields initialized:
   - `email` - from Google account
   - `created_at` - now
@@ -73,7 +73,7 @@ See [../overview.md](../overview.md) for context.
 ## Outputs
 
 - Authenticated session
-- User record in Firestore (created or existing)
+- User record in DataConnect (created or existing)
 
 ---
 

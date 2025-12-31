@@ -1,5 +1,13 @@
+/**
+ * Test Users Helper - DataConnect Version
+ *
+ * Provides test user definitions and seeding/cleanup functions
+ * for E2E tests using DataConnect.
+ */
+
 import { getAuth } from 'firebase-admin/auth';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getAdminApp } from './dataconnect-admin';
+import { upsertUser } from './dataconnect-mutations';
 
 export interface TestUser {
   uid: string;
@@ -48,11 +56,10 @@ export const TEST_USERS = {
 };
 
 /**
- * Seeds a single test user in BOTH Firebase Auth AND Firestore
+ * Seeds a single test user in BOTH Firebase Auth AND DataConnect
  */
 async function seedUser(user: TestUser): Promise<void> {
-  const auth = getAuth();
-  const db = getFirestore();
+  const auth = getAuth(getAdminApp());
 
   try {
     // Create in Auth
@@ -62,32 +69,30 @@ async function seedUser(user: TestUser): Promise<void> {
       password: user.password,
       displayName: user.displayName,
     });
-
-    // Create in Firestore
-    await db.collection('users').doc(user.uid).set({
-      userId: user.uid,
-      fplTeamId: user.fplTeamId,
-      fplTeamName: user.fplTeamName,
-      email: user.email,
-      displayName: user.displayName,
-      wins: 0,
-      losses: 0,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    });
-
-    console.log(`✅ ${user.displayName} seeded (Auth + Firestore)`);
-  } catch (error: any) {
-    if (error.code === 'auth/uid-already-exists') {
-      console.log(`ℹ️  ${user.displayName} already exists`);
+    console.log(`[+] Auth user created: ${user.displayName}`);
+  } catch (error: unknown) {
+    if (error instanceof Error && 'code' in error) {
+      const firebaseError = error as { code: string };
+      if (firebaseError.code === 'auth/uid-already-exists') {
+        console.log(`[=] Auth user exists: ${user.displayName}`);
+      } else {
+        throw error;
+      }
     } else {
       throw error;
     }
   }
+
+  // Create in DataConnect
+  await upsertUser({
+    uid: user.uid,
+    email: user.email,
+  });
+  console.log(`[+] DataConnect user upserted: ${user.displayName}`);
 }
 
 /**
- * Seeds test users in BOTH Firebase Auth AND Firestore
+ * Seeds test users in BOTH Firebase Auth AND DataConnect
  * This ensures users can login AND have profile data
  */
 export async function seedTestUsers(): Promise<void> {
@@ -99,25 +104,28 @@ export async function seedTestUsers(): Promise<void> {
 }
 
 /**
- * Cleans up a single test user from BOTH Auth AND Firestore
+ * Cleans up a single test user from Auth
+ * Note: DataConnect data is ephemeral in emulator
  */
 async function cleanupUser(user: TestUser): Promise<void> {
-  const auth = getAuth();
-  const db = getFirestore();
+  const auth = getAuth(getAdminApp());
 
   try {
     await auth.deleteUser(user.uid);
-    await db.collection('users').doc(user.uid).delete();
-    console.log(`✅ ${user.displayName} cleaned up`);
-  } catch (error: any) {
-    if (error.code !== 'auth/user-not-found') {
-      console.error(`Error cleaning up ${user.displayName}:`, error);
+    console.log(`[-] Auth user deleted: ${user.displayName}`);
+  } catch (error: unknown) {
+    if (error instanceof Error && 'code' in error) {
+      const firebaseError = error as { code: string };
+      if (firebaseError.code !== 'auth/user-not-found') {
+        console.error(`Error cleaning up ${user.displayName}:`, error);
+      }
     }
   }
 }
 
 /**
- * Cleans up test users from BOTH Auth AND Firestore
+ * Cleans up test users from Auth
+ * Note: DataConnect data is ephemeral and cleared on emulator restart
  */
 export async function cleanupTestUsers(): Promise<void> {
   await cleanupUser(TEST_USERS.standard);

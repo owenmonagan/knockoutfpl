@@ -16,7 +16,7 @@ External services and APIs the system depends on.
 |---------|---------|-----------|
 | FPL API | Team data, scores, leagues | Yes - core functionality |
 | Firebase Auth | User authentication | Yes - auth system |
-| Firestore | Data persistence | Yes - database |
+| Firebase Data Connect (PostgreSQL) | Data persistence | Yes - database |
 
 ---
 

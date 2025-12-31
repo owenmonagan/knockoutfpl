@@ -13,10 +13,10 @@ interface CreationStep {
 }
 
 const CREATION_STEPS: CreationStep[] = [
-  { id: 'fetchingData', label: 'Fetching league data from FPL', duration: 1500 },
-  { id: 'validating', label: 'Validating participants', duration: 300 },
-  { id: 'generating', label: 'Generating bracket structure', duration: 500 },
-  { id: 'saving', label: 'Saving tournament', duration: 2500 },
+  { id: 'fetchingData', label: 'Fetching league data', duration: 1200 },
+  { id: 'generating', label: 'Generating bracket', duration: 400 },
+  { id: 'savingPlayers', label: 'Saving players', duration: 1500 },
+  { id: 'buildingBracket', label: 'Building bracket', duration: 2000 },
   { id: 'complete', label: 'Tournament ready!', duration: 0 },
 ];
 

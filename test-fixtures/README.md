@@ -18,7 +18,7 @@ test-fixtures/
 ## CLI Commands
 
 ```bash
-# List available snapshots in Firestore
+# List available snapshots
 npm run fixtures:list
 
 # Download latest snapshot

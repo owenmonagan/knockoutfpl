@@ -320,5 +320,29 @@
     opacity: 0;
     pointer-events: none;
   }
+
+  /* Step completion animation for creation progress */
+  @keyframes step-complete {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .animate-step-complete {
+    animation: step-complete 0.3s ease-out;
+  }
+
+  /* Reduced motion support for step-complete */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-step-complete {
+      animation: none;
+    }
+  }
 }
 

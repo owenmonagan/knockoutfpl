@@ -19,15 +19,16 @@ async function waitForEmulators() {
 
   console.log('Waiting for Firebase emulators...');
 
-  // Check both Hub (4400) and Auth (9099) to ensure emulators are fully ready
+  // Check Hub (4400), Auth (9099), and DataConnect (9399) to ensure emulators are fully ready
   while (attempts < maxAttempts) {
     try {
-      const [hubResponse, authResponse] = await Promise.all([
+      const [hubResponse, authResponse, dataConnectResponse] = await Promise.all([
         fetch('http://127.0.0.1:4400'),
         fetch('http://127.0.0.1:9099'),
+        fetch('http://127.0.0.1:9399'),
       ]);
-      if (hubResponse.ok && authResponse.ok) {
-        // Both hub and auth are responding - emulators are ready
+      if (hubResponse.ok && authResponse.ok && dataConnectResponse.ok) {
+        // All services are responding - emulators are ready
         console.log('Emulators ready!');
         // Extra delay to ensure all services are fully initialized
         await new Promise((r) => setTimeout(r, 2000));
@@ -40,7 +41,7 @@ async function waitForEmulators() {
     await new Promise((r) => setTimeout(r, 1000));
   }
 
-  throw new Error('Emulators did not start in time - ensure Firebase emulators are running (check ports 4400 and 9099)');
+  throw new Error('Emulators did not start in time - ensure Firebase emulators are running (check ports 4400, 9099, and 9399)');
 }
 
 export default globalSetup;

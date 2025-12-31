@@ -44,8 +44,8 @@ Profit = (Page Views × $0.0005) - Firebase Costs
 |--------|-------|-------|
 | Ad CPM | $0.50 | Conservative for sports/hobby niche |
 | Ads per page view | 1 | Single non-intrusive placement |
-| Firebase reads per PV | ~4 | User doc, tournament, bracket |
-| Firebase read cost | $0.036/100k | After free tier |
+| DB queries per PV | ~4 | User doc, tournament, bracket |
+| Cloud SQL cost | ~$10/month base | Plus usage-based charges |
 
 **Phase 1 P/L Target**
 
@@ -53,24 +53,24 @@ Profit = (Page Views × $0.0005) - Firebase Costs
 |--------|--------|
 | Page Views | 240,000 |
 | Revenue (at $0.50 CPM) | $120 |
-| Firebase Costs | <$5 |
-| **Net** | ~$115 |
+| Infrastructure Costs | <$15 |
+| **Net** | ~$105 |
 
 **Budget & Alerts**
 
 | Alert | Threshold | Action |
 |-------|-----------|--------|
-| Firebase budget | $10/month | Email alert at 50%, 90% |
+| Cloud SQL budget | $15/month | Email alert at 50%, 90% |
 | Budget exceeded | 100% | Review architecture |
 
 **Break-even Check**
 
 At $0.50 CPM, break-even requires:
 ```
-Page Views > (Firebase Costs ÷ 0.0005)
+Page Views > (Infrastructure Costs ÷ 0.0005)
 ```
 
-If Firebase costs $5/month → need >10,000 page views. Phase 1 target gives 24x headroom.
+If infrastructure costs $15/month → need >30,000 page views. Phase 1 target gives 8x headroom.
 
 ---
 
@@ -119,16 +119,16 @@ These drive the NSM. If page views are off track, diagnose here.
 | Metric | Location |
 |--------|----------|
 | Page views | Firebase Analytics or Google Analytics |
-| Firestore reads/writes | Firebase Console → Usage |
+| Database queries | Cloud SQL Console → Metrics |
 | Cloud Function invocations | Firebase Console → Functions |
-| Estimated costs | Firebase Console → Usage & Billing |
+| Estimated costs | Firebase Console → Usage & Billing, Cloud SQL Console |
 | Signups | Firebase Console → Authentication |
 
 ### Alerts to Configure
 
 | Alert | Threshold | Action |
 |-------|-----------|--------|
-| Firebase budget | $10/month | Email at 50%, 90% |
+| Infrastructure budget | $15/month | Email at 50%, 90% |
 | Error rate | >1% of requests | Immediate notification |
 | Signup conversion | <30% | Investigate funnel |
 

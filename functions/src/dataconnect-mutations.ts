@@ -811,3 +811,222 @@ export async function updateTournamentCurrentRound(
     { variables: { id: tournamentId, currentRound } }
   );
 }
+
+// =============================================================================
+// BATCH MUTATION FUNCTIONS
+// =============================================================================
+// These functions batch multiple mutations into a single GraphQL request
+// using aliases to reduce connection overhead
+
+const BATCH_SIZE = 20; // Max mutations per batch to avoid query size limits
+
+/**
+ * Batch upsert entries - reduces N calls to ceil(N/BATCH_SIZE) calls
+ */
+export async function upsertEntriesBatch(
+  entries: UpsertEntryInput[],
+  _authClaims: AuthClaims
+): Promise<void> {
+  if (entries.length === 0) return;
+
+  for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+    const batch = entries.slice(i, i + BATCH_SIZE);
+
+    // Build mutation with aliases
+    const mutations = batch.map((entry, idx) => `
+      e${idx}: entry_upsert(data: {
+        entryId: ${entry.entryId}
+        season: "${entry.season}"
+        name: ${JSON.stringify(entry.name)}
+        playerFirstName: ${entry.playerFirstName ? JSON.stringify(entry.playerFirstName) : 'null'}
+        playerLastName: ${entry.playerLastName ? JSON.stringify(entry.playerLastName) : 'null'}
+        summaryOverallPoints: ${entry.summaryOverallPoints ?? 'null'}
+        summaryOverallRank: ${entry.summaryOverallRank ?? 'null'}
+        rawJson: ${JSON.stringify(entry.rawJson)}
+      })
+    `).join('\n');
+
+    const batchMutation = `mutation BatchUpsertEntries { ${mutations} }`;
+    await dataConnectAdmin.executeGraphql(batchMutation, {});
+  }
+}
+
+/**
+ * Batch upsert picks - reduces N calls to ceil(N/BATCH_SIZE) calls
+ */
+export async function upsertPicksBatch(
+  picks: UpsertPickInput[],
+  _authClaims: AuthClaims
+): Promise<void> {
+  if (picks.length === 0) return;
+
+  for (let i = 0; i < picks.length; i += BATCH_SIZE) {
+    const batch = picks.slice(i, i + BATCH_SIZE);
+
+    const mutations = batch.map((pick, idx) => `
+      p${idx}: pick_upsert(data: {
+        entryId: ${pick.entryId}
+        event: ${pick.event}
+        points: ${pick.points}
+        totalPoints: ${pick.totalPoints ?? 'null'}
+        rank: ${pick.rank ?? 'null'}
+        overallRank: ${pick.overallRank ?? 'null'}
+        eventTransfersCost: ${pick.eventTransfersCost ?? 'null'}
+        activeChip: ${pick.activeChip ? JSON.stringify(pick.activeChip) : 'null'}
+        rawJson: ${JSON.stringify(pick.rawJson)}
+        isFinal: ${pick.isFinal}
+        entryEntryId: ${pick.entryId}
+      })
+    `).join('\n');
+
+    const batchMutation = `mutation BatchUpsertPicks { ${mutations} }`;
+    await dataConnectAdmin.executeGraphql(batchMutation, {});
+  }
+}
+
+/**
+ * Batch create rounds - reduces N calls to ceil(N/BATCH_SIZE) calls
+ */
+export async function createRoundsBatch(
+  rounds: CreateRoundInput[],
+  _authClaims: AuthClaims
+): Promise<void> {
+  if (rounds.length === 0) return;
+
+  for (let i = 0; i < rounds.length; i += BATCH_SIZE) {
+    const batch = rounds.slice(i, i + BATCH_SIZE);
+
+    const mutations = batch.map((round, idx) => `
+      r${idx}: round_insert(data: {
+        tournamentId: "${round.tournamentId}"
+        roundNumber: ${round.roundNumber}
+        event: ${round.event}
+        status: "${round.status}"
+        tournamentTournamentId: "${round.tournamentId}"
+      })
+    `).join('\n');
+
+    const batchMutation = `mutation BatchCreateRounds { ${mutations} }`;
+    await dataConnectAdmin.executeGraphql(batchMutation, {});
+  }
+}
+
+/**
+ * Batch create participants - reduces N calls to ceil(N/BATCH_SIZE) calls
+ */
+export async function createParticipantsBatch(
+  participants: CreateParticipantInput[],
+  _authClaims: AuthClaims
+): Promise<void> {
+  if (participants.length === 0) return;
+
+  for (let i = 0; i < participants.length; i += BATCH_SIZE) {
+    const batch = participants.slice(i, i + BATCH_SIZE);
+
+    const mutations = batch.map((p, idx) => `
+      p${idx}: participant_insert(data: {
+        tournamentId: "${p.tournamentId}"
+        entryId: ${p.entryId}
+        teamName: ${JSON.stringify(p.teamName)}
+        managerName: ${JSON.stringify(p.managerName)}
+        seed: ${p.seed}
+        leagueRank: ${p.leagueRank ?? 'null'}
+        leaguePoints: ${p.leaguePoints ?? 'null'}
+        rawJson: ${JSON.stringify(p.rawJson)}
+        tournamentTournamentId: "${p.tournamentId}"
+        entryEntryId: ${p.entryId}
+      })
+    `).join('\n');
+
+    const batchMutation = `mutation BatchCreateParticipants { ${mutations} }`;
+    await dataConnectAdmin.executeGraphql(batchMutation, {});
+  }
+}
+
+/**
+ * Batch create matches - reduces N calls to ceil(N/BATCH_SIZE) calls
+ */
+export async function createMatchesBatch(
+  matches: CreateMatchInput[],
+  _authClaims: AuthClaims
+): Promise<void> {
+  if (matches.length === 0) return;
+
+  for (let i = 0; i < matches.length; i += BATCH_SIZE) {
+    const batch = matches.slice(i, i + BATCH_SIZE);
+
+    const mutations = batch.map((m, idx) => `
+      m${idx}: match_insert(data: {
+        tournamentId: "${m.tournamentId}"
+        matchId: ${m.matchId}
+        roundNumber: ${m.roundNumber}
+        positionInRound: ${m.positionInRound}
+        qualifiesToMatchId: ${m.qualifiesToMatchId ?? 'null'}
+        isBye: ${m.isBye}
+        status: "${m.status ?? 'pending'}"
+        tournamentTournamentId: "${m.tournamentId}"
+      })
+    `).join('\n');
+
+    const batchMutation = `mutation BatchCreateMatches { ${mutations} }`;
+    await dataConnectAdmin.executeGraphql(batchMutation, {});
+  }
+}
+
+/**
+ * Batch update matches (for bye winners) - reduces N calls to ceil(N/BATCH_SIZE) calls
+ */
+export async function updateMatchesBatch(
+  matches: UpdateMatchInput[],
+  _authClaims: AuthClaims
+): Promise<void> {
+  if (matches.length === 0) return;
+
+  for (let i = 0; i < matches.length; i += BATCH_SIZE) {
+    const batch = matches.slice(i, i + BATCH_SIZE);
+
+    const mutations = batch.map((m, idx) => `
+      m${idx}: match_update(
+        key: { tournamentId: "${m.tournamentId}", matchId: ${m.matchId} }
+        data: {
+          roundNumber: ${m.roundNumber}
+          positionInRound: ${m.positionInRound}
+          qualifiesToMatchId: ${m.qualifiesToMatchId ?? 'null'}
+          isBye: ${m.isBye}
+          status: "${m.status}"
+          winnerEntryId: ${m.winnerEntryId ?? 'null'}
+        }
+      )
+    `).join('\n');
+
+    const batchMutation = `mutation BatchUpdateMatches { ${mutations} }`;
+    await dataConnectAdmin.executeGraphql(batchMutation, {});
+  }
+}
+
+/**
+ * Batch create match picks - reduces N calls to ceil(N/BATCH_SIZE) calls
+ */
+export async function createMatchPicksBatch(
+  picks: CreateMatchPickInput[],
+  _authClaims: AuthClaims
+): Promise<void> {
+  if (picks.length === 0) return;
+
+  for (let i = 0; i < picks.length; i += BATCH_SIZE) {
+    const batch = picks.slice(i, i + BATCH_SIZE);
+
+    const mutations = batch.map((p, idx) => `
+      mp${idx}: matchPick_upsert(data: {
+        tournamentId: "${p.tournamentId}"
+        matchId: ${p.matchId}
+        entryId: ${p.entryId}
+        slot: ${p.slot}
+        entryEntryId: ${p.entryId}
+      })
+    `).join('\n');
+
+    const batchMutation = `mutation BatchCreateMatchPicks { ${mutations} }`;
+    await dataConnectAdmin.executeGraphql(batchMutation, {});
+  }
+}

@@ -719,222 +719,6 @@ export interface User_Key {
   __typename?: 'User_Key';
 }
 
-interface UpsertUserRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: UpsertUserVariables): MutationRef<UpsertUserData, UpsertUserVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: UpsertUserVariables): MutationRef<UpsertUserData, UpsertUserVariables>;
-  operationName: string;
-}
-export const upsertUserRef: UpsertUserRef;
-
-export function upsertUser(vars: UpsertUserVariables): MutationPromise<UpsertUserData, UpsertUserVariables>;
-export function upsertUser(dc: DataConnect, vars: UpsertUserVariables): MutationPromise<UpsertUserData, UpsertUserVariables>;
-
-interface ConnectFplEntryRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: ConnectFplEntryVariables): MutationRef<ConnectFplEntryData, ConnectFplEntryVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: ConnectFplEntryVariables): MutationRef<ConnectFplEntryData, ConnectFplEntryVariables>;
-  operationName: string;
-}
-export const connectFplEntryRef: ConnectFplEntryRef;
-
-export function connectFplEntry(vars: ConnectFplEntryVariables): MutationPromise<ConnectFplEntryData, ConnectFplEntryVariables>;
-export function connectFplEntry(dc: DataConnect, vars: ConnectFplEntryVariables): MutationPromise<ConnectFplEntryData, ConnectFplEntryVariables>;
-
-interface UpsertEntryRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: UpsertEntryVariables): MutationRef<UpsertEntryData, UpsertEntryVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: UpsertEntryVariables): MutationRef<UpsertEntryData, UpsertEntryVariables>;
-  operationName: string;
-}
-export const upsertEntryRef: UpsertEntryRef;
-
-export function upsertEntry(vars: UpsertEntryVariables): MutationPromise<UpsertEntryData, UpsertEntryVariables>;
-export function upsertEntry(dc: DataConnect, vars: UpsertEntryVariables): MutationPromise<UpsertEntryData, UpsertEntryVariables>;
-
-interface UpsertPickRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: UpsertPickVariables): MutationRef<UpsertPickData, UpsertPickVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: UpsertPickVariables): MutationRef<UpsertPickData, UpsertPickVariables>;
-  operationName: string;
-}
-export const upsertPickRef: UpsertPickRef;
-
-export function upsertPick(vars: UpsertPickVariables): MutationPromise<UpsertPickData, UpsertPickVariables>;
-export function upsertPick(dc: DataConnect, vars: UpsertPickVariables): MutationPromise<UpsertPickData, UpsertPickVariables>;
-
-interface UpsertLeagueRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: UpsertLeagueVariables): MutationRef<UpsertLeagueData, UpsertLeagueVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: UpsertLeagueVariables): MutationRef<UpsertLeagueData, UpsertLeagueVariables>;
-  operationName: string;
-}
-export const upsertLeagueRef: UpsertLeagueRef;
-
-export function upsertLeague(vars: UpsertLeagueVariables): MutationPromise<UpsertLeagueData, UpsertLeagueVariables>;
-export function upsertLeague(dc: DataConnect, vars: UpsertLeagueVariables): MutationPromise<UpsertLeagueData, UpsertLeagueVariables>;
-
-interface UpsertEventRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: UpsertEventVariables): MutationRef<UpsertEventData, UpsertEventVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: UpsertEventVariables): MutationRef<UpsertEventData, UpsertEventVariables>;
-  operationName: string;
-}
-export const upsertEventRef: UpsertEventRef;
-
-export function upsertEvent(vars: UpsertEventVariables): MutationPromise<UpsertEventData, UpsertEventVariables>;
-export function upsertEvent(dc: DataConnect, vars: UpsertEventVariables): MutationPromise<UpsertEventData, UpsertEventVariables>;
-
-interface CreateTournamentRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: CreateTournamentVariables): MutationRef<CreateTournamentData, CreateTournamentVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: CreateTournamentVariables): MutationRef<CreateTournamentData, CreateTournamentVariables>;
-  operationName: string;
-}
-export const createTournamentRef: CreateTournamentRef;
-
-export function createTournament(vars: CreateTournamentVariables): MutationPromise<CreateTournamentData, CreateTournamentVariables>;
-export function createTournament(dc: DataConnect, vars: CreateTournamentVariables): MutationPromise<CreateTournamentData, CreateTournamentVariables>;
-
-interface UpdateTournamentStatusRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: UpdateTournamentStatusVariables): MutationRef<UpdateTournamentStatusData, UpdateTournamentStatusVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: UpdateTournamentStatusVariables): MutationRef<UpdateTournamentStatusData, UpdateTournamentStatusVariables>;
-  operationName: string;
-}
-export const updateTournamentStatusRef: UpdateTournamentStatusRef;
-
-export function updateTournamentStatus(vars: UpdateTournamentStatusVariables): MutationPromise<UpdateTournamentStatusData, UpdateTournamentStatusVariables>;
-export function updateTournamentStatus(dc: DataConnect, vars: UpdateTournamentStatusVariables): MutationPromise<UpdateTournamentStatusData, UpdateTournamentStatusVariables>;
-
-interface SetTournamentWinnerRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: SetTournamentWinnerVariables): MutationRef<SetTournamentWinnerData, SetTournamentWinnerVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: SetTournamentWinnerVariables): MutationRef<SetTournamentWinnerData, SetTournamentWinnerVariables>;
-  operationName: string;
-}
-export const setTournamentWinnerRef: SetTournamentWinnerRef;
-
-export function setTournamentWinner(vars: SetTournamentWinnerVariables): MutationPromise<SetTournamentWinnerData, SetTournamentWinnerVariables>;
-export function setTournamentWinner(dc: DataConnect, vars: SetTournamentWinnerVariables): MutationPromise<SetTournamentWinnerData, SetTournamentWinnerVariables>;
-
-interface AdvanceTournamentRoundRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: AdvanceTournamentRoundVariables): MutationRef<AdvanceTournamentRoundData, AdvanceTournamentRoundVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: AdvanceTournamentRoundVariables): MutationRef<AdvanceTournamentRoundData, AdvanceTournamentRoundVariables>;
-  operationName: string;
-}
-export const advanceTournamentRoundRef: AdvanceTournamentRoundRef;
-
-export function advanceTournamentRound(vars: AdvanceTournamentRoundVariables): MutationPromise<AdvanceTournamentRoundData, AdvanceTournamentRoundVariables>;
-export function advanceTournamentRound(dc: DataConnect, vars: AdvanceTournamentRoundVariables): MutationPromise<AdvanceTournamentRoundData, AdvanceTournamentRoundVariables>;
-
-interface CreateRoundRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: CreateRoundVariables): MutationRef<CreateRoundData, CreateRoundVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: CreateRoundVariables): MutationRef<CreateRoundData, CreateRoundVariables>;
-  operationName: string;
-}
-export const createRoundRef: CreateRoundRef;
-
-export function createRound(vars: CreateRoundVariables): MutationPromise<CreateRoundData, CreateRoundVariables>;
-export function createRound(dc: DataConnect, vars: CreateRoundVariables): MutationPromise<CreateRoundData, CreateRoundVariables>;
-
-interface UpdateRoundRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: UpdateRoundVariables): MutationRef<UpdateRoundData, UpdateRoundVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: UpdateRoundVariables): MutationRef<UpdateRoundData, UpdateRoundVariables>;
-  operationName: string;
-}
-export const updateRoundRef: UpdateRoundRef;
-
-export function updateRound(vars: UpdateRoundVariables): MutationPromise<UpdateRoundData, UpdateRoundVariables>;
-export function updateRound(dc: DataConnect, vars: UpdateRoundVariables): MutationPromise<UpdateRoundData, UpdateRoundVariables>;
-
-interface CreateParticipantRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: CreateParticipantVariables): MutationRef<CreateParticipantData, CreateParticipantVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: CreateParticipantVariables): MutationRef<CreateParticipantData, CreateParticipantVariables>;
-  operationName: string;
-}
-export const createParticipantRef: CreateParticipantRef;
-
-export function createParticipant(vars: CreateParticipantVariables): MutationPromise<CreateParticipantData, CreateParticipantVariables>;
-export function createParticipant(dc: DataConnect, vars: CreateParticipantVariables): MutationPromise<CreateParticipantData, CreateParticipantVariables>;
-
-interface UpdateParticipantRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: UpdateParticipantVariables): MutationRef<UpdateParticipantData, UpdateParticipantVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: UpdateParticipantVariables): MutationRef<UpdateParticipantData, UpdateParticipantVariables>;
-  operationName: string;
-}
-export const updateParticipantRef: UpdateParticipantRef;
-
-export function updateParticipant(vars: UpdateParticipantVariables): MutationPromise<UpdateParticipantData, UpdateParticipantVariables>;
-export function updateParticipant(dc: DataConnect, vars: UpdateParticipantVariables): MutationPromise<UpdateParticipantData, UpdateParticipantVariables>;
-
-interface CreateMatchRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: CreateMatchVariables): MutationRef<CreateMatchData, CreateMatchVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: CreateMatchVariables): MutationRef<CreateMatchData, CreateMatchVariables>;
-  operationName: string;
-}
-export const createMatchRef: CreateMatchRef;
-
-export function createMatch(vars: CreateMatchVariables): MutationPromise<CreateMatchData, CreateMatchVariables>;
-export function createMatch(dc: DataConnect, vars: CreateMatchVariables): MutationPromise<CreateMatchData, CreateMatchVariables>;
-
-interface UpdateMatchRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: UpdateMatchVariables): MutationRef<UpdateMatchData, UpdateMatchVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: UpdateMatchVariables): MutationRef<UpdateMatchData, UpdateMatchVariables>;
-  operationName: string;
-}
-export const updateMatchRef: UpdateMatchRef;
-
-export function updateMatch(vars: UpdateMatchVariables): MutationPromise<UpdateMatchData, UpdateMatchVariables>;
-export function updateMatch(dc: DataConnect, vars: UpdateMatchVariables): MutationPromise<UpdateMatchData, UpdateMatchVariables>;
-
-interface CreateMatchPickRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: CreateMatchPickVariables): MutationRef<CreateMatchPickData, CreateMatchPickVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: CreateMatchPickVariables): MutationRef<CreateMatchPickData, CreateMatchPickVariables>;
-  operationName: string;
-}
-export const createMatchPickRef: CreateMatchPickRef;
-
-export function createMatchPick(vars: CreateMatchPickVariables): MutationPromise<CreateMatchPickData, CreateMatchPickVariables>;
-export function createMatchPick(dc: DataConnect, vars: CreateMatchPickVariables): MutationPromise<CreateMatchPickData, CreateMatchPickVariables>;
-
-interface DeleteTournamentRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: DeleteTournamentVariables): MutationRef<DeleteTournamentData, DeleteTournamentVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: DeleteTournamentVariables): MutationRef<DeleteTournamentData, DeleteTournamentVariables>;
-  operationName: string;
-}
-export const deleteTournamentRef: DeleteTournamentRef;
-
-export function deleteTournament(vars: DeleteTournamentVariables): MutationPromise<DeleteTournamentData, DeleteTournamentVariables>;
-export function deleteTournament(dc: DataConnect, vars: DeleteTournamentVariables): MutationPromise<DeleteTournamentData, DeleteTournamentVariables>;
-
 interface GetUserRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars: GetUserVariables): QueryRef<GetUserData, GetUserVariables>;
@@ -1210,4 +994,220 @@ export const getUserParticipationsRef: GetUserParticipationsRef;
 
 export function getUserParticipations(vars: GetUserParticipationsVariables): QueryPromise<GetUserParticipationsData, GetUserParticipationsVariables>;
 export function getUserParticipations(dc: DataConnect, vars: GetUserParticipationsVariables): QueryPromise<GetUserParticipationsData, GetUserParticipationsVariables>;
+
+interface UpsertUserRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertUserVariables): MutationRef<UpsertUserData, UpsertUserVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpsertUserVariables): MutationRef<UpsertUserData, UpsertUserVariables>;
+  operationName: string;
+}
+export const upsertUserRef: UpsertUserRef;
+
+export function upsertUser(vars: UpsertUserVariables): MutationPromise<UpsertUserData, UpsertUserVariables>;
+export function upsertUser(dc: DataConnect, vars: UpsertUserVariables): MutationPromise<UpsertUserData, UpsertUserVariables>;
+
+interface ConnectFplEntryRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ConnectFplEntryVariables): MutationRef<ConnectFplEntryData, ConnectFplEntryVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: ConnectFplEntryVariables): MutationRef<ConnectFplEntryData, ConnectFplEntryVariables>;
+  operationName: string;
+}
+export const connectFplEntryRef: ConnectFplEntryRef;
+
+export function connectFplEntry(vars: ConnectFplEntryVariables): MutationPromise<ConnectFplEntryData, ConnectFplEntryVariables>;
+export function connectFplEntry(dc: DataConnect, vars: ConnectFplEntryVariables): MutationPromise<ConnectFplEntryData, ConnectFplEntryVariables>;
+
+interface UpsertEntryRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertEntryVariables): MutationRef<UpsertEntryData, UpsertEntryVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpsertEntryVariables): MutationRef<UpsertEntryData, UpsertEntryVariables>;
+  operationName: string;
+}
+export const upsertEntryRef: UpsertEntryRef;
+
+export function upsertEntry(vars: UpsertEntryVariables): MutationPromise<UpsertEntryData, UpsertEntryVariables>;
+export function upsertEntry(dc: DataConnect, vars: UpsertEntryVariables): MutationPromise<UpsertEntryData, UpsertEntryVariables>;
+
+interface UpsertPickRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertPickVariables): MutationRef<UpsertPickData, UpsertPickVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpsertPickVariables): MutationRef<UpsertPickData, UpsertPickVariables>;
+  operationName: string;
+}
+export const upsertPickRef: UpsertPickRef;
+
+export function upsertPick(vars: UpsertPickVariables): MutationPromise<UpsertPickData, UpsertPickVariables>;
+export function upsertPick(dc: DataConnect, vars: UpsertPickVariables): MutationPromise<UpsertPickData, UpsertPickVariables>;
+
+interface UpsertLeagueRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertLeagueVariables): MutationRef<UpsertLeagueData, UpsertLeagueVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpsertLeagueVariables): MutationRef<UpsertLeagueData, UpsertLeagueVariables>;
+  operationName: string;
+}
+export const upsertLeagueRef: UpsertLeagueRef;
+
+export function upsertLeague(vars: UpsertLeagueVariables): MutationPromise<UpsertLeagueData, UpsertLeagueVariables>;
+export function upsertLeague(dc: DataConnect, vars: UpsertLeagueVariables): MutationPromise<UpsertLeagueData, UpsertLeagueVariables>;
+
+interface UpsertEventRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertEventVariables): MutationRef<UpsertEventData, UpsertEventVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpsertEventVariables): MutationRef<UpsertEventData, UpsertEventVariables>;
+  operationName: string;
+}
+export const upsertEventRef: UpsertEventRef;
+
+export function upsertEvent(vars: UpsertEventVariables): MutationPromise<UpsertEventData, UpsertEventVariables>;
+export function upsertEvent(dc: DataConnect, vars: UpsertEventVariables): MutationPromise<UpsertEventData, UpsertEventVariables>;
+
+interface CreateTournamentRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateTournamentVariables): MutationRef<CreateTournamentData, CreateTournamentVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateTournamentVariables): MutationRef<CreateTournamentData, CreateTournamentVariables>;
+  operationName: string;
+}
+export const createTournamentRef: CreateTournamentRef;
+
+export function createTournament(vars: CreateTournamentVariables): MutationPromise<CreateTournamentData, CreateTournamentVariables>;
+export function createTournament(dc: DataConnect, vars: CreateTournamentVariables): MutationPromise<CreateTournamentData, CreateTournamentVariables>;
+
+interface UpdateTournamentStatusRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateTournamentStatusVariables): MutationRef<UpdateTournamentStatusData, UpdateTournamentStatusVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateTournamentStatusVariables): MutationRef<UpdateTournamentStatusData, UpdateTournamentStatusVariables>;
+  operationName: string;
+}
+export const updateTournamentStatusRef: UpdateTournamentStatusRef;
+
+export function updateTournamentStatus(vars: UpdateTournamentStatusVariables): MutationPromise<UpdateTournamentStatusData, UpdateTournamentStatusVariables>;
+export function updateTournamentStatus(dc: DataConnect, vars: UpdateTournamentStatusVariables): MutationPromise<UpdateTournamentStatusData, UpdateTournamentStatusVariables>;
+
+interface SetTournamentWinnerRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: SetTournamentWinnerVariables): MutationRef<SetTournamentWinnerData, SetTournamentWinnerVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: SetTournamentWinnerVariables): MutationRef<SetTournamentWinnerData, SetTournamentWinnerVariables>;
+  operationName: string;
+}
+export const setTournamentWinnerRef: SetTournamentWinnerRef;
+
+export function setTournamentWinner(vars: SetTournamentWinnerVariables): MutationPromise<SetTournamentWinnerData, SetTournamentWinnerVariables>;
+export function setTournamentWinner(dc: DataConnect, vars: SetTournamentWinnerVariables): MutationPromise<SetTournamentWinnerData, SetTournamentWinnerVariables>;
+
+interface AdvanceTournamentRoundRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: AdvanceTournamentRoundVariables): MutationRef<AdvanceTournamentRoundData, AdvanceTournamentRoundVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: AdvanceTournamentRoundVariables): MutationRef<AdvanceTournamentRoundData, AdvanceTournamentRoundVariables>;
+  operationName: string;
+}
+export const advanceTournamentRoundRef: AdvanceTournamentRoundRef;
+
+export function advanceTournamentRound(vars: AdvanceTournamentRoundVariables): MutationPromise<AdvanceTournamentRoundData, AdvanceTournamentRoundVariables>;
+export function advanceTournamentRound(dc: DataConnect, vars: AdvanceTournamentRoundVariables): MutationPromise<AdvanceTournamentRoundData, AdvanceTournamentRoundVariables>;
+
+interface CreateRoundRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateRoundVariables): MutationRef<CreateRoundData, CreateRoundVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateRoundVariables): MutationRef<CreateRoundData, CreateRoundVariables>;
+  operationName: string;
+}
+export const createRoundRef: CreateRoundRef;
+
+export function createRound(vars: CreateRoundVariables): MutationPromise<CreateRoundData, CreateRoundVariables>;
+export function createRound(dc: DataConnect, vars: CreateRoundVariables): MutationPromise<CreateRoundData, CreateRoundVariables>;
+
+interface UpdateRoundRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateRoundVariables): MutationRef<UpdateRoundData, UpdateRoundVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateRoundVariables): MutationRef<UpdateRoundData, UpdateRoundVariables>;
+  operationName: string;
+}
+export const updateRoundRef: UpdateRoundRef;
+
+export function updateRound(vars: UpdateRoundVariables): MutationPromise<UpdateRoundData, UpdateRoundVariables>;
+export function updateRound(dc: DataConnect, vars: UpdateRoundVariables): MutationPromise<UpdateRoundData, UpdateRoundVariables>;
+
+interface CreateParticipantRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateParticipantVariables): MutationRef<CreateParticipantData, CreateParticipantVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateParticipantVariables): MutationRef<CreateParticipantData, CreateParticipantVariables>;
+  operationName: string;
+}
+export const createParticipantRef: CreateParticipantRef;
+
+export function createParticipant(vars: CreateParticipantVariables): MutationPromise<CreateParticipantData, CreateParticipantVariables>;
+export function createParticipant(dc: DataConnect, vars: CreateParticipantVariables): MutationPromise<CreateParticipantData, CreateParticipantVariables>;
+
+interface UpdateParticipantRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateParticipantVariables): MutationRef<UpdateParticipantData, UpdateParticipantVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateParticipantVariables): MutationRef<UpdateParticipantData, UpdateParticipantVariables>;
+  operationName: string;
+}
+export const updateParticipantRef: UpdateParticipantRef;
+
+export function updateParticipant(vars: UpdateParticipantVariables): MutationPromise<UpdateParticipantData, UpdateParticipantVariables>;
+export function updateParticipant(dc: DataConnect, vars: UpdateParticipantVariables): MutationPromise<UpdateParticipantData, UpdateParticipantVariables>;
+
+interface CreateMatchRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateMatchVariables): MutationRef<CreateMatchData, CreateMatchVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateMatchVariables): MutationRef<CreateMatchData, CreateMatchVariables>;
+  operationName: string;
+}
+export const createMatchRef: CreateMatchRef;
+
+export function createMatch(vars: CreateMatchVariables): MutationPromise<CreateMatchData, CreateMatchVariables>;
+export function createMatch(dc: DataConnect, vars: CreateMatchVariables): MutationPromise<CreateMatchData, CreateMatchVariables>;
+
+interface UpdateMatchRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateMatchVariables): MutationRef<UpdateMatchData, UpdateMatchVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateMatchVariables): MutationRef<UpdateMatchData, UpdateMatchVariables>;
+  operationName: string;
+}
+export const updateMatchRef: UpdateMatchRef;
+
+export function updateMatch(vars: UpdateMatchVariables): MutationPromise<UpdateMatchData, UpdateMatchVariables>;
+export function updateMatch(dc: DataConnect, vars: UpdateMatchVariables): MutationPromise<UpdateMatchData, UpdateMatchVariables>;
+
+interface CreateMatchPickRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateMatchPickVariables): MutationRef<CreateMatchPickData, CreateMatchPickVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateMatchPickVariables): MutationRef<CreateMatchPickData, CreateMatchPickVariables>;
+  operationName: string;
+}
+export const createMatchPickRef: CreateMatchPickRef;
+
+export function createMatchPick(vars: CreateMatchPickVariables): MutationPromise<CreateMatchPickData, CreateMatchPickVariables>;
+export function createMatchPick(dc: DataConnect, vars: CreateMatchPickVariables): MutationPromise<CreateMatchPickData, CreateMatchPickVariables>;
+
+interface DeleteTournamentRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteTournamentVariables): MutationRef<DeleteTournamentData, DeleteTournamentVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: DeleteTournamentVariables): MutationRef<DeleteTournamentData, DeleteTournamentVariables>;
+  operationName: string;
+}
+export const deleteTournamentRef: DeleteTournamentRef;
+
+export function deleteTournament(vars: DeleteTournamentVariables): MutationPromise<DeleteTournamentData, DeleteTournamentVariables>;
+export function deleteTournament(dc: DataConnect, vars: DeleteTournamentVariables): MutationPromise<DeleteTournamentData, DeleteTournamentVariables>;
 

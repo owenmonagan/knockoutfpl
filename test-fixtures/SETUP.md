@@ -2,7 +2,7 @@
 
 ## Overview
 
-The test fixtures system downloads FPL API snapshots from Firestore for use in tests.
+The test fixtures system downloads FPL API snapshots from Firebase for use in tests.
 
 ## Current Status
 
@@ -63,7 +63,7 @@ gcloud auth application-default login
 npm run fixtures:list
 ```
 
-This will show all snapshots in Firestore with their gameweek and status.
+This will show all available snapshots with their gameweek and status.
 
 ### 2. Download Snapshots
 

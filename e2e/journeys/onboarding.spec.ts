@@ -139,8 +139,8 @@ test.describe('Onboarding Journey @journey @onboarding', () => {
     /**
      * NOTE: These tests require Firebase emulators with seeded data.
      * To run these tests:
-     * 1. Start Firebase emulators: firebase emulators:start
-     * 2. Seed test user with tournaments in Firestore
+     * 1. Start Firebase emulators: npm run emulators:e2e
+     * 2. Seed test data: npm run e2e:seed
      * 3. Run tests with emulator configuration
      */
 
