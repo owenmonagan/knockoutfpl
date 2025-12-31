@@ -59,7 +59,7 @@ Users can compare two FPL teams for any gameweek:
 - Firebase Auth integration (email/password)
 - FPL League import (fetch managers from league API)
 - Bracket generation (seeding based on league rank)
-- Tournament persistence (Firestore)
+- Tournament persistence (DataConnect)
 - Bracket visualization (already built)
 - Gameweek score fetching (Cloud Functions)
 - Automatic winner progression
@@ -110,7 +110,7 @@ Users can compare two FPL teams for any gameweek:
 ### Phase 1: Firebase & Authentication (COMPLETED)
 - Firebase project setup
 - Authentication service
-- User service with Firestore
+- User service with DataConnect
 - Protected routes
 - E2E auth tests
 
@@ -131,7 +131,7 @@ Users can compare two FPL teams for any gameweek:
 - Bracket generation algorithm
 - Seeding logic (by league rank)
 - Bye assignment for non-power-of-2 sizes
-- Save tournament to Firestore
+- Save tournament to DataConnect
 
 ### Phase 5: Score Processing
 - Cloud Function for FPL score fetching

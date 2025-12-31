@@ -7,7 +7,7 @@ A web application that creates knockout tournaments from Fantasy Premier League 
 - React 19 + TypeScript + Vite
 - Vitest for unit/integration testing
 - Playwright for E2E testing
-- Firebase (Auth, Firestore, Cloud Functions)
+- Firebase (Auth, DataConnect, Cloud Functions)
 
 ## Getting Started
 

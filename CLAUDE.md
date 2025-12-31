@@ -9,7 +9,7 @@ This document describes our development process, technical stack, and implementa
 ## 🛠️ Tech Stack
 
 - **Frontend:** React 18 + Vite + TypeScript + shadcn/ui + Tailwind CSS
-- **Backend:** Firebase (Auth, Firestore, Cloud Functions)
+- **Backend:** Firebase (Auth, DataConnect, Cloud Functions)
 - **FPL API:** Unofficial public endpoints (proxied via Cloud Functions)
 - **Hosting:** Firebase Hosting
 - **Testing:** Playwright MCP for automated browser testing
@@ -418,62 +418,81 @@ A pre-commit hook (see below) can enforce this automatically.
 
 **Services:**
 - **Firebase Auth:** Email/password authentication
-- **Firestore:** NoSQL database for users and tournaments
+- **Firebase DataConnect:** PostgreSQL-backed database for users and tournaments
 - **Cloud Functions:** API proxying and scheduled tasks
 - **Firebase Hosting:** Static site deployment
 
 ---
 
-## 📊 Database Schema (Firestore)
+## 📊 Database Schema (DataConnect)
 
-### Collections Structure
+DataConnect uses a GraphQL schema with PostgreSQL as the underlying database. Schema is defined in `dataconnect/schema/schema.gql`.
 
-#### `users` Collection
-```typescript
-{
-  userId: string;              // Firebase Auth UID (document ID)
-  fplTeamId: number;          // e.g., 158256
-  fplTeamName: string;        // e.g., "Owen's Team" (from FPL API)
-  email: string;
-  displayName: string;
-  wins: number;               // Total wins
-  losses: number;             // Total losses
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+### Tables
+
+#### `User` Table
+```graphql
+type User @table {
+  id: ID!                      # Firebase Auth UID
+  fplTeamId: Int              # e.g., 158256
+  fplTeamName: String         # e.g., "Owen's Team" (from FPL API)
+  email: String!
+  displayName: String
+  wins: Int! @default(value: 0)
+  losses: Int! @default(value: 0)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
 }
 ```
 
-**Indexes:**
-- `fplTeamId` (for quick lookup/validation)
-
-#### `tournaments` Collection
-```typescript
-{
-  id: string;                  // Firestore document ID
-  fplLeagueId: number;         // FPL classic league ID
-  fplLeagueName: string;       // League name from FPL API
-  creatorUserId: string;       // Firebase Auth UID
-  startGameweek: number;       // First round gameweek
-  currentRound: number;        // 1-indexed
-  totalRounds: number;         // Calculated from participant count
-  status: 'active' | 'completed';
-  participants: Participant[]; // Array of managers
-  rounds: Round[];             // Bracket structure
-  winnerId: number | null;     // FPL team ID of winner
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+#### `Tournament` Table
+```graphql
+type Tournament @table {
+  id: UUID! @default(expr: "uuidV4()")
+  fplLeagueId: Int!            # FPL classic league ID
+  fplLeagueName: String!       # League name from FPL API
+  creator: User!               # References User table
+  startGameweek: Int!          # First round gameweek
+  currentRound: Int!           # 1-indexed
+  totalRounds: Int!            # Calculated from participant count
+  status: String!              # 'active' | 'completed'
+  winnerId: Int                # FPL team ID of winner
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
 }
 ```
 
-**Indexes:**
-- `creatorUserId` + `status` (for user's tournaments)
-- `fplLeagueId` (for league lookup)
-- `status` + `currentRound` (for scheduled function)
+#### `Participant` Table
+```graphql
+type Participant @table {
+  id: UUID! @default(expr: "uuidV4()")
+  tournament: Tournament!
+  fplTeamId: Int!
+  fplTeamName: String!
+  seed: Int!
+  eliminatedRound: Int         # null if still active
+}
+```
 
-**Security Rules:**
-- Users can read tournaments they created
-- Users can create tournaments
-- Only Cloud Functions can update scores and advance rounds
+#### `Match` Table
+```graphql
+type Match @table {
+  id: UUID! @default(expr: "uuidV4()")
+  tournament: Tournament!
+  round: Int!
+  position: Int!               # Position within round
+  player1: Participant
+  player2: Participant
+  player1Score: Int
+  player2Score: Int
+  winner: Participant
+  gameweek: Int!
+}
+```
+
+**Access Control:**
+- Queries and mutations are defined in `dataconnect/connector/` directory
+- Access is controlled via Firebase Auth integration
 
 ---
 
@@ -535,7 +554,12 @@ knockoutfpl/
 │   ├── lib/             # Utilities and helpers
 │   ├── App.tsx          # Main application component
 │   └── index.css        # Global styles (Tailwind)
+├── dataconnect/
+│   ├── schema/          # GraphQL schema definitions
+│   ├── connector/       # Queries and mutations
+│   └── dataconnect-generated/  # Generated TypeScript SDK
 ├── functions/           # Firebase Cloud Functions
+├── e2e/                 # Playwright E2E tests
 ├── .playwright-mcp/     # Playwright test artifacts
 ├── CLAUDE.md           # This file (development guide)
 └── PRODUCT.md          # Product vision and roadmap
