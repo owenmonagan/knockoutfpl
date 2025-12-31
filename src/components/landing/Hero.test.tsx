@@ -17,46 +17,40 @@ describe('Hero', () => {
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   });
 
-  it('displays KNOCKOUT FPL headline', () => {
+  it('displays main headline with Knockout Cup text', () => {
     renderHero();
     const heading = screen.getByRole('heading', { level: 1 });
-    expect(heading).toHaveTextContent('KNOCKOUT FPL');
-  });
-
-  it('headline is uppercase', () => {
-    renderHero();
-    const heading = screen.getByRole('heading', { level: 1 });
-    expect(heading).toHaveClass('uppercase');
+    expect(heading).toHaveTextContent(/knockout cup/i);
   });
 
   it('displays tagline', () => {
     renderHero();
-    expect(screen.getByText('Every gameweek is a cup final.')).toBeInTheDocument();
+    expect(
+      screen.getByText(/head-to-head battles.*one survives/i)
+    ).toBeInTheDocument();
   });
 
-  it('displays Enter the Arena CTA', () => {
+  it('displays Create Your Tournament CTA', () => {
     renderHero();
-    expect(screen.getByRole('link', { name: /enter the arena/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /create your tournament/i })
+    ).toBeInTheDocument();
   });
 
   it('CTA links to /signup', () => {
     renderHero();
-    const cta = screen.getByRole('link', { name: /enter the arena/i });
+    const cta = screen.getByRole('link', { name: /create your tournament/i });
     expect(cta).toHaveAttribute('href', '/signup');
   });
 
-  it('renders trophy animation', () => {
+  it('displays View Demo link', () => {
     renderHero();
-    expect(document.querySelector('[data-testid="trophy-container"]')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /view demo/i })).toBeInTheDocument();
   });
 
-  it('renders bracket motif', () => {
+  it('displays trust badges', () => {
     renderHero();
-    expect(screen.getByLabelText(/tournament bracket/i)).toBeInTheDocument();
-  });
-
-  it('renders trophy shimmer effect', () => {
-    renderHero();
-    expect(document.querySelector('[data-testid="trophy-shimmer"]')).toBeInTheDocument();
+    expect(screen.getByText(/free to start/i)).toBeInTheDocument();
+    expect(screen.getByText(/official fpl sync/i)).toBeInTheDocument();
   });
 });

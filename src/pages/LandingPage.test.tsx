@@ -15,22 +15,26 @@ describe('LandingPage', () => {
   it('renders Hero headline', () => {
     renderLandingPage();
     const heading = screen.getByRole('heading', { level: 1 });
-    expect(heading).toHaveTextContent('KNOCKOUT FPL');
+    expect(heading).toHaveTextContent(/knockout cup/i);
   });
 
   it('renders Hero CTA linking to signup', () => {
     renderLandingPage();
-    const cta = screen.getByRole('link', { name: /enter the arena/i });
+    const cta = screen.getByRole('link', { name: /create your tournament/i });
     expect(cta).toHaveAttribute('href', '/signup');
   });
 
-  it('renders ValueProps section', () => {
+  it('renders Features section', () => {
     renderLandingPage();
-    expect(screen.getByTestId('value-props')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /everything you need to run a cup/i })
+    ).toBeInTheDocument();
   });
 
-  it('renders SocialProof section', () => {
+  it('renders Testimonials section', () => {
     renderLandingPage();
-    expect(screen.getByTestId('social-proof')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /what managers are saying/i })
+    ).toBeInTheDocument();
   });
 });
