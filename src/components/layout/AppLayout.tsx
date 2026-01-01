@@ -32,9 +32,12 @@ export function AppLayout() {
     return 'auth';
   };
 
+  const navbarVariant = getNavbarVariant();
+
   return (
     <>
-      <Navbar variant={getNavbarVariant()} />
+      {/* Landing page has its own LandingHeader, skip the app navbar */}
+      {navbarVariant !== 'landing' && <Navbar variant={navbarVariant} />}
       <Outlet />
     </>
   );

@@ -55,11 +55,11 @@ describe('AppLayout', () => {
     vi.clearAllMocks();
   });
 
-  describe('landing variant', () => {
-    it('uses landing variant on / path', () => {
+  describe('landing page', () => {
+    it('does not render navbar on / path (landing page has its own header)', () => {
       renderWithRoute('/');
-      const navbar = screen.getByTestId('navbar');
-      expect(navbar).toHaveAttribute('data-variant', 'landing');
+      expect(screen.queryByTestId('navbar')).not.toBeInTheDocument();
+      expect(screen.getByText('Landing Page')).toBeInTheDocument();
     });
   });
 
@@ -128,9 +128,9 @@ describe('AppLayout', () => {
     });
 
     it('renders navbar and content together', () => {
-      renderWithRoute('/');
+      renderWithRoute('/login');
       expect(screen.getByTestId('navbar')).toBeInTheDocument();
-      expect(screen.getByText('Landing Page')).toBeInTheDocument();
+      expect(screen.getByText('Login Page')).toBeInTheDocument();
     });
   });
 });
