@@ -389,6 +389,7 @@ async function writeTournamentToDatabase(
     })),
     authClaims
   );
+  console.log(`[createTournament] Matches created successfully`);
 
   // 6b. Update bye matches with winners (batch)
   const byeMatchUpdates: UpdateMatchInput[] = records.matchRecords
@@ -407,10 +408,41 @@ async function writeTournamentToDatabase(
   if (byeMatchUpdates.length > 0) {
     console.log(`[createTournament] Batch updating ${byeMatchUpdates.length} bye matches with winners...`);
     await updateMatchesBatch(byeMatchUpdates, authClaims);
+    console.log(`[createTournament] Bye matches updated successfully`);
   }
 
   // 7. Create match picks (batch)
   console.log(`[createTournament] Batch creating ${records.matchPicks.length} match picks...`);
+
+  // Verify all matchPick references are valid
+  const matchIdSet = new Set(records.matchRecords.map(m => m.matchId));
+  const entryIdSet = new Set(records.entries.map(e => e.entryId));
+  const participantKeySet = new Set(records.participants.map(p => `${p.entryId}`));
+
+  const invalidMatchRefs = records.matchPicks.filter(p => !matchIdSet.has(p.matchId));
+  const invalidEntryRefs = records.matchPicks.filter(p => !entryIdSet.has(p.entryId));
+  const invalidParticipantRefs = records.matchPicks.filter(p => !participantKeySet.has(`${p.entryId}`));
+
+  if (invalidMatchRefs.length > 0) {
+    console.error(`[createTournament] INVALID MATCH REFS: ${JSON.stringify(invalidMatchRefs)}`);
+    console.error(`[createTournament] Valid matchIds: ${[...matchIdSet].join(', ')}`);
+  }
+  if (invalidEntryRefs.length > 0) {
+    console.error(`[createTournament] INVALID ENTRY REFS: ${JSON.stringify(invalidEntryRefs)}`);
+  }
+  if (invalidParticipantRefs.length > 0) {
+    console.error(`[createTournament] INVALID PARTICIPANT REFS: ${JSON.stringify(invalidParticipantRefs)}`);
+  }
+
+  // Log detailed matchPicks info for debugging
+  const round1MatchCount = records.matchRecords.filter(m => m.roundNumber === 1).length;
+  const round2MatchPicks = records.matchPicks.filter(p => p.matchId > round1MatchCount);
+  console.log(`[createTournament] Round 1 match picks: ${records.matchPicks.length - round2MatchPicks.length}`);
+  console.log(`[createTournament] Round 2+ match picks (bye advancements): ${round2MatchPicks.length}`);
+  if (round2MatchPicks.length > 0) {
+    console.log(`[createTournament] Round 2+ matchIds: ${[...new Set(round2MatchPicks.map(p => p.matchId))].join(', ')}`);
+  }
+
   await createMatchPicksBatch(
     records.matchPicks.map(pick => ({
       tournamentId,

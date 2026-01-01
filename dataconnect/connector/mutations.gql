@@ -385,3 +385,33 @@ mutation CreateMatchPick(
 mutation DeleteTournament($id: UUID!) @auth(level: USER) {
   tournament_delete(id: $id)
 }
+
+# Delete all match picks for a tournament (admin script only)
+mutation DeleteMatchPicksByTournament($tournamentId: UUID!)
+  @auth(level: PUBLIC, insecureReason: "Admin cleanup script - requires valid tournamentId") {
+  matchPick_deleteMany(where: { tournamentId: { eq: $tournamentId } })
+}
+
+# Delete all matches for a tournament (admin script only)
+mutation DeleteMatchesByTournament($tournamentId: UUID!)
+  @auth(level: PUBLIC, insecureReason: "Admin cleanup script - requires valid tournamentId") {
+  match_deleteMany(where: { tournamentId: { eq: $tournamentId } })
+}
+
+# Delete all rounds for a tournament (admin script only)
+mutation DeleteRoundsByTournament($tournamentId: UUID!)
+  @auth(level: PUBLIC, insecureReason: "Admin cleanup script - requires valid tournamentId") {
+  round_deleteMany(where: { tournamentId: { eq: $tournamentId } })
+}
+
+# Delete all participants for a tournament (admin script only)
+mutation DeleteParticipantsByTournament($tournamentId: UUID!)
+  @auth(level: PUBLIC, insecureReason: "Admin cleanup script - requires valid tournamentId") {
+  participant_deleteMany(where: { tournamentId: { eq: $tournamentId } })
+}
+
+# Delete tournament by ID (admin script only)
+mutation DeleteTournamentById($id: UUID!)
+  @auth(level: PUBLIC, insecureReason: "Admin cleanup script - requires valid tournament ID") {
+  tournament_delete(id: $id)
+}

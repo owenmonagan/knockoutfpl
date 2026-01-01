@@ -44,6 +44,8 @@
     "fixtures:scenario": "npx tsx scripts/fixtures-scenario.ts",
     "e2e:seed": "DATA_CONNECT_EMULATOR_HOST=127.0.0.1:9399 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 npx tsx e2e/fixtures/seed-tournaments.ts",
     "e2e:seed:clear": "DATA_CONNECT_EMULATOR_HOST=127.0.0.1:9399 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 npx tsx e2e/fixtures/seed-tournaments.ts --clear",
+    "db:clean": "npx tsx scripts/delete-all-tournaments.ts",
+    "db:clean:dry": "npx tsx scripts/delete-all-tournaments.ts --dry-run",
     "prepare": "husky"
   },
   "dependencies": {

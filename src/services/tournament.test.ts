@@ -19,14 +19,18 @@ vi.mock('@knockoutfpl/dataconnect', () => ({
   getTournamentWithParticipants: vi.fn(),
   getTournamentRounds: vi.fn(),
   getRoundMatches: vi.fn(),
-  getMatchPicks: vi.fn(),
+  getAllTournamentMatchPicks: vi.fn(),
   getPicksForEvent: vi.fn(),
   getCurrentEvent: vi.fn(),
 }));
 
 // Mock Firebase Functions
 vi.mock('firebase/functions', () => ({
-  httpsCallable: vi.fn(() => vi.fn()),
+  httpsCallable: vi.fn(() => {
+    const callable = vi.fn();
+    (callable as any).stream = vi.fn();
+    return callable;
+  }),
 }));
 
 describe('getTournamentByLeague', () => {
@@ -50,6 +54,7 @@ describe('getTournamentByLeague', () => {
       getTournamentWithParticipants,
       getTournamentRounds,
       getCurrentEvent,
+      getAllTournamentMatchPicks,
     } = await import('@knockoutfpl/dataconnect');
 
     vi.mocked(getLeagueTournaments).mockResolvedValue({
@@ -88,6 +93,12 @@ describe('getTournamentByLeague', () => {
       },
     } as any);
 
+    vi.mocked(getAllTournamentMatchPicks).mockResolvedValue({
+      data: {
+        matchPicks: [],
+      },
+    } as any);
+
     const result = await getTournamentByLeague(123);
     expect(result?.id).toBe('tournament-123');
     expect(result?.fplLeagueName).toBe('Test League');
@@ -110,7 +121,8 @@ describe('callCreateTournament', () => {
         startEvent: 20,
       },
     });
-    vi.mocked(httpsCallable).mockReturnValue(mockCallable);
+    (mockCallable as any).stream = vi.fn();
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable as any);
 
     const result = await callCreateTournament(12345);
 
@@ -129,7 +141,8 @@ describe('callCreateTournament', () => {
         startEvent: 25,
       },
     });
-    vi.mocked(httpsCallable).mockReturnValue(mockCallable);
+    (mockCallable as any).stream = vi.fn();
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable as any);
 
     const result = await callCreateTournament(12345, 25);
 
@@ -150,7 +163,8 @@ describe('callCreateTournament', () => {
         startEvent: 20,
       },
     });
-    vi.mocked(httpsCallable).mockReturnValue(mockCallable);
+    (mockCallable as any).stream = vi.fn();
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable as any);
 
     const result = await callCreateTournament(12345, undefined);
 
@@ -167,7 +181,8 @@ describe('callRefreshTournament', () => {
   it('should return null on error without throwing', async () => {
     const { httpsCallable } = await import('firebase/functions');
     const mockCallable = vi.fn().mockRejectedValue(new Error('Network error'));
-    vi.mocked(httpsCallable).mockReturnValue(mockCallable);
+    (mockCallable as any).stream = vi.fn();
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable as any);
 
     const result = await callRefreshTournament('tournament-123');
 
@@ -179,7 +194,8 @@ describe('callRefreshTournament', () => {
     const mockCallable = vi.fn().mockResolvedValue({
       data: { picksRefreshed: 5, matchesResolved: 2 },
     });
-    vi.mocked(httpsCallable).mockReturnValue(mockCallable);
+    (mockCallable as any).stream = vi.fn();
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable as any);
 
     const result = await callRefreshTournament('tournament-123');
 

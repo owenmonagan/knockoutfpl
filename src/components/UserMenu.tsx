@@ -12,7 +12,7 @@ export interface UserMenuProps {
   onSignOut?: () => void;
 }
 
-export function UserMenu({ displayName, email, onSignOut }: UserMenuProps) {
+export function UserMenu({ displayName, onSignOut }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

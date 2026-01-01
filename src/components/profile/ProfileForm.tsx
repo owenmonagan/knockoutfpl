@@ -11,7 +11,7 @@ export interface ProfileFormProps {
   isLoading: boolean;
 }
 
-export function ProfileForm({ displayName, email, onUpdateDisplayName, isLoading }: ProfileFormProps) {
+export function ProfileForm({ displayName, email, onUpdateDisplayName }: ProfileFormProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(displayName);
   const [isSaving, setIsSaving] = useState(false);

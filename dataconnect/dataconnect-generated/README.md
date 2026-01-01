@@ -21,12 +21,14 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetTournamentWithParticipants*](#gettournamentwithparticipants)
   - [*GetUserTournaments*](#getusertournaments)
   - [*GetLeagueTournaments*](#getleaguetournaments)
+  - [*GetAllTournaments*](#getalltournaments)
   - [*GetTournamentRounds*](#gettournamentrounds)
   - [*GetRound*](#getround)
   - [*GetActiveRounds*](#getactiverounds)
   - [*GetRoundMatches*](#getroundmatches)
   - [*GetMatch*](#getmatch)
   - [*GetMatchPicks*](#getmatchpicks)
+  - [*GetAllTournamentMatchPicks*](#getalltournamentmatchpicks)
   - [*GetUserMatches*](#getusermatches)
   - [*GetParticipant*](#getparticipant)
   - [*GetActiveParticipants*](#getactiveparticipants)
@@ -50,6 +52,11 @@ This README will guide you through the process of using the generated JavaScript
   - [*UpdateMatch*](#updatematch)
   - [*CreateMatchPick*](#creatematchpick)
   - [*DeleteTournament*](#deletetournament)
+  - [*DeleteMatchPicksByTournament*](#deletematchpicksbytournament)
+  - [*DeleteMatchesByTournament*](#deletematchesbytournament)
+  - [*DeleteRoundsByTournament*](#deleteroundsbytournament)
+  - [*DeleteParticipantsByTournament*](#deleteparticipantsbytournament)
+  - [*DeleteTournamentById*](#deletetournamentbyid)
 
 # Accessing the connector
 A connector is a collection of Queries and Mutations. One SDK is generated for each connector - this SDK is generated for the connector `default`. You can find more information about connectors in the [Data Connect documentation](https://firebase.google.com/docs/data-connect#how-does).
@@ -1666,6 +1673,104 @@ executeQuery(ref).then((response) => {
 });
 ```
 
+## GetAllTournaments
+You can execute the `GetAllTournaments` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getAllTournaments(): QueryPromise<GetAllTournamentsData, undefined>;
+
+interface GetAllTournamentsRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<GetAllTournamentsData, undefined>;
+}
+export const getAllTournamentsRef: GetAllTournamentsRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getAllTournaments(dc: DataConnect): QueryPromise<GetAllTournamentsData, undefined>;
+
+interface GetAllTournamentsRef {
+  ...
+  (dc: DataConnect): QueryRef<GetAllTournamentsData, undefined>;
+}
+export const getAllTournamentsRef: GetAllTournamentsRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getAllTournamentsRef:
+```typescript
+const name = getAllTournamentsRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetAllTournaments` query has no variables.
+### Return Type
+Recall that executing the `GetAllTournaments` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetAllTournamentsData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetAllTournamentsData {
+  tournaments: ({
+    id: UUIDString;
+    fplLeagueId: number;
+    fplLeagueName: string;
+    participantCount: number;
+    status: string;
+    createdAt: TimestampString;
+  } & Tournament_Key)[];
+}
+```
+### Using `GetAllTournaments`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getAllTournaments } from '@knockoutfpl/dataconnect';
+
+
+// Call the `getAllTournaments()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getAllTournaments();
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getAllTournaments(dataConnect);
+
+console.log(data.tournaments);
+
+// Or, you can use the `Promise` API.
+getAllTournaments().then((response) => {
+  const data = response.data;
+  console.log(data.tournaments);
+});
+```
+
+### Using `GetAllTournaments`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getAllTournamentsRef } from '@knockoutfpl/dataconnect';
+
+
+// Call the `getAllTournamentsRef()` function to get a reference to the query.
+const ref = getAllTournamentsRef();
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getAllTournamentsRef(dataConnect);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.tournaments);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.tournaments);
+});
+```
+
 ## GetTournamentRounds
 You can execute the `GetTournamentRounds` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
@@ -2377,6 +2482,125 @@ const ref = getMatchPicksRef({ tournamentId: ..., matchId: ..., });
 // You can also pass in a `DataConnect` instance to the `QueryRef` function.
 const dataConnect = getDataConnect(connectorConfig);
 const ref = getMatchPicksRef(dataConnect, getMatchPicksVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.matchPicks);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.matchPicks);
+});
+```
+
+## GetAllTournamentMatchPicks
+You can execute the `GetAllTournamentMatchPicks` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getAllTournamentMatchPicks(vars: GetAllTournamentMatchPicksVariables): QueryPromise<GetAllTournamentMatchPicksData, GetAllTournamentMatchPicksVariables>;
+
+interface GetAllTournamentMatchPicksRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetAllTournamentMatchPicksVariables): QueryRef<GetAllTournamentMatchPicksData, GetAllTournamentMatchPicksVariables>;
+}
+export const getAllTournamentMatchPicksRef: GetAllTournamentMatchPicksRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getAllTournamentMatchPicks(dc: DataConnect, vars: GetAllTournamentMatchPicksVariables): QueryPromise<GetAllTournamentMatchPicksData, GetAllTournamentMatchPicksVariables>;
+
+interface GetAllTournamentMatchPicksRef {
+  ...
+  (dc: DataConnect, vars: GetAllTournamentMatchPicksVariables): QueryRef<GetAllTournamentMatchPicksData, GetAllTournamentMatchPicksVariables>;
+}
+export const getAllTournamentMatchPicksRef: GetAllTournamentMatchPicksRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getAllTournamentMatchPicksRef:
+```typescript
+const name = getAllTournamentMatchPicksRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetAllTournamentMatchPicks` query requires an argument of type `GetAllTournamentMatchPicksVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetAllTournamentMatchPicksVariables {
+  tournamentId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `GetAllTournamentMatchPicks` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetAllTournamentMatchPicksData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetAllTournamentMatchPicksData {
+  matchPicks: ({
+    matchId: number;
+    entryId: number;
+    slot: number;
+    entry: {
+      entryId: number;
+      name: string;
+      playerFirstName?: string | null;
+      playerLastName?: string | null;
+    } & Entry_Key;
+  })[];
+}
+```
+### Using `GetAllTournamentMatchPicks`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getAllTournamentMatchPicks, GetAllTournamentMatchPicksVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetAllTournamentMatchPicks` query requires an argument of type `GetAllTournamentMatchPicksVariables`:
+const getAllTournamentMatchPicksVars: GetAllTournamentMatchPicksVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `getAllTournamentMatchPicks()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getAllTournamentMatchPicks(getAllTournamentMatchPicksVars);
+// Variables can be defined inline as well.
+const { data } = await getAllTournamentMatchPicks({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getAllTournamentMatchPicks(dataConnect, getAllTournamentMatchPicksVars);
+
+console.log(data.matchPicks);
+
+// Or, you can use the `Promise` API.
+getAllTournamentMatchPicks(getAllTournamentMatchPicksVars).then((response) => {
+  const data = response.data;
+  console.log(data.matchPicks);
+});
+```
+
+### Using `GetAllTournamentMatchPicks`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getAllTournamentMatchPicksRef, GetAllTournamentMatchPicksVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetAllTournamentMatchPicks` query requires an argument of type `GetAllTournamentMatchPicksVariables`:
+const getAllTournamentMatchPicksVars: GetAllTournamentMatchPicksVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `getAllTournamentMatchPicksRef()` function to get a reference to the query.
+const ref = getAllTournamentMatchPicksRef(getAllTournamentMatchPicksVars);
+// Variables can be defined inline as well.
+const ref = getAllTournamentMatchPicksRef({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getAllTournamentMatchPicksRef(dataConnect, getAllTournamentMatchPicksVars);
 
 // Call `executeQuery()` on the reference to execute the query.
 // You can use the `await` keyword to wait for the promise to resolve.
@@ -5071,6 +5295,551 @@ const ref = deleteTournamentRef({ id: ..., });
 // You can also pass in a `DataConnect` instance to the `MutationRef` function.
 const dataConnect = getDataConnect(connectorConfig);
 const ref = deleteTournamentRef(dataConnect, deleteTournamentVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.tournament_delete);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.tournament_delete);
+});
+```
+
+## DeleteMatchPicksByTournament
+You can execute the `DeleteMatchPicksByTournament` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+deleteMatchPicksByTournament(vars: DeleteMatchPicksByTournamentVariables): MutationPromise<DeleteMatchPicksByTournamentData, DeleteMatchPicksByTournamentVariables>;
+
+interface DeleteMatchPicksByTournamentRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteMatchPicksByTournamentVariables): MutationRef<DeleteMatchPicksByTournamentData, DeleteMatchPicksByTournamentVariables>;
+}
+export const deleteMatchPicksByTournamentRef: DeleteMatchPicksByTournamentRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+deleteMatchPicksByTournament(dc: DataConnect, vars: DeleteMatchPicksByTournamentVariables): MutationPromise<DeleteMatchPicksByTournamentData, DeleteMatchPicksByTournamentVariables>;
+
+interface DeleteMatchPicksByTournamentRef {
+  ...
+  (dc: DataConnect, vars: DeleteMatchPicksByTournamentVariables): MutationRef<DeleteMatchPicksByTournamentData, DeleteMatchPicksByTournamentVariables>;
+}
+export const deleteMatchPicksByTournamentRef: DeleteMatchPicksByTournamentRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteMatchPicksByTournamentRef:
+```typescript
+const name = deleteMatchPicksByTournamentRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `DeleteMatchPicksByTournament` mutation requires an argument of type `DeleteMatchPicksByTournamentVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface DeleteMatchPicksByTournamentVariables {
+  tournamentId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `DeleteMatchPicksByTournament` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `DeleteMatchPicksByTournamentData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface DeleteMatchPicksByTournamentData {
+  matchPick_deleteMany: number;
+}
+```
+### Using `DeleteMatchPicksByTournament`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, deleteMatchPicksByTournament, DeleteMatchPicksByTournamentVariables } from '@knockoutfpl/dataconnect';
+
+// The `DeleteMatchPicksByTournament` mutation requires an argument of type `DeleteMatchPicksByTournamentVariables`:
+const deleteMatchPicksByTournamentVars: DeleteMatchPicksByTournamentVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `deleteMatchPicksByTournament()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await deleteMatchPicksByTournament(deleteMatchPicksByTournamentVars);
+// Variables can be defined inline as well.
+const { data } = await deleteMatchPicksByTournament({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await deleteMatchPicksByTournament(dataConnect, deleteMatchPicksByTournamentVars);
+
+console.log(data.matchPick_deleteMany);
+
+// Or, you can use the `Promise` API.
+deleteMatchPicksByTournament(deleteMatchPicksByTournamentVars).then((response) => {
+  const data = response.data;
+  console.log(data.matchPick_deleteMany);
+});
+```
+
+### Using `DeleteMatchPicksByTournament`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, deleteMatchPicksByTournamentRef, DeleteMatchPicksByTournamentVariables } from '@knockoutfpl/dataconnect';
+
+// The `DeleteMatchPicksByTournament` mutation requires an argument of type `DeleteMatchPicksByTournamentVariables`:
+const deleteMatchPicksByTournamentVars: DeleteMatchPicksByTournamentVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `deleteMatchPicksByTournamentRef()` function to get a reference to the mutation.
+const ref = deleteMatchPicksByTournamentRef(deleteMatchPicksByTournamentVars);
+// Variables can be defined inline as well.
+const ref = deleteMatchPicksByTournamentRef({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = deleteMatchPicksByTournamentRef(dataConnect, deleteMatchPicksByTournamentVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.matchPick_deleteMany);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.matchPick_deleteMany);
+});
+```
+
+## DeleteMatchesByTournament
+You can execute the `DeleteMatchesByTournament` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+deleteMatchesByTournament(vars: DeleteMatchesByTournamentVariables): MutationPromise<DeleteMatchesByTournamentData, DeleteMatchesByTournamentVariables>;
+
+interface DeleteMatchesByTournamentRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteMatchesByTournamentVariables): MutationRef<DeleteMatchesByTournamentData, DeleteMatchesByTournamentVariables>;
+}
+export const deleteMatchesByTournamentRef: DeleteMatchesByTournamentRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+deleteMatchesByTournament(dc: DataConnect, vars: DeleteMatchesByTournamentVariables): MutationPromise<DeleteMatchesByTournamentData, DeleteMatchesByTournamentVariables>;
+
+interface DeleteMatchesByTournamentRef {
+  ...
+  (dc: DataConnect, vars: DeleteMatchesByTournamentVariables): MutationRef<DeleteMatchesByTournamentData, DeleteMatchesByTournamentVariables>;
+}
+export const deleteMatchesByTournamentRef: DeleteMatchesByTournamentRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteMatchesByTournamentRef:
+```typescript
+const name = deleteMatchesByTournamentRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `DeleteMatchesByTournament` mutation requires an argument of type `DeleteMatchesByTournamentVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface DeleteMatchesByTournamentVariables {
+  tournamentId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `DeleteMatchesByTournament` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `DeleteMatchesByTournamentData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface DeleteMatchesByTournamentData {
+  match_deleteMany: number;
+}
+```
+### Using `DeleteMatchesByTournament`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, deleteMatchesByTournament, DeleteMatchesByTournamentVariables } from '@knockoutfpl/dataconnect';
+
+// The `DeleteMatchesByTournament` mutation requires an argument of type `DeleteMatchesByTournamentVariables`:
+const deleteMatchesByTournamentVars: DeleteMatchesByTournamentVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `deleteMatchesByTournament()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await deleteMatchesByTournament(deleteMatchesByTournamentVars);
+// Variables can be defined inline as well.
+const { data } = await deleteMatchesByTournament({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await deleteMatchesByTournament(dataConnect, deleteMatchesByTournamentVars);
+
+console.log(data.match_deleteMany);
+
+// Or, you can use the `Promise` API.
+deleteMatchesByTournament(deleteMatchesByTournamentVars).then((response) => {
+  const data = response.data;
+  console.log(data.match_deleteMany);
+});
+```
+
+### Using `DeleteMatchesByTournament`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, deleteMatchesByTournamentRef, DeleteMatchesByTournamentVariables } from '@knockoutfpl/dataconnect';
+
+// The `DeleteMatchesByTournament` mutation requires an argument of type `DeleteMatchesByTournamentVariables`:
+const deleteMatchesByTournamentVars: DeleteMatchesByTournamentVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `deleteMatchesByTournamentRef()` function to get a reference to the mutation.
+const ref = deleteMatchesByTournamentRef(deleteMatchesByTournamentVars);
+// Variables can be defined inline as well.
+const ref = deleteMatchesByTournamentRef({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = deleteMatchesByTournamentRef(dataConnect, deleteMatchesByTournamentVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.match_deleteMany);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.match_deleteMany);
+});
+```
+
+## DeleteRoundsByTournament
+You can execute the `DeleteRoundsByTournament` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+deleteRoundsByTournament(vars: DeleteRoundsByTournamentVariables): MutationPromise<DeleteRoundsByTournamentData, DeleteRoundsByTournamentVariables>;
+
+interface DeleteRoundsByTournamentRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteRoundsByTournamentVariables): MutationRef<DeleteRoundsByTournamentData, DeleteRoundsByTournamentVariables>;
+}
+export const deleteRoundsByTournamentRef: DeleteRoundsByTournamentRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+deleteRoundsByTournament(dc: DataConnect, vars: DeleteRoundsByTournamentVariables): MutationPromise<DeleteRoundsByTournamentData, DeleteRoundsByTournamentVariables>;
+
+interface DeleteRoundsByTournamentRef {
+  ...
+  (dc: DataConnect, vars: DeleteRoundsByTournamentVariables): MutationRef<DeleteRoundsByTournamentData, DeleteRoundsByTournamentVariables>;
+}
+export const deleteRoundsByTournamentRef: DeleteRoundsByTournamentRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteRoundsByTournamentRef:
+```typescript
+const name = deleteRoundsByTournamentRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `DeleteRoundsByTournament` mutation requires an argument of type `DeleteRoundsByTournamentVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface DeleteRoundsByTournamentVariables {
+  tournamentId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `DeleteRoundsByTournament` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `DeleteRoundsByTournamentData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface DeleteRoundsByTournamentData {
+  round_deleteMany: number;
+}
+```
+### Using `DeleteRoundsByTournament`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, deleteRoundsByTournament, DeleteRoundsByTournamentVariables } from '@knockoutfpl/dataconnect';
+
+// The `DeleteRoundsByTournament` mutation requires an argument of type `DeleteRoundsByTournamentVariables`:
+const deleteRoundsByTournamentVars: DeleteRoundsByTournamentVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `deleteRoundsByTournament()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await deleteRoundsByTournament(deleteRoundsByTournamentVars);
+// Variables can be defined inline as well.
+const { data } = await deleteRoundsByTournament({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await deleteRoundsByTournament(dataConnect, deleteRoundsByTournamentVars);
+
+console.log(data.round_deleteMany);
+
+// Or, you can use the `Promise` API.
+deleteRoundsByTournament(deleteRoundsByTournamentVars).then((response) => {
+  const data = response.data;
+  console.log(data.round_deleteMany);
+});
+```
+
+### Using `DeleteRoundsByTournament`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, deleteRoundsByTournamentRef, DeleteRoundsByTournamentVariables } from '@knockoutfpl/dataconnect';
+
+// The `DeleteRoundsByTournament` mutation requires an argument of type `DeleteRoundsByTournamentVariables`:
+const deleteRoundsByTournamentVars: DeleteRoundsByTournamentVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `deleteRoundsByTournamentRef()` function to get a reference to the mutation.
+const ref = deleteRoundsByTournamentRef(deleteRoundsByTournamentVars);
+// Variables can be defined inline as well.
+const ref = deleteRoundsByTournamentRef({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = deleteRoundsByTournamentRef(dataConnect, deleteRoundsByTournamentVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.round_deleteMany);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.round_deleteMany);
+});
+```
+
+## DeleteParticipantsByTournament
+You can execute the `DeleteParticipantsByTournament` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+deleteParticipantsByTournament(vars: DeleteParticipantsByTournamentVariables): MutationPromise<DeleteParticipantsByTournamentData, DeleteParticipantsByTournamentVariables>;
+
+interface DeleteParticipantsByTournamentRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteParticipantsByTournamentVariables): MutationRef<DeleteParticipantsByTournamentData, DeleteParticipantsByTournamentVariables>;
+}
+export const deleteParticipantsByTournamentRef: DeleteParticipantsByTournamentRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+deleteParticipantsByTournament(dc: DataConnect, vars: DeleteParticipantsByTournamentVariables): MutationPromise<DeleteParticipantsByTournamentData, DeleteParticipantsByTournamentVariables>;
+
+interface DeleteParticipantsByTournamentRef {
+  ...
+  (dc: DataConnect, vars: DeleteParticipantsByTournamentVariables): MutationRef<DeleteParticipantsByTournamentData, DeleteParticipantsByTournamentVariables>;
+}
+export const deleteParticipantsByTournamentRef: DeleteParticipantsByTournamentRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteParticipantsByTournamentRef:
+```typescript
+const name = deleteParticipantsByTournamentRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `DeleteParticipantsByTournament` mutation requires an argument of type `DeleteParticipantsByTournamentVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface DeleteParticipantsByTournamentVariables {
+  tournamentId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `DeleteParticipantsByTournament` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `DeleteParticipantsByTournamentData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface DeleteParticipantsByTournamentData {
+  participant_deleteMany: number;
+}
+```
+### Using `DeleteParticipantsByTournament`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, deleteParticipantsByTournament, DeleteParticipantsByTournamentVariables } from '@knockoutfpl/dataconnect';
+
+// The `DeleteParticipantsByTournament` mutation requires an argument of type `DeleteParticipantsByTournamentVariables`:
+const deleteParticipantsByTournamentVars: DeleteParticipantsByTournamentVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `deleteParticipantsByTournament()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await deleteParticipantsByTournament(deleteParticipantsByTournamentVars);
+// Variables can be defined inline as well.
+const { data } = await deleteParticipantsByTournament({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await deleteParticipantsByTournament(dataConnect, deleteParticipantsByTournamentVars);
+
+console.log(data.participant_deleteMany);
+
+// Or, you can use the `Promise` API.
+deleteParticipantsByTournament(deleteParticipantsByTournamentVars).then((response) => {
+  const data = response.data;
+  console.log(data.participant_deleteMany);
+});
+```
+
+### Using `DeleteParticipantsByTournament`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, deleteParticipantsByTournamentRef, DeleteParticipantsByTournamentVariables } from '@knockoutfpl/dataconnect';
+
+// The `DeleteParticipantsByTournament` mutation requires an argument of type `DeleteParticipantsByTournamentVariables`:
+const deleteParticipantsByTournamentVars: DeleteParticipantsByTournamentVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `deleteParticipantsByTournamentRef()` function to get a reference to the mutation.
+const ref = deleteParticipantsByTournamentRef(deleteParticipantsByTournamentVars);
+// Variables can be defined inline as well.
+const ref = deleteParticipantsByTournamentRef({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = deleteParticipantsByTournamentRef(dataConnect, deleteParticipantsByTournamentVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.participant_deleteMany);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.participant_deleteMany);
+});
+```
+
+## DeleteTournamentById
+You can execute the `DeleteTournamentById` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+deleteTournamentById(vars: DeleteTournamentByIdVariables): MutationPromise<DeleteTournamentByIdData, DeleteTournamentByIdVariables>;
+
+interface DeleteTournamentByIdRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteTournamentByIdVariables): MutationRef<DeleteTournamentByIdData, DeleteTournamentByIdVariables>;
+}
+export const deleteTournamentByIdRef: DeleteTournamentByIdRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+deleteTournamentById(dc: DataConnect, vars: DeleteTournamentByIdVariables): MutationPromise<DeleteTournamentByIdData, DeleteTournamentByIdVariables>;
+
+interface DeleteTournamentByIdRef {
+  ...
+  (dc: DataConnect, vars: DeleteTournamentByIdVariables): MutationRef<DeleteTournamentByIdData, DeleteTournamentByIdVariables>;
+}
+export const deleteTournamentByIdRef: DeleteTournamentByIdRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteTournamentByIdRef:
+```typescript
+const name = deleteTournamentByIdRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `DeleteTournamentById` mutation requires an argument of type `DeleteTournamentByIdVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface DeleteTournamentByIdVariables {
+  id: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `DeleteTournamentById` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `DeleteTournamentByIdData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface DeleteTournamentByIdData {
+  tournament_delete?: Tournament_Key | null;
+}
+```
+### Using `DeleteTournamentById`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, deleteTournamentById, DeleteTournamentByIdVariables } from '@knockoutfpl/dataconnect';
+
+// The `DeleteTournamentById` mutation requires an argument of type `DeleteTournamentByIdVariables`:
+const deleteTournamentByIdVars: DeleteTournamentByIdVariables = {
+  id: ..., 
+};
+
+// Call the `deleteTournamentById()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await deleteTournamentById(deleteTournamentByIdVars);
+// Variables can be defined inline as well.
+const { data } = await deleteTournamentById({ id: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await deleteTournamentById(dataConnect, deleteTournamentByIdVars);
+
+console.log(data.tournament_delete);
+
+// Or, you can use the `Promise` API.
+deleteTournamentById(deleteTournamentByIdVars).then((response) => {
+  const data = response.data;
+  console.log(data.tournament_delete);
+});
+```
+
+### Using `DeleteTournamentById`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, deleteTournamentByIdRef, DeleteTournamentByIdVariables } from '@knockoutfpl/dataconnect';
+
+// The `DeleteTournamentById` mutation requires an argument of type `DeleteTournamentByIdVariables`:
+const deleteTournamentByIdVars: DeleteTournamentByIdVariables = {
+  id: ..., 
+};
+
+// Call the `deleteTournamentByIdRef()` function to get a reference to the mutation.
+const ref = deleteTournamentByIdRef(deleteTournamentByIdVars);
+// Variables can be defined inline as well.
+const ref = deleteTournamentByIdRef({ id: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = deleteTournamentByIdRef(dataConnect, deleteTournamentByIdVars);
 
 // Call `executeMutation()` on the reference to execute the mutation.
 // You can use the `await` keyword to wait for the promise to resolve.

@@ -558,7 +558,9 @@ describe('FPLConnectionCard', () => {
 
     it('handles incomplete FPL data gracefully (all fields missing)', () => {
       const incompleteFplData = {
+        teamId: 123456,
         teamName: 'Test Team',
+        managerName: 'Test Manager',
         overallPoints: undefined as any,
         overallRank: undefined as any,
         gameweekPoints: undefined as any,

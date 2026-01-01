@@ -21,10 +21,10 @@ export function MatchCard({ match, participants, gameweek, isUserMatch, userTeam
   const player1 = match.player1 ? getParticipantById(match.player1.fplTeamId) : null;
   const player2 = match.player2 ? getParticipantById(match.player2.fplTeamId) : null;
 
-  const stakesCallout = isUserMatch && match.player1?.score !== null && match.player2?.score !== null
+  const stakesCallout = isUserMatch && match.player1 && match.player2 && match.player1.score !== null && match.player2.score !== null
     ? getStakesCallout(
-        userTeamId === match.player1?.fplTeamId ? match.player1.score : match.player2!.score,
-        userTeamId === match.player1?.fplTeamId ? match.player2!.score : match.player1.score,
+        userTeamId === match.player1.fplTeamId ? match.player1.score : match.player2.score,
+        userTeamId === match.player1.fplTeamId ? match.player2.score : match.player1.score,
         true
       )
     : '';

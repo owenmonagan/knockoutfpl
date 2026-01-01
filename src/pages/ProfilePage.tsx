@@ -52,10 +52,10 @@ export function ProfilePage() {
   }, [userProfile?.fplTeamId]);
 
   const handleConnect = async (teamId: number) => {
-    if (!authUser?.uid) return;
+    if (!authUser?.uid || !authUser?.email) return;
     setError(null);
     try {
-      await connectFPLTeam(authUser.uid, teamId);
+      await connectFPLTeam(authUser.uid, authUser.email, teamId);
       // Refresh profile after connect
       const profile = await getUserProfile(authUser.uid);
       setUserProfile(profile);
@@ -65,10 +65,10 @@ export function ProfilePage() {
   };
 
   const handleUpdate = async (teamId: number) => {
-    if (!authUser?.uid) return;
+    if (!authUser?.uid || !authUser?.email) return;
     setError(null);
     try {
-      await connectFPLTeam(authUser.uid, teamId);
+      await connectFPLTeam(authUser.uid, authUser.email, teamId);
       // Refresh profile after update
       const profile = await getUserProfile(authUser.uid);
       setUserProfile(profile);

@@ -47,8 +47,10 @@ describe('AuthContext', () => {
   it('should set user when onAuthStateChanged is called with a user', async () => {
     const mockUser = { uid: 'test-uid', email: 'test@example.com' };
 
-    vi.mocked(onAuthStateChanged).mockImplementation((auth, callback) => {
-      callback(mockUser as any);
+    vi.mocked(onAuthStateChanged).mockImplementation((_auth, callback) => {
+      if (typeof callback === 'function') {
+        callback(mockUser as any);
+      }
       return () => {};
     });
 
@@ -99,7 +101,9 @@ describe('AuthContext', () => {
     it('clears timeout when auth state resolves before timeout fires', async () => {
       let authCallback: ((user: any) => void) | undefined;
       vi.mocked(onAuthStateChanged).mockImplementation((_auth, callback) => {
-        authCallback = callback;
+        if (typeof callback === 'function') {
+          authCallback = callback;
+        }
         return vi.fn();
       });
 

@@ -1010,8 +1010,14 @@ export async function createMatchPicksBatch(
 ): Promise<void> {
   if (picks.length === 0) return;
 
+  console.log(`[createMatchPicksBatch] Total picks to create: ${picks.length}`);
+
   for (let i = 0; i < picks.length; i += BATCH_SIZE) {
     const batch = picks.slice(i, i + BATCH_SIZE);
+    const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
+    const totalBatches = Math.ceil(picks.length / BATCH_SIZE);
+
+    console.log(`[createMatchPicksBatch] Processing batch ${batchNumber}/${totalBatches} (${batch.length} picks)`);
 
     const mutations = batch.map((p, idx) => `
       mp${idx}: matchPick_upsert(data: {
@@ -1024,6 +1030,23 @@ export async function createMatchPicksBatch(
     `).join('\n');
 
     const batchMutation = `mutation BatchCreateMatchPicks { ${mutations} }`;
-    await dataConnectAdmin.executeGraphql(batchMutation, {});
+
+    try {
+      await dataConnectAdmin.executeGraphql(batchMutation, {});
+      console.log(`[createMatchPicksBatch] Batch ${batchNumber}/${totalBatches} completed successfully`);
+    } catch (error) {
+      // Log detailed error information
+      console.error(`[createMatchPicksBatch] Batch ${batchNumber}/${totalBatches} FAILED`);
+      console.error(`[createMatchPicksBatch] Batch data:`, JSON.stringify(batch, null, 2));
+      console.error(`[createMatchPicksBatch] Error details:`, error);
+
+      // Log match IDs in this batch for debugging
+      const matchIds = batch.map(p => p.matchId);
+      const entryIds = batch.map(p => p.entryId);
+      console.error(`[createMatchPicksBatch] Match IDs in batch: ${matchIds.join(', ')}`);
+      console.error(`[createMatchPicksBatch] Entry IDs in batch: ${entryIds.join(', ')}`);
+
+      throw error;
+    }
   }
 }

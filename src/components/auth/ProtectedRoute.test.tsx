@@ -35,8 +35,8 @@ describe('ProtectedRoute', () => {
       displayName: 'Test',
       wins: 0,
       losses: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     });
 
     render(
@@ -133,8 +133,8 @@ describe('ProtectedRoute', () => {
         displayName: 'Test User',
         wins: 0,
         losses: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
 
       render(
@@ -174,8 +174,8 @@ describe('ProtectedRoute', () => {
         displayName: 'Test User',
         wins: 0,
         losses: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
 
       render(

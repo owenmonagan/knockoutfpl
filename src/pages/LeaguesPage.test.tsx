@@ -36,6 +36,7 @@ describe('LeaguesPage', () => {
       user: null,
       loading: false,
       isAuthenticated: false,
+      connectionError: false,
     });
 
     // Default: no tournament data
@@ -69,6 +70,7 @@ describe('LeaguesPage', () => {
         } as any,
         loading: false,
         isAuthenticated: true,
+        connectionError: false,
       });
 
       vi.mocked(userService.getUserProfile).mockResolvedValue({
@@ -103,6 +105,7 @@ describe('LeaguesPage', () => {
         } as any,
         loading: false,
         isAuthenticated: true,
+        connectionError: false,
       });
 
       vi.mocked(userService.getUserProfile).mockResolvedValue({
@@ -145,6 +148,7 @@ describe('LeaguesPage', () => {
         } as any,
         loading: false,
         isAuthenticated: true,
+        connectionError: false,
       });
 
       vi.mocked(userService.getUserProfile).mockResolvedValue({
@@ -185,6 +189,7 @@ describe('LeaguesPage', () => {
         } as any,
         loading: false,
         isAuthenticated: true,
+        connectionError: false,
       });
 
       vi.mocked(userService.getUserProfile).mockResolvedValue({

@@ -14,14 +14,14 @@ const mockAuthUser = {
   uid: 'test-user-123',
   email: 'test@example.com',
   displayName: 'Test User',
-};
+} as any;
 
 const mockAuthContext = {
   user: mockAuthUser,
   loading: false,
   isAuthenticated: true,
   connectionError: false,
-};
+} as any;
 
 describe('ProfilePage', () => {
   beforeEach(() => {

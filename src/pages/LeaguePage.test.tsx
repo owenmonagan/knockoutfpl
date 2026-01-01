@@ -27,6 +27,7 @@ const mockAuthContext = {
   user: mockUser,
   loading: false,
   isAuthenticated: true,
+  connectionError: false,
 };
 
 const renderLeaguePage = (leagueId: string = '123') => {

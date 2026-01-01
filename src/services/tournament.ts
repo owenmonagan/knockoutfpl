@@ -6,7 +6,7 @@ import {
   getTournamentWithParticipants,
   getTournamentRounds,
   getRoundMatches,
-  getMatchPicks,
+  getAllTournamentMatchPicks,
   getPicksForEvent,
   getCurrentEvent,
 } from '@knockoutfpl/dataconnect';
@@ -122,7 +122,18 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
     }
   });
 
-  // For each round, fetch matches and match picks
+  // Fetch ALL match picks for the tournament in ONE query (avoids rate limiting)
+  const allMatchPicksResult = await getAllTournamentMatchPicks(dataConnect, { tournamentId });
+
+  // Group match picks by matchId for efficient lookup
+  const matchPicksByMatchId = new Map<number, typeof allMatchPicksResult.data.matchPicks>();
+  for (const pick of allMatchPicksResult.data.matchPicks || []) {
+    const existing = matchPicksByMatchId.get(pick.matchId) || [];
+    existing.push(pick);
+    matchPicksByMatchId.set(pick.matchId, existing);
+  }
+
+  // For each round, fetch matches and use pre-loaded match picks
   const rounds: Round[] = await Promise.all(
     (roundsResult.data.rounds || []).map(async (r) => {
       // Get matches for this round
@@ -131,51 +142,44 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
         roundNumber: r.roundNumber,
       });
 
-      // For each match, get the match picks (players)
-      const matches: Match[] = await Promise.all(
-        (matchesResult.data.matches || []).map(async (m) => {
-          const picksResult = await getMatchPicks(dataConnect, {
-            tournamentId,
-            matchId: m.matchId,
-          });
+      // For each match, use pre-loaded match picks (no additional queries)
+      const matches: Match[] = (matchesResult.data.matches || []).map((m) => {
+        const picks = matchPicksByMatchId.get(m.matchId) || [];
+        const player1Pick = picks.find((p) => p.slot === 1);
+        const player2Pick = picks.find((p) => p.slot === 2);
 
-          const picks = picksResult.data.matchPicks || [];
-          const player1Pick = picks.find((p) => p.slot === 1);
-          const player2Pick = picks.find((p) => p.slot === 2);
+        // Look up scores from the picks table using entryId and round's event
+        const player1Score = player1Pick
+          ? scoreMap.get(`${player1Pick.entryId}-${r.event}`) ?? null
+          : null;
+        const player2Score = player2Pick
+          ? scoreMap.get(`${player2Pick.entryId}-${r.event}`) ?? null
+          : null;
 
-          // Look up scores from the picks table using entryId and round's event
-          const player1Score = player1Pick
-            ? scoreMap.get(`${player1Pick.entryId}-${r.event}`) ?? null
-            : null;
-          const player2Score = player2Pick
-            ? scoreMap.get(`${player2Pick.entryId}-${r.event}`) ?? null
-            : null;
+        const player1: MatchPlayer | null = player1Pick
+          ? {
+              fplTeamId: player1Pick.entryId,
+              seed: participantMap.get(player1Pick.entryId)?.seed ?? 0,
+              score: player1Score,
+            }
+          : null;
 
-          const player1: MatchPlayer | null = player1Pick
-            ? {
-                fplTeamId: player1Pick.entryId,
-                seed: participantMap.get(player1Pick.entryId)?.seed ?? 0,
-                score: player1Score,
-              }
-            : null;
+        const player2: MatchPlayer | null = player2Pick
+          ? {
+              fplTeamId: player2Pick.entryId,
+              seed: participantMap.get(player2Pick.entryId)?.seed ?? 0,
+              score: player2Score,
+            }
+          : null;
 
-          const player2: MatchPlayer | null = player2Pick
-            ? {
-                fplTeamId: player2Pick.entryId,
-                seed: participantMap.get(player2Pick.entryId)?.seed ?? 0,
-                score: player2Score,
-              }
-            : null;
-
-          return {
-            id: `${m.tournamentId}-${m.matchId}`,
-            player1,
-            player2,
-            winnerId: m.winnerEntryId ?? null,
-            isBye: m.isBye,
-          };
-        })
-      );
+        return {
+          id: `${m.tournamentId}-${m.matchId}`,
+          player1,
+          player2,
+          winnerId: m.winnerEntryId ?? null,
+          isBye: m.isBye,
+        };
+      });
 
       return {
         roundNumber: r.roundNumber,
@@ -204,6 +208,8 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
     participants,
     rounds,
     winnerId,
+    createdAt: basicTournament.createdAt,
+    updatedAt: basicTournament.createdAt, // Use createdAt as fallback for updatedAt
   };
 }
 

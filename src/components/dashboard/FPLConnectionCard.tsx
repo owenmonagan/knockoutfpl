@@ -61,7 +61,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Button } from '../ui/button';
-import { Skeleton } from '../ui/skeleton';
 
 // Re-export for backwards compatibility
 export type FPLTeamData = FPLTeamInfo;

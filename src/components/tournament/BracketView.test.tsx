@@ -12,6 +12,7 @@ describe('BracketView', () => {
     creatorUserId: 'user-1',
     startGameweek: 20,
     currentRound: 1,
+    currentGameweek: 20,
     totalRounds: 2,
     status: 'active',
     participants: [

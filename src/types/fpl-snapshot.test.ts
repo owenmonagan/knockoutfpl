@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import type { FPLSnapshot, GameweekStatus, TeamSnapshotData } from './fpl-snapshot';
-import type { BootstrapResponse, FixtureResponse, PicksResponse } from './fpl-api';
 
 describe('FPL Snapshot Types', () => {
   it('should allow valid FPLSnapshot structure', () => {
