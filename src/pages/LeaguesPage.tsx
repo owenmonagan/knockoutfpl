@@ -124,6 +124,7 @@ export function LeaguesPage() {
   // Transform league data to YourMatchesSection format
   const aggregateMatches = (): MatchSummaryCardProps[] => {
     const allMatches: MatchSummaryCardProps[] = [];
+    const yourTeamName = teamInfo?.teamName ?? 'My Team';
 
     for (const league of leagues) {
       // Add current match if exists
@@ -131,6 +132,7 @@ export function LeaguesPage() {
         const match = league.userProgress.currentMatch;
         allMatches.push({
           type: match.isLive ? 'live' : 'upcoming',
+          yourTeamName,
           opponentTeamName: match.opponentTeamName,
           leagueName: league.name,
           roundName: match.roundName,
@@ -146,6 +148,7 @@ export function LeaguesPage() {
         const match = league.userProgress.recentResult;
         allMatches.push({
           type: 'finished',
+          yourTeamName,
           opponentTeamName: match.opponentTeamName,
           leagueName: league.name,
           roundName: match.roundName,

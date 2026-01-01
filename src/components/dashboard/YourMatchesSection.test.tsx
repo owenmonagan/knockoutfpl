@@ -5,6 +5,7 @@ import type { MatchSummaryCardProps } from './MatchSummaryCard';
 
 const mockLiveMatch: MatchSummaryCardProps = {
   type: 'live',
+  yourTeamName: 'My Team',
   opponentTeamName: "Dave's Dumpster Fire",
   leagueName: 'Work League',
   roundName: 'Semi-finals',
@@ -14,15 +15,16 @@ const mockLiveMatch: MatchSummaryCardProps = {
 
 const mockUpcomingMatch: MatchSummaryCardProps = {
   type: 'upcoming',
+  yourTeamName: 'My Team',
   opponentTeamName: 'Uncle Terry XI',
   leagueName: 'Family Cup',
   roundName: 'Quarter-finals',
   gameweek: 15,
-  startsIn: 'Saturday',
 };
 
 const mockFinishedWonMatch: MatchSummaryCardProps = {
   type: 'finished',
+  yourTeamName: 'My Team',
   opponentTeamName: 'John FC',
   leagueName: 'Office League',
   roundName: 'Round of 16',
@@ -33,6 +35,7 @@ const mockFinishedWonMatch: MatchSummaryCardProps = {
 
 const mockFinishedLostMatch: MatchSummaryCardProps = {
   type: 'finished',
+  yourTeamName: 'My Team',
   opponentTeamName: 'Mike United',
   leagueName: 'Friends League',
   roundName: 'Quarter-finals',
@@ -267,7 +270,6 @@ describe('YourMatchesSection', () => {
 
       expect(screen.getByText(/vs Uncle Terry XI/)).toBeInTheDocument();
       expect(screen.getByText(/GW15/)).toBeInTheDocument();
-      expect(screen.getByText(/Starts Saturday/)).toBeInTheDocument();
     });
 
     it('should render finished won match correctly', () => {

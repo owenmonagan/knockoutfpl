@@ -8,6 +8,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="live"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -23,6 +24,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="live"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -39,6 +41,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="live"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -54,6 +57,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="live"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -69,6 +73,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="live"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -84,6 +89,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="live"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -99,6 +105,7 @@ describe('MatchSummaryCard', () => {
       const { container } = render(
         <MatchSummaryCard
           type="live"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -117,42 +124,41 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="upcoming"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
           gameweek={14}
-          startsIn="Saturday"
         />
       );
 
       expect(screen.getByText(/vs Dave's Dumpster Fire/)).toBeInTheDocument();
     });
 
-    it('should show gameweek and start day', () => {
+    it('should show gameweek', () => {
       render(
         <MatchSummaryCard
           type="upcoming"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
           gameweek={14}
-          startsIn="Saturday"
         />
       );
 
       expect(screen.getByText(/GW14/)).toBeInTheDocument();
-      expect(screen.getByText(/Starts Saturday/)).toBeInTheDocument();
     });
 
     it('should have dashed border for upcoming match', () => {
       const { container } = render(
         <MatchSummaryCard
           type="upcoming"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
           gameweek={14}
-          startsIn="Saturday"
         />
       );
 
@@ -166,6 +172,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="finished"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -182,6 +189,7 @@ describe('MatchSummaryCard', () => {
       const { container } = render(
         <MatchSummaryCard
           type="finished"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -199,6 +207,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="finished"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -215,6 +224,7 @@ describe('MatchSummaryCard', () => {
       const { container } = render(
         <MatchSummaryCard
           type="finished"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -235,6 +245,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="finished"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -251,6 +262,7 @@ describe('MatchSummaryCard', () => {
       const { container } = render(
         <MatchSummaryCard
           type="finished"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -268,6 +280,7 @@ describe('MatchSummaryCard', () => {
       const { container } = render(
         <MatchSummaryCard
           type="finished"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -289,6 +302,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="live"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -307,6 +321,7 @@ describe('MatchSummaryCard', () => {
       const { container } = render(
         <MatchSummaryCard
           type="live"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -326,6 +341,7 @@ describe('MatchSummaryCard', () => {
       const { container } = render(
         <MatchSummaryCard
           type="live"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -346,6 +362,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="live"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -363,6 +380,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="live"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -379,6 +397,7 @@ describe('MatchSummaryCard', () => {
       render(
         <MatchSummaryCard
           type="upcoming"
+          yourTeamName="My Team"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -387,6 +406,20 @@ describe('MatchSummaryCard', () => {
 
       // Should still render without crashing
       expect(screen.getByText(/vs Dave's Dumpster Fire/)).toBeInTheDocument();
+    });
+
+    it('should show TBD when opponent name is undefined', () => {
+      render(
+        <MatchSummaryCard
+          type="upcoming"
+          yourTeamName="My Team"
+          leagueName="Work League"
+          roundName="Finals"
+          gameweek={15}
+        />
+      );
+
+      expect(screen.getByText(/vs TBD/)).toBeInTheDocument();
     });
   });
 });

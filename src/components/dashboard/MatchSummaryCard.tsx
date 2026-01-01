@@ -3,17 +3,25 @@ import { cn } from '@/lib/utils';
 
 export interface MatchSummaryCardProps {
   type: 'live' | 'upcoming' | 'finished';
-  opponentTeamName: string;
+
+  // Team info
+  yourTeamName: string;
+  opponentTeamName?: string; // undefined = TBD
+
+  // Context
   leagueName: string;
   roundName: string;
-  // For live/finished matches
+
+  // Scores (live/finished)
   yourScore?: number | null;
   theirScore?: number | null;
-  // For upcoming matches
-  gameweek?: number;
-  startsIn?: string; // e.g., "Saturday", "2 days"
-  // For finished matches
+
+  // Finished result
   result?: 'won' | 'lost';
+
+  // Upcoming info
+  gameweek?: number;
+
   // Navigation
   onClick?: () => void;
 }
@@ -51,41 +59,46 @@ function getCardClasses(type: MatchSummaryCardProps['type'], result?: 'won' | 'l
 export function MatchSummaryCard(props: MatchSummaryCardProps) {
   const {
     type,
+    yourTeamName,
     opponentTeamName,
     leagueName,
     roundName,
     yourScore,
     theirScore,
     gameweek,
-    startsIn,
     result,
     onClick,
   } = props;
+
+  // Suppress unused variable warning until we use yourTeamName in next task
+  void yourTeamName;
 
   const isClickable = !!onClick;
 
   // Line 1: Opponent display
   const renderLine1 = () => {
+    const displayOpponent = opponentTeamName ?? 'TBD';
+
     if (type === 'finished') {
       if (result === 'won') {
         return (
           <span className="font-semibold text-foreground">
             <span className="text-primary mr-1">&#10003;</span>
-            Beat {opponentTeamName}
+            Beat {displayOpponent}
           </span>
         );
       }
       return (
         <span className="font-semibold text-muted-foreground">
           <span className="text-destructive mr-1">&#10007;</span>
-          Lost to {opponentTeamName}
+          Lost to {displayOpponent}
         </span>
       );
     }
 
     return (
       <span className="font-semibold text-foreground">
-        vs {opponentTeamName}
+        vs {displayOpponent}
       </span>
     );
   };
@@ -101,13 +114,9 @@ export function MatchSummaryCard(props: MatchSummaryCardProps) {
   const renderLine3 = () => {
     if (type === 'upcoming') {
       const gwText = gameweek ? `GW${gameweek}` : '';
-      const startsText = startsIn ? `Starts ${startsIn}` : '';
-      const separator = gwText && startsText ? ' \u00B7 ' : '';
-      return (
-        <span className="text-sm text-muted-foreground">
-          {gwText}{separator}{startsText}
-        </span>
-      );
+      return gwText ? (
+        <span className="text-sm text-muted-foreground">{gwText}</span>
+      ) : null;
     }
 
     if (type === 'live' || type === 'finished') {
