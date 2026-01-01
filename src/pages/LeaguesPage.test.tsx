@@ -428,8 +428,8 @@ describe('LeaguesPage', () => {
 
       renderWithRouter(<LeaguesPage />);
 
-      // MatchSummaryCard shows "vs OpponentName" for live/upcoming matches
-      const opponentText = await screen.findByText(/vs rival team/i);
+      // MatchSummaryCard shows opponent name in the card
+      const opponentText = await screen.findByText(/Rival Team/);
       expect(opponentText).toBeInTheDocument();
     });
   });

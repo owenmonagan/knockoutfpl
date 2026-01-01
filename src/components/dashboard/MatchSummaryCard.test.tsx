@@ -3,6 +3,105 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MatchSummaryCard } from './MatchSummaryCard';
 
 describe('MatchSummaryCard', () => {
+  describe('Team Avatars', () => {
+    it('should display initials for your team', () => {
+      render(
+        <MatchSummaryCard
+          type="live"
+          yourTeamName="Haaland's Hairband"
+          opponentTeamName="Salah's Legacy"
+          leagueName="Work League"
+          roundName="Semi-finals"
+          yourScore={52}
+          theirScore={48}
+        />
+      );
+
+      expect(screen.getByText('HH')).toBeInTheDocument();
+    });
+
+    it('should display initials for opponent team', () => {
+      render(
+        <MatchSummaryCard
+          type="live"
+          yourTeamName="Haaland's Hairband"
+          opponentTeamName="Salah's Legacy"
+          leagueName="Work League"
+          roundName="Semi-finals"
+          yourScore={52}
+          theirScore={48}
+        />
+      );
+
+      expect(screen.getByText('SL')).toBeInTheDocument();
+    });
+
+    it('should display TBD for missing opponent', () => {
+      render(
+        <MatchSummaryCard
+          type="upcoming"
+          yourTeamName="Haaland's Hairband"
+          leagueName="Work League"
+          roundName="Semi-finals"
+          gameweek={14}
+        />
+      );
+
+      // TBD appears in avatar and label
+      const tbdElements = screen.getAllByText('TBD');
+      expect(tbdElements.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('Card Layout', () => {
+    it('should show status badge in header for live match', () => {
+      render(
+        <MatchSummaryCard
+          type="live"
+          yourTeamName="My Team"
+          opponentTeamName="Their Team"
+          leagueName="Work League"
+          roundName="Semi-finals"
+          yourScore={52}
+          theirScore={48}
+        />
+      );
+
+      expect(screen.getByText(/live/i)).toBeInTheDocument();
+    });
+
+    it('should show point differential badge when winning', () => {
+      render(
+        <MatchSummaryCard
+          type="live"
+          yourTeamName="My Team"
+          opponentTeamName="Their Team"
+          leagueName="Work League"
+          roundName="Semi-finals"
+          yourScore={78}
+          theirScore={62}
+        />
+      );
+
+      expect(screen.getByText(/\+16/)).toBeInTheDocument();
+    });
+
+    it('should show VS for upcoming match', () => {
+      render(
+        <MatchSummaryCard
+          type="upcoming"
+          yourTeamName="My Team"
+          opponentTeamName="Their Team"
+          leagueName="Work League"
+          roundName="Semi-finals"
+          gameweek={14}
+        />
+      );
+
+      expect(screen.getByText('VS')).toBeInTheDocument();
+    });
+  });
+
   describe('Live Match', () => {
     it('should render live match with opponent name', () => {
       render(
@@ -17,7 +116,7 @@ describe('MatchSummaryCard', () => {
         />
       );
 
-      expect(screen.getByText(/vs Dave's Dumpster Fire/)).toBeInTheDocument();
+      expect(screen.getByText("Dave's Dumpster Fire")).toBeInTheDocument();
     });
 
     it('should display league name and round', () => {
@@ -38,6 +137,24 @@ describe('MatchSummaryCard', () => {
     });
 
     it('should show scores for live match', () => {
+      const { container } = render(
+        <MatchSummaryCard
+          type="live"
+          yourTeamName="My Team"
+          opponentTeamName="Dave's Dumpster Fire"
+          leagueName="Work League"
+          roundName="Semi-finals"
+          yourScore={52}
+          theirScore={48}
+        />
+      );
+
+      // Scores are in the same container element
+      expect(container.textContent).toContain('52');
+      expect(container.textContent).toContain('48');
+    });
+
+    it('should show "Winning" in footer when ahead', () => {
       render(
         <MatchSummaryCard
           type="live"
@@ -50,26 +167,10 @@ describe('MatchSummaryCard', () => {
         />
       );
 
-      expect(screen.getByText(/52 - 48/)).toBeInTheDocument();
+      expect(screen.getByText(/Winning/)).toBeInTheDocument();
     });
 
-    it('should show "You\'re ahead" when winning', () => {
-      render(
-        <MatchSummaryCard
-          type="live"
-          yourTeamName="My Team"
-          opponentTeamName="Dave's Dumpster Fire"
-          leagueName="Work League"
-          roundName="Semi-finals"
-          yourScore={52}
-          theirScore={48}
-        />
-      );
-
-      expect(screen.getByText(/You're ahead/)).toBeInTheDocument();
-    });
-
-    it('should show "You\'re behind" when losing', () => {
+    it('should show "Losing" in footer when behind', () => {
       render(
         <MatchSummaryCard
           type="live"
@@ -82,7 +183,7 @@ describe('MatchSummaryCard', () => {
         />
       );
 
-      expect(screen.getByText(/You're behind/)).toBeInTheDocument();
+      expect(screen.getByText(/Losing/)).toBeInTheDocument();
     });
 
     it('should show "Tied" when scores are equal', () => {
@@ -98,7 +199,9 @@ describe('MatchSummaryCard', () => {
         />
       );
 
-      expect(screen.getByText(/Tied/)).toBeInTheDocument();
+      // Tied appears in badge and footer
+      const tiedElements = screen.getAllByText(/Tied/);
+      expect(tiedElements.length).toBeGreaterThanOrEqual(1);
     });
 
     it('should have primary color border for live match', () => {
@@ -132,7 +235,7 @@ describe('MatchSummaryCard', () => {
         />
       );
 
-      expect(screen.getByText(/vs Dave's Dumpster Fire/)).toBeInTheDocument();
+      expect(screen.getByText("Dave's Dumpster Fire")).toBeInTheDocument();
     });
 
     it('should show gameweek', () => {
@@ -165,10 +268,25 @@ describe('MatchSummaryCard', () => {
       const card = container.querySelector('.border-dashed');
       expect(card).toBeInTheDocument();
     });
+
+    it('should show "Upcoming" status badge', () => {
+      render(
+        <MatchSummaryCard
+          type="upcoming"
+          yourTeamName="My Team"
+          opponentTeamName="Dave's Dumpster Fire"
+          leagueName="Work League"
+          roundName="Semi-finals"
+          gameweek={14}
+        />
+      );
+
+      expect(screen.getByText(/Upcoming/)).toBeInTheDocument();
+    });
   });
 
   describe('Finished Match (Won)', () => {
-    it('should show "Beat" prefix for won match', () => {
+    it('should show "Won" badge for won match', () => {
       render(
         <MatchSummaryCard
           type="finished"
@@ -182,11 +300,11 @@ describe('MatchSummaryCard', () => {
         />
       );
 
-      expect(screen.getByText(/Beat Dave's Dumpster Fire/)).toBeInTheDocument();
+      expect(screen.getByText('Won')).toBeInTheDocument();
     });
 
-    it('should show checkmark icon for won match', () => {
-      const { container } = render(
+    it('should show "Advanced" in footer for won match', () => {
+      render(
         <MatchSummaryCard
           type="finished"
           yourTeamName="My Team"
@@ -199,28 +317,10 @@ describe('MatchSummaryCard', () => {
         />
       );
 
-      // Look for the check icon or symbol
-      expect(container.textContent).toMatch(/[✓]/);
+      expect(screen.getByText(/Advanced/)).toBeInTheDocument();
     });
 
     it('should show final scores', () => {
-      render(
-        <MatchSummaryCard
-          type="finished"
-          yourTeamName="My Team"
-          opponentTeamName="Dave's Dumpster Fire"
-          leagueName="Work League"
-          roundName="Quarter-finals"
-          yourScore={67}
-          theirScore={52}
-          result="won"
-        />
-      );
-
-      expect(screen.getByText(/67 - 52/)).toBeInTheDocument();
-    });
-
-    it('should have green accent for won match', () => {
       const { container } = render(
         <MatchSummaryCard
           type="finished"
@@ -234,14 +334,31 @@ describe('MatchSummaryCard', () => {
         />
       );
 
-      // Check for green left border
-      const card = container.querySelector('.border-l-green-500, .border-l-primary');
-      expect(card).toBeInTheDocument();
+      // Scores are in the same container element
+      expect(container.textContent).toContain('67');
+      expect(container.textContent).toContain('52');
+    });
+
+    it('should show "Finished" status badge', () => {
+      render(
+        <MatchSummaryCard
+          type="finished"
+          yourTeamName="My Team"
+          opponentTeamName="Dave's Dumpster Fire"
+          leagueName="Work League"
+          roundName="Quarter-finals"
+          yourScore={67}
+          theirScore={52}
+          result="won"
+        />
+      );
+
+      expect(screen.getByText(/Finished/)).toBeInTheDocument();
     });
   });
 
   describe('Finished Match (Lost)', () => {
-    it('should show "Lost to" prefix for lost match', () => {
+    it('should show "Lost" badge for lost match', () => {
       render(
         <MatchSummaryCard
           type="finished"
@@ -255,11 +372,11 @@ describe('MatchSummaryCard', () => {
         />
       );
 
-      expect(screen.getByText(/Lost to Dave's Dumpster Fire/)).toBeInTheDocument();
+      expect(screen.getByText('Lost')).toBeInTheDocument();
     });
 
-    it('should show X icon for lost match', () => {
-      const { container } = render(
+    it('should show "Eliminated" in footer for lost match', () => {
+      render(
         <MatchSummaryCard
           type="finished"
           yourTeamName="My Team"
@@ -272,8 +389,7 @@ describe('MatchSummaryCard', () => {
         />
       );
 
-      // Look for the X icon or symbol
-      expect(container.textContent).toMatch(/[✗]/);
+      expect(screen.getByText(/Eliminated/)).toBeInTheDocument();
     });
 
     it('should have muted/dimmed styling for lost match', () => {
@@ -334,6 +450,23 @@ describe('MatchSummaryCard', () => {
       const card = container.querySelector('.cursor-pointer');
       expect(card).toBeInTheDocument();
     });
+
+    it('should show "Details" link when clickable', () => {
+      render(
+        <MatchSummaryCard
+          type="live"
+          yourTeamName="My Team"
+          opponentTeamName="Dave's Dumpster Fire"
+          leagueName="Work League"
+          roundName="Semi-finals"
+          yourScore={52}
+          theirScore={48}
+          onClick={() => {}}
+        />
+      );
+
+      expect(screen.getByText(/Details/)).toBeInTheDocument();
+    });
   });
 
   describe('Hover Effects', () => {
@@ -390,7 +523,7 @@ describe('MatchSummaryCard', () => {
       );
 
       // Should still render without crashing
-      expect(screen.getByText(/vs Dave's Dumpster Fire/)).toBeInTheDocument();
+      expect(screen.getByText("Dave's Dumpster Fire")).toBeInTheDocument();
     });
 
     it('should handle missing optional props for upcoming match', () => {
@@ -405,7 +538,7 @@ describe('MatchSummaryCard', () => {
       );
 
       // Should still render without crashing
-      expect(screen.getByText(/vs Dave's Dumpster Fire/)).toBeInTheDocument();
+      expect(screen.getByText("Dave's Dumpster Fire")).toBeInTheDocument();
     });
 
     it('should show TBD when opponent name is undefined', () => {
@@ -419,7 +552,24 @@ describe('MatchSummaryCard', () => {
         />
       );
 
-      expect(screen.getByText(/vs TBD/)).toBeInTheDocument();
+      // TBD appears as avatar text and as label
+      const tbdElements = screen.getAllByText('TBD');
+      expect(tbdElements.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should show opponent TBD info in footer when TBD and upcoming', () => {
+      render(
+        <MatchSummaryCard
+          type="upcoming"
+          yourTeamName="My Team"
+          leagueName="Work League"
+          roundName="Finals"
+          gameweek={15}
+        />
+      );
+
+      // gameweek - 1 = 14
+      expect(screen.getByText(/Opponent TBD after GW14/)).toBeInTheDocument();
     });
   });
 });

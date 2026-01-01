@@ -135,9 +135,10 @@ describe('YourMatchesSection', () => {
       const matches = [mockLiveMatch, mockUpcomingMatch, mockFinishedWonMatch];
       render(<YourMatchesSection matches={matches} />);
 
-      expect(screen.getByText(/vs Dave's Dumpster Fire/)).toBeInTheDocument();
-      expect(screen.getByText(/vs Uncle Terry XI/)).toBeInTheDocument();
-      expect(screen.getByText(/Beat John FC/)).toBeInTheDocument();
+      // New design shows opponent names directly
+      expect(screen.getByText("Dave's Dumpster Fire")).toBeInTheDocument();
+      expect(screen.getByText('Uncle Terry XI')).toBeInTheDocument();
+      expect(screen.getByText('John FC')).toBeInTheDocument();
     });
 
     it('should render cards in the order provided', () => {
@@ -258,32 +259,40 @@ describe('YourMatchesSection', () => {
 
   describe('Different Match Types', () => {
     it('should render live match correctly', () => {
-      render(<YourMatchesSection matches={[mockLiveMatch]} />);
+      const { container } = render(<YourMatchesSection matches={[mockLiveMatch]} />);
 
-      expect(screen.getByText(/vs Dave's Dumpster Fire/)).toBeInTheDocument();
-      expect(screen.getByText(/52 - 48/)).toBeInTheDocument();
-      expect(screen.getByText(/You're ahead/)).toBeInTheDocument();
+      expect(screen.getByText("Dave's Dumpster Fire")).toBeInTheDocument();
+      // Scores are displayed in the card
+      expect(container.textContent).toContain('52');
+      expect(container.textContent).toContain('48');
+      expect(screen.getByText(/Winning/)).toBeInTheDocument();
     });
 
     it('should render upcoming match correctly', () => {
       render(<YourMatchesSection matches={[mockUpcomingMatch]} />);
 
-      expect(screen.getByText(/vs Uncle Terry XI/)).toBeInTheDocument();
+      expect(screen.getByText('Uncle Terry XI')).toBeInTheDocument();
       expect(screen.getByText(/GW15/)).toBeInTheDocument();
     });
 
     it('should render finished won match correctly', () => {
-      render(<YourMatchesSection matches={[mockFinishedWonMatch]} />);
+      const { container } = render(<YourMatchesSection matches={[mockFinishedWonMatch]} />);
 
-      expect(screen.getByText(/Beat John FC/)).toBeInTheDocument();
-      expect(screen.getByText(/67 - 52/)).toBeInTheDocument();
+      expect(screen.getByText('John FC')).toBeInTheDocument();
+      expect(screen.getByText('Won')).toBeInTheDocument();
+      // Scores are displayed in the card
+      expect(container.textContent).toContain('67');
+      expect(container.textContent).toContain('52');
     });
 
     it('should render finished lost match correctly', () => {
-      render(<YourMatchesSection matches={[mockFinishedLostMatch]} />);
+      const { container } = render(<YourMatchesSection matches={[mockFinishedLostMatch]} />);
 
-      expect(screen.getByText(/Lost to Mike United/)).toBeInTheDocument();
-      expect(screen.getByText(/48 - 55/)).toBeInTheDocument();
+      expect(screen.getByText('Mike United')).toBeInTheDocument();
+      expect(screen.getByText('Lost')).toBeInTheDocument();
+      // Scores are displayed in the card
+      expect(container.textContent).toContain('48');
+      expect(container.textContent).toContain('55');
     });
   });
 

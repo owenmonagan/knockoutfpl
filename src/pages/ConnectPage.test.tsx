@@ -61,54 +61,64 @@ afterEach(() => {
 });
 
 describe('ConnectPage', () => {
-  it('renders the page title', () => {
+  it('renders the page title', async () => {
     render(
       <BrowserRouter>
         <ConnectPage />
       </BrowserRouter>
     );
 
-    expect(screen.getByText('Connect Your FPL Team')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Connect Your FPL Team')).toBeInTheDocument();
+    });
   });
 
-  it('renders the subtitle', () => {
+  it('renders the subtitle', async () => {
     render(
       <BrowserRouter>
         <ConnectPage />
       </BrowserRouter>
     );
 
-    expect(screen.getByText("Let's see what you're made of.")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Let's see what you're made of.")).toBeInTheDocument();
+    });
   });
 
-  it('renders the FPL Team ID input', () => {
+  it('renders the FPL Team ID input', async () => {
     render(
       <BrowserRouter>
         <ConnectPage />
       </BrowserRouter>
     );
 
-    expect(screen.getByLabelText('FPL Team ID')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByLabelText('FPL Team ID')).toBeInTheDocument();
+    });
   });
 
-  it('renders the help link', () => {
+  it('renders the help link', async () => {
     render(
       <BrowserRouter>
         <ConnectPage />
       </BrowserRouter>
     );
 
-    expect(screen.getByText("Where's my Team ID?")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Where's my Team ID?")).toBeInTheDocument();
+    });
   });
 
-  it('renders the Find My Team button', () => {
+  it('renders the Find My Team button', async () => {
     render(
       <BrowserRouter>
         <ConnectPage />
       </BrowserRouter>
     );
 
-    expect(screen.getByRole('button', { name: 'Find My Team' })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Find My Team' })).toBeInTheDocument();
+    });
   });
 
   it('shows loading state when form is submitted', async () => {
@@ -120,6 +130,11 @@ describe('ConnectPage', () => {
         <ConnectPage />
       </BrowserRouter>
     );
+
+    // Wait for initial loading to complete
+    await waitFor(() => {
+      expect(screen.getByLabelText('FPL Team ID')).toBeInTheDocument();
+    });
 
     await user.type(screen.getByLabelText('FPL Team ID'), '158256');
     await user.click(screen.getByRole('button', { name: 'Find My Team' }));
@@ -143,6 +158,11 @@ describe('ConnectPage', () => {
       </BrowserRouter>
     );
 
+    // Wait for initial loading to complete
+    await waitFor(() => {
+      expect(screen.getByLabelText('FPL Team ID')).toBeInTheDocument();
+    });
+
     await user.type(screen.getByLabelText('FPL Team ID'), '158256');
     await user.click(screen.getByRole('button', { name: 'Find My Team' }));
 
@@ -163,6 +183,11 @@ describe('ConnectPage', () => {
       </BrowserRouter>
     );
 
+    // Wait for initial loading to complete
+    await waitFor(() => {
+      expect(screen.getByLabelText('FPL Team ID')).toBeInTheDocument();
+    });
+
     await user.type(screen.getByLabelText('FPL Team ID'), '999999');
     await user.click(screen.getByRole('button', { name: 'Find My Team' }));
 
@@ -179,6 +204,11 @@ describe('ConnectPage', () => {
         <ConnectPage />
       </BrowserRouter>
     );
+
+    // Wait for initial loading to complete
+    await waitFor(() => {
+      expect(screen.getByText("Where's my Team ID?")).toBeInTheDocument();
+    });
 
     await user.click(screen.getByText("Where's my Team ID?"));
 
@@ -202,6 +232,11 @@ describe('ConnectPage', () => {
         <ConnectPage />
       </BrowserRouter>
     );
+
+    // Wait for initial loading to complete
+    await waitFor(() => {
+      expect(screen.getByLabelText('FPL Team ID')).toBeInTheDocument();
+    });
 
     await user.type(screen.getByLabelText('FPL Team ID'), '158256');
     await user.click(screen.getByRole('button', { name: 'Find My Team' }));

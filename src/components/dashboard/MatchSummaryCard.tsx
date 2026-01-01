@@ -1,5 +1,7 @@
 import { Card, CardContent } from '../ui/card';
+import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
+import { getInitials } from '@/lib/initials';
 
 export interface MatchSummaryCardProps {
   type: 'live' | 'upcoming' | 'finished';
@@ -26,34 +28,57 @@ export interface MatchSummaryCardProps {
   onClick?: () => void;
 }
 
-function getStatusText(yourScore: number, theirScore: number): string {
-  if (yourScore > theirScore) {
-    return "You're ahead";
-  } else if (yourScore < theirScore) {
-    return "You're behind";
-  }
-  return 'Tied';
+interface TeamAvatarProps {
+  teamName?: string;
+  isYou?: boolean;
+  isWinner?: boolean;
+  isLoser?: boolean;
+  isTBD?: boolean;
 }
 
-function getCardClasses(type: MatchSummaryCardProps['type'], result?: 'won' | 'lost'): string {
-  const baseClasses = 'transition-all duration-200';
+function TeamAvatar({ teamName, isYou, isWinner, isLoser, isTBD }: TeamAvatarProps) {
+  const initials = isTBD ? 'TBD' : teamName ? getInitials(teamName) : '??';
 
-  switch (type) {
-    case 'live':
-      return cn(
-        baseClasses,
-        'border-primary shadow-[0_0_20px_rgba(0,255,136,0.1)]'
-      );
-    case 'upcoming':
-      return cn(baseClasses, 'border-dashed');
-    case 'finished':
-      if (result === 'won') {
-        return cn(baseClasses, 'border-l-4 border-l-primary');
-      }
-      return cn(baseClasses, 'opacity-90');
-    default:
-      return baseClasses;
+  const baseClasses = 'h-12 w-12 rounded-full flex items-center justify-center font-bold text-sm';
+
+  if (isTBD) {
+    return (
+      <div className={cn(baseClasses, 'border-2 border-dashed border-muted-foreground/50 text-muted-foreground text-xs')}>
+        {initials}
+      </div>
+    );
   }
+
+  if (isWinner) {
+    return (
+      <div className={cn(baseClasses, 'border-2 border-primary bg-primary/10 text-primary')}>
+        {initials}
+      </div>
+    );
+  }
+
+  if (isLoser) {
+    return (
+      <div className={cn(baseClasses, 'border border-muted bg-muted/50 text-muted-foreground grayscale')}>
+        {initials}
+      </div>
+    );
+  }
+
+  if (isYou) {
+    return (
+      <div className={cn(baseClasses, 'border-2 border-primary bg-primary/10 text-primary')}>
+        {initials}
+      </div>
+    );
+  }
+
+  // Default: opponent in live/upcoming
+  return (
+    <div className={cn(baseClasses, 'border border-muted bg-muted/50 text-muted-foreground')}>
+      {initials}
+    </div>
+  );
 }
 
 export function MatchSummaryCard(props: MatchSummaryCardProps) {
@@ -70,101 +95,165 @@ export function MatchSummaryCard(props: MatchSummaryCardProps) {
     onClick,
   } = props;
 
-  // Suppress unused variable warning until we use yourTeamName in next task
-  void yourTeamName;
-
   const isClickable = !!onClick;
+  const isTBD = !opponentTeamName;
+  const hasScores = yourScore != null && theirScore != null;
+  const scoreDiff = hasScores ? yourScore - theirScore : 0;
 
-  // Line 1: Opponent display
-  const renderLine1 = () => {
-    const displayOpponent = opponentTeamName ?? 'TBD';
+  // Determine avatar states
+  const youWon = type === 'finished' && result === 'won';
+  const youLost = type === 'finished' && result === 'lost';
 
-    if (type === 'finished') {
-      if (result === 'won') {
+  // Card classes based on state
+  const cardClasses = cn(
+    'overflow-hidden transition-all duration-200',
+    {
+      'border-2 border-primary shadow-[0_0_20px_rgba(0,255,136,0.1)]': type === 'live',
+      'border-dashed': type === 'upcoming',
+      'opacity-90': youLost,
+    },
+    isClickable && 'cursor-pointer hover:-translate-y-1'
+  );
+
+  // Header badge content
+  const renderStatusBadge = () => {
+    switch (type) {
+      case 'live':
         return (
-          <span className="font-semibold text-foreground">
-            <span className="text-primary mr-1">&#10003;</span>
-            Beat {displayOpponent}
-          </span>
+          <Badge variant="default" className="gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
+            Live
+          </Badge>
         );
-      }
+      case 'finished':
+        return (
+          <Badge variant="secondary">
+            Finished
+          </Badge>
+        );
+      case 'upcoming':
+        return (
+          <Badge variant="outline">
+            Upcoming
+          </Badge>
+        );
+    }
+  };
+
+  // Score or VS display
+  const renderScoreSection = () => {
+    if (type === 'upcoming') {
       return (
-        <span className="font-semibold text-muted-foreground">
-          <span className="text-destructive mr-1">&#10007;</span>
-          Lost to {displayOpponent}
-        </span>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-2xl font-bold text-muted-foreground">VS</span>
+          {gameweek && (
+            <span className="text-xs text-muted-foreground">GW{gameweek}</span>
+          )}
+        </div>
       );
+    }
+
+    if (!hasScores) {
+      return <span className="text-muted-foreground">-</span>;
     }
 
     return (
-      <span className="font-semibold text-foreground">
-        vs {displayOpponent}
-      </span>
+      <div className="flex flex-col items-center gap-1">
+        <div className="text-2xl font-black tracking-wider tabular-nums">
+          {yourScore}
+          <span className="text-muted-foreground mx-1">-</span>
+          {theirScore}
+        </div>
+        {type === 'live' && scoreDiff !== 0 && (
+          <Badge variant={scoreDiff > 0 ? 'default' : 'destructive'} className="text-xs">
+            {scoreDiff > 0 ? '+' : ''}{scoreDiff} pts
+          </Badge>
+        )}
+        {type === 'live' && scoreDiff === 0 && (
+          <Badge variant="secondary" className="text-xs">
+            Tied
+          </Badge>
+        )}
+        {type === 'finished' && (
+          <Badge variant={youWon ? 'default' : 'destructive'} className="text-xs">
+            {youWon ? 'Won' : 'Lost'}
+          </Badge>
+        )}
+      </div>
     );
   };
 
-  // Line 2: League and round
-  const renderLine2 = () => (
-    <span className="text-sm text-muted-foreground">
-      {leagueName} &middot; {roundName}
-    </span>
-  );
-
-  // Line 3: Score/timing info
-  const renderLine3 = () => {
-    if (type === 'upcoming') {
-      const gwText = gameweek ? `GW${gameweek}` : '';
-      return gwText ? (
-        <span className="text-sm text-muted-foreground">{gwText}</span>
-      ) : null;
+  // Footer content
+  const renderFooter = () => {
+    if (type === 'live' && hasScores) {
+      if (scoreDiff > 0) return 'Winning';
+      if (scoreDiff < 0) return 'Losing';
+      return 'Tied';
     }
-
-    if (type === 'live' || type === 'finished') {
-      const hasScores =
-        yourScore !== null &&
-        yourScore !== undefined &&
-        theirScore !== null &&
-        theirScore !== undefined;
-
-      if (!hasScores) {
-        return null;
-      }
-
-      const scoreText = `${yourScore} - ${theirScore}`;
-
-      if (type === 'live') {
-        const status = getStatusText(yourScore, theirScore);
-        return (
-          <span className="text-sm">
-            <span className="font-semibold text-foreground">{scoreText}</span>
-            <span className="text-muted-foreground"> &middot; {status}</span>
-          </span>
-        );
-      }
-
-      // Finished match - just show score
-      return (
-        <span className="text-sm text-muted-foreground">{scoreText}</span>
+    if (type === 'finished') {
+      return youLost ? (
+        <span className="text-destructive">Eliminated</span>
+      ) : (
+        <span className="text-primary">Advanced</span>
       );
     }
-
+    if (type === 'upcoming' && isTBD && gameweek) {
+      return `Opponent TBD after GW${gameweek - 1}`;
+    }
     return null;
   };
 
   return (
-    <Card
-      role="article"
-      className={cn(
-        getCardClasses(type, result),
-        isClickable && 'cursor-pointer hover:-translate-y-1'
-      )}
-      onClick={onClick}
-    >
-      <CardContent className="p-4 space-y-1">
-        <div>{renderLine1()}</div>
-        <div>{renderLine2()}</div>
-        <div>{renderLine3()}</div>
+    <Card role="article" className={cardClasses} onClick={onClick}>
+      {/* Header */}
+      <div className="px-4 py-2 border-b bg-muted/30 flex justify-between items-center">
+        {renderStatusBadge()}
+        <span className="text-xs text-muted-foreground">
+          {leagueName} · {roundName}
+        </span>
+      </div>
+
+      {/* Body */}
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between gap-4">
+          {/* Your team */}
+          <div className="flex flex-col items-center gap-2 flex-1">
+            <TeamAvatar
+              teamName={yourTeamName}
+              isYou
+              isWinner={youWon}
+              isLoser={youLost}
+            />
+            <span className="text-xs font-medium text-center line-clamp-1">You</span>
+          </div>
+
+          {/* Score/VS */}
+          {renderScoreSection()}
+
+          {/* Opponent */}
+          <div className="flex flex-col items-center gap-2 flex-1">
+            <TeamAvatar
+              teamName={opponentTeamName}
+              isTBD={isTBD}
+              isWinner={youLost}
+              isLoser={youWon}
+            />
+            <span className="text-xs font-medium text-muted-foreground text-center line-clamp-1">
+              {isTBD ? 'TBD' : opponentTeamName}
+            </span>
+          </div>
+        </div>
       </CardContent>
+
+      {/* Footer */}
+      <div className="px-4 py-2 border-t bg-muted/20 flex justify-between items-center">
+        <span className="text-xs text-muted-foreground">{renderFooter()}</span>
+        {isClickable && (
+          <span className="text-xs text-muted-foreground">
+            Details →
+          </span>
+        )}
+      </div>
     </Card>
   );
 }
