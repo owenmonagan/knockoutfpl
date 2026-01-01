@@ -1,6 +1,13 @@
 import { Card, CardContent } from '@/components/ui/card';
 
-const testimonials = [
+interface Testimonial {
+  name: string;
+  handle: string;
+  initials: string;
+  quote: string;
+}
+
+const testimonials: Testimonial[] = [
   {
     name: 'Alex Johnson',
     handle: '@FPL_AlexJ',
@@ -26,9 +33,9 @@ const testimonials = [
 
 function StarRating() {
   return (
-    <div className="flex gap-0.5 text-primary">
+    <div className="flex gap-0.5 text-primary" role="img" aria-label="5 out of 5 stars">
       {[...Array(5)].map((_, i) => (
-        <span key={i} className="text-lg">
+        <span key={i} className="text-lg" aria-hidden="true">
           &#9733;
         </span>
       ))}

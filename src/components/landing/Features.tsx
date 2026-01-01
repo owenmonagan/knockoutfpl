@@ -1,6 +1,12 @@
 import { Card, CardContent } from '@/components/ui/card';
 
-const features = [
+interface Feature {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+const features: Feature[] = [
   {
     icon: 'account_tree',
     title: 'Instant Brackets',
@@ -45,7 +51,7 @@ export function Features() {
               <CardContent className="p-6">
                 {/* Icon Container */}
                 <div className="bg-primary/10 text-primary rounded-xl p-3 w-fit mb-4">
-                  <span className="material-symbols-outlined text-2xl">
+                  <span className="material-symbols-outlined text-2xl" aria-hidden="true">
                     {feature.icon}
                   </span>
                 </div>
