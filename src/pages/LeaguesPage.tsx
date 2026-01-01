@@ -193,6 +193,15 @@ export function LeaguesPage() {
             <TeamIdentity
               teamName={teamInfo.teamName}
               managerName={teamInfo.managerName}
+              overallRank={teamInfo.overallRank ?? 0}
+              gameweekNumber={currentGameweek ?? 0}
+              gameweekPoints={teamInfo.gameweekPoints ?? 0}
+              onSync={() => {
+                // TODO: Implement sync functionality
+              }}
+              onEditTeam={() => {
+                navigate('/connect');
+              }}
             />
           ) : null}
         </section>

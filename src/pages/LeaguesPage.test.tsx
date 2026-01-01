@@ -52,6 +52,8 @@ describe('LeaguesPage', () => {
       teamId: 123456,
       teamName: 'Test Team',
       managerName: 'Test Manager',
+      overallRank: 50000,
+      gameweekPoints: 65,
     });
 
     // Default: bootstrap data
@@ -155,6 +157,8 @@ describe('LeaguesPage', () => {
         teamId: 123456,
         teamName: 'My FPL Squad',
         managerName: 'John Smith',
+        overallRank: 75000,
+        gameweekPoints: 72,
       });
 
       vi.mocked(fplService.getUserMiniLeagues).mockResolvedValue([]);
