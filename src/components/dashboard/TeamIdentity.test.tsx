@@ -85,4 +85,27 @@ describe('TeamIdentity', () => {
     render(<TeamIdentity {...defaultProps} overallRank={500} />);
     expect(screen.getByText(/500/)).toBeInTheDocument();
   });
+
+  describe('edge cases', () => {
+    it('handles zero overall rank gracefully', () => {
+      render(<TeamIdentity {...defaultProps} overallRank={0} />);
+      expect(screen.getByText(/OR:/)).toBeInTheDocument();
+    });
+
+    it('handles zero gameweek points', () => {
+      render(<TeamIdentity {...defaultProps} gameweekPoints={0} />);
+      expect(screen.getByText(/0 pts/)).toBeInTheDocument();
+    });
+
+    it('handles missing gameweek number', () => {
+      render(<TeamIdentity {...defaultProps} gameweekNumber={0} />);
+      expect(screen.getByText(/GW0:/)).toBeInTheDocument();
+    });
+
+    it('handles very long team names without breaking layout', () => {
+      const longName = 'This Is An Extremely Long Team Name That Should Not Break';
+      render(<TeamIdentity {...defaultProps} teamName={longName} />);
+      expect(screen.getByText(longName)).toBeInTheDocument();
+    });
+  });
 });
