@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import userEvent from '@testing-library/user-event';
+import { BrowserRouter, MemoryRouter, Routes, Route } from 'react-router-dom';
 import { LeaguesPage } from './LeaguesPage';
 import * as AuthContext from '../contexts/AuthContext';
 import * as userService from '../services/user';
@@ -430,6 +431,134 @@ describe('LeaguesPage', () => {
       // MatchSummaryCard shows "vs OpponentName" for live/upcoming matches
       const opponentText = await screen.findByText(/vs rival team/i);
       expect(opponentText).toBeInTheDocument();
+    });
+  });
+
+  describe('Sync Functionality', () => {
+    it('handles sync button click by refetching data', async () => {
+      const user = userEvent.setup();
+
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+        connectionError: false,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(fplService.getFPLTeamInfo).mockResolvedValue({
+        teamId: 123456,
+        teamName: 'Test FC',
+        managerName: 'Test Manager',
+        overallRank: 50000,
+        gameweekPoints: 65,
+      });
+
+      vi.mocked(fplService.getFPLBootstrapData).mockResolvedValue({
+        currentGameweek: 34,
+      });
+
+      vi.mocked(fplService.getUserMiniLeagues).mockResolvedValue([]);
+
+      renderWithRouter(<LeaguesPage />);
+
+      // Wait for initial load to complete
+      await waitFor(() => {
+        expect(screen.getByText('Test FC')).toBeInTheDocument();
+      });
+
+      // Clear mock call counts
+      vi.mocked(fplService.getFPLTeamInfo).mockClear();
+      vi.mocked(fplService.getFPLBootstrapData).mockClear();
+      vi.mocked(fplService.getUserMiniLeagues).mockClear();
+
+      // Click sync button
+      await user.click(screen.getByRole('button', { name: /sync/i }));
+
+      // Verify data was refetched
+      await waitFor(() => {
+        expect(fplService.getFPLTeamInfo).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('Edit Team Functionality', () => {
+    it('navigates to /connect when edit team clicked', async () => {
+      const user = userEvent.setup();
+
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+        connectionError: false,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(fplService.getFPLTeamInfo).mockResolvedValue({
+        teamId: 123456,
+        teamName: 'Test FC',
+        managerName: 'Test Manager',
+        overallRank: 50000,
+        gameweekPoints: 65,
+      });
+
+      vi.mocked(fplService.getFPLBootstrapData).mockResolvedValue({
+        currentGameweek: 34,
+      });
+
+      vi.mocked(fplService.getUserMiniLeagues).mockResolvedValue([]);
+
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<LeaguesPage />} />
+            <Route path="/connect" element={<div>Connect Page</div>} />
+          </Routes>
+        </MemoryRouter>
+      );
+
+      // Wait for initial load to complete
+      await waitFor(() => {
+        expect(screen.getByText('Test FC')).toBeInTheDocument();
+      });
+
+      // Click edit team button
+      await user.click(screen.getByRole('button', { name: /change team/i }));
+
+      // Verify navigation to connect page
+      await waitFor(() => {
+        expect(screen.getByText('Connect Page')).toBeInTheDocument();
+      });
     });
   });
 });

@@ -43,65 +43,83 @@ export function LeaguesPage() {
   const [currentGameweek, setCurrentGameweek] = useState<number | undefined>(undefined);
   const [isLoadingTeam, setIsLoadingTeam] = useState(true);
   const [isLoadingLeagues, setIsLoadingLeagues] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Clear ConnectPage's sessionStorage on successful load
   useEffect(() => {
     sessionStorage.removeItem(CONNECT_SUCCESS_STORAGE_KEY);
   }, []);
 
-  useEffect(() => {
-    async function loadData() {
-      if (!authUser?.uid) {
-        setIsLoadingTeam(false);
-        setIsLoadingLeagues(false);
-        return;
-      }
-
-      // Get user profile
-      const userProfile = await getUserProfile(authUser.uid);
-      if (!userProfile || userProfile.fplTeamId === 0) {
-        setIsLoadingTeam(false);
-        setIsLoadingLeagues(false);
-        return;
-      }
-
-      // Fetch team info and bootstrap data in parallel
-      const [fplTeamInfo, bootstrapData] = await Promise.all([
-        getFPLTeamInfo(userProfile.fplTeamId).catch(() => null),
-        getFPLBootstrapData().catch(() => ({ currentGameweek: undefined })),
-      ]);
-
-      setTeamInfo(fplTeamInfo);
-      setCurrentGameweek(bootstrapData.currentGameweek);
+  // Shared data loading function
+  const loadAllData = async () => {
+    if (!authUser?.uid) {
       setIsLoadingTeam(false);
-
-      // Fetch leagues
-      const miniLeagues = await getUserMiniLeagues(userProfile.fplTeamId);
-
-      // Fetch member counts and tournament data for each league in parallel
-      const leaguesWithTournaments = await Promise.all(
-        miniLeagues.map(async (league) => {
-          const [standings, tournamentData] = await Promise.all([
-            getLeagueStandings(league.id),
-            getTournamentSummaryForLeague(league.id, userProfile.fplTeamId).catch(() => ({
-              tournament: null,
-              userProgress: null,
-            })),
-          ]);
-          return {
-            ...league,
-            memberCount: standings.length,
-            ...tournamentData, // adds tournament and userProgress
-          };
-        })
-      );
-
-      setLeagues(leaguesWithTournaments);
       setIsLoadingLeagues(false);
+      return;
     }
 
-    loadData();
+    // Get user profile
+    const userProfile = await getUserProfile(authUser.uid);
+    if (!userProfile || userProfile.fplTeamId === 0) {
+      setIsLoadingTeam(false);
+      setIsLoadingLeagues(false);
+      return;
+    }
+
+    // Fetch team info and bootstrap data in parallel
+    const [fplTeamInfo, bootstrapData] = await Promise.all([
+      getFPLTeamInfo(userProfile.fplTeamId).catch(() => null),
+      getFPLBootstrapData().catch(() => ({ currentGameweek: undefined })),
+    ]);
+
+    setTeamInfo(fplTeamInfo);
+    setCurrentGameweek(bootstrapData.currentGameweek);
+    setIsLoadingTeam(false);
+
+    // Fetch leagues
+    const miniLeagues = await getUserMiniLeagues(userProfile.fplTeamId);
+
+    // Fetch member counts and tournament data for each league in parallel
+    const leaguesWithTournaments = await Promise.all(
+      miniLeagues.map(async (league) => {
+        const [standings, tournamentData] = await Promise.all([
+          getLeagueStandings(league.id),
+          getTournamentSummaryForLeague(league.id, userProfile.fplTeamId).catch(() => ({
+            tournament: null,
+            userProgress: null,
+          })),
+        ]);
+        return {
+          ...league,
+          memberCount: standings.length,
+          ...tournamentData, // adds tournament and userProgress
+        };
+      })
+    );
+
+    setLeagues(leaguesWithTournaments);
+    setIsLoadingLeagues(false);
+  };
+
+  useEffect(() => {
+    loadAllData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser]);
+
+  // Handle sync button click - refetch all data
+  const handleSync = async () => {
+    if (!authUser?.uid || isSyncing) return;
+
+    setIsSyncing(true);
+    setIsLoadingTeam(true);
+    setIsLoadingLeagues(true);
+
+    try {
+      await loadAllData();
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Transform league data to YourMatchesSection format
   const aggregateMatches = (): MatchSummaryCardProps[] => {
@@ -196,12 +214,11 @@ export function LeaguesPage() {
               overallRank={teamInfo.overallRank ?? 0}
               gameweekNumber={currentGameweek ?? 0}
               gameweekPoints={teamInfo.gameweekPoints ?? 0}
-              onSync={() => {
-                // TODO: Implement sync functionality
-              }}
+              onSync={handleSync}
               onEditTeam={() => {
                 navigate('/connect');
               }}
+              isSyncing={isSyncing}
             />
           ) : null}
         </section>
