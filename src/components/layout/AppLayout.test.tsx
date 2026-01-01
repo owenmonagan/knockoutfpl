@@ -5,12 +5,18 @@ import { AppLayout } from './AppLayout';
 import { AuthContext } from '../../contexts/AuthContext';
 import type { User as FirebaseUser } from 'firebase/auth';
 
-// Mock Navbar to check which variant is passed
-vi.mock('./Navbar', () => ({
-  Navbar: ({ variant }: { variant: string }) => (
-    <nav data-testid="navbar" data-variant={variant}>
-      Navbar: {variant}
-    </nav>
+// Mock AppHeader to check which variant and authPage are passed
+vi.mock('./AppHeader', () => ({
+  AppHeader: ({
+    variant,
+    authPage,
+  }: {
+    variant: string;
+    authPage?: string;
+  }) => (
+    <header data-testid="app-header" data-variant={variant} data-auth-page={authPage || ''}>
+      AppHeader: {variant} {authPage && `(${authPage})`}
+    </header>
   ),
 }));
 
@@ -56,68 +62,73 @@ describe('AppLayout', () => {
   });
 
   describe('landing page', () => {
-    it('does not render navbar on / path (landing page has its own header)', () => {
+    it('uses landing variant on / path', () => {
       renderWithRoute('/');
-      expect(screen.queryByTestId('navbar')).not.toBeInTheDocument();
+      const header = screen.getByTestId('app-header');
+      expect(header).toHaveAttribute('data-variant', 'landing');
       expect(screen.getByText('Landing Page')).toBeInTheDocument();
     });
   });
 
   describe('auth variant', () => {
-    it('uses auth variant on /login', () => {
+    it('uses auth variant on /login with login authPage', () => {
       renderWithRoute('/login');
-      const navbar = screen.getByTestId('navbar');
-      expect(navbar).toHaveAttribute('data-variant', 'auth');
+      const header = screen.getByTestId('app-header');
+      expect(header).toHaveAttribute('data-variant', 'auth');
+      expect(header).toHaveAttribute('data-auth-page', 'login');
     });
 
-    it('uses auth variant on /signup', () => {
+    it('uses auth variant on /signup with signup authPage', () => {
       renderWithRoute('/signup');
-      const navbar = screen.getByTestId('navbar');
-      expect(navbar).toHaveAttribute('data-variant', 'auth');
+      const header = screen.getByTestId('app-header');
+      expect(header).toHaveAttribute('data-variant', 'auth');
+      expect(header).toHaveAttribute('data-auth-page', 'signup');
     });
 
-    it('uses auth variant on /forgot-password', () => {
+    it('uses auth variant on /forgot-password with forgot-password authPage', () => {
       renderWithRoute('/forgot-password');
-      const navbar = screen.getByTestId('navbar');
-      expect(navbar).toHaveAttribute('data-variant', 'auth');
+      const header = screen.getByTestId('app-header');
+      expect(header).toHaveAttribute('data-variant', 'auth');
+      expect(header).toHaveAttribute('data-auth-page', 'forgot-password');
     });
 
     it('uses auth variant on public league page when not authenticated', () => {
       renderWithRoute('/league/123', false);
-      const navbar = screen.getByTestId('navbar');
-      expect(navbar).toHaveAttribute('data-variant', 'auth');
+      const header = screen.getByTestId('app-header');
+      expect(header).toHaveAttribute('data-variant', 'auth');
+      expect(header).toHaveAttribute('data-auth-page', '');
     });
   });
 
   describe('authenticated variant', () => {
     it('uses authenticated variant on /dashboard when logged in', () => {
       renderWithRoute('/dashboard', true);
-      const navbar = screen.getByTestId('navbar');
-      expect(navbar).toHaveAttribute('data-variant', 'authenticated');
+      const header = screen.getByTestId('app-header');
+      expect(header).toHaveAttribute('data-variant', 'authenticated');
     });
 
     it('uses authenticated variant on /leagues when logged in', () => {
       renderWithRoute('/leagues', true);
-      const navbar = screen.getByTestId('navbar');
-      expect(navbar).toHaveAttribute('data-variant', 'authenticated');
+      const header = screen.getByTestId('app-header');
+      expect(header).toHaveAttribute('data-variant', 'authenticated');
     });
 
     it('uses authenticated variant on /profile when logged in', () => {
       renderWithRoute('/profile', true);
-      const navbar = screen.getByTestId('navbar');
-      expect(navbar).toHaveAttribute('data-variant', 'authenticated');
+      const header = screen.getByTestId('app-header');
+      expect(header).toHaveAttribute('data-variant', 'authenticated');
     });
 
     it('uses authenticated variant on /connect when logged in', () => {
       renderWithRoute('/connect', true);
-      const navbar = screen.getByTestId('navbar');
-      expect(navbar).toHaveAttribute('data-variant', 'authenticated');
+      const header = screen.getByTestId('app-header');
+      expect(header).toHaveAttribute('data-variant', 'authenticated');
     });
 
     it('uses authenticated variant on public league page when logged in', () => {
       renderWithRoute('/league/123', true);
-      const navbar = screen.getByTestId('navbar');
-      expect(navbar).toHaveAttribute('data-variant', 'authenticated');
+      const header = screen.getByTestId('app-header');
+      expect(header).toHaveAttribute('data-variant', 'authenticated');
     });
   });
 
@@ -127,9 +138,9 @@ describe('AppLayout', () => {
       expect(screen.getByText('Dashboard Page')).toBeInTheDocument();
     });
 
-    it('renders navbar and content together', () => {
+    it('renders header and content together', () => {
       renderWithRoute('/login');
-      expect(screen.getByTestId('navbar')).toBeInTheDocument();
+      expect(screen.getByTestId('app-header')).toBeInTheDocument();
       expect(screen.getByText('Login Page')).toBeInTheDocument();
     });
   });

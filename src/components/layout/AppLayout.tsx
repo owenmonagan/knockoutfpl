@@ -1,43 +1,44 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Navbar } from './Navbar';
+import { AppHeader } from './AppHeader';
 
-type NavbarVariant = 'landing' | 'auth' | 'authenticated';
+type HeaderVariant = 'landing' | 'auth' | 'authenticated';
+type AuthPage = 'login' | 'signup' | 'forgot-password';
 
-const AUTH_PATHS = ['/login', '/signup', '/forgot-password'];
+const AUTH_PATH_MAP: Record<string, AuthPage> = {
+  '/login': 'login',
+  '/signup': 'signup',
+  '/forgot-password': 'forgot-password',
+};
 
 export function AppLayout() {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
 
-  const getNavbarVariant = (): NavbarVariant => {
+  const getHeaderVariant = (): HeaderVariant => {
     const path = location.pathname;
 
-    // Landing page
     if (path === '/') {
       return 'landing';
     }
 
-    // Auth pages always use auth variant
-    if (AUTH_PATHS.includes(path)) {
+    if (path in AUTH_PATH_MAP) {
       return 'auth';
     }
 
-    // Authenticated users get authenticated variant
     if (isAuthenticated) {
       return 'authenticated';
     }
 
-    // Default to auth (for public pages like /league/:id when not logged in)
     return 'auth';
   };
 
-  const navbarVariant = getNavbarVariant();
+  const headerVariant = getHeaderVariant();
+  const authPage = AUTH_PATH_MAP[location.pathname];
 
   return (
     <>
-      {/* Landing page has its own LandingHeader, skip the app navbar */}
-      {navbarVariant !== 'landing' && <Navbar variant={navbarVariant} />}
+      <AppHeader variant={headerVariant} authPage={authPage} />
       <Outlet />
     </>
   );
