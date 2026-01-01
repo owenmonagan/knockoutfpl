@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -42,13 +43,15 @@ export function TeamIdentity({
             <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
               {teamName}
             </h1>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onEditTeam}
-              className="text-muted-foreground transition-colors hover:text-foreground"
               aria-label="Change team"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
             >
               <span className="material-symbols-outlined text-lg">edit</span>
-            </button>
+            </Button>
           </div>
 
           {/* Manager name */}
@@ -57,20 +60,23 @@ export function TeamIdentity({
           {/* Badges */}
           <div className="flex flex-wrap items-center gap-3">
             {/* Overall Rank Badge */}
-            <div className="inline-flex items-center gap-1.5 rounded bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
+            <Badge
+              variant="outline"
+              className="gap-1.5 border-primary/20 bg-primary/10 text-primary"
+            >
               <span className="material-symbols-outlined text-[16px]">
                 leaderboard
               </span>
               OR: {formatRank(overallRank)}
-            </div>
+            </Badge>
 
             {/* Gameweek Points Badge */}
-            <div className="inline-flex items-center gap-1.5 rounded bg-muted px-2.5 py-1 text-xs font-bold text-foreground">
+            <Badge variant="secondary" className="gap-1.5">
               <span className="material-symbols-outlined text-[16px]">
                 trending_up
               </span>
               GW{gameweekNumber}: {gameweekPoints} pts
-            </div>
+            </Badge>
           </div>
         </div>
 
