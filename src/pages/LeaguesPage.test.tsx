@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { LeaguesPage } from './LeaguesPage';
 import * as AuthContext from '../contexts/AuthContext';
@@ -23,6 +23,8 @@ vi.mock('../services/user', () => ({
 vi.mock('../services/fpl', () => ({
   getUserMiniLeagues: vi.fn(),
   getLeagueStandings: vi.fn(),
+  getFPLTeamInfo: vi.fn(),
+  getFPLBootstrapData: vi.fn(),
 }));
 
 vi.mock('../services/tournament', () => ({
@@ -44,24 +46,22 @@ describe('LeaguesPage', () => {
       tournament: null,
       userProgress: null,
     });
-  });
 
-  describe('Basic Page Structure', () => {
-    it('renders with "Your Mini Leagues" heading', () => {
-      renderWithRouter(<LeaguesPage />);
-      const heading = screen.getByRole('heading', { name: /your mini leagues/i });
-      expect(heading).toBeInTheDocument();
+    // Default: no team info
+    vi.mocked(fplService.getFPLTeamInfo).mockResolvedValue({
+      teamId: 123456,
+      teamName: 'Test Team',
+      managerName: 'Test Manager',
     });
 
-    it('shows subtitle about selecting a league', () => {
-      renderWithRouter(<LeaguesPage />);
-      const subtitle = screen.getByText(/select a league to start a knockout tournament/i);
-      expect(subtitle).toBeInTheDocument();
+    // Default: bootstrap data
+    vi.mocked(fplService.getFPLBootstrapData).mockResolvedValue({
+      currentGameweek: 15,
     });
   });
 
-  describe('Loading State', () => {
-    it('shows loading message while fetching leagues', async () => {
+  describe('Page Sections', () => {
+    it('renders the Your Matches section heading', async () => {
       vi.mocked(AuthContext.useAuth).mockReturnValue({
         user: {
           uid: 'test-uid',
@@ -85,13 +85,125 @@ describe('LeaguesPage', () => {
         updatedAt: {} as any,
       });
 
-      // Keep in loading state
+      vi.mocked(fplService.getUserMiniLeagues).mockResolvedValue([]);
+
+      renderWithRouter(<LeaguesPage />);
+
+      const matchesHeading = await screen.findByRole('heading', { name: /your matches/i });
+      expect(matchesHeading).toBeInTheDocument();
+    });
+
+    it('renders the Your Leagues section heading', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+        connectionError: false,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(fplService.getUserMiniLeagues).mockResolvedValue([]);
+
+      renderWithRouter(<LeaguesPage />);
+
+      const leaguesHeading = await screen.findByRole('heading', { name: /your leagues/i });
+      expect(leaguesHeading).toBeInTheDocument();
+    });
+  });
+
+  describe('Team Identity Section', () => {
+    it('displays team name and manager name after loading', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+        connectionError: false,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(fplService.getFPLTeamInfo).mockResolvedValue({
+        teamId: 123456,
+        teamName: 'My FPL Squad',
+        managerName: 'John Smith',
+      });
+
+      vi.mocked(fplService.getUserMiniLeagues).mockResolvedValue([]);
+
+      renderWithRouter(<LeaguesPage />);
+
+      const teamName = await screen.findByText('My FPL Squad');
+      const managerName = await screen.findByText(/manager: john smith/i);
+      expect(teamName).toBeInTheDocument();
+      expect(managerName).toBeInTheDocument();
+    });
+  });
+
+  describe('Loading State', () => {
+    it('shows skeleton loaders while fetching data', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+        connectionError: false,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      // Keep in loading state for team info
+      vi.mocked(fplService.getFPLTeamInfo).mockImplementation(() => new Promise(() => {}));
       vi.mocked(fplService.getUserMiniLeagues).mockImplementation(() => new Promise(() => {}));
 
       renderWithRouter(<LeaguesPage />);
 
-      const loadingMessage = await screen.findByText(/loading leagues/i);
-      expect(loadingMessage).toBeInTheDocument();
+      // Check for skeleton loaders - they're rendered as div elements with animate-pulse class
+      await waitFor(() => {
+        const skeletons = document.querySelectorAll('.animate-pulse');
+        expect(skeletons.length).toBeGreaterThan(0);
+      });
     });
   });
 
@@ -131,15 +243,14 @@ describe('LeaguesPage', () => {
 
       renderWithRouter(<LeaguesPage />);
 
-      // Note: LeaguesTable renders both desktop table and mobile view,
-      // so each league name appears twice (in table cell and mobile card)
-      const league1Elements = await screen.findAllByText('Test League');
-      const league2Elements = await screen.findAllByText('Another League');
-      expect(league1Elements.length).toBeGreaterThan(0);
-      expect(league2Elements.length).toBeGreaterThan(0);
+      // LeagueSummaryCard renders league names
+      const league1Element = await screen.findByText('Test League');
+      const league2Element = await screen.findByText('Another League');
+      expect(league1Element).toBeInTheDocument();
+      expect(league2Element).toBeInTheDocument();
     });
 
-    it('displays league member counts', async () => {
+    it('displays league member counts in managers format', async () => {
       vi.mocked(AuthContext.useAuth).mockReturnValue({
         user: {
           uid: 'test-uid',
@@ -174,7 +285,8 @@ describe('LeaguesPage', () => {
 
       renderWithRouter(<LeaguesPage />);
 
-      const memberCount = await screen.findByText(/2 members/i);
+      // LeagueSummaryCard shows "X managers" format
+      const memberCount = await screen.findByText(/2 managers/i);
       expect(memberCount).toBeInTheDocument();
     });
   });
@@ -208,9 +320,112 @@ describe('LeaguesPage', () => {
 
       renderWithRouter(<LeaguesPage />);
 
-      // LeaguesTable component shows this message when no leagues
+      // YourLeaguesSection component shows this message when no leagues
       const emptyMessage = await screen.findByText(/no leagues found/i);
       expect(emptyMessage).toBeInTheDocument();
+    });
+
+    it('shows matches empty state when no matches', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+        connectionError: false,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(fplService.getUserMiniLeagues).mockResolvedValue([]);
+
+      renderWithRouter(<LeaguesPage />);
+
+      // YourMatchesSection shows this message when no matches
+      const matchesEmptyMessage = await screen.findByText(/your knockout journey starts here/i);
+      expect(matchesEmptyMessage).toBeInTheDocument();
+    });
+  });
+
+  describe('Matches Display', () => {
+    it('displays current match when user has one', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: {
+          uid: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+        } as any,
+        loading: false,
+        isAuthenticated: true,
+        connectionError: false,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(fplService.getUserMiniLeagues).mockResolvedValue([
+        { id: 123, name: 'Test League', entryRank: 5 },
+      ]);
+
+      vi.mocked(fplService.getLeagueStandings).mockResolvedValue([
+        { fplTeamId: 1, teamName: 'Team 1', managerName: 'Manager 1', rank: 1, totalPoints: 100 },
+      ]);
+
+      vi.mocked(tournamentService.getTournamentSummaryForLeague).mockResolvedValue({
+        tournament: {
+          id: 'tournament-1',
+          status: 'active',
+          currentRound: 1,
+          totalRounds: 4,
+          startGameweek: 15,
+          endGameweek: 18,
+        },
+        userProgress: {
+          status: 'active',
+          eliminationRound: null,
+          currentRoundName: 'Round 1',
+          currentMatch: {
+            opponentTeamName: 'Rival Team',
+            opponentManagerName: 'Rival Manager',
+            roundNumber: 1,
+            roundName: 'Round 1',
+            gameweek: 15,
+            yourScore: 45,
+            theirScore: 42,
+            isLive: true,
+            result: 'pending',
+          },
+          recentResult: null,
+          nextOpponent: null,
+        },
+      });
+
+      renderWithRouter(<LeaguesPage />);
+
+      // MatchSummaryCard shows "vs OpponentName" for live/upcoming matches
+      const opponentText = await screen.findByText(/vs rival team/i);
+      expect(opponentText).toBeInTheDocument();
     });
   });
 });

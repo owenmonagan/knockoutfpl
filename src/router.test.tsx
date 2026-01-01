@@ -91,8 +91,8 @@ describe('Router', () => {
     });
 
     renderWithAuth(<RouterProvider router={testRouter} />);
-    // Dashboard now redirects to leagues
-    expect(screen.getByText(/your mini leagues/i)).toBeInTheDocument();
+    // Dashboard now redirects to leagues page which has "Your Leagues" section
+    expect(screen.getByRole('heading', { name: /your leagues/i })).toBeInTheDocument();
   });
 
   it('should render profile page at /profile when authenticated', async () => {
