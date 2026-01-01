@@ -1,9 +1,7 @@
 import { Card, CardContent } from '../ui/card';
 import { Skeleton } from '../ui/skeleton';
-import {
-  LeagueSummaryCard,
-  LeagueSummaryCardProps,
-} from './LeagueSummaryCard';
+import { LeagueSummaryCard } from './LeagueSummaryCard';
+import type { LeagueSummaryCardProps } from './LeagueSummaryCard';
 
 // Extend LeagueSummaryCardProps without the onClick handler
 export interface LeagueData extends Omit<LeagueSummaryCardProps, 'onClick'> {

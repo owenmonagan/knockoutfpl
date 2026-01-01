@@ -1,6 +1,7 @@
 import { Badge } from '../ui/badge';
 import { Card, CardContent } from '../ui/card';
-import { MatchSummaryCard, MatchSummaryCardProps } from './MatchSummaryCard';
+import { MatchSummaryCard } from './MatchSummaryCard';
+import type { MatchSummaryCardProps } from './MatchSummaryCard';
 import { cn } from '@/lib/utils';
 
 export interface YourMatchesSectionProps {

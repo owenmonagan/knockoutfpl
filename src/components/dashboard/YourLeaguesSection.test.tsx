@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { YourLeaguesSection, LeagueData } from './YourLeaguesSection';
+import { YourLeaguesSection } from './YourLeaguesSection';
+import type { LeagueData } from './YourLeaguesSection';
 
 // Active tournament, user still alive
 const mockActiveAlive: LeagueData = {

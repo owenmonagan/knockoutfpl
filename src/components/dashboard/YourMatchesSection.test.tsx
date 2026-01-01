@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { YourMatchesSection } from './YourMatchesSection';
-import { MatchSummaryCardProps } from './MatchSummaryCard';
+import type { MatchSummaryCardProps } from './MatchSummaryCard';
 
 const mockLiveMatch: MatchSummaryCardProps = {
   type: 'live',
