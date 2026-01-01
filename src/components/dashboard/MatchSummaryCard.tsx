@@ -1,7 +1,7 @@
 import { Card, CardContent } from '../ui/card';
 import { cn } from '@/lib/utils';
 
-export interface MatchCardProps {
+export interface MatchSummaryCardProps {
   type: 'live' | 'upcoming' | 'finished';
   opponentTeamName: string;
   leagueName: string;
@@ -27,7 +27,7 @@ function getStatusText(yourScore: number, theirScore: number): string {
   return 'Tied';
 }
 
-function getCardClasses(type: MatchCardProps['type'], result?: 'won' | 'lost'): string {
+function getCardClasses(type: MatchSummaryCardProps['type'], result?: 'won' | 'lost'): string {
   const baseClasses = 'transition-all duration-200';
 
   switch (type) {
@@ -48,7 +48,7 @@ function getCardClasses(type: MatchCardProps['type'], result?: 'won' | 'lost'): 
   }
 }
 
-export function MatchCard(props: MatchCardProps) {
+export function MatchSummaryCard(props: MatchSummaryCardProps) {
   const {
     type,
     opponentTeamName,

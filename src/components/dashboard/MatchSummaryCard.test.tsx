@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { MatchCard } from './MatchCard';
+import { MatchSummaryCard } from './MatchSummaryCard';
 
-describe('MatchCard', () => {
+describe('MatchSummaryCard', () => {
   describe('Live Match', () => {
     it('should render live match with opponent name', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="live"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -21,7 +21,7 @@ describe('MatchCard', () => {
 
     it('should display league name and round', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="live"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -37,7 +37,7 @@ describe('MatchCard', () => {
 
     it('should show scores for live match', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="live"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -52,7 +52,7 @@ describe('MatchCard', () => {
 
     it('should show "You\'re ahead" when winning', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="live"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -67,7 +67,7 @@ describe('MatchCard', () => {
 
     it('should show "You\'re behind" when losing', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="live"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -82,7 +82,7 @@ describe('MatchCard', () => {
 
     it('should show "Tied" when scores are equal', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="live"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -97,7 +97,7 @@ describe('MatchCard', () => {
 
     it('should have primary color border for live match', () => {
       const { container } = render(
-        <MatchCard
+        <MatchSummaryCard
           type="live"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -115,7 +115,7 @@ describe('MatchCard', () => {
   describe('Upcoming Match', () => {
     it('should render upcoming match with opponent name', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="upcoming"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -130,7 +130,7 @@ describe('MatchCard', () => {
 
     it('should show gameweek and start day', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="upcoming"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -146,7 +146,7 @@ describe('MatchCard', () => {
 
     it('should have dashed border for upcoming match', () => {
       const { container } = render(
-        <MatchCard
+        <MatchSummaryCard
           type="upcoming"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -164,7 +164,7 @@ describe('MatchCard', () => {
   describe('Finished Match (Won)', () => {
     it('should show "Beat" prefix for won match', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="finished"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -180,7 +180,7 @@ describe('MatchCard', () => {
 
     it('should show checkmark icon for won match', () => {
       const { container } = render(
-        <MatchCard
+        <MatchSummaryCard
           type="finished"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -197,7 +197,7 @@ describe('MatchCard', () => {
 
     it('should show final scores', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="finished"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -213,7 +213,7 @@ describe('MatchCard', () => {
 
     it('should have green accent for won match', () => {
       const { container } = render(
-        <MatchCard
+        <MatchSummaryCard
           type="finished"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -233,7 +233,7 @@ describe('MatchCard', () => {
   describe('Finished Match (Lost)', () => {
     it('should show "Lost to" prefix for lost match', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="finished"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -249,7 +249,7 @@ describe('MatchCard', () => {
 
     it('should show X icon for lost match', () => {
       const { container } = render(
-        <MatchCard
+        <MatchSummaryCard
           type="finished"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -266,7 +266,7 @@ describe('MatchCard', () => {
 
     it('should have muted/dimmed styling for lost match', () => {
       const { container } = render(
-        <MatchCard
+        <MatchSummaryCard
           type="finished"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -287,7 +287,7 @@ describe('MatchCard', () => {
     it('should call onClick when card is clicked', () => {
       const handleClick = vi.fn();
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="live"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -305,7 +305,7 @@ describe('MatchCard', () => {
 
     it('should have cursor-pointer when onClick is provided', () => {
       const { container } = render(
-        <MatchCard
+        <MatchSummaryCard
           type="live"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -324,7 +324,7 @@ describe('MatchCard', () => {
   describe('Hover Effects', () => {
     it('should have hover transform effect', () => {
       const { container } = render(
-        <MatchCard
+        <MatchSummaryCard
           type="live"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -344,7 +344,7 @@ describe('MatchCard', () => {
   describe('Accessibility', () => {
     it('should have article role', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="live"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -361,7 +361,7 @@ describe('MatchCard', () => {
   describe('Edge Cases', () => {
     it('should handle null scores for live match gracefully', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="live"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
@@ -377,7 +377,7 @@ describe('MatchCard', () => {
 
     it('should handle missing optional props for upcoming match', () => {
       render(
-        <MatchCard
+        <MatchSummaryCard
           type="upcoming"
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
