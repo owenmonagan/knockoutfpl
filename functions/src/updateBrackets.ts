@@ -141,7 +141,7 @@ async function processRound(round: ActiveRound, event: number): Promise<void> {
       const finalResult = results.find(r => r.matchId === finalMatch.matchId);
 
       if (finalResult) {
-        await updateTournamentStatus(round.tournamentId, 'completed', finalResult.winnerId);
+        await updateTournamentStatus(round.tournamentId, 'completed', new Date(), finalResult.winnerId);
         await updateParticipantStatus(round.tournamentId, finalResult.winnerId, 'champion');
         console.log(`[updateBrackets] Tournament ${round.tournamentId} complete! Winner: ${finalResult.winnerId}`);
       }

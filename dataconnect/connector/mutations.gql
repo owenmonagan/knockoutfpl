@@ -179,11 +179,13 @@ mutation CreateTournament(
 }
 
 # Update tournament status
-mutation UpdateTournamentStatus($id: UUID!, $status: String!) @auth(level: PUBLIC) {
+mutation UpdateTournamentStatus($id: UUID!, $status: String!, $winnerEntryId: Int, $updatedAt: Timestamp!) @auth(level: PUBLIC) {
   tournament_update(
     id: $id
     data: {
       status: $status
+      winnerEntryId: $winnerEntryId
+      updatedAt: $updatedAt
     }
   )
 }

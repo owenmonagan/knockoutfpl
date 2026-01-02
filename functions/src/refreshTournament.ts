@@ -428,7 +428,7 @@ export const refreshTournament = onCall(
           const finalResult = results.find(r => r.matchId === finalMatch.matchId);
 
           if (finalResult) {
-            await updateTournamentStatus(tournamentId, 'completed', finalResult.winnerId);
+            await updateTournamentStatus(tournamentId, 'completed', new Date(), finalResult.winnerId);
             await updateParticipantStatus(tournamentId, finalResult.winnerId, 'champion');
             logInfo('tournament_complete', {
               tournamentId,
