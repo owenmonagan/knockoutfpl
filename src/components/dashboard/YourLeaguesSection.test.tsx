@@ -196,17 +196,6 @@ describe('YourLeaguesSection', () => {
       expect(screen.getByText(/Family & Friends/)).toBeInTheDocument();
     });
 
-    // TODO: Tournament Info Row with gameweek range will be added in a later task
-    it.skip('should display correct card content for active league', () => {
-      render(
-        <YourLeaguesSection leagues={[mockActiveAlive]} onLeagueClick={() => {}} />
-      );
-
-      expect(screen.getByText(/14 managers/)).toBeInTheDocument();
-      expect(screen.getByText(/GW12 → GW15/)).toBeInTheDocument();
-      expect(screen.getByText(/Round 3 of 4/)).toBeInTheDocument();
-    });
-
     it('should display correct card content for league without tournament', () => {
       render(
         <YourLeaguesSection leagues={[mockNoTournament]} onLeagueClick={() => {}} />

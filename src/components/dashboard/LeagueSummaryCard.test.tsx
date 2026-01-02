@@ -288,56 +288,6 @@ describe('LeagueSummaryCard', () => {
       expect(screen.getByText(/Work Colleagues League/)).toBeInTheDocument();
     });
 
-    // TODO: Tournament Info Row with gameweek range will be added in a later task
-    it.skip('should display member count and gameweek range', () => {
-      render(
-        <LeagueSummaryCard
-          leagueName="Work Colleagues League"
-          memberCount={14}
-          tournament={{
-            startGameweek: 12,
-            endGameweek: 15,
-            currentRound: 3,
-            totalRounds: 4,
-            status: 'active',
-          }}
-          userProgress={{
-            status: 'active',
-            currentRoundName: 'Semi-finals',
-          }}
-          onClick={() => {}}
-        />
-      );
-
-      expect(screen.getByText(/14 managers/)).toBeInTheDocument();
-      expect(screen.getByText(/GW12 → GW15/)).toBeInTheDocument();
-    });
-
-    // TODO: Tournament Info Row with round progress will be added in a later task
-    it.skip('should show round progress and user current round', () => {
-      render(
-        <LeagueSummaryCard
-          leagueName="Work Colleagues League"
-          memberCount={14}
-          tournament={{
-            startGameweek: 12,
-            endGameweek: 15,
-            currentRound: 3,
-            totalRounds: 4,
-            status: 'active',
-          }}
-          userProgress={{
-            status: 'active',
-            currentRoundName: 'Semi-finals',
-          }}
-          onClick={() => {}}
-        />
-      );
-
-      expect(screen.getByText(/Round 3 of 4/)).toBeInTheDocument();
-      expect(screen.getByText(/You: Semi-finals/)).toBeInTheDocument();
-    });
-
     it('should show "View Tournament" button', () => {
       render(
         <LeagueSummaryCard
@@ -387,31 +337,6 @@ describe('LeagueSummaryCard', () => {
   });
 
   describe('League with Active Tournament (user eliminated)', () => {
-    // TODO: Tournament Info Row with round progress will be added in a later task
-    it.skip('should show eliminated status with round number', () => {
-      render(
-        <LeagueSummaryCard
-          leagueName="Reddit r/FantasyPL Knockout"
-          memberCount={128}
-          tournament={{
-            startGameweek: 8,
-            endGameweek: 15,
-            currentRound: 5,
-            totalRounds: 7,
-            status: 'active',
-          }}
-          userProgress={{
-            status: 'eliminated',
-            eliminationRound: 2,
-          }}
-          onClick={() => {}}
-        />
-      );
-
-      expect(screen.getByText(/Round 5 of 7/)).toBeInTheDocument();
-      expect(screen.getByText(/You: Eliminated R2/)).toBeInTheDocument();
-    });
-
     it('should have muted styling when eliminated', () => {
       const { container } = render(
         <LeagueSummaryCard
