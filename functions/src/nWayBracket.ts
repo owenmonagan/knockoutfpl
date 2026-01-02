@@ -184,7 +184,7 @@ export function assignParticipantsToNWayMatches(
   participantCount: number
 ): NWayMatchAssignment[] {
   const groupCount = totalSlots / matchSize;
-  const byeCount = totalSlots - participantCount;
+  // Note: byeCount = totalSlots - participantCount (used implicitly below)
 
   // Initialize groups
   const groups: (number | null)[][] = [];
