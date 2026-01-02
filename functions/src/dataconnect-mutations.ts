@@ -82,6 +82,7 @@ const UPSERT_EVENT_MUTATION = `
     $name: String!
     $deadlineTime: Timestamp!
     $finished: Boolean!
+    $finalizedAt: Timestamp
     $isCurrent: Boolean!
     $isNext: Boolean!
     $rawJson: String!
@@ -93,6 +94,7 @@ const UPSERT_EVENT_MUTATION = `
         name: $name
         deadlineTime: $deadlineTime
         finished: $finished
+        finalizedAt: $finalizedAt
         isCurrent: $isCurrent
         isNext: $isNext
         rawJson: $rawJson
@@ -458,6 +460,7 @@ export interface UpsertEventInput {
   name: string;
   deadlineTime: string; // ISO 8601 string
   finished: boolean;
+  finalizedAt?: string; // ISO 8601 string or undefined
   isCurrent: boolean;
   isNext: boolean;
   rawJson: string;

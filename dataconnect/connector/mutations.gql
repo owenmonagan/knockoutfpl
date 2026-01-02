@@ -129,6 +129,7 @@ mutation UpsertEvent(
   $name: String!
   $deadlineTime: Timestamp!
   $finished: Boolean!
+  $finalizedAt: Timestamp
   $isCurrent: Boolean!
   $isNext: Boolean!
   $rawJson: String!
@@ -140,6 +141,7 @@ mutation UpsertEvent(
       name: $name
       deadlineTime: $deadlineTime
       finished: $finished
+      finalizedAt: $finalizedAt
       isCurrent: $isCurrent
       isNext: $isNext
       rawJson: $rawJson
