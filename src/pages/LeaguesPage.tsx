@@ -125,6 +125,7 @@ export function LeaguesPage() {
   const aggregateMatches = (): MatchSummaryCardProps[] => {
     const allMatches: MatchSummaryCardProps[] = [];
     const yourTeamName = teamInfo?.teamName ?? 'My Team';
+    const yourFplTeamId = teamInfo?.teamId ?? 0;
 
     for (const league of leagues) {
       // Add current match if exists
@@ -133,7 +134,9 @@ export function LeaguesPage() {
         allMatches.push({
           type: match.isLive ? 'live' : 'upcoming',
           yourTeamName,
+          yourFplTeamId,
           opponentTeamName: match.opponentTeamName,
+          opponentFplTeamId: match.opponentFplTeamId,
           leagueName: league.name,
           roundName: match.roundName,
           yourScore: match.yourScore,
@@ -149,11 +152,14 @@ export function LeaguesPage() {
         allMatches.push({
           type: 'finished',
           yourTeamName,
+          yourFplTeamId,
           opponentTeamName: match.opponentTeamName,
+          opponentFplTeamId: match.opponentFplTeamId,
           leagueName: league.name,
           roundName: match.roundName,
           yourScore: match.yourScore,
           theirScore: match.theirScore,
+          gameweek: match.gameweek,
           result: match.result === 'won' ? 'won' : 'lost',
           onClick: () => navigate(`/league/${league.id}`),
         });
