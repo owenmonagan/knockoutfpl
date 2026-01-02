@@ -5,6 +5,7 @@ import { Skeleton } from '../components/ui/skeleton';
 import { Card, CardContent } from '../components/ui/card';
 import { BracketView } from '../components/tournament/BracketView';
 import { NoTournamentEmptyState } from '../components/leagues/NoTournamentEmptyState';
+import { ShareTournamentDialog } from '../components/tournament/ShareTournamentDialog';
 import {
   getTournamentByLeague,
   callCreateTournament,
@@ -22,6 +23,7 @@ export function LeaguePage() {
   const [leagueInfo, setLeagueInfo] = useState<FPLLeagueInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -95,6 +97,7 @@ export function LeaguePage() {
     const newTournament = await getTournamentByLeague(Number(leagueId));
     if (newTournament) {
       setTournament(newTournament);
+      setShowShareModal(true);
     }
   };
 
@@ -131,6 +134,13 @@ export function LeaguePage() {
           </CardContent>
         </Card>
       )}
+
+      <ShareTournamentDialog
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        leagueId={Number(leagueId)}
+        leagueName={leagueInfo?.name ?? 'Your League'}
+      />
     </div>
   );
 }
