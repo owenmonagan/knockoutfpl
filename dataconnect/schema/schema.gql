@@ -158,6 +158,14 @@ type Tournament @table(name: "tournaments") {
   winnerEntryId: Int @col(name: "winner_entry_id")
   isTest: Boolean! @col(name: "is_test") @default(value: false)
 
+  # Background import tracking
+  size: String @col(name: "size")                    # 'standard' | 'large' | 'mega'
+  importStatus: String @col(name: "import_status")   # 'pending' | 'importing' | 'complete' | 'failed'
+  importProgress: Int @col(name: "import_progress")  # 0-100 percentage
+  importedCount: Int @col(name: "imported_count")    # Actual count imported
+  totalCount: Int @col(name: "total_count")          # Total to import
+  importError: String @col(name: "import_error")     # Error message if failed
+
   createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
   updatedAt: Timestamp! @col(name: "updated_at") @default(expr: "request.time")
 

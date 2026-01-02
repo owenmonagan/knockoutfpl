@@ -2262,6 +2262,42 @@ extend type Tournament {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Tournament.id", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `Tournament` table where the `importError` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  importError_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Tournament.importError", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `Tournament` table where the `importProgress` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  importProgress_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Tournament.importProgress", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `Tournament` table where the `importStatus` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  importStatus_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Tournament.importStatus", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `Tournament` table where the `importedCount` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  importedCount_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Tournament.importedCount", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `Tournament` table where the `isTest` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   isTest_count(
@@ -2298,6 +2334,15 @@ extend type Tournament {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Tournament.seedingMethod", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `Tournament` table where the `size` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  size_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Tournament.size", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `Tournament` table where the `startEvent` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   startEvent_count(
@@ -2315,6 +2360,15 @@ extend type Tournament {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Tournament.status", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `Tournament` table where the `totalCount` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  totalCount_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Tournament.totalCount", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `Tournament` table where the `totalRounds` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
@@ -2361,6 +2415,24 @@ extend type Tournament {
     distinct: Boolean = false
   ): Int @fdc_generated(from: "Tournament.fplLeagueId", purpose: QUERY_SUM)
   """
+  ✨ Sum the `importProgress` field in the `Tournament` table.
+  """
+  importProgress_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "Tournament.importProgress", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `importedCount` field in the `Tournament` table.
+  """
+  importedCount_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "Tournament.importedCount", purpose: QUERY_SUM)
+  """
   ✨ Sum the `matchSize` field in the `Tournament` table.
   """
   matchSize_sum(
@@ -2387,6 +2459,15 @@ extend type Tournament {
     """
     distinct: Boolean = false
   ): Int @fdc_generated(from: "Tournament.startEvent", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `totalCount` field in the `Tournament` table.
+  """
+  totalCount_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "Tournament.totalCount", purpose: QUERY_SUM)
   """
   ✨ Sum the `totalRounds` field in the `Tournament` table.
   """
@@ -2424,6 +2505,24 @@ extend type Tournament {
     distinct: Boolean = false
   ): Float @fdc_generated(from: "Tournament.fplLeagueId", purpose: QUERY_AVG)
   """
+  ✨ Average the `importProgress` field in the `Tournament` table.
+  """
+  importProgress_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "Tournament.importProgress", purpose: QUERY_AVG)
+  """
+  ✨ Average the `importedCount` field in the `Tournament` table.
+  """
+  importedCount_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "Tournament.importedCount", purpose: QUERY_AVG)
+  """
   ✨ Average the `matchSize` field in the `Tournament` table.
   """
   matchSize_avg(
@@ -2450,6 +2549,15 @@ extend type Tournament {
     """
     distinct: Boolean = false
   ): Float @fdc_generated(from: "Tournament.startEvent", purpose: QUERY_AVG)
+  """
+  ✨ Average the `totalCount` field in the `Tournament` table.
+  """
+  totalCount_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "Tournament.totalCount", purpose: QUERY_AVG)
   """
   ✨ Average the `totalRounds` field in the `Tournament` table.
   """
@@ -2481,6 +2589,14 @@ extend type Tournament {
   """
   fplLeagueId_min: Int @fdc_generated(from: "Tournament.fplLeagueId", purpose: QUERY_MIN)
   """
+  ✨ Minimum of the `importProgress` field in the `Tournament` table.
+  """
+  importProgress_min: Int @fdc_generated(from: "Tournament.importProgress", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `importedCount` field in the `Tournament` table.
+  """
+  importedCount_min: Int @fdc_generated(from: "Tournament.importedCount", purpose: QUERY_MIN)
+  """
   ✨ Minimum of the `matchSize` field in the `Tournament` table.
   """
   matchSize_min: Int @fdc_generated(from: "Tournament.matchSize", purpose: QUERY_MIN)
@@ -2492,6 +2608,10 @@ extend type Tournament {
   ✨ Minimum of the `startEvent` field in the `Tournament` table.
   """
   startEvent_min: Int @fdc_generated(from: "Tournament.startEvent", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `totalCount` field in the `Tournament` table.
+  """
+  totalCount_min: Int @fdc_generated(from: "Tournament.totalCount", purpose: QUERY_MIN)
   """
   ✨ Minimum of the `totalRounds` field in the `Tournament` table.
   """
@@ -2517,6 +2637,14 @@ extend type Tournament {
   """
   fplLeagueId_max: Int @fdc_generated(from: "Tournament.fplLeagueId", purpose: QUERY_MAX)
   """
+  ✨ Maximum of the `importProgress` field in the `Tournament` table.
+  """
+  importProgress_max: Int @fdc_generated(from: "Tournament.importProgress", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `importedCount` field in the `Tournament` table.
+  """
+  importedCount_max: Int @fdc_generated(from: "Tournament.importedCount", purpose: QUERY_MAX)
+  """
   ✨ Maximum of the `matchSize` field in the `Tournament` table.
   """
   matchSize_max: Int @fdc_generated(from: "Tournament.matchSize", purpose: QUERY_MAX)
@@ -2528,6 +2656,10 @@ extend type Tournament {
   ✨ Maximum of the `startEvent` field in the `Tournament` table.
   """
   startEvent_max: Int @fdc_generated(from: "Tournament.startEvent", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `totalCount` field in the `Tournament` table.
+  """
+  totalCount_max: Int @fdc_generated(from: "Tournament.totalCount", purpose: QUERY_MAX)
   """
   ✨ Maximum of the `totalRounds` field in the `Tournament` table.
   """

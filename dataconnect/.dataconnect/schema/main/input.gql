@@ -4828,6 +4828,46 @@ input Tournament_Data {
   """
   fplLeagueName_expr: String_Expr
   """
+  ✨ Generated from Field `Tournament`.`importError` of type `String`
+  """
+  importError: String
+  """
+  ✨ `_expr` server value variant of `importError` (✨ Generated from Field `Tournament`.`importError` of type `String`)
+  """
+  importError_expr: String_Expr
+  """
+  ✨ Generated from Field `Tournament`.`importProgress` of type `Int`
+  """
+  importProgress: Int
+  """
+  ✨ `_expr` server value variant of `importProgress` (✨ Generated from Field `Tournament`.`importProgress` of type `Int`)
+  """
+  importProgress_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `importProgress` (✨ Generated from Field `Tournament`.`importProgress` of type `Int`)
+  """
+  importProgress_update: [Int_Update!]
+  """
+  ✨ Generated from Field `Tournament`.`importStatus` of type `String`
+  """
+  importStatus: String
+  """
+  ✨ `_expr` server value variant of `importStatus` (✨ Generated from Field `Tournament`.`importStatus` of type `String`)
+  """
+  importStatus_expr: String_Expr
+  """
+  ✨ Generated from Field `Tournament`.`importedCount` of type `Int`
+  """
+  importedCount: Int
+  """
+  ✨ `_expr` server value variant of `importedCount` (✨ Generated from Field `Tournament`.`importedCount` of type `Int`)
+  """
+  importedCount_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `importedCount` (✨ Generated from Field `Tournament`.`importedCount` of type `Int`)
+  """
+  importedCount_update: [Int_Update!]
+  """
   ✨ Generated from Field `Tournament`.`isTest` of type `Boolean!`
   """
   isTest: Boolean
@@ -4868,6 +4908,14 @@ input Tournament_Data {
   """
   seedingMethod_expr: String_Expr
   """
+  ✨ Generated from Field `Tournament`.`size` of type `String`
+  """
+  size: String
+  """
+  ✨ `_expr` server value variant of `size` (✨ Generated from Field `Tournament`.`size` of type `String`)
+  """
+  size_expr: String_Expr
+  """
   ✨ Generated from Field `Tournament`.`startEvent` of type `Int!`
   """
   startEvent: Int
@@ -4887,6 +4935,18 @@ input Tournament_Data {
   ✨ `_expr` server value variant of `status` (✨ Generated from Field `Tournament`.`status` of type `String!`)
   """
   status_expr: String_Expr
+  """
+  ✨ Generated from Field `Tournament`.`totalCount` of type `Int`
+  """
+  totalCount: Int
+  """
+  ✨ `_expr` server value variant of `totalCount` (✨ Generated from Field `Tournament`.`totalCount` of type `Int`)
+  """
+  totalCount_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `totalCount` (✨ Generated from Field `Tournament`.`totalCount` of type `Int`)
+  """
+  totalCount_update: [Int_Update!]
   """
   ✨ Generated from Field `Tournament`.`totalRounds` of type `Int!`
   """
@@ -4973,6 +5033,22 @@ input Tournament_Filter {
   """
   fplLeagueName: String_Filter
   """
+  ✨ Generated from Field `Tournament`.`importError` of type `String`
+  """
+  importError: String_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importProgress` of type `Int`
+  """
+  importProgress: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importStatus` of type `String`
+  """
+  importStatus: String_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importedCount` of type `Int`
+  """
+  importedCount: Int_Filter
+  """
   ✨ Generated from Field `Tournament`.`isTest` of type `Boolean!`
   """
   isTest: Boolean_Filter
@@ -4989,6 +5065,10 @@ input Tournament_Filter {
   """
   seedingMethod: String_Filter
   """
+  ✨ Generated from Field `Tournament`.`size` of type `String`
+  """
+  size: String_Filter
+  """
   ✨ Generated from Field `Tournament`.`startEvent` of type `Int!`
   """
   startEvent: Int_Filter
@@ -4996,6 +5076,10 @@ input Tournament_Filter {
   ✨ Generated from Field `Tournament`.`status` of type `String!`
   """
   status: String_Filter
+  """
+  ✨ Generated from Field `Tournament`.`totalCount` of type `Int`
+  """
+  totalCount: Int_Filter
   """
   ✨ Generated from Field `Tournament`.`totalRounds` of type `Int!`
   """
@@ -5083,6 +5167,22 @@ input Tournament_Having {
   """
   id_count: Int_Filter
   """
+  ✨ Generated from Field `Tournament`.`importError_count` of type `Int!`
+  """
+  importError_count: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importProgress_count` of type `Int!`
+  """
+  importProgress_count: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importStatus_count` of type `Int!`
+  """
+  importStatus_count: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importedCount_count` of type `Int!`
+  """
+  importedCount_count: Int_Filter
+  """
   ✨ Generated from Field `Tournament`.`isTest_count` of type `Int!`
   """
   isTest_count: Int_Filter
@@ -5099,6 +5199,10 @@ input Tournament_Having {
   """
   seedingMethod_count: Int_Filter
   """
+  ✨ Generated from Field `Tournament`.`size_count` of type `Int!`
+  """
+  size_count: Int_Filter
+  """
   ✨ Generated from Field `Tournament`.`startEvent_count` of type `Int!`
   """
   startEvent_count: Int_Filter
@@ -5106,6 +5210,10 @@ input Tournament_Having {
   ✨ Generated from Field `Tournament`.`status_count` of type `Int!`
   """
   status_count: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`totalCount_count` of type `Int!`
+  """
+  totalCount_count: Int_Filter
   """
   ✨ Generated from Field `Tournament`.`totalRounds_count` of type `Int!`
   """
@@ -5127,6 +5235,14 @@ input Tournament_Having {
   """
   fplLeagueId_sum: Int_Filter
   """
+  ✨ Generated from Field `Tournament`.`importProgress_sum` of type `Int`
+  """
+  importProgress_sum: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importedCount_sum` of type `Int`
+  """
+  importedCount_sum: Int_Filter
+  """
   ✨ Generated from Field `Tournament`.`matchSize_sum` of type `Int`
   """
   matchSize_sum: Int_Filter
@@ -5138,6 +5254,10 @@ input Tournament_Having {
   ✨ Generated from Field `Tournament`.`startEvent_sum` of type `Int`
   """
   startEvent_sum: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`totalCount_sum` of type `Int`
+  """
+  totalCount_sum: Int_Filter
   """
   ✨ Generated from Field `Tournament`.`totalRounds_sum` of type `Int`
   """
@@ -5155,6 +5275,14 @@ input Tournament_Having {
   """
   fplLeagueId_avg: Float_Filter
   """
+  ✨ Generated from Field `Tournament`.`importProgress_avg` of type `Float`
+  """
+  importProgress_avg: Float_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importedCount_avg` of type `Float`
+  """
+  importedCount_avg: Float_Filter
+  """
   ✨ Generated from Field `Tournament`.`matchSize_avg` of type `Float`
   """
   matchSize_avg: Float_Filter
@@ -5166,6 +5294,10 @@ input Tournament_Having {
   ✨ Generated from Field `Tournament`.`startEvent_avg` of type `Float`
   """
   startEvent_avg: Float_Filter
+  """
+  ✨ Generated from Field `Tournament`.`totalCount_avg` of type `Float`
+  """
+  totalCount_avg: Float_Filter
   """
   ✨ Generated from Field `Tournament`.`totalRounds_avg` of type `Float`
   """
@@ -5187,6 +5319,14 @@ input Tournament_Having {
   """
   fplLeagueId_min: Int_Filter
   """
+  ✨ Generated from Field `Tournament`.`importProgress_min` of type `Int`
+  """
+  importProgress_min: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importedCount_min` of type `Int`
+  """
+  importedCount_min: Int_Filter
+  """
   ✨ Generated from Field `Tournament`.`matchSize_min` of type `Int`
   """
   matchSize_min: Int_Filter
@@ -5198,6 +5338,10 @@ input Tournament_Having {
   ✨ Generated from Field `Tournament`.`startEvent_min` of type `Int`
   """
   startEvent_min: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`totalCount_min` of type `Int`
+  """
+  totalCount_min: Int_Filter
   """
   ✨ Generated from Field `Tournament`.`totalRounds_min` of type `Int`
   """
@@ -5223,6 +5367,14 @@ input Tournament_Having {
   """
   fplLeagueId_max: Int_Filter
   """
+  ✨ Generated from Field `Tournament`.`importProgress_max` of type `Int`
+  """
+  importProgress_max: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importedCount_max` of type `Int`
+  """
+  importedCount_max: Int_Filter
+  """
   ✨ Generated from Field `Tournament`.`matchSize_max` of type `Int`
   """
   matchSize_max: Int_Filter
@@ -5234,6 +5386,10 @@ input Tournament_Having {
   ✨ Generated from Field `Tournament`.`startEvent_max` of type `Int`
   """
   startEvent_max: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`totalCount_max` of type `Int`
+  """
+  totalCount_max: Int_Filter
   """
   ✨ Generated from Field `Tournament`.`totalRounds_max` of type `Int`
   """
@@ -5306,6 +5462,22 @@ input Tournament_Order {
   """
   fplLeagueName: OrderDirection
   """
+  ✨ Generated from Field `Tournament`.`importError` of type `String`
+  """
+  importError: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importProgress` of type `Int`
+  """
+  importProgress: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importStatus` of type `String`
+  """
+  importStatus: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importedCount` of type `Int`
+  """
+  importedCount: OrderDirection
+  """
   ✨ Generated from Field `Tournament`.`isTest` of type `Boolean!`
   """
   isTest: OrderDirection
@@ -5322,6 +5494,10 @@ input Tournament_Order {
   """
   seedingMethod: OrderDirection
   """
+  ✨ Generated from Field `Tournament`.`size` of type `String`
+  """
+  size: OrderDirection
+  """
   ✨ Generated from Field `Tournament`.`startEvent` of type `Int!`
   """
   startEvent: OrderDirection
@@ -5329,6 +5505,10 @@ input Tournament_Order {
   ✨ Generated from Field `Tournament`.`status` of type `String!`
   """
   status: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`totalCount` of type `Int`
+  """
+  totalCount: OrderDirection
   """
   ✨ Generated from Field `Tournament`.`totalRounds` of type `Int!`
   """
@@ -5370,6 +5550,22 @@ input Tournament_Order {
   """
   id_count: OrderDirection
   """
+  ✨ Generated from Field `Tournament`.`importError_count` of type `Int!`
+  """
+  importError_count: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importProgress_count` of type `Int!`
+  """
+  importProgress_count: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importStatus_count` of type `Int!`
+  """
+  importStatus_count: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importedCount_count` of type `Int!`
+  """
+  importedCount_count: OrderDirection
+  """
   ✨ Generated from Field `Tournament`.`isTest_count` of type `Int!`
   """
   isTest_count: OrderDirection
@@ -5386,6 +5582,10 @@ input Tournament_Order {
   """
   seedingMethod_count: OrderDirection
   """
+  ✨ Generated from Field `Tournament`.`size_count` of type `Int!`
+  """
+  size_count: OrderDirection
+  """
   ✨ Generated from Field `Tournament`.`startEvent_count` of type `Int!`
   """
   startEvent_count: OrderDirection
@@ -5393,6 +5593,10 @@ input Tournament_Order {
   ✨ Generated from Field `Tournament`.`status_count` of type `Int!`
   """
   status_count: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`totalCount_count` of type `Int!`
+  """
+  totalCount_count: OrderDirection
   """
   ✨ Generated from Field `Tournament`.`totalRounds_count` of type `Int!`
   """
@@ -5414,6 +5618,14 @@ input Tournament_Order {
   """
   fplLeagueId_sum: OrderDirection
   """
+  ✨ Generated from Field `Tournament`.`importProgress_sum` of type `Int`
+  """
+  importProgress_sum: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importedCount_sum` of type `Int`
+  """
+  importedCount_sum: OrderDirection
+  """
   ✨ Generated from Field `Tournament`.`matchSize_sum` of type `Int`
   """
   matchSize_sum: OrderDirection
@@ -5425,6 +5637,10 @@ input Tournament_Order {
   ✨ Generated from Field `Tournament`.`startEvent_sum` of type `Int`
   """
   startEvent_sum: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`totalCount_sum` of type `Int`
+  """
+  totalCount_sum: OrderDirection
   """
   ✨ Generated from Field `Tournament`.`totalRounds_sum` of type `Int`
   """
@@ -5442,6 +5658,14 @@ input Tournament_Order {
   """
   fplLeagueId_avg: OrderDirection
   """
+  ✨ Generated from Field `Tournament`.`importProgress_avg` of type `Float`
+  """
+  importProgress_avg: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importedCount_avg` of type `Float`
+  """
+  importedCount_avg: OrderDirection
+  """
   ✨ Generated from Field `Tournament`.`matchSize_avg` of type `Float`
   """
   matchSize_avg: OrderDirection
@@ -5453,6 +5677,10 @@ input Tournament_Order {
   ✨ Generated from Field `Tournament`.`startEvent_avg` of type `Float`
   """
   startEvent_avg: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`totalCount_avg` of type `Float`
+  """
+  totalCount_avg: OrderDirection
   """
   ✨ Generated from Field `Tournament`.`totalRounds_avg` of type `Float`
   """
@@ -5474,6 +5702,14 @@ input Tournament_Order {
   """
   fplLeagueId_min: OrderDirection
   """
+  ✨ Generated from Field `Tournament`.`importProgress_min` of type `Int`
+  """
+  importProgress_min: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importedCount_min` of type `Int`
+  """
+  importedCount_min: OrderDirection
+  """
   ✨ Generated from Field `Tournament`.`matchSize_min` of type `Int`
   """
   matchSize_min: OrderDirection
@@ -5485,6 +5721,10 @@ input Tournament_Order {
   ✨ Generated from Field `Tournament`.`startEvent_min` of type `Int`
   """
   startEvent_min: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`totalCount_min` of type `Int`
+  """
+  totalCount_min: OrderDirection
   """
   ✨ Generated from Field `Tournament`.`totalRounds_min` of type `Int`
   """
@@ -5510,6 +5750,14 @@ input Tournament_Order {
   """
   fplLeagueId_max: OrderDirection
   """
+  ✨ Generated from Field `Tournament`.`importProgress_max` of type `Int`
+  """
+  importProgress_max: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importedCount_max` of type `Int`
+  """
+  importedCount_max: OrderDirection
+  """
   ✨ Generated from Field `Tournament`.`matchSize_max` of type `Int`
   """
   matchSize_max: OrderDirection
@@ -5521,6 +5769,10 @@ input Tournament_Order {
   ✨ Generated from Field `Tournament`.`startEvent_max` of type `Int`
   """
   startEvent_max: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`totalCount_max` of type `Int`
+  """
+  totalCount_max: OrderDirection
   """
   ✨ Generated from Field `Tournament`.`totalRounds_max` of type `Int`
   """
