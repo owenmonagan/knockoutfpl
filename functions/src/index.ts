@@ -101,3 +101,6 @@ export { checkEventStatus } from './checkEventStatus';
 
 // Export scheduled verdict email queue function
 export { queueVerdicts } from './queueVerdicts';
+
+// Export Cloud Task handler for background tournament import
+export { processTournamentImport } from './processTournamentImport';

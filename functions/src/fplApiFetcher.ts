@@ -55,6 +55,14 @@ export async function fetchLeagueStandings(leagueId: number): Promise<LeagueStan
   return fetchJSON(`${FPL_API_BASE}/leagues-classic/${leagueId}/standings/`);
 }
 
+/**
+ * Fetch a specific page of league standings.
+ * FPL API paginates at 50 results per page.
+ */
+export async function fetchFPLLeagueStandingsPage(leagueId: number, page: number): Promise<LeagueStandingsResponse> {
+  return fetchJSON(`${FPL_API_BASE}/leagues-classic/${leagueId}/standings/?page_standings=${page}`);
+}
+
 export async function fetchEntry(teamId: number): Promise<EntryResponse> {
   return fetchJSON(`${FPL_API_BASE}/entry/${teamId}/`);
 }

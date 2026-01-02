@@ -125,6 +125,7 @@ export interface LeagueStandingEntry {
 export interface LeagueStandingsResponse {
   league: LeagueInfo;
   standings: {
+    has_next: boolean;
     results: LeagueStandingEntry[];
   };
 }
