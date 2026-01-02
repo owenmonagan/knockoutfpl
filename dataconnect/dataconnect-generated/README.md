@@ -52,6 +52,9 @@ This README will guide you through the process of using the generated JavaScript
   - [*UpsertLeague*](#upsertleague)
   - [*UpsertEvent*](#upsertevent)
   - [*CreateTournament*](#createtournament)
+  - [*CreateTournamentWithImportStatus*](#createtournamentwithimportstatus)
+  - [*UpdateTournamentImportProgress*](#updatetournamentimportprogress)
+  - [*FinalizeTournamentImport*](#finalizetournamentimport)
   - [*UpdateTournamentStatus*](#updatetournamentstatus)
   - [*SetTournamentWinner*](#settournamentwinner)
   - [*AdvanceTournamentRound*](#advancetournamentround)
@@ -5325,6 +5328,384 @@ console.log(data.tournament_insert);
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.tournament_insert);
+});
+```
+
+## CreateTournamentWithImportStatus
+You can execute the `CreateTournamentWithImportStatus` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+createTournamentWithImportStatus(vars: CreateTournamentWithImportStatusVariables): MutationPromise<CreateTournamentWithImportStatusData, CreateTournamentWithImportStatusVariables>;
+
+interface CreateTournamentWithImportStatusRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateTournamentWithImportStatusVariables): MutationRef<CreateTournamentWithImportStatusData, CreateTournamentWithImportStatusVariables>;
+}
+export const createTournamentWithImportStatusRef: CreateTournamentWithImportStatusRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+createTournamentWithImportStatus(dc: DataConnect, vars: CreateTournamentWithImportStatusVariables): MutationPromise<CreateTournamentWithImportStatusData, CreateTournamentWithImportStatusVariables>;
+
+interface CreateTournamentWithImportStatusRef {
+  ...
+  (dc: DataConnect, vars: CreateTournamentWithImportStatusVariables): MutationRef<CreateTournamentWithImportStatusData, CreateTournamentWithImportStatusVariables>;
+}
+export const createTournamentWithImportStatusRef: CreateTournamentWithImportStatusRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the createTournamentWithImportStatusRef:
+```typescript
+const name = createTournamentWithImportStatusRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `CreateTournamentWithImportStatus` mutation requires an argument of type `CreateTournamentWithImportStatusVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface CreateTournamentWithImportStatusVariables {
+  id: UUIDString;
+  fplLeagueId: number;
+  fplLeagueName: string;
+  creatorUid: string;
+  participantCount: number;
+  totalRounds: number;
+  startEvent: number;
+  seedingMethod: string;
+  matchSize: number;
+  isTest: boolean;
+  size: string;
+  importStatus: string;
+  totalCount: number;
+}
+```
+### Return Type
+Recall that executing the `CreateTournamentWithImportStatus` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `CreateTournamentWithImportStatusData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface CreateTournamentWithImportStatusData {
+  tournament_insert: Tournament_Key;
+}
+```
+### Using `CreateTournamentWithImportStatus`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, createTournamentWithImportStatus, CreateTournamentWithImportStatusVariables } from '@knockoutfpl/dataconnect';
+
+// The `CreateTournamentWithImportStatus` mutation requires an argument of type `CreateTournamentWithImportStatusVariables`:
+const createTournamentWithImportStatusVars: CreateTournamentWithImportStatusVariables = {
+  id: ..., 
+  fplLeagueId: ..., 
+  fplLeagueName: ..., 
+  creatorUid: ..., 
+  participantCount: ..., 
+  totalRounds: ..., 
+  startEvent: ..., 
+  seedingMethod: ..., 
+  matchSize: ..., 
+  isTest: ..., 
+  size: ..., 
+  importStatus: ..., 
+  totalCount: ..., 
+};
+
+// Call the `createTournamentWithImportStatus()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await createTournamentWithImportStatus(createTournamentWithImportStatusVars);
+// Variables can be defined inline as well.
+const { data } = await createTournamentWithImportStatus({ id: ..., fplLeagueId: ..., fplLeagueName: ..., creatorUid: ..., participantCount: ..., totalRounds: ..., startEvent: ..., seedingMethod: ..., matchSize: ..., isTest: ..., size: ..., importStatus: ..., totalCount: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await createTournamentWithImportStatus(dataConnect, createTournamentWithImportStatusVars);
+
+console.log(data.tournament_insert);
+
+// Or, you can use the `Promise` API.
+createTournamentWithImportStatus(createTournamentWithImportStatusVars).then((response) => {
+  const data = response.data;
+  console.log(data.tournament_insert);
+});
+```
+
+### Using `CreateTournamentWithImportStatus`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, createTournamentWithImportStatusRef, CreateTournamentWithImportStatusVariables } from '@knockoutfpl/dataconnect';
+
+// The `CreateTournamentWithImportStatus` mutation requires an argument of type `CreateTournamentWithImportStatusVariables`:
+const createTournamentWithImportStatusVars: CreateTournamentWithImportStatusVariables = {
+  id: ..., 
+  fplLeagueId: ..., 
+  fplLeagueName: ..., 
+  creatorUid: ..., 
+  participantCount: ..., 
+  totalRounds: ..., 
+  startEvent: ..., 
+  seedingMethod: ..., 
+  matchSize: ..., 
+  isTest: ..., 
+  size: ..., 
+  importStatus: ..., 
+  totalCount: ..., 
+};
+
+// Call the `createTournamentWithImportStatusRef()` function to get a reference to the mutation.
+const ref = createTournamentWithImportStatusRef(createTournamentWithImportStatusVars);
+// Variables can be defined inline as well.
+const ref = createTournamentWithImportStatusRef({ id: ..., fplLeagueId: ..., fplLeagueName: ..., creatorUid: ..., participantCount: ..., totalRounds: ..., startEvent: ..., seedingMethod: ..., matchSize: ..., isTest: ..., size: ..., importStatus: ..., totalCount: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = createTournamentWithImportStatusRef(dataConnect, createTournamentWithImportStatusVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.tournament_insert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.tournament_insert);
+});
+```
+
+## UpdateTournamentImportProgress
+You can execute the `UpdateTournamentImportProgress` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+updateTournamentImportProgress(vars: UpdateTournamentImportProgressVariables): MutationPromise<UpdateTournamentImportProgressData, UpdateTournamentImportProgressVariables>;
+
+interface UpdateTournamentImportProgressRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateTournamentImportProgressVariables): MutationRef<UpdateTournamentImportProgressData, UpdateTournamentImportProgressVariables>;
+}
+export const updateTournamentImportProgressRef: UpdateTournamentImportProgressRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+updateTournamentImportProgress(dc: DataConnect, vars: UpdateTournamentImportProgressVariables): MutationPromise<UpdateTournamentImportProgressData, UpdateTournamentImportProgressVariables>;
+
+interface UpdateTournamentImportProgressRef {
+  ...
+  (dc: DataConnect, vars: UpdateTournamentImportProgressVariables): MutationRef<UpdateTournamentImportProgressData, UpdateTournamentImportProgressVariables>;
+}
+export const updateTournamentImportProgressRef: UpdateTournamentImportProgressRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the updateTournamentImportProgressRef:
+```typescript
+const name = updateTournamentImportProgressRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `UpdateTournamentImportProgress` mutation requires an argument of type `UpdateTournamentImportProgressVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface UpdateTournamentImportProgressVariables {
+  id: UUIDString;
+  importStatus: string;
+  importProgress: number;
+  importedCount: number;
+  importError?: string | null;
+}
+```
+### Return Type
+Recall that executing the `UpdateTournamentImportProgress` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `UpdateTournamentImportProgressData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface UpdateTournamentImportProgressData {
+  tournament_update?: Tournament_Key | null;
+}
+```
+### Using `UpdateTournamentImportProgress`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, updateTournamentImportProgress, UpdateTournamentImportProgressVariables } from '@knockoutfpl/dataconnect';
+
+// The `UpdateTournamentImportProgress` mutation requires an argument of type `UpdateTournamentImportProgressVariables`:
+const updateTournamentImportProgressVars: UpdateTournamentImportProgressVariables = {
+  id: ..., 
+  importStatus: ..., 
+  importProgress: ..., 
+  importedCount: ..., 
+  importError: ..., // optional
+};
+
+// Call the `updateTournamentImportProgress()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await updateTournamentImportProgress(updateTournamentImportProgressVars);
+// Variables can be defined inline as well.
+const { data } = await updateTournamentImportProgress({ id: ..., importStatus: ..., importProgress: ..., importedCount: ..., importError: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await updateTournamentImportProgress(dataConnect, updateTournamentImportProgressVars);
+
+console.log(data.tournament_update);
+
+// Or, you can use the `Promise` API.
+updateTournamentImportProgress(updateTournamentImportProgressVars).then((response) => {
+  const data = response.data;
+  console.log(data.tournament_update);
+});
+```
+
+### Using `UpdateTournamentImportProgress`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, updateTournamentImportProgressRef, UpdateTournamentImportProgressVariables } from '@knockoutfpl/dataconnect';
+
+// The `UpdateTournamentImportProgress` mutation requires an argument of type `UpdateTournamentImportProgressVariables`:
+const updateTournamentImportProgressVars: UpdateTournamentImportProgressVariables = {
+  id: ..., 
+  importStatus: ..., 
+  importProgress: ..., 
+  importedCount: ..., 
+  importError: ..., // optional
+};
+
+// Call the `updateTournamentImportProgressRef()` function to get a reference to the mutation.
+const ref = updateTournamentImportProgressRef(updateTournamentImportProgressVars);
+// Variables can be defined inline as well.
+const ref = updateTournamentImportProgressRef({ id: ..., importStatus: ..., importProgress: ..., importedCount: ..., importError: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = updateTournamentImportProgressRef(dataConnect, updateTournamentImportProgressVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.tournament_update);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.tournament_update);
+});
+```
+
+## FinalizeTournamentImport
+You can execute the `FinalizeTournamentImport` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+finalizeTournamentImport(vars: FinalizeTournamentImportVariables): MutationPromise<FinalizeTournamentImportData, FinalizeTournamentImportVariables>;
+
+interface FinalizeTournamentImportRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: FinalizeTournamentImportVariables): MutationRef<FinalizeTournamentImportData, FinalizeTournamentImportVariables>;
+}
+export const finalizeTournamentImportRef: FinalizeTournamentImportRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+finalizeTournamentImport(dc: DataConnect, vars: FinalizeTournamentImportVariables): MutationPromise<FinalizeTournamentImportData, FinalizeTournamentImportVariables>;
+
+interface FinalizeTournamentImportRef {
+  ...
+  (dc: DataConnect, vars: FinalizeTournamentImportVariables): MutationRef<FinalizeTournamentImportData, FinalizeTournamentImportVariables>;
+}
+export const finalizeTournamentImportRef: FinalizeTournamentImportRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the finalizeTournamentImportRef:
+```typescript
+const name = finalizeTournamentImportRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `FinalizeTournamentImport` mutation requires an argument of type `FinalizeTournamentImportVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface FinalizeTournamentImportVariables {
+  id: UUIDString;
+  participantCount: number;
+}
+```
+### Return Type
+Recall that executing the `FinalizeTournamentImport` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `FinalizeTournamentImportData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface FinalizeTournamentImportData {
+  tournament_update?: Tournament_Key | null;
+}
+```
+### Using `FinalizeTournamentImport`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, finalizeTournamentImport, FinalizeTournamentImportVariables } from '@knockoutfpl/dataconnect';
+
+// The `FinalizeTournamentImport` mutation requires an argument of type `FinalizeTournamentImportVariables`:
+const finalizeTournamentImportVars: FinalizeTournamentImportVariables = {
+  id: ..., 
+  participantCount: ..., 
+};
+
+// Call the `finalizeTournamentImport()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await finalizeTournamentImport(finalizeTournamentImportVars);
+// Variables can be defined inline as well.
+const { data } = await finalizeTournamentImport({ id: ..., participantCount: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await finalizeTournamentImport(dataConnect, finalizeTournamentImportVars);
+
+console.log(data.tournament_update);
+
+// Or, you can use the `Promise` API.
+finalizeTournamentImport(finalizeTournamentImportVars).then((response) => {
+  const data = response.data;
+  console.log(data.tournament_update);
+});
+```
+
+### Using `FinalizeTournamentImport`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, finalizeTournamentImportRef, FinalizeTournamentImportVariables } from '@knockoutfpl/dataconnect';
+
+// The `FinalizeTournamentImport` mutation requires an argument of type `FinalizeTournamentImportVariables`:
+const finalizeTournamentImportVars: FinalizeTournamentImportVariables = {
+  id: ..., 
+  participantCount: ..., 
+};
+
+// Call the `finalizeTournamentImportRef()` function to get a reference to the mutation.
+const ref = finalizeTournamentImportRef(finalizeTournamentImportVars);
+// Variables can be defined inline as well.
+const ref = finalizeTournamentImportRef({ id: ..., participantCount: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = finalizeTournamentImportRef(dataConnect, finalizeTournamentImportVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.tournament_update);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.tournament_update);
 });
 ```
 

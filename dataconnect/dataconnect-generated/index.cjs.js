@@ -91,6 +91,42 @@ exports.createTournament = function createTournament(dcOrVars, vars) {
   return executeMutation(createTournamentRef(dcOrVars, vars));
 };
 
+const createTournamentWithImportStatusRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateTournamentWithImportStatus', inputVars);
+}
+createTournamentWithImportStatusRef.operationName = 'CreateTournamentWithImportStatus';
+exports.createTournamentWithImportStatusRef = createTournamentWithImportStatusRef;
+
+exports.createTournamentWithImportStatus = function createTournamentWithImportStatus(dcOrVars, vars) {
+  return executeMutation(createTournamentWithImportStatusRef(dcOrVars, vars));
+};
+
+const updateTournamentImportProgressRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateTournamentImportProgress', inputVars);
+}
+updateTournamentImportProgressRef.operationName = 'UpdateTournamentImportProgress';
+exports.updateTournamentImportProgressRef = updateTournamentImportProgressRef;
+
+exports.updateTournamentImportProgress = function updateTournamentImportProgress(dcOrVars, vars) {
+  return executeMutation(updateTournamentImportProgressRef(dcOrVars, vars));
+};
+
+const finalizeTournamentImportRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'FinalizeTournamentImport', inputVars);
+}
+finalizeTournamentImportRef.operationName = 'FinalizeTournamentImport';
+exports.finalizeTournamentImportRef = finalizeTournamentImportRef;
+
+exports.finalizeTournamentImport = function finalizeTournamentImport(dcOrVars, vars) {
+  return executeMutation(finalizeTournamentImportRef(dcOrVars, vars));
+};
+
 const updateTournamentStatusRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();

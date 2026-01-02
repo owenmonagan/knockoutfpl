@@ -83,6 +83,39 @@ export function createTournament(dcOrVars, vars) {
   return executeMutation(createTournamentRef(dcOrVars, vars));
 }
 
+export const createTournamentWithImportStatusRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateTournamentWithImportStatus', inputVars);
+}
+createTournamentWithImportStatusRef.operationName = 'CreateTournamentWithImportStatus';
+
+export function createTournamentWithImportStatus(dcOrVars, vars) {
+  return executeMutation(createTournamentWithImportStatusRef(dcOrVars, vars));
+}
+
+export const updateTournamentImportProgressRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateTournamentImportProgress', inputVars);
+}
+updateTournamentImportProgressRef.operationName = 'UpdateTournamentImportProgress';
+
+export function updateTournamentImportProgress(dcOrVars, vars) {
+  return executeMutation(updateTournamentImportProgressRef(dcOrVars, vars));
+}
+
+export const finalizeTournamentImportRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'FinalizeTournamentImport', inputVars);
+}
+finalizeTournamentImportRef.operationName = 'FinalizeTournamentImport';
+
+export function finalizeTournamentImport(dcOrVars, vars) {
+  return executeMutation(finalizeTournamentImportRef(dcOrVars, vars));
+}
+
 export const updateTournamentStatusRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();

@@ -178,6 +178,81 @@ mutation CreateTournament(
   )
 }
 
+# Create tournament with import status (called from Cloud Functions)
+mutation CreateTournamentWithImportStatus(
+  $id: UUID!
+  $fplLeagueId: Int!
+  $fplLeagueName: String!
+  $creatorUid: String!
+  $participantCount: Int!
+  $totalRounds: Int!
+  $startEvent: Int!
+  $seedingMethod: String!
+  $matchSize: Int!
+  $isTest: Boolean!
+  $size: String!
+  $importStatus: String!
+  $totalCount: Int!
+) @auth(level: NO_ACCESS) {
+  tournament_insert(
+    data: {
+      id: $id
+      fplLeagueId: $fplLeagueId
+      fplLeagueName: $fplLeagueName
+      creatorUid: $creatorUid
+      participantCount: $participantCount
+      totalRounds: $totalRounds
+      currentRound: 1
+      startEvent: $startEvent
+      seedingMethod: $seedingMethod
+      matchSize: $matchSize
+      status: "creating"
+      isTest: $isTest
+      size: $size
+      importStatus: $importStatus
+      importProgress: 0
+      importedCount: 0
+      totalCount: $totalCount
+    }
+  )
+}
+
+# Update tournament import progress (called from Cloud Functions)
+mutation UpdateTournamentImportProgress(
+  $id: UUID!
+  $importStatus: String!
+  $importProgress: Int!
+  $importedCount: Int!
+  $importError: String
+) @auth(level: NO_ACCESS) {
+  tournament_update(
+    id: $id
+    data: {
+      importStatus: $importStatus
+      importProgress: $importProgress
+      importedCount: $importedCount
+      importError: $importError
+    }
+  )
+}
+
+# Finalize tournament import (called from Cloud Functions)
+mutation FinalizeTournamentImport(
+  $id: UUID!
+  $participantCount: Int!
+) @auth(level: NO_ACCESS) {
+  tournament_update(
+    id: $id
+    data: {
+      importStatus: "complete"
+      importProgress: 100
+      importedCount: $participantCount
+      participantCount: $participantCount
+      status: "active"
+    }
+  )
+}
+
 # Update tournament status
 mutation UpdateTournamentStatus($id: UUID!, $status: String!, $winnerEntryId: Int, $updatedAt: Timestamp!) @auth(level: PUBLIC) {
   tournament_update(

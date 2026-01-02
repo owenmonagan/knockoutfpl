@@ -107,6 +107,26 @@ export interface CreateTournamentVariables {
   matchSize: number;
 }
 
+export interface CreateTournamentWithImportStatusData {
+  tournament_insert: Tournament_Key;
+}
+
+export interface CreateTournamentWithImportStatusVariables {
+  id: UUIDString;
+  fplLeagueId: number;
+  fplLeagueName: string;
+  creatorUid: string;
+  participantCount: number;
+  totalRounds: number;
+  startEvent: number;
+  seedingMethod: string;
+  matchSize: number;
+  isTest: boolean;
+  size: string;
+  importStatus: string;
+  totalCount: number;
+}
+
 export interface DeleteMatchPicksByTournamentData {
   matchPick_deleteMany: number;
 }
@@ -169,6 +189,15 @@ export interface Event_Key {
   event: number;
   season: string;
   __typename?: 'Event_Key';
+}
+
+export interface FinalizeTournamentImportData {
+  tournament_update?: Tournament_Key | null;
+}
+
+export interface FinalizeTournamentImportVariables {
+  id: UUIDString;
+  participantCount: number;
 }
 
 export interface GetActiveParticipantsData {
@@ -942,6 +971,18 @@ export interface UpdateRoundVariables {
   status: string;
 }
 
+export interface UpdateTournamentImportProgressData {
+  tournament_update?: Tournament_Key | null;
+}
+
+export interface UpdateTournamentImportProgressVariables {
+  id: UUIDString;
+  importStatus: string;
+  importProgress: number;
+  importedCount: number;
+  importError?: string | null;
+}
+
 export interface UpdateTournamentStatusData {
   tournament_update?: Tournament_Key | null;
 }
@@ -1113,6 +1154,42 @@ export const createTournamentRef: CreateTournamentRef;
 
 export function createTournament(vars: CreateTournamentVariables): MutationPromise<CreateTournamentData, CreateTournamentVariables>;
 export function createTournament(dc: DataConnect, vars: CreateTournamentVariables): MutationPromise<CreateTournamentData, CreateTournamentVariables>;
+
+interface CreateTournamentWithImportStatusRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateTournamentWithImportStatusVariables): MutationRef<CreateTournamentWithImportStatusData, CreateTournamentWithImportStatusVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateTournamentWithImportStatusVariables): MutationRef<CreateTournamentWithImportStatusData, CreateTournamentWithImportStatusVariables>;
+  operationName: string;
+}
+export const createTournamentWithImportStatusRef: CreateTournamentWithImportStatusRef;
+
+export function createTournamentWithImportStatus(vars: CreateTournamentWithImportStatusVariables): MutationPromise<CreateTournamentWithImportStatusData, CreateTournamentWithImportStatusVariables>;
+export function createTournamentWithImportStatus(dc: DataConnect, vars: CreateTournamentWithImportStatusVariables): MutationPromise<CreateTournamentWithImportStatusData, CreateTournamentWithImportStatusVariables>;
+
+interface UpdateTournamentImportProgressRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateTournamentImportProgressVariables): MutationRef<UpdateTournamentImportProgressData, UpdateTournamentImportProgressVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateTournamentImportProgressVariables): MutationRef<UpdateTournamentImportProgressData, UpdateTournamentImportProgressVariables>;
+  operationName: string;
+}
+export const updateTournamentImportProgressRef: UpdateTournamentImportProgressRef;
+
+export function updateTournamentImportProgress(vars: UpdateTournamentImportProgressVariables): MutationPromise<UpdateTournamentImportProgressData, UpdateTournamentImportProgressVariables>;
+export function updateTournamentImportProgress(dc: DataConnect, vars: UpdateTournamentImportProgressVariables): MutationPromise<UpdateTournamentImportProgressData, UpdateTournamentImportProgressVariables>;
+
+interface FinalizeTournamentImportRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: FinalizeTournamentImportVariables): MutationRef<FinalizeTournamentImportData, FinalizeTournamentImportVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: FinalizeTournamentImportVariables): MutationRef<FinalizeTournamentImportData, FinalizeTournamentImportVariables>;
+  operationName: string;
+}
+export const finalizeTournamentImportRef: FinalizeTournamentImportRef;
+
+export function finalizeTournamentImport(vars: FinalizeTournamentImportVariables): MutationPromise<FinalizeTournamentImportData, FinalizeTournamentImportVariables>;
+export function finalizeTournamentImport(dc: DataConnect, vars: FinalizeTournamentImportVariables): MutationPromise<FinalizeTournamentImportData, FinalizeTournamentImportVariables>;
 
 interface UpdateTournamentStatusRef {
   /* Allow users to create refs without passing in DataConnect */
