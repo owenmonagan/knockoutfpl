@@ -92,3 +92,6 @@ export { fixAllTournamentByes } from './fixAllTournamentByes';
 
 // Export eager refresh function for tournament viewing
 export { refreshTournament } from './refreshTournament';
+
+// Export scheduled event finalization checker
+export { checkEventStatus } from './checkEventStatus';
