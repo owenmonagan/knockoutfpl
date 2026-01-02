@@ -1,26 +1,14 @@
 // src/components/tournament/BracketMatchCard.tsx
 import { Card } from '../ui/card';
 import type { Match, Participant } from '../../types/tournament';
-import { cn } from '../../lib/utils'; // Used for player slot styling
+import { cn } from '../../lib/utils';
+import { getFplTeamUrl } from '../../lib/fpl-urls';
 
 interface BracketMatchCardProps {
   match: Match;
   participants: Participant[];
   roundStarted: boolean;
   gameweek: number;
-}
-
-/**
- * Generate URL to a team's FPL page.
- * - If the round has started, link to the specific gameweek view
- * - Otherwise, link to the team's history page
- */
-function getFplTeamUrl(fplTeamId: number, gameweek: number, roundStarted: boolean): string {
-  const base = 'https://fantasy.premierleague.com/entry';
-  if (roundStarted) {
-    return `${base}/${fplTeamId}/event/${gameweek}`;
-  }
-  return `${base}/${fplTeamId}/history`;
 }
 
 export function BracketMatchCard({
