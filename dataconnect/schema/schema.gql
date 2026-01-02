@@ -21,7 +21,8 @@ type User @table(key: "uid") {
 }
 
 # Email queue for scheduled delivery
-type EmailQueue @table(name: "email_queue", key: "id") {
+# Unique constraint on [userUid, type, event] prevents duplicate emails for same user/type/event
+type EmailQueue @table(name: "email_queue", key: "id") @unique(fields: ["userUid", "type", "event"]) {
   id: UUID! @default(expr: "uuidV4()")
 
   # Target user
