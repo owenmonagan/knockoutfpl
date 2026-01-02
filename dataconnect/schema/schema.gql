@@ -21,16 +21,22 @@ type User @table(key: "uid") {
 }
 
 # Email queue for scheduled delivery
+# Emails are pre-rendered at queue time for reliability
 # Unique constraint on [userUid, type, event] prevents duplicate emails for same user/type/event
 type EmailQueue @table(name: "email_queue", key: "id") @unique(fields: ["userUid", "type", "event"]) {
   id: UUID! @default(expr: "uuidV4()")
 
-  # Target user
+  # Target
   userUid: String! @col(name: "user_uid")
+  toEmail: String! @col(name: "to_email")
 
-  # Email details
+  # Email type and context
   type: String!              # 'matchup' | 'verdict'
   event: Int!                # Gameweek number
+
+  # Pre-rendered content (built at queue time)
+  subject: String!
+  htmlBody: String! @col(name: "html_body")
 
   # Processing state
   status: String! @default(value: "pending")  # 'pending' | 'processing' | 'sent' | 'failed'
@@ -169,7 +175,7 @@ type Round @table(name: "rounds", key: ["tournamentId", "roundNumber"]) {
 
   startedAt: Timestamp @col(name: "started_at")
   completedAt: Timestamp @col(name: "completed_at")
-  updatedAt: Timestamp! @col(name: "updated_at") @default(expr: "request.time")
+  updatedAt: Timestamp @col(name: "updated_at") @default(expr: "request.time")
 
   # Relations
   tournament: Tournament!
