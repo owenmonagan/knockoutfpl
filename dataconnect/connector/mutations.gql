@@ -213,6 +213,8 @@ mutation CreateTournamentWithImportStatus(
       importProgress: 0
       importedCount: 0
       totalCount: $totalCount
+      createdAt_expr: "request.time"
+      updatedAt_expr: "request.time"
     }
   )
 }
@@ -232,6 +234,7 @@ mutation UpdateTournamentImportProgress(
       importProgress: $importProgress
       importedCount: $importedCount
       importError: $importError
+      updatedAt_expr: "request.time"
     }
   )
 }
@@ -249,6 +252,7 @@ mutation FinalizeTournamentImport(
       importedCount: $participantCount
       participantCount: $participantCount
       status: "active"
+      updatedAt_expr: "request.time"
     }
   )
 }
