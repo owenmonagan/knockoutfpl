@@ -1,4 +1,4 @@
-const FPL_API_BASE = 'https://fantasy.premierleague.com/api';
+import { FPL_API_BASE } from './fplApiFetcher';
 
 // System league IDs to filter out (Overall, country leagues, etc.)
 const SYSTEM_LEAGUE_IDS = new Set([
