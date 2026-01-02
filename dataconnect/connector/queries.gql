@@ -570,3 +570,54 @@ query GetEntryMatchesInEvent($entryId: Int!, $event: Int!) @auth(level: PUBLIC) 
     }
   }
 }
+
+# =============================================================================
+# VERDICT EMAIL QUERIES
+# =============================================================================
+
+# Get all match results for a user in a specific gameweek
+# Includes all data needed to build verdict email content
+# Note: Event filtering is done client-side after fetching all matchPicks for the entry
+query GetUserVerdictResults($entryId: Int!) @auth(level: PUBLIC) {
+  matchPicks(where: { entryId: { eq: $entryId } }) {
+    tournamentId
+    matchId
+    entryId
+    slot
+    match {
+      matchId
+      status
+      winnerEntryId
+      isBye
+      positionInRound
+      round {
+        event
+        roundNumber
+        tournament {
+          id
+          fplLeagueName
+          totalRounds
+        }
+      }
+      # Get all participants in this match for scores/names
+      matchPicks {
+        entryId
+        slot
+        participant {
+          entryId
+          teamName
+          seed
+        }
+      }
+    }
+  }
+}
+
+# Get scores for multiple entries in a specific event
+query GetPickScores($entryIds: [Int!]!, $event: Int!) @auth(level: PUBLIC) {
+  picks(where: { entryId: { in: $entryIds }, event: { eq: $event } }) {
+    entryId
+    event
+    points
+  }
+}

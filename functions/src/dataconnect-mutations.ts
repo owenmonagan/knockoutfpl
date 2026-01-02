@@ -611,6 +611,53 @@ const GET_ENTRY_MATCHES_IN_EVENT_QUERY = `
   }
 `;
 
+// Verdict email queries
+const GET_USER_VERDICT_RESULTS_QUERY = `
+  query GetUserVerdictResults($entryId: Int!) {
+    matchPicks(where: { entryId: { eq: $entryId } }) {
+      tournamentId
+      matchId
+      entryId
+      slot
+      match {
+        matchId
+        status
+        winnerEntryId
+        isBye
+        positionInRound
+        round {
+          event
+          roundNumber
+          tournament {
+            id
+            fplLeagueName
+            totalRounds
+          }
+        }
+        matchPicks {
+          entryId
+          slot
+          participant {
+            entryId
+            teamName
+            seed
+          }
+        }
+      }
+    }
+  }
+`;
+
+const GET_PICK_SCORES_QUERY = `
+  query GetPickScores($entryIds: [Int!]!, $event: Int!) {
+    picks(where: { entryId: { in: $entryIds }, event: { eq: $event } }) {
+      entryId
+      event
+      points
+    }
+  }
+`;
+
 // Type definitions for mutation inputs
 export interface UpsertEntryInput {
   entryId: number;
@@ -1254,6 +1301,131 @@ export async function getEntryMatchesInEvent(
       event: mp.match.round.event,
       roundNumber: mp.match.round.roundNumber,
     }));
+}
+
+// =============================================================================
+// VERDICT EMAIL RESULT FUNCTIONS
+// =============================================================================
+
+/**
+ * Verdict match result for building verdict emails
+ * Contains all data needed to describe a match outcome to a user
+ */
+export interface VerdictMatchResult {
+  tournamentId: string;
+  tournamentName: string;
+  totalRounds: number;
+  roundNumber: number;
+  matchId: number;
+  isBye: boolean;
+  userEntryId: number;
+  userTeamName: string;
+  userScore: number | null;
+  opponentEntryId: number | null;
+  opponentTeamName: string | null;
+  opponentScore: number | null;
+  winnerEntryId: number | null;
+  isChampionship: boolean;  // Was this the final?
+  won: boolean;
+}
+
+/**
+ * Get all match results for a user in a specific gameweek
+ * Used to build verdict email content with complete match context
+ */
+export async function getUserVerdictResults(
+  entryId: number,
+  event: number
+): Promise<VerdictMatchResult[]> {
+  const result = await dataConnectAdmin.executeGraphql<{
+    matchPicks: Array<{
+      tournamentId: string;
+      matchId: number;
+      entryId: number;
+      slot: number;
+      match: {
+        matchId: number;
+        status: string;
+        winnerEntryId: number | null;
+        isBye: boolean;
+        positionInRound: number;
+        round: {
+          event: number;
+          roundNumber: number;
+          tournament: {
+            id: string;
+            fplLeagueName: string;
+            totalRounds: number;
+          };
+        };
+        matchPicks: Array<{
+          entryId: number;
+          slot: number;
+          participant: {
+            entryId: number;
+            teamName: string;
+            seed: number;
+          };
+        }>;
+      };
+    }>;
+  }, { entryId: number }>(GET_USER_VERDICT_RESULTS_QUERY, { variables: { entryId } });
+
+  // Filter to matches in this event and transform
+  return result.data.matchPicks
+    .filter(mp => mp.match.round.event === event)
+    .map(mp => {
+      const match = mp.match;
+      const tournament = match.round.tournament;
+
+      // Find user and opponent in match
+      const userPick = match.matchPicks.find(p => p.entryId === entryId);
+      const opponentPick = match.matchPicks.find(p => p.entryId !== entryId);
+
+      const isChampionship = match.round.roundNumber === tournament.totalRounds;
+      const won = match.winnerEntryId === entryId;
+
+      return {
+        tournamentId: mp.tournamentId,
+        tournamentName: tournament.fplLeagueName,
+        totalRounds: tournament.totalRounds,
+        roundNumber: match.round.roundNumber,
+        matchId: match.matchId,
+        isBye: match.isBye,
+        userEntryId: entryId,
+        userTeamName: userPick?.participant.teamName ?? 'Unknown',
+        userScore: null,  // Will be filled from Pick table via getPickScores
+        opponentEntryId: opponentPick?.entryId ?? null,
+        opponentTeamName: opponentPick?.participant.teamName ?? null,
+        opponentScore: null,  // Will be filled from Pick table via getPickScores
+        winnerEntryId: match.winnerEntryId,
+        isChampionship,
+        won,
+      };
+    });
+}
+
+/**
+ * Get scores for multiple entries in a specific event
+ * Used to fill in scores for verdict email results
+ */
+export async function getPickScores(
+  entryIds: number[],
+  event: number
+): Promise<Map<number, number>> {
+  if (entryIds.length === 0) {
+    return new Map();
+  }
+
+  const result = await dataConnectAdmin.executeGraphql<{
+    picks: Array<{ entryId: number; event: number; points: number }>;
+  }, { entryIds: number[]; event: number }>(GET_PICK_SCORES_QUERY, { variables: { entryIds, event } });
+
+  const scoreMap = new Map<number, number>();
+  for (const pick of result.data.picks) {
+    scoreMap.set(pick.entryId, pick.points);
+  }
+  return scoreMap;
 }
 
 // =============================================================================
