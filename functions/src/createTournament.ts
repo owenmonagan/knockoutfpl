@@ -125,8 +125,8 @@ export function validateLeagueStandings(standings: any): void {
     throw new HttpsError('failed-precondition', 'League must have at least 4 participants');
   }
 
-  if (count > 50) {
-    throw new HttpsError('failed-precondition', 'League exceeds maximum 50 participants');
+  if (count > 48) {
+    throw new HttpsError('failed-precondition', 'League exceeds maximum 48 participants');
   }
 }
 

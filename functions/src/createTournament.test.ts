@@ -55,10 +55,16 @@ describe('createTournament', () => {
       expect(() => validateLeagueStandings(standings)).toThrow('at least 4');
     });
 
-    it('throws if more than 50 participants', () => {
-      const results = Array(51).fill({});
+    it('throws if more than 48 participants', () => {
+      const results = Array(49).fill({});
       const standings = { standings: { results } };
-      expect(() => validateLeagueStandings(standings)).toThrow('maximum 50');
+      expect(() => validateLeagueStandings(standings)).toThrow('maximum 48');
+    });
+
+    it('passes with exactly 48 participants', () => {
+      const results = Array(48).fill({});
+      const standings = { standings: { results } };
+      expect(() => validateLeagueStandings(standings)).not.toThrow();
     });
 
     it('passes with valid participant count', () => {
