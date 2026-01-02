@@ -307,6 +307,9 @@ export interface GetLeagueTournamentsData {
     participantCount: number;
     totalRounds: number;
     currentRound: number;
+    startEvent: number;
+    seedingMethod: string;
+    matchSize: number;
     status: string;
     createdAt: TimestampString;
     creatorUid: string;
@@ -484,6 +487,7 @@ export interface GetTournamentData {
     currentRound: number;
     startEvent: number;
     seedingMethod: string;
+    matchSize: number;
     status: string;
     winnerEntryId?: number | null;
     createdAt: TimestampString;
@@ -523,6 +527,8 @@ export interface GetTournamentWithParticipantsData {
     totalRounds: number;
     currentRound: number;
     startEvent: number;
+    seedingMethod: string;
+    matchSize: number;
     status: string;
     winnerEntryId?: number | null;
   } & Tournament_Key;
@@ -596,6 +602,9 @@ export interface GetUserTournamentsData {
     participantCount: number;
     totalRounds: number;
     currentRound: number;
+    startEvent: number;
+    seedingMethod: string;
+    matchSize: number;
     status: string;
     createdAt: TimestampString;
   } & Tournament_Key)[];

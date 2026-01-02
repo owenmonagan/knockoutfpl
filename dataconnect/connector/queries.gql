@@ -161,6 +161,7 @@ query GetTournament($id: UUID!) @auth(level: PUBLIC) {
     currentRound
     startEvent
     seedingMethod
+    matchSize
     status
     winnerEntryId
     createdAt
@@ -182,6 +183,8 @@ query GetTournamentWithParticipants($id: UUID!) @auth(level: PUBLIC) {
     totalRounds
     currentRound
     startEvent
+    seedingMethod
+    matchSize
     status
     winnerEntryId
   }
@@ -208,6 +211,9 @@ query GetUserTournaments($creatorUid: String!) @auth(level: USER) {
     participantCount
     totalRounds
     currentRound
+    startEvent
+    seedingMethod
+    matchSize
     status
     createdAt
   }
@@ -221,6 +227,9 @@ query GetLeagueTournaments($fplLeagueId: Int!) @auth(level: PUBLIC) {
     participantCount
     totalRounds
     currentRound
+    startEvent
+    seedingMethod
+    matchSize
     status
     createdAt
     creatorUid
