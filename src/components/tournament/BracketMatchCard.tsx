@@ -3,12 +3,15 @@ import { Card } from '../ui/card';
 import type { Match, Participant } from '../../types/tournament';
 import { cn } from '../../lib/utils';
 import { getFplTeamUrl } from '../../lib/fpl-urls';
+import { ClaimTeamButton } from './ClaimTeamButton';
 
 interface BracketMatchCardProps {
   match: Match;
   participants: Participant[];
   roundStarted: boolean;
   gameweek: number;
+  isAuthenticated?: boolean;
+  onClaimTeam?: (fplTeamId: number) => void;
 }
 
 export function BracketMatchCard({
@@ -16,6 +19,8 @@ export function BracketMatchCard({
   participants,
   roundStarted,
   gameweek,
+  isAuthenticated = false,
+  onClaimTeam,
 }: BracketMatchCardProps) {
   const getParticipant = (fplTeamId: number | null): Participant | null => {
     if (!fplTeamId) return null;
@@ -69,12 +74,18 @@ export function BracketMatchCard({
             <span className="text-muted-foreground text-xs">({participant.seed})</span>
           )}
         </div>
-        {/* Show score only when round has started and score is available */}
-        {showScore && (
-          <span className={cn("tabular-nums font-medium", isWinner && "text-green-600 dark:text-green-400")}>
-            {player.score}
-          </span>
-        )}
+        <div className="flex items-center gap-1">
+          {/* Claim button - only show for non-authenticated users with real players */}
+          {!isAuthenticated && onClaimTeam && player?.fplTeamId && (
+            <ClaimTeamButton fplTeamId={player.fplTeamId} onClaim={onClaimTeam} />
+          )}
+          {/* Show score only when round has started and score is available */}
+          {showScore && (
+            <span className={cn("tabular-nums font-medium", isWinner && "text-green-600 dark:text-green-400")}>
+              {player.score}
+            </span>
+          )}
+        </div>
       </div>
     );
 

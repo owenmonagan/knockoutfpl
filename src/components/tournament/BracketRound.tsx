@@ -7,9 +7,17 @@ interface BracketRoundProps {
   round: Round;
   participants: Participant[];
   currentGameweek: number;
+  isAuthenticated?: boolean;
+  onClaimTeam?: (fplTeamId: number) => void;
 }
 
-export function BracketRound({ round, participants, currentGameweek }: BracketRoundProps) {
+export function BracketRound({
+  round,
+  participants,
+  currentGameweek,
+  isAuthenticated,
+  onClaimTeam,
+}: BracketRoundProps) {
   // Round has started if its gameweek is at or before the current FPL gameweek
   const roundStarted = round.gameweek <= currentGameweek;
 
@@ -33,6 +41,8 @@ export function BracketRound({ round, participants, currentGameweek }: BracketRo
             participants={participants}
             roundStarted={roundStarted}
             gameweek={round.gameweek}
+            isAuthenticated={isAuthenticated}
+            onClaimTeam={onClaimTeam}
           />
         ))}
       </div>

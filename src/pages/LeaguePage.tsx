@@ -1,6 +1,6 @@
 // src/pages/LeaguePage.tsx
 import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Skeleton } from '../components/ui/skeleton';
 import { Card, CardContent } from '../components/ui/card';
 import { BracketView } from '../components/tournament/BracketView';
@@ -12,12 +12,15 @@ import {
   callRefreshTournament,
 } from '../services/tournament';
 import { getLeagueInfo, type FPLLeagueInfo } from '../services/fpl';
+import { signInWithGoogle } from '../services/auth';
+import { createUserProfile, connectFPLTeam } from '../services/user';
 import { useAuth } from '../contexts/AuthContext';
 import type { Tournament } from '../types/tournament';
 import { MIN_TOURNAMENT_PARTICIPANTS, MAX_TOURNAMENT_PARTICIPANTS } from '../constants/tournament';
 
 export function LeaguePage() {
   const { leagueId } = useParams<{ leagueId: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [leagueInfo, setLeagueInfo] = useState<FPLLeagueInfo | null>(null);
@@ -101,6 +104,40 @@ export function LeaguePage() {
     }
   };
 
+  const handleClaimTeam = async (fplTeamId: number) => {
+    // If user is already authenticated, just redirect (edge case)
+    if (user) {
+      navigate('/leagues');
+      return;
+    }
+
+    try {
+      // Trigger Google sign-in
+      const credential = await signInWithGoogle();
+
+      // Create user profile (fire-and-forget for DataConnect)
+      await createUserProfile({
+        userId: credential.user.uid,
+        email: credential.user.email || '',
+        displayName: credential.user.displayName || '',
+      });
+
+      // Auto-connect the claimed FPL team
+      await connectFPLTeam(
+        credential.user.uid,
+        credential.user.email || '',
+        fplTeamId
+      );
+
+      // Redirect to leagues page
+      navigate('/leagues');
+    } catch (error) {
+      // User cancelled sign-in or error occurred
+      // Just stay on the page - no action needed
+      console.warn('Claim team flow cancelled or failed:', error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto p-4 space-y-4">
@@ -118,7 +155,12 @@ export function LeaguePage() {
   return (
     <div className="container mx-auto p-4 space-y-6">
       {tournament ? (
-        <BracketView tournament={tournament} isRefreshing={isRefreshing} />
+        <BracketView
+          tournament={tournament}
+          isRefreshing={isRefreshing}
+          isAuthenticated={!!user}
+          onClaimTeam={handleClaimTeam}
+        />
       ) : leagueInfo ? (
         <NoTournamentEmptyState
           leagueName={leagueInfo.name}

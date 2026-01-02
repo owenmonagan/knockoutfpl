@@ -1,6 +1,6 @@
 // src/components/tournament/BracketMatchCard.test.tsx
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { BracketMatchCard } from './BracketMatchCard';
 import type { Match, Participant } from '../../types/tournament';
 
@@ -182,6 +182,83 @@ describe('BracketMatchCard', () => {
       links.forEach((link) => {
         expect(link).toHaveClass('cursor-pointer');
       });
+    });
+  });
+
+  describe('Claim button', () => {
+    it('shows claim button when user is not authenticated', () => {
+      const handleClaim = vi.fn();
+
+      render(
+        <BracketMatchCard
+          match={mockMatch}
+          participants={mockParticipants}
+          roundStarted={false}
+          gameweek={1}
+          isAuthenticated={false}
+          onClaimTeam={handleClaim}
+        />
+      );
+
+      // Should show claim buttons for both players
+      expect(screen.getAllByRole('button')).toHaveLength(2);
+    });
+
+    it('hides claim button when user is authenticated', () => {
+      const handleClaim = vi.fn();
+
+      render(
+        <BracketMatchCard
+          match={mockMatch}
+          participants={mockParticipants}
+          roundStarted={false}
+          gameweek={1}
+          isAuthenticated={true}
+          onClaimTeam={handleClaim}
+        />
+      );
+
+      // Should not show any claim buttons
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    });
+
+    it('does not show claim button for TBD slots', () => {
+      const matchWithTBD: Match = {
+        id: 'r2-m1',
+        player1: { fplTeamId: 1, seed: 1, score: null },
+        player2: null,
+        winnerId: null,
+        isBye: false,
+      };
+
+      render(
+        <BracketMatchCard
+          match={matchWithTBD}
+          participants={mockParticipants}
+          roundStarted={false}
+          gameweek={1}
+          isAuthenticated={false}
+          onClaimTeam={vi.fn()}
+        />
+      );
+
+      // Only one claim button for player1
+      expect(screen.getAllByRole('button')).toHaveLength(1);
+    });
+
+    it('does not show claim button when onClaimTeam not provided', () => {
+      render(
+        <BracketMatchCard
+          match={mockMatch}
+          participants={mockParticipants}
+          roundStarted={false}
+          gameweek={1}
+          isAuthenticated={false}
+        />
+      );
+
+      // Should not show any claim buttons
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
     });
   });
 });

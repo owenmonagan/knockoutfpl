@@ -9,9 +9,16 @@ import type { Tournament } from '../../types/tournament';
 interface BracketViewProps {
   tournament: Tournament;
   isRefreshing?: boolean;
+  isAuthenticated?: boolean;
+  onClaimTeam?: (fplTeamId: number) => void;
 }
 
-export function BracketView({ tournament, isRefreshing = false }: BracketViewProps) {
+export function BracketView({
+  tournament,
+  isRefreshing = false,
+  isAuthenticated,
+  onClaimTeam,
+}: BracketViewProps) {
   return (
     <div className="space-y-6">
       <Card>
@@ -40,6 +47,8 @@ export function BracketView({ tournament, isRefreshing = false }: BracketViewPro
               rounds={tournament.rounds}
               participants={tournament.participants}
               currentGameweek={tournament.currentGameweek}
+              isAuthenticated={isAuthenticated}
+              onClaimTeam={onClaimTeam}
             />
           ) : (
             <p className="text-muted-foreground text-center py-8">

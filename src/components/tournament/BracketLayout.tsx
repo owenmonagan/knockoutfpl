@@ -6,9 +6,17 @@ interface BracketLayoutProps {
   rounds: Round[];
   participants: Participant[];
   currentGameweek: number;
+  isAuthenticated?: boolean;
+  onClaimTeam?: (fplTeamId: number) => void;
 }
 
-export function BracketLayout({ rounds, participants, currentGameweek }: BracketLayoutProps) {
+export function BracketLayout({
+  rounds,
+  participants,
+  currentGameweek,
+  isAuthenticated,
+  onClaimTeam,
+}: BracketLayoutProps) {
   return (
     <div
       data-testid="bracket-layout"
@@ -20,6 +28,8 @@ export function BracketLayout({ rounds, participants, currentGameweek }: Bracket
           round={round}
           participants={participants}
           currentGameweek={currentGameweek}
+          isAuthenticated={isAuthenticated}
+          onClaimTeam={onClaimTeam}
         />
       ))}
     </div>
