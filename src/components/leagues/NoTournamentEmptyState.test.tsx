@@ -33,4 +33,56 @@ describe('NoTournamentEmptyState', () => {
     renderComponent();
     expect(screen.getByText('emoji_events')).toBeInTheDocument();
   });
+
+  describe('authenticated user', () => {
+    it('should render CreateTournamentButton when authenticated', () => {
+      renderComponent({ isAuthenticated: true });
+      expect(screen.getByRole('button', { name: /create tournament/i })).toBeInTheDocument();
+    });
+
+    it('should not show sign up link when authenticated', () => {
+      renderComponent({ isAuthenticated: true });
+      expect(screen.queryByText(/sign up to create tournament/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('unauthenticated user', () => {
+    it('should render sign up button when not authenticated', () => {
+      renderComponent({ isAuthenticated: false });
+      expect(screen.getByRole('link', { name: /sign up to create tournament/i })).toBeInTheDocument();
+    });
+
+    it('should link to signup page', () => {
+      renderComponent({ isAuthenticated: false });
+      const link = screen.getByRole('link', { name: /sign up to create tournament/i });
+      expect(link).toHaveAttribute('href', '/signup');
+    });
+
+    it('should show sign in prompt text', () => {
+      renderComponent({ isAuthenticated: false });
+      expect(screen.getByText(/sign in to create a knockout tournament/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('How It Works section', () => {
+    it('should display dynamic manager count', () => {
+      renderComponent({ managerCount: 18 });
+      expect(screen.getByText(/all 18 managers/i)).toBeInTheDocument();
+    });
+
+    it('should show Auto-Seeding feature', () => {
+      renderComponent();
+      expect(screen.getByText('Auto-Seeding')).toBeInTheDocument();
+    });
+
+    it('should show Head-to-Head feature', () => {
+      renderComponent();
+      expect(screen.getByText('Head-to-Head')).toBeInTheDocument();
+    });
+
+    it('should show Auto-Updates feature', () => {
+      renderComponent();
+      expect(screen.getByText('Auto-Updates')).toBeInTheDocument();
+    });
+  });
 });
