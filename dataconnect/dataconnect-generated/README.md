@@ -75,6 +75,8 @@ This README will guide you through the process of using the generated JavaScript
   - [*DeleteParticipantsByTournament*](#deleteparticipantsbytournament)
   - [*DeleteTournamentById*](#deletetournamentbyid)
   - [*CreateEmailQueueEntry*](#createemailqueueentry)
+  - [*CreateParticipantLeagues*](#createparticipantleagues)
+  - [*UpsertParticipantLeague*](#upsertparticipantleague)
 
 # Accessing the connector
 A connector is a collection of Queries and Mutations. One SDK is generated for each connector - this SDK is generated for the connector `default`. You can find more information about connectors in the [Data Connect documentation](https://firebase.google.com/docs/data-connect#how-does).
@@ -8061,6 +8063,266 @@ console.log(data.emailQueue_insert);
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.emailQueue_insert);
+});
+```
+
+## CreateParticipantLeagues
+You can execute the `CreateParticipantLeagues` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+createParticipantLeagues(vars: CreateParticipantLeaguesVariables): MutationPromise<CreateParticipantLeaguesData, CreateParticipantLeaguesVariables>;
+
+interface CreateParticipantLeaguesRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateParticipantLeaguesVariables): MutationRef<CreateParticipantLeaguesData, CreateParticipantLeaguesVariables>;
+}
+export const createParticipantLeaguesRef: CreateParticipantLeaguesRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+createParticipantLeagues(dc: DataConnect, vars: CreateParticipantLeaguesVariables): MutationPromise<CreateParticipantLeaguesData, CreateParticipantLeaguesVariables>;
+
+interface CreateParticipantLeaguesRef {
+  ...
+  (dc: DataConnect, vars: CreateParticipantLeaguesVariables): MutationRef<CreateParticipantLeaguesData, CreateParticipantLeaguesVariables>;
+}
+export const createParticipantLeaguesRef: CreateParticipantLeaguesRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the createParticipantLeaguesRef:
+```typescript
+const name = createParticipantLeaguesRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `CreateParticipantLeagues` mutation requires an argument of type `CreateParticipantLeaguesVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface CreateParticipantLeaguesVariables {
+  data: ({
+    tournamentId?: UUIDString | null;
+    tournamentId_expr?: {
+    };
+      entryId?: number | null;
+      entryId_expr?: {
+      };
+        entryId_update?: ({
+          inc?: number | null;
+          dec?: number | null;
+        })[];
+          leagueId?: number | null;
+          leagueId_expr?: {
+          };
+            leagueId_update?: ({
+              inc?: number | null;
+              dec?: number | null;
+            })[];
+              participant?: Participant_Key | null;
+              tournament?: Tournament_Key | null;
+              entryRank?: number | null;
+              entryRank_expr?: {
+              };
+                entryRank_update?: ({
+                  inc?: number | null;
+                  dec?: number | null;
+                })[];
+                  leagueName?: string | null;
+                  leagueName_expr?: {
+                  };
+  })[];
+}
+```
+### Return Type
+Recall that executing the `CreateParticipantLeagues` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `CreateParticipantLeaguesData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface CreateParticipantLeaguesData {
+  participantLeague_insertMany: ParticipantLeague_Key[];
+}
+```
+### Using `CreateParticipantLeagues`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, createParticipantLeagues, CreateParticipantLeaguesVariables } from '@knockoutfpl/dataconnect';
+
+// The `CreateParticipantLeagues` mutation requires an argument of type `CreateParticipantLeaguesVariables`:
+const createParticipantLeaguesVars: CreateParticipantLeaguesVariables = {
+  data: ..., 
+};
+
+// Call the `createParticipantLeagues()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await createParticipantLeagues(createParticipantLeaguesVars);
+// Variables can be defined inline as well.
+const { data } = await createParticipantLeagues({ data: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await createParticipantLeagues(dataConnect, createParticipantLeaguesVars);
+
+console.log(data.participantLeague_insertMany);
+
+// Or, you can use the `Promise` API.
+createParticipantLeagues(createParticipantLeaguesVars).then((response) => {
+  const data = response.data;
+  console.log(data.participantLeague_insertMany);
+});
+```
+
+### Using `CreateParticipantLeagues`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, createParticipantLeaguesRef, CreateParticipantLeaguesVariables } from '@knockoutfpl/dataconnect';
+
+// The `CreateParticipantLeagues` mutation requires an argument of type `CreateParticipantLeaguesVariables`:
+const createParticipantLeaguesVars: CreateParticipantLeaguesVariables = {
+  data: ..., 
+};
+
+// Call the `createParticipantLeaguesRef()` function to get a reference to the mutation.
+const ref = createParticipantLeaguesRef(createParticipantLeaguesVars);
+// Variables can be defined inline as well.
+const ref = createParticipantLeaguesRef({ data: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = createParticipantLeaguesRef(dataConnect, createParticipantLeaguesVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.participantLeague_insertMany);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.participantLeague_insertMany);
+});
+```
+
+## UpsertParticipantLeague
+You can execute the `UpsertParticipantLeague` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+upsertParticipantLeague(vars: UpsertParticipantLeagueVariables): MutationPromise<UpsertParticipantLeagueData, UpsertParticipantLeagueVariables>;
+
+interface UpsertParticipantLeagueRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertParticipantLeagueVariables): MutationRef<UpsertParticipantLeagueData, UpsertParticipantLeagueVariables>;
+}
+export const upsertParticipantLeagueRef: UpsertParticipantLeagueRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+upsertParticipantLeague(dc: DataConnect, vars: UpsertParticipantLeagueVariables): MutationPromise<UpsertParticipantLeagueData, UpsertParticipantLeagueVariables>;
+
+interface UpsertParticipantLeagueRef {
+  ...
+  (dc: DataConnect, vars: UpsertParticipantLeagueVariables): MutationRef<UpsertParticipantLeagueData, UpsertParticipantLeagueVariables>;
+}
+export const upsertParticipantLeagueRef: UpsertParticipantLeagueRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the upsertParticipantLeagueRef:
+```typescript
+const name = upsertParticipantLeagueRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `UpsertParticipantLeague` mutation requires an argument of type `UpsertParticipantLeagueVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface UpsertParticipantLeagueVariables {
+  tournamentId: UUIDString;
+  entryId: number;
+  leagueId: number;
+  leagueName: string;
+  entryRank?: number | null;
+}
+```
+### Return Type
+Recall that executing the `UpsertParticipantLeague` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `UpsertParticipantLeagueData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface UpsertParticipantLeagueData {
+  participantLeague_upsert: ParticipantLeague_Key;
+}
+```
+### Using `UpsertParticipantLeague`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, upsertParticipantLeague, UpsertParticipantLeagueVariables } from '@knockoutfpl/dataconnect';
+
+// The `UpsertParticipantLeague` mutation requires an argument of type `UpsertParticipantLeagueVariables`:
+const upsertParticipantLeagueVars: UpsertParticipantLeagueVariables = {
+  tournamentId: ..., 
+  entryId: ..., 
+  leagueId: ..., 
+  leagueName: ..., 
+  entryRank: ..., // optional
+};
+
+// Call the `upsertParticipantLeague()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await upsertParticipantLeague(upsertParticipantLeagueVars);
+// Variables can be defined inline as well.
+const { data } = await upsertParticipantLeague({ tournamentId: ..., entryId: ..., leagueId: ..., leagueName: ..., entryRank: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await upsertParticipantLeague(dataConnect, upsertParticipantLeagueVars);
+
+console.log(data.participantLeague_upsert);
+
+// Or, you can use the `Promise` API.
+upsertParticipantLeague(upsertParticipantLeagueVars).then((response) => {
+  const data = response.data;
+  console.log(data.participantLeague_upsert);
+});
+```
+
+### Using `UpsertParticipantLeague`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, upsertParticipantLeagueRef, UpsertParticipantLeagueVariables } from '@knockoutfpl/dataconnect';
+
+// The `UpsertParticipantLeague` mutation requires an argument of type `UpsertParticipantLeagueVariables`:
+const upsertParticipantLeagueVars: UpsertParticipantLeagueVariables = {
+  tournamentId: ..., 
+  entryId: ..., 
+  leagueId: ..., 
+  leagueName: ..., 
+  entryRank: ..., // optional
+};
+
+// Call the `upsertParticipantLeagueRef()` function to get a reference to the mutation.
+const ref = upsertParticipantLeagueRef(upsertParticipantLeagueVars);
+// Variables can be defined inline as well.
+const ref = upsertParticipantLeagueRef({ tournamentId: ..., entryId: ..., leagueId: ..., leagueName: ..., entryRank: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = upsertParticipantLeagueRef(dataConnect, upsertParticipantLeagueVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.participantLeague_upsert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.participantLeague_upsert);
 });
 ```
 

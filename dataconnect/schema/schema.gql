@@ -215,6 +215,20 @@ type Participant @table(name: "participants", key: ["tournamentId", "entryId"]) 
   user: User
 }
 
+# Mini-league memberships for each tournament participant
+# Used to calculate "friend proximity" - shared mini-leagues between users
+type ParticipantLeague @table(name: "participant_leagues", key: ["tournamentId", "entryId", "leagueId"]) {
+  tournamentId: UUID! @col(name: "tournament_id")
+  entryId: Int! @col(name: "entry_id")        # FPL team ID
+  leagueId: Int! @col(name: "league_id")      # FPL mini-league ID
+  leagueName: String! @col(name: "league_name")
+  entryRank: Int @col(name: "entry_rank")     # User's rank in this league
+
+  # Relations
+  tournament: Tournament!
+  participant: Participant! @ref(fields: ["tournamentId", "entryId"])
+}
+
 # Individual knockout matches
 type Match @table(name: "matches", key: ["tournamentId", "matchId"]) {
   tournamentId: UUID! @col(name: "tournament_id")

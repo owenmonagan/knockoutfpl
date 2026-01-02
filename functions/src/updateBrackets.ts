@@ -32,6 +32,33 @@ import { sendDiscordAlert } from './discord';
 import { fetchCurrentGameweek, fetchScoresForEntries } from './fpl-scores';
 import { resolveMatch, getNextRoundSlot, MatchResult } from './match-resolver';
 
+// =============================================================================
+// PRIORITY SORTING FOR CLAIMED USERS
+// =============================================================================
+
+/**
+ * Sorts matches by claimed user priority using matchPicks.participant.uid.
+ * Order: Most claimed participants first > Fewer claimed > None claimed
+ *
+ * This ensures that when the background job runs, matches involving users
+ * who have linked their FPL accounts get updated first, providing faster
+ * feedback to engaged users.
+ *
+ * @param matches - Array of RoundMatch objects with matchPicks containing participant.uid
+ * @returns New sorted array (does not mutate original)
+ */
+export function sortMatchesByClaimedPriority(matches: RoundMatch[]): RoundMatch[] {
+  return [...matches].sort((a, b) => {
+    const aClaimedCount = a.matchPicks.filter(mp => mp.participant.uid != null).length;
+    const bClaimedCount = b.matchPicks.filter(mp => mp.participant.uid != null).length;
+    return bClaimedCount - aClaimedCount; // Higher claimed count first
+  });
+}
+
+// =============================================================================
+// CONFIGURATION
+// =============================================================================
+
 // Current FPL season
 const CURRENT_SEASON = '2024-25';
 
@@ -52,15 +79,22 @@ async function processRound(round: ActiveRound, event: number): Promise<void> {
   console.log(`[updateBrackets] Processing round ${round.roundNumber} of tournament ${round.tournamentId}`);
 
   // 1. Get all active matches in this round
-  const matches = await getRoundMatches(round.tournamentId, round.roundNumber);
-  console.log(`[updateBrackets] Found ${matches.length} active matches`);
+  const rawMatches = await getRoundMatches(round.tournamentId, round.roundNumber);
+  console.log(`[updateBrackets] Found ${rawMatches.length} active matches`);
 
-  if (matches.length === 0) {
+  if (rawMatches.length === 0) {
     // No active matches - round may already be complete
     return;
   }
 
-  // 2. Collect all entry IDs that need scores
+  // 2. Sort matches by claimed user priority (matches with claimed participants first)
+  const matches = sortMatchesByClaimedPriority(rawMatches);
+  const claimedMatchCount = matches.filter(m =>
+    m.matchPicks.some(mp => mp.participant.uid != null)
+  ).length;
+  console.log(`[updateBrackets] ${claimedMatchCount}/${matches.length} matches have claimed participants (prioritized)`);
+
+  // 3. Collect all entry IDs that need scores
   const entryIds = new Set<number>();
   for (const match of matches) {
     for (const pick of match.matchPicks) {
@@ -68,12 +102,12 @@ async function processRound(round: ActiveRound, event: number): Promise<void> {
     }
   }
 
-  // 3. Fetch scores from FPL API
+  // 4. Fetch scores from FPL API
   // Use treatMissingAsZero to handle deleted/missing FPL teams (they get 0 points)
   console.log(`[updateBrackets] Fetching scores for ${entryIds.size} entries`);
   const scoresMap = await fetchScoresForEntries(Array.from(entryIds), event, { treatMissingAsZero: true });
 
-  // 4. Update pick records with final scores
+  // 5. Update pick records with final scores
   for (const [entryId, picks] of scoresMap) {
     await upsertPickAdmin(
       {
@@ -90,13 +124,13 @@ async function processRound(round: ActiveRound, event: number): Promise<void> {
     );
   }
 
-  // 5. Build points lookup from scores
+  // 6. Build points lookup from scores
   const pointsMap = new Map<number, number>();
   for (const [entryId, picks] of scoresMap) {
     pointsMap.set(entryId, picks.entry_history.points);
   }
 
-  // 6. Resolve each match
+  // 7. Resolve each match
   const results: MatchResult[] = [];
   const completedMatchIds = new Set<number>();
 
@@ -126,14 +160,14 @@ async function processRound(round: ActiveRound, event: number): Promise<void> {
     }
   }
 
-  // 7. Check if round is complete
+  // 8. Check if round is complete
   const allMatchesComplete = matches.every(m => completedMatchIds.has(m.matchId));
 
   if (allMatchesComplete) {
     console.log(`[updateBrackets] Round ${round.roundNumber} complete`);
     await updateRoundStatus(round.tournamentId, round.roundNumber, 'complete');
 
-    // 8. Check if this was the final round
+    // 9. Check if this was the final round
     const isFinalRound = round.roundNumber === round.tournament.totalRounds;
 
     if (isFinalRound) {
@@ -147,7 +181,7 @@ async function processRound(round: ActiveRound, event: number): Promise<void> {
         console.log(`[updateBrackets] Tournament ${round.tournamentId} complete! Winner: ${finalResult.winnerId}`);
       }
     } else {
-      // 9. Advance winners to next round
+      // 10. Advance winners to next round
       await advanceWinnersToNextRound(round, matches, results);
 
       // Activate next round

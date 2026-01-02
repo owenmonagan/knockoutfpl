@@ -41,6 +41,12 @@ It has the same format as `Participant_Key`, but is only used as mutation return
 """
 scalar Participant_KeyOutput
 """
+✨ `ParticipantLeague_KeyOutput` returns the primary key fields of table type `ParticipantLeague`.
+
+It has the same format as `ParticipantLeague_Key`, but is only used as mutation return value.
+"""
+scalar ParticipantLeague_KeyOutput
+"""
 ✨ `Pick_KeyOutput` returns the primary key fields of table type `Pick`.
 
 It has the same format as `Pick_Key`, but is only used as mutation return value.
@@ -3168,6 +3174,10 @@ input Participant_Filter {
   """
   matchPicks_on_participant: MatchPick_ListFilter
   """
+  ✨ Generated from Field `Participant`.`participantLeagues_on_participant` of type `[ParticipantLeague!]!`
+  """
+  participantLeagues_on_participant: ParticipantLeague_ListFilter
+  """
   ✨ Generated from Field `Participant`.`matches_via_MatchPick` of type `[Match!]!`
   """
   matches_via_MatchPick: Match_ListFilter
@@ -3612,6 +3622,369 @@ input Participant_Order {
   ✨ Generated from Field `Participant`.`seed_max` of type `Int`
   """
   seed_max: OrderDirection
+}
+"""
+✨ Generated data input type for table 'ParticipantLeague'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input ParticipantLeague_Data {
+  """
+  ✨ Generated from Field `ParticipantLeague`.`tournamentId` of type `UUID!`
+  """
+  tournamentId: UUID
+  """
+  ✨ `_expr` server value variant of `tournamentId` (✨ Generated from Field `ParticipantLeague`.`tournamentId` of type `UUID!`)
+  """
+  tournamentId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId` of type `Int!`
+  """
+  entryId: Int
+  """
+  ✨ `_expr` server value variant of `entryId` (✨ Generated from Field `ParticipantLeague`.`entryId` of type `Int!`)
+  """
+  entryId_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `entryId` (✨ Generated from Field `ParticipantLeague`.`entryId` of type `Int!`)
+  """
+  entryId_update: [Int_Update!]
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId` of type `Int!`
+  """
+  leagueId: Int
+  """
+  ✨ `_expr` server value variant of `leagueId` (✨ Generated from Field `ParticipantLeague`.`leagueId` of type `Int!`)
+  """
+  leagueId_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `leagueId` (✨ Generated from Field `ParticipantLeague`.`leagueId` of type `Int!`)
+  """
+  leagueId_update: [Int_Update!]
+  """
+  ✨ Generated from Field `ParticipantLeague`.`participant` of type `Participant!`
+  """
+  participant: Participant_Key
+  """
+  ✨ Generated from Field `ParticipantLeague`.`tournament` of type `Tournament!`
+  """
+  tournament: Tournament_Key
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank` of type `Int`
+  """
+  entryRank: Int
+  """
+  ✨ `_expr` server value variant of `entryRank` (✨ Generated from Field `ParticipantLeague`.`entryRank` of type `Int`)
+  """
+  entryRank_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `entryRank` (✨ Generated from Field `ParticipantLeague`.`entryRank` of type `Int`)
+  """
+  entryRank_update: [Int_Update!]
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueName` of type `String!`
+  """
+  leagueName: String
+  """
+  ✨ `_expr` server value variant of `leagueName` (✨ Generated from Field `ParticipantLeague`.`leagueName` of type `String!`)
+  """
+  leagueName_expr: String_Expr
+}
+"""
+✨ Generated filter input type for table 'ParticipantLeague'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input ParticipantLeague_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [ParticipantLeague_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: ParticipantLeague_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [ParticipantLeague_Filter!]
+  """
+  ✨ Generated from Field `ParticipantLeague`.`tournamentId` of type `UUID!`
+  """
+  tournamentId: UUID_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId` of type `Int!`
+  """
+  entryId: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId` of type `Int!`
+  """
+  leagueId: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`participant` of type `Participant!`
+  """
+  participant: Participant_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`tournament` of type `Tournament!`
+  """
+  tournament: Tournament_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank` of type `Int`
+  """
+  entryRank: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueName` of type `String!`
+  """
+  leagueName: String_Filter
+}
+"""
+✨ Generated first-row input type for table 'ParticipantLeague'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input ParticipantLeague_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [ParticipantLeague_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: ParticipantLeague_Filter
+}
+"""
+✨ Generated having input type for table 'ParticipantLeague'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input ParticipantLeague_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [ParticipantLeague_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: ParticipantLeague_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [ParticipantLeague_Having!]
+  """
+  ✨ Generated from Field `ParticipantLeague`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId_count` of type `Int!`
+  """
+  entryId_count: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank_count` of type `Int!`
+  """
+  entryRank_count: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId_count` of type `Int!`
+  """
+  leagueId_count: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueName_count` of type `Int!`
+  """
+  leagueName_count: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`tournamentId_count` of type `Int!`
+  """
+  tournamentId_count: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId_sum` of type `Int`
+  """
+  entryId_sum: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank_sum` of type `Int`
+  """
+  entryRank_sum: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId_sum` of type `Int`
+  """
+  leagueId_sum: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId_avg` of type `Float`
+  """
+  entryId_avg: Float_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank_avg` of type `Float`
+  """
+  entryRank_avg: Float_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId_avg` of type `Float`
+  """
+  leagueId_avg: Float_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId_min` of type `Int`
+  """
+  entryId_min: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank_min` of type `Int`
+  """
+  entryRank_min: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId_min` of type `Int`
+  """
+  leagueId_min: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId_max` of type `Int`
+  """
+  entryId_max: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank_max` of type `Int`
+  """
+  entryRank_max: Int_Filter
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId_max` of type `Int`
+  """
+  leagueId_max: Int_Filter
+}
+"""
+✨ Generated key input type for table 'ParticipantLeague'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input ParticipantLeague_Key {
+  """
+  ✨ Generated from Field `ParticipantLeague`.`tournamentId` of type `UUID!`
+  """
+  tournamentId: UUID
+  """
+  ✨ `_expr` server value variant of `tournamentId` (✨ Generated from Field `ParticipantLeague`.`tournamentId` of type `UUID!`)
+  """
+  tournamentId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId` of type `Int!`
+  """
+  entryId: Int
+  """
+  ✨ `_expr` server value variant of `entryId` (✨ Generated from Field `ParticipantLeague`.`entryId` of type `Int!`)
+  """
+  entryId_expr: Int_Expr
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId` of type `Int!`
+  """
+  leagueId: Int
+  """
+  ✨ `_expr` server value variant of `leagueId` (✨ Generated from Field `ParticipantLeague`.`leagueId` of type `Int!`)
+  """
+  leagueId_expr: Int_Expr
+}
+"""
+✨ Generated list filter input type for table 'ParticipantLeague'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input ParticipantLeague_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: ParticipantLeague_Filter
+}
+"""
+✨ Generated order input type for table 'ParticipantLeague'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input ParticipantLeague_Order {
+  """
+  ✨ Generated from Field `ParticipantLeague`.`tournamentId` of type `UUID!`
+  """
+  tournamentId: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId` of type `Int!`
+  """
+  entryId: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId` of type `Int!`
+  """
+  leagueId: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`participant` of type `Participant!`
+  """
+  participant: Participant_Order
+  """
+  ✨ Generated from Field `ParticipantLeague`.`tournament` of type `Tournament!`
+  """
+  tournament: Tournament_Order
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank` of type `Int`
+  """
+  entryRank: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueName` of type `String!`
+  """
+  leagueName: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId_count` of type `Int!`
+  """
+  entryId_count: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank_count` of type `Int!`
+  """
+  entryRank_count: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId_count` of type `Int!`
+  """
+  leagueId_count: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueName_count` of type `Int!`
+  """
+  leagueName_count: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`tournamentId_count` of type `Int!`
+  """
+  tournamentId_count: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId_sum` of type `Int`
+  """
+  entryId_sum: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank_sum` of type `Int`
+  """
+  entryRank_sum: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId_sum` of type `Int`
+  """
+  leagueId_sum: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId_avg` of type `Float`
+  """
+  entryId_avg: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank_avg` of type `Float`
+  """
+  entryRank_avg: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId_avg` of type `Float`
+  """
+  leagueId_avg: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId_min` of type `Int`
+  """
+  entryId_min: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank_min` of type `Int`
+  """
+  entryRank_min: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId_min` of type `Int`
+  """
+  leagueId_min: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryId_max` of type `Int`
+  """
+  entryId_max: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`entryRank_max` of type `Int`
+  """
+  entryRank_max: OrderDirection
+  """
+  ✨ Generated from Field `ParticipantLeague`.`leagueId_max` of type `Int`
+  """
+  leagueId_max: OrderDirection
 }
 """
 ✨ Generated data input type for table 'Pick'. It includes all necessary fields for creating or upserting rows into table.
@@ -5100,6 +5473,10 @@ input Tournament_Filter {
   ✨ Generated from Field `Tournament`.`participants_on_tournament` of type `[Participant!]!`
   """
   participants_on_tournament: Participant_ListFilter
+  """
+  ✨ Generated from Field `Tournament`.`participantLeagues_on_tournament` of type `[ParticipantLeague!]!`
+  """
+  participantLeagues_on_tournament: ParticipantLeague_ListFilter
   """
   ✨ Generated from Field `Tournament`.`rounds_on_tournament` of type `[Round!]!`
   """

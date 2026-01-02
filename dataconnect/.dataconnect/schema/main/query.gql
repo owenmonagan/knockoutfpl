@@ -103,6 +103,20 @@ extend type Query {
     first: Participant_FirstRow
   ): Participant @fdc_generated(from: "Participant", purpose: QUERY_SINGLE)
   """
+  ✨ Look up a single `ParticipantLeague` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  participantLeague(
+    """
+    The key used to identify the object.
+    """
+    key: ParticipantLeague_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: ParticipantLeague_FirstRow
+  ): ParticipantLeague @fdc_generated(from: "ParticipantLeague", purpose: QUERY_SINGLE)
+  """
   ✨ Look up a single `Pick` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
   """
   pick(
@@ -401,6 +415,40 @@ extend type Query {
     """
     having: Participant_Having
   ): [Participant!]! @fdc_generated(from: "Participant", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `ParticipantLeague` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  participantLeagues(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: ParticipantLeague_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [ParticipantLeague_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: ParticipantLeague_Having
+  ): [ParticipantLeague!]! @fdc_generated(from: "ParticipantLeague", purpose: QUERY_MULTIPLE)
   """
   ✨ List `Pick` objects in the table and return selected fields, optionally filtered by `where` conditions
   """

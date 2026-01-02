@@ -334,6 +334,7 @@ const GET_ROUND_MATCH_PICKS_QUERY = `
       slot
       participant {
         seed
+        uid
       }
     }
   }
@@ -790,6 +791,7 @@ interface RawMatchPick {
   slot: number;
   participant: {
     seed: number;
+    uid: string | null;
   };
 }
 
@@ -806,6 +808,7 @@ export interface RoundMatch {
     slot: number;
     participant: {
       seed: number;
+      uid: string | null;
     };
   }>;
 }

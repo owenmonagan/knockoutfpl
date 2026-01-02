@@ -1298,6 +1298,40 @@ extend type Participant {
     having: MatchPick_Having
   ): [MatchPick!]! @fdc_generated(from: "MatchPick.participant", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
   """
+  ✨ List `ParticipantLeague` objects in a one-to-many relationship (where `ParticipantLeague`.`participant` is this object).
+  """
+  participantLeagues_on_participant(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: ParticipantLeague_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [ParticipantLeague_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: ParticipantLeague_Having
+  ): [ParticipantLeague!]! @fdc_generated(from: "ParticipantLeague.participant", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
   ✨ List `Match` objects using `MatchPick` as the join table (a `MatchPick` object exists where its `participant` is this and its `match` is that).
   """
   matches_via_MatchPick(
@@ -1612,6 +1646,139 @@ extend type Participant {
   ✨ Maximum of the `seed` field in the `Participant` table.
   """
   seed_max: Int @fdc_generated(from: "Participant.seed", purpose: QUERY_MAX)
+}
+extend type ParticipantLeague {
+  """
+  Implicit metadata field that cannot be written. It provides extra information about query results.
+  """
+  _metadata: _Metadata @fdc_generated(from: "ParticipantLeague", purpose: METADATA_FIELD)
+  """
+  ✨ Count the number of rows in the `ParticipantLeague` table.
+  """
+  _count: Int! @fdc_generated(from: "ParticipantLeague.", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `ParticipantLeague` table where the `entryId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  entryId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "ParticipantLeague.entryId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `ParticipantLeague` table where the `entryRank` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  entryRank_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "ParticipantLeague.entryRank", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `ParticipantLeague` table where the `leagueId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  leagueId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "ParticipantLeague.leagueId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `ParticipantLeague` table where the `leagueName` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  leagueName_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "ParticipantLeague.leagueName", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `ParticipantLeague` table where the `tournamentId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  tournamentId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "ParticipantLeague.tournamentId", purpose: QUERY_COUNT)
+  """
+  ✨ Sum the `entryId` field in the `ParticipantLeague` table.
+  """
+  entryId_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "ParticipantLeague.entryId", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `entryRank` field in the `ParticipantLeague` table.
+  """
+  entryRank_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "ParticipantLeague.entryRank", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `leagueId` field in the `ParticipantLeague` table.
+  """
+  leagueId_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "ParticipantLeague.leagueId", purpose: QUERY_SUM)
+  """
+  ✨ Average the `entryId` field in the `ParticipantLeague` table.
+  """
+  entryId_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "ParticipantLeague.entryId", purpose: QUERY_AVG)
+  """
+  ✨ Average the `entryRank` field in the `ParticipantLeague` table.
+  """
+  entryRank_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "ParticipantLeague.entryRank", purpose: QUERY_AVG)
+  """
+  ✨ Average the `leagueId` field in the `ParticipantLeague` table.
+  """
+  leagueId_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "ParticipantLeague.leagueId", purpose: QUERY_AVG)
+  """
+  ✨ Minimum of the `entryId` field in the `ParticipantLeague` table.
+  """
+  entryId_min: Int @fdc_generated(from: "ParticipantLeague.entryId", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `entryRank` field in the `ParticipantLeague` table.
+  """
+  entryRank_min: Int @fdc_generated(from: "ParticipantLeague.entryRank", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `leagueId` field in the `ParticipantLeague` table.
+  """
+  leagueId_min: Int @fdc_generated(from: "ParticipantLeague.leagueId", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `entryId` field in the `ParticipantLeague` table.
+  """
+  entryId_max: Int @fdc_generated(from: "ParticipantLeague.entryId", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `entryRank` field in the `ParticipantLeague` table.
+  """
+  entryRank_max: Int @fdc_generated(from: "ParticipantLeague.entryRank", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `leagueId` field in the `ParticipantLeague` table.
+  """
+  leagueId_max: Int @fdc_generated(from: "ParticipantLeague.leagueId", purpose: QUERY_MAX)
 }
 extend type Pick {
   """
@@ -2165,6 +2332,40 @@ extend type Tournament {
     """
     having: Participant_Having
   ): [Participant!]! @fdc_generated(from: "Participant.tournament", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
+  ✨ List `ParticipantLeague` objects in a one-to-many relationship (where `ParticipantLeague`.`tournament` is this object).
+  """
+  participantLeagues_on_tournament(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: ParticipantLeague_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [ParticipantLeague_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: ParticipantLeague_Having
+  ): [ParticipantLeague!]! @fdc_generated(from: "ParticipantLeague.tournament", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
   """
   ✨ List `Round` objects in a one-to-many relationship (where `Round`.`tournament` is this object).
   """

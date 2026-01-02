@@ -6,6 +6,347 @@ export const connectorConfig = {
   location: 'us-east1'
 };
 
+export const upsertUserRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpsertUser', inputVars);
+}
+upsertUserRef.operationName = 'UpsertUser';
+
+export function upsertUser(dcOrVars, vars) {
+  return executeMutation(upsertUserRef(dcOrVars, vars));
+}
+
+export const connectFplEntryRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'ConnectFplEntry', inputVars);
+}
+connectFplEntryRef.operationName = 'ConnectFplEntry';
+
+export function connectFplEntry(dcOrVars, vars) {
+  return executeMutation(connectFplEntryRef(dcOrVars, vars));
+}
+
+export const upsertEntryRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpsertEntry', inputVars);
+}
+upsertEntryRef.operationName = 'UpsertEntry';
+
+export function upsertEntry(dcOrVars, vars) {
+  return executeMutation(upsertEntryRef(dcOrVars, vars));
+}
+
+export const upsertPickRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpsertPick', inputVars);
+}
+upsertPickRef.operationName = 'UpsertPick';
+
+export function upsertPick(dcOrVars, vars) {
+  return executeMutation(upsertPickRef(dcOrVars, vars));
+}
+
+export const upsertLeagueRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpsertLeague', inputVars);
+}
+upsertLeagueRef.operationName = 'UpsertLeague';
+
+export function upsertLeague(dcOrVars, vars) {
+  return executeMutation(upsertLeagueRef(dcOrVars, vars));
+}
+
+export const upsertEventRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpsertEvent', inputVars);
+}
+upsertEventRef.operationName = 'UpsertEvent';
+
+export function upsertEvent(dcOrVars, vars) {
+  return executeMutation(upsertEventRef(dcOrVars, vars));
+}
+
+export const createTournamentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateTournament', inputVars);
+}
+createTournamentRef.operationName = 'CreateTournament';
+
+export function createTournament(dcOrVars, vars) {
+  return executeMutation(createTournamentRef(dcOrVars, vars));
+}
+
+export const createTournamentWithImportStatusRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateTournamentWithImportStatus', inputVars);
+}
+createTournamentWithImportStatusRef.operationName = 'CreateTournamentWithImportStatus';
+
+export function createTournamentWithImportStatus(dcOrVars, vars) {
+  return executeMutation(createTournamentWithImportStatusRef(dcOrVars, vars));
+}
+
+export const updateTournamentImportProgressRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateTournamentImportProgress', inputVars);
+}
+updateTournamentImportProgressRef.operationName = 'UpdateTournamentImportProgress';
+
+export function updateTournamentImportProgress(dcOrVars, vars) {
+  return executeMutation(updateTournamentImportProgressRef(dcOrVars, vars));
+}
+
+export const finalizeTournamentImportRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'FinalizeTournamentImport', inputVars);
+}
+finalizeTournamentImportRef.operationName = 'FinalizeTournamentImport';
+
+export function finalizeTournamentImport(dcOrVars, vars) {
+  return executeMutation(finalizeTournamentImportRef(dcOrVars, vars));
+}
+
+export const updateTournamentStatusRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateTournamentStatus', inputVars);
+}
+updateTournamentStatusRef.operationName = 'UpdateTournamentStatus';
+
+export function updateTournamentStatus(dcOrVars, vars) {
+  return executeMutation(updateTournamentStatusRef(dcOrVars, vars));
+}
+
+export const setTournamentWinnerRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'SetTournamentWinner', inputVars);
+}
+setTournamentWinnerRef.operationName = 'SetTournamentWinner';
+
+export function setTournamentWinner(dcOrVars, vars) {
+  return executeMutation(setTournamentWinnerRef(dcOrVars, vars));
+}
+
+export const advanceTournamentRoundRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'AdvanceTournamentRound', inputVars);
+}
+advanceTournamentRoundRef.operationName = 'AdvanceTournamentRound';
+
+export function advanceTournamentRound(dcOrVars, vars) {
+  return executeMutation(advanceTournamentRoundRef(dcOrVars, vars));
+}
+
+export const createRoundRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateRound', inputVars);
+}
+createRoundRef.operationName = 'CreateRound';
+
+export function createRound(dcOrVars, vars) {
+  return executeMutation(createRoundRef(dcOrVars, vars));
+}
+
+export const updateRoundRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateRound', inputVars);
+}
+updateRoundRef.operationName = 'UpdateRound';
+
+export function updateRound(dcOrVars, vars) {
+  return executeMutation(updateRoundRef(dcOrVars, vars));
+}
+
+export const updateRoundUpdatedAtRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateRoundUpdatedAt', inputVars);
+}
+updateRoundUpdatedAtRef.operationName = 'UpdateRoundUpdatedAt';
+
+export function updateRoundUpdatedAt(dcOrVars, vars) {
+  return executeMutation(updateRoundUpdatedAtRef(dcOrVars, vars));
+}
+
+export const updateMatchUpdatedAtRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateMatchUpdatedAt', inputVars);
+}
+updateMatchUpdatedAtRef.operationName = 'UpdateMatchUpdatedAt';
+
+export function updateMatchUpdatedAt(dcOrVars, vars) {
+  return executeMutation(updateMatchUpdatedAtRef(dcOrVars, vars));
+}
+
+export const createParticipantRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateParticipant', inputVars);
+}
+createParticipantRef.operationName = 'CreateParticipant';
+
+export function createParticipant(dcOrVars, vars) {
+  return executeMutation(createParticipantRef(dcOrVars, vars));
+}
+
+export const updateParticipantRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateParticipant', inputVars);
+}
+updateParticipantRef.operationName = 'UpdateParticipant';
+
+export function updateParticipant(dcOrVars, vars) {
+  return executeMutation(updateParticipantRef(dcOrVars, vars));
+}
+
+export const createMatchRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateMatch', inputVars);
+}
+createMatchRef.operationName = 'CreateMatch';
+
+export function createMatch(dcOrVars, vars) {
+  return executeMutation(createMatchRef(dcOrVars, vars));
+}
+
+export const updateMatchRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateMatch', inputVars);
+}
+updateMatchRef.operationName = 'UpdateMatch';
+
+export function updateMatch(dcOrVars, vars) {
+  return executeMutation(updateMatchRef(dcOrVars, vars));
+}
+
+export const createMatchPickRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateMatchPick', inputVars);
+}
+createMatchPickRef.operationName = 'CreateMatchPick';
+
+export function createMatchPick(dcOrVars, vars) {
+  return executeMutation(createMatchPickRef(dcOrVars, vars));
+}
+
+export const deleteTournamentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteTournament', inputVars);
+}
+deleteTournamentRef.operationName = 'DeleteTournament';
+
+export function deleteTournament(dcOrVars, vars) {
+  return executeMutation(deleteTournamentRef(dcOrVars, vars));
+}
+
+export const deleteMatchPicksByTournamentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteMatchPicksByTournament', inputVars);
+}
+deleteMatchPicksByTournamentRef.operationName = 'DeleteMatchPicksByTournament';
+
+export function deleteMatchPicksByTournament(dcOrVars, vars) {
+  return executeMutation(deleteMatchPicksByTournamentRef(dcOrVars, vars));
+}
+
+export const deleteMatchesByTournamentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteMatchesByTournament', inputVars);
+}
+deleteMatchesByTournamentRef.operationName = 'DeleteMatchesByTournament';
+
+export function deleteMatchesByTournament(dcOrVars, vars) {
+  return executeMutation(deleteMatchesByTournamentRef(dcOrVars, vars));
+}
+
+export const deleteRoundsByTournamentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteRoundsByTournament', inputVars);
+}
+deleteRoundsByTournamentRef.operationName = 'DeleteRoundsByTournament';
+
+export function deleteRoundsByTournament(dcOrVars, vars) {
+  return executeMutation(deleteRoundsByTournamentRef(dcOrVars, vars));
+}
+
+export const deleteParticipantsByTournamentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteParticipantsByTournament', inputVars);
+}
+deleteParticipantsByTournamentRef.operationName = 'DeleteParticipantsByTournament';
+
+export function deleteParticipantsByTournament(dcOrVars, vars) {
+  return executeMutation(deleteParticipantsByTournamentRef(dcOrVars, vars));
+}
+
+export const deleteTournamentByIdRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteTournamentById', inputVars);
+}
+deleteTournamentByIdRef.operationName = 'DeleteTournamentById';
+
+export function deleteTournamentById(dcOrVars, vars) {
+  return executeMutation(deleteTournamentByIdRef(dcOrVars, vars));
+}
+
+export const createEmailQueueEntryRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateEmailQueueEntry', inputVars);
+}
+createEmailQueueEntryRef.operationName = 'CreateEmailQueueEntry';
+
+export function createEmailQueueEntry(dcOrVars, vars) {
+  return executeMutation(createEmailQueueEntryRef(dcOrVars, vars));
+}
+
+export const createParticipantLeaguesRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateParticipantLeagues', inputVars);
+}
+createParticipantLeaguesRef.operationName = 'CreateParticipantLeagues';
+
+export function createParticipantLeagues(dcOrVars, vars) {
+  return executeMutation(createParticipantLeaguesRef(dcOrVars, vars));
+}
+
+export const upsertParticipantLeagueRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpsertParticipantLeague', inputVars);
+}
+upsertParticipantLeagueRef.operationName = 'UpsertParticipantLeague';
+
+export function upsertParticipantLeague(dcOrVars, vars) {
+  return executeMutation(upsertParticipantLeagueRef(dcOrVars, vars));
+}
+
 export const getUserRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -411,324 +752,5 @@ getRoundMatchesWithPriorityRef.operationName = 'GetRoundMatchesWithPriority';
 
 export function getRoundMatchesWithPriority(dcOrVars, vars) {
   return executeQuery(getRoundMatchesWithPriorityRef(dcOrVars, vars));
-}
-
-export const upsertUserRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'UpsertUser', inputVars);
-}
-upsertUserRef.operationName = 'UpsertUser';
-
-export function upsertUser(dcOrVars, vars) {
-  return executeMutation(upsertUserRef(dcOrVars, vars));
-}
-
-export const connectFplEntryRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'ConnectFplEntry', inputVars);
-}
-connectFplEntryRef.operationName = 'ConnectFplEntry';
-
-export function connectFplEntry(dcOrVars, vars) {
-  return executeMutation(connectFplEntryRef(dcOrVars, vars));
-}
-
-export const upsertEntryRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'UpsertEntry', inputVars);
-}
-upsertEntryRef.operationName = 'UpsertEntry';
-
-export function upsertEntry(dcOrVars, vars) {
-  return executeMutation(upsertEntryRef(dcOrVars, vars));
-}
-
-export const upsertPickRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'UpsertPick', inputVars);
-}
-upsertPickRef.operationName = 'UpsertPick';
-
-export function upsertPick(dcOrVars, vars) {
-  return executeMutation(upsertPickRef(dcOrVars, vars));
-}
-
-export const upsertLeagueRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'UpsertLeague', inputVars);
-}
-upsertLeagueRef.operationName = 'UpsertLeague';
-
-export function upsertLeague(dcOrVars, vars) {
-  return executeMutation(upsertLeagueRef(dcOrVars, vars));
-}
-
-export const upsertEventRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'UpsertEvent', inputVars);
-}
-upsertEventRef.operationName = 'UpsertEvent';
-
-export function upsertEvent(dcOrVars, vars) {
-  return executeMutation(upsertEventRef(dcOrVars, vars));
-}
-
-export const createTournamentRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'CreateTournament', inputVars);
-}
-createTournamentRef.operationName = 'CreateTournament';
-
-export function createTournament(dcOrVars, vars) {
-  return executeMutation(createTournamentRef(dcOrVars, vars));
-}
-
-export const createTournamentWithImportStatusRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'CreateTournamentWithImportStatus', inputVars);
-}
-createTournamentWithImportStatusRef.operationName = 'CreateTournamentWithImportStatus';
-
-export function createTournamentWithImportStatus(dcOrVars, vars) {
-  return executeMutation(createTournamentWithImportStatusRef(dcOrVars, vars));
-}
-
-export const updateTournamentImportProgressRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'UpdateTournamentImportProgress', inputVars);
-}
-updateTournamentImportProgressRef.operationName = 'UpdateTournamentImportProgress';
-
-export function updateTournamentImportProgress(dcOrVars, vars) {
-  return executeMutation(updateTournamentImportProgressRef(dcOrVars, vars));
-}
-
-export const finalizeTournamentImportRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'FinalizeTournamentImport', inputVars);
-}
-finalizeTournamentImportRef.operationName = 'FinalizeTournamentImport';
-
-export function finalizeTournamentImport(dcOrVars, vars) {
-  return executeMutation(finalizeTournamentImportRef(dcOrVars, vars));
-}
-
-export const updateTournamentStatusRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'UpdateTournamentStatus', inputVars);
-}
-updateTournamentStatusRef.operationName = 'UpdateTournamentStatus';
-
-export function updateTournamentStatus(dcOrVars, vars) {
-  return executeMutation(updateTournamentStatusRef(dcOrVars, vars));
-}
-
-export const setTournamentWinnerRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'SetTournamentWinner', inputVars);
-}
-setTournamentWinnerRef.operationName = 'SetTournamentWinner';
-
-export function setTournamentWinner(dcOrVars, vars) {
-  return executeMutation(setTournamentWinnerRef(dcOrVars, vars));
-}
-
-export const advanceTournamentRoundRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'AdvanceTournamentRound', inputVars);
-}
-advanceTournamentRoundRef.operationName = 'AdvanceTournamentRound';
-
-export function advanceTournamentRound(dcOrVars, vars) {
-  return executeMutation(advanceTournamentRoundRef(dcOrVars, vars));
-}
-
-export const createRoundRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'CreateRound', inputVars);
-}
-createRoundRef.operationName = 'CreateRound';
-
-export function createRound(dcOrVars, vars) {
-  return executeMutation(createRoundRef(dcOrVars, vars));
-}
-
-export const updateRoundRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'UpdateRound', inputVars);
-}
-updateRoundRef.operationName = 'UpdateRound';
-
-export function updateRound(dcOrVars, vars) {
-  return executeMutation(updateRoundRef(dcOrVars, vars));
-}
-
-export const updateRoundUpdatedAtRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'UpdateRoundUpdatedAt', inputVars);
-}
-updateRoundUpdatedAtRef.operationName = 'UpdateRoundUpdatedAt';
-
-export function updateRoundUpdatedAt(dcOrVars, vars) {
-  return executeMutation(updateRoundUpdatedAtRef(dcOrVars, vars));
-}
-
-export const updateMatchUpdatedAtRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'UpdateMatchUpdatedAt', inputVars);
-}
-updateMatchUpdatedAtRef.operationName = 'UpdateMatchUpdatedAt';
-
-export function updateMatchUpdatedAt(dcOrVars, vars) {
-  return executeMutation(updateMatchUpdatedAtRef(dcOrVars, vars));
-}
-
-export const createParticipantRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'CreateParticipant', inputVars);
-}
-createParticipantRef.operationName = 'CreateParticipant';
-
-export function createParticipant(dcOrVars, vars) {
-  return executeMutation(createParticipantRef(dcOrVars, vars));
-}
-
-export const updateParticipantRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'UpdateParticipant', inputVars);
-}
-updateParticipantRef.operationName = 'UpdateParticipant';
-
-export function updateParticipant(dcOrVars, vars) {
-  return executeMutation(updateParticipantRef(dcOrVars, vars));
-}
-
-export const createMatchRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'CreateMatch', inputVars);
-}
-createMatchRef.operationName = 'CreateMatch';
-
-export function createMatch(dcOrVars, vars) {
-  return executeMutation(createMatchRef(dcOrVars, vars));
-}
-
-export const updateMatchRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'UpdateMatch', inputVars);
-}
-updateMatchRef.operationName = 'UpdateMatch';
-
-export function updateMatch(dcOrVars, vars) {
-  return executeMutation(updateMatchRef(dcOrVars, vars));
-}
-
-export const createMatchPickRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'CreateMatchPick', inputVars);
-}
-createMatchPickRef.operationName = 'CreateMatchPick';
-
-export function createMatchPick(dcOrVars, vars) {
-  return executeMutation(createMatchPickRef(dcOrVars, vars));
-}
-
-export const deleteTournamentRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'DeleteTournament', inputVars);
-}
-deleteTournamentRef.operationName = 'DeleteTournament';
-
-export function deleteTournament(dcOrVars, vars) {
-  return executeMutation(deleteTournamentRef(dcOrVars, vars));
-}
-
-export const deleteMatchPicksByTournamentRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'DeleteMatchPicksByTournament', inputVars);
-}
-deleteMatchPicksByTournamentRef.operationName = 'DeleteMatchPicksByTournament';
-
-export function deleteMatchPicksByTournament(dcOrVars, vars) {
-  return executeMutation(deleteMatchPicksByTournamentRef(dcOrVars, vars));
-}
-
-export const deleteMatchesByTournamentRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'DeleteMatchesByTournament', inputVars);
-}
-deleteMatchesByTournamentRef.operationName = 'DeleteMatchesByTournament';
-
-export function deleteMatchesByTournament(dcOrVars, vars) {
-  return executeMutation(deleteMatchesByTournamentRef(dcOrVars, vars));
-}
-
-export const deleteRoundsByTournamentRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'DeleteRoundsByTournament', inputVars);
-}
-deleteRoundsByTournamentRef.operationName = 'DeleteRoundsByTournament';
-
-export function deleteRoundsByTournament(dcOrVars, vars) {
-  return executeMutation(deleteRoundsByTournamentRef(dcOrVars, vars));
-}
-
-export const deleteParticipantsByTournamentRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'DeleteParticipantsByTournament', inputVars);
-}
-deleteParticipantsByTournamentRef.operationName = 'DeleteParticipantsByTournament';
-
-export function deleteParticipantsByTournament(dcOrVars, vars) {
-  return executeMutation(deleteParticipantsByTournamentRef(dcOrVars, vars));
-}
-
-export const deleteTournamentByIdRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'DeleteTournamentById', inputVars);
-}
-deleteTournamentByIdRef.operationName = 'DeleteTournamentById';
-
-export function deleteTournamentById(dcOrVars, vars) {
-  return executeMutation(deleteTournamentByIdRef(dcOrVars, vars));
-}
-
-export const createEmailQueueEntryRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'CreateEmailQueueEntry', inputVars);
-}
-createEmailQueueEntryRef.operationName = 'CreateEmailQueueEntry';
-
-export function createEmailQueueEntry(dcOrVars, vars) {
-  return executeMutation(createEmailQueueEntryRef(dcOrVars, vars));
 }
 

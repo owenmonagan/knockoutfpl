@@ -550,3 +550,31 @@ mutation CreateEmailQueueEntry(
     }
   )
 }
+
+# =============================================================================
+# PARTICIPANT LEAGUE MUTATIONS (Friend Proximity Feature)
+# =============================================================================
+
+# Batch insert participant league memberships (called from Cloud Functions during import)
+mutation CreateParticipantLeagues(
+  $data: [ParticipantLeague_Data!]!
+) @auth(level: NO_ACCESS) {
+  participantLeague_insertMany(data: $data)
+}
+
+# Single upsert for individual inserts (called from Cloud Functions)
+mutation UpsertParticipantLeague(
+  $tournamentId: UUID!
+  $entryId: Int!
+  $leagueId: Int!
+  $leagueName: String!
+  $entryRank: Int
+) @auth(level: NO_ACCESS) {
+  participantLeague_upsert(data: {
+    tournamentId: $tournamentId
+    entryId: $entryId
+    leagueId: $leagueId
+    leagueName: $leagueName
+    entryRank: $entryRank
+  })
+}
