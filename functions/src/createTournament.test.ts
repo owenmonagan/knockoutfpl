@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { validateTournamentRequest, validateLeagueStandings, getCurrentGameweek, buildTournamentRecords } from './createTournament';
+import { validateTournamentRequest, validateLeagueStandings, getCurrentGameweek, buildTournamentRecords, buildNWayTournamentRecords } from './createTournament';
 import { generateBracketStructure, assignParticipantsToMatches, calculateBracketSize, calculateTotalRounds } from './bracketGenerator';
+import { calculateNWayBracket, generateNWayBracketStructure, assignParticipantsToNWayMatches } from './nWayBracket';
 
 describe('createTournament', () => {
   describe('validateTournamentRequest', () => {
@@ -273,6 +274,203 @@ describe('createTournament', () => {
       // Verify no byes with exactly 8 participants
       const byeMatches = records.matchRecords.filter(m => m.isBye);
       expect(byeMatches).toHaveLength(0);
+    });
+  });
+
+  describe('buildNWayTournamentRecords', () => {
+    const mockStandings = {
+      league: { id: 12345, name: 'Test 4-Way League' },
+      standings: {
+        results: [
+          { entry: 100, entry_name: 'Team A', player_name: 'Player A', rank: 1, total: 500 },
+          { entry: 101, entry_name: 'Team B', player_name: 'Player B', rank: 2, total: 450 },
+          { entry: 102, entry_name: 'Team C', player_name: 'Player C', rank: 3, total: 400 },
+          { entry: 103, entry_name: 'Team D', player_name: 'Player D', rank: 4, total: 350 },
+        ]
+      }
+    };
+
+    it('builds correct 4-way tournament with 4 participants (1 match final)', () => {
+      const matchSize = 4;
+      const { rounds, totalSlots } = calculateNWayBracket(4, matchSize);
+      const matches = generateNWayBracketStructure(matchSize, rounds);
+      const assignments = assignParticipantsToNWayMatches(matchSize, totalSlots, 4);
+
+      const records = buildNWayTournamentRecords(
+        'test-uuid',
+        'user-123',
+        mockStandings,
+        totalSlots,
+        rounds,
+        10, // startEvent
+        matches,
+        assignments,
+        matchSize
+      );
+
+      expect(records.tournament.fplLeagueId).toBe(12345);
+      expect(records.tournament.matchSize).toBe(4);
+      expect(records.tournament.totalRounds).toBe(1); // 4 people = 1 round (all in final)
+      expect(records.participants).toHaveLength(4);
+      expect(records.matchRecords).toHaveLength(1); // Single 4-way final
+      expect(records.matchPicks).toHaveLength(4); // 4 picks for 1 match
+    });
+
+    it('builds correct 4-way tournament with 16 participants (2 rounds)', () => {
+      const sixteenPlayerStandings = {
+        league: { id: 123, name: 'Test 16 Player League' },
+        standings: {
+          results: Array(16).fill(null).map((_, i) => ({
+            entry: 1000 + i,
+            entry_name: `Team ${i + 1}`,
+            player_name: `Manager ${i + 1}`,
+            rank: i + 1,
+            total: 1000 - i * 10,
+          })),
+        },
+      };
+
+      const matchSize = 4;
+      const { rounds, totalSlots } = calculateNWayBracket(16, matchSize);
+      const matches = generateNWayBracketStructure(matchSize, rounds);
+      const assignments = assignParticipantsToNWayMatches(matchSize, totalSlots, 16);
+
+      const records = buildNWayTournamentRecords(
+        'test-uuid',
+        'user-123',
+        sixteenPlayerStandings,
+        totalSlots,
+        rounds,
+        20,
+        matches,
+        assignments,
+        matchSize
+      );
+
+      expect(records.tournament.matchSize).toBe(4);
+      expect(records.tournament.totalRounds).toBe(2); // 16 -> 4 -> 1
+      expect(records.participants).toHaveLength(16);
+      expect(records.matchRecords).toHaveLength(5); // 4 round1 + 1 final
+      expect(records.rounds).toHaveLength(2);
+    });
+
+    it('builds correct 3-way tournament with 9 participants (2 rounds)', () => {
+      const ninePlayerStandings = {
+        league: { id: 456, name: 'Test 9 Player League' },
+        standings: {
+          results: Array(9).fill(null).map((_, i) => ({
+            entry: 2000 + i,
+            entry_name: `Team ${i + 1}`,
+            player_name: `Manager ${i + 1}`,
+            rank: i + 1,
+            total: 900 - i * 10,
+          })),
+        },
+      };
+
+      const matchSize = 3;
+      const { rounds, totalSlots } = calculateNWayBracket(9, matchSize);
+      const matches = generateNWayBracketStructure(matchSize, rounds);
+      const assignments = assignParticipantsToNWayMatches(matchSize, totalSlots, 9);
+
+      const records = buildNWayTournamentRecords(
+        'test-uuid',
+        'user-456',
+        ninePlayerStandings,
+        totalSlots,
+        rounds,
+        15,
+        matches,
+        assignments,
+        matchSize
+      );
+
+      expect(records.tournament.matchSize).toBe(3);
+      expect(records.tournament.totalRounds).toBe(2); // 9 -> 3 -> 1
+      expect(records.participants).toHaveLength(9);
+      expect(records.matchRecords).toHaveLength(4); // 3 round1 + 1 final
+      expect(records.matchPicks).toHaveLength(9); // 9 participants in round 1
+    });
+
+    it('handles byes in 4-way tournament (10 participants)', () => {
+      const tenPlayerStandings = {
+        league: { id: 789, name: 'Test 10 Player League' },
+        standings: {
+          results: Array(10).fill(null).map((_, i) => ({
+            entry: 3000 + i,
+            entry_name: `Team ${i + 1}`,
+            player_name: `Manager ${i + 1}`,
+            rank: i + 1,
+            total: 1000 - i * 10,
+          })),
+        },
+      };
+
+      const matchSize = 4;
+      const { rounds, totalSlots, byeCount } = calculateNWayBracket(10, matchSize);
+      const matches = generateNWayBracketStructure(matchSize, rounds);
+      const assignments = assignParticipantsToNWayMatches(matchSize, totalSlots, 10);
+
+      expect(totalSlots).toBe(16); // Next power of 4
+      expect(byeCount).toBe(6); // 16 - 10 = 6 byes
+
+      const records = buildNWayTournamentRecords(
+        'test-uuid',
+        'user-789',
+        tenPlayerStandings,
+        totalSlots,
+        rounds,
+        25,
+        matches,
+        assignments,
+        matchSize
+      );
+
+      expect(records.tournament.matchSize).toBe(4);
+      expect(records.participants).toHaveLength(10);
+      // 6 byes distributed across 4 groups: each group has 2-3 real players
+      // No group has only 1 player, so no auto-advance bye matches
+      expect(records.matchRecords).toHaveLength(5); // 4 round1 + 1 final
+    });
+
+    it('creates bye match when only 1 player in group (4 participants in 4-way)', () => {
+      // With 4 participants in a 16-slot 4-way bracket, we get 12 byes
+      // Each of the 4 groups gets 3 byes = 1 real player = auto-advance
+      const fourPlayerStandings = {
+        league: { id: 999, name: 'Test 4 Player 16-Slot League' },
+        standings: {
+          results: Array(4).fill(null).map((_, i) => ({
+            entry: 4000 + i,
+            entry_name: `Team ${i + 1}`,
+            player_name: `Manager ${i + 1}`,
+            rank: i + 1,
+            total: 1000 - i * 10,
+          })),
+        },
+      };
+
+      // Force a 16-slot bracket with 4 participants
+      const matchSize = 4;
+      const totalSlots = 16;
+      const rounds = 2;
+      const matches = generateNWayBracketStructure(matchSize, rounds);
+      const assignments = assignParticipantsToNWayMatches(matchSize, totalSlots, 4);
+
+      const records = buildNWayTournamentRecords(
+        'test-uuid',
+        'user-999',
+        fourPlayerStandings,
+        totalSlots,
+        rounds,
+        30,
+        matches,
+        assignments,
+        matchSize
+      );
+
+      // All 4 round 1 matches should be byes (only 1 real player each)
+      const byeMatches = records.matchRecords.filter(m => m.isBye);
+      expect(byeMatches.length).toBe(4);
     });
   });
 });
