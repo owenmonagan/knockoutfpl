@@ -232,5 +232,19 @@ describe('FPL Service', () => {
 
       expect(result.memberCount).toBe(0);
     });
+
+    it('should return 0 memberCount when standings is undefined', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          league: { id: 123, name: 'No Standings League' },
+          // Note: no standings property at all
+        }),
+      });
+
+      const result = await getLeagueInfo(123);
+
+      expect(result.memberCount).toBe(0);
+    });
   });
 });

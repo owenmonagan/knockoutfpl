@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { ConnectPage } from './ConnectPage';
 import { getFPLTeamInfo } from '../services/fpl';
-import { connectFPLTeam } from '../services/user';
+import { connectFPLTeam, getUserProfile } from '../services/user';
 
 const mockNavigate = vi.fn();
 
@@ -216,6 +216,33 @@ describe('ConnectPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/fantasy.premierleague.com\/entry/)).toBeInTheDocument();
+    });
+  });
+
+  it('shows change-team mode for users with existing FPL team', async () => {
+    // Mock getUserProfile to return an existing profile
+    (getUserProfile as ReturnType<typeof vi.fn>).mockResolvedValue({
+      fplTeamId: 123456,
+    });
+    (getFPLTeamInfo as ReturnType<typeof vi.fn>).mockResolvedValue({
+      teamId: 123456,
+      teamName: 'Existing Team',
+      overallRank: 100000,
+    });
+
+    render(
+      <BrowserRouter>
+        <ConnectPage />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Change Your FPL Team')).toBeInTheDocument();
+      expect(screen.getByText('Enter a new Team ID to switch teams.')).toBeInTheDocument();
+      expect(screen.getByText('Currently connected:')).toBeInTheDocument();
+      expect(screen.getByText('Existing Team')).toBeInTheDocument();
+      expect(screen.getByLabelText('New FPL Team ID')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Switch to This Team' })).toBeInTheDocument();
     });
   });
 });
