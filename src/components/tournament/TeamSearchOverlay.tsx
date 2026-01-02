@@ -1,12 +1,15 @@
 // src/components/tournament/TeamSearchOverlay.tsx
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
+import { sortParticipantsByFriendship } from '../../services/sharedLeagues';
 import type { Participant } from '../../types/tournament';
 
 export interface TeamSearchOverlayProps {
   participants: Participant[];
+  sharedCounts?: Map<number, number>;
   onConfirm: (fplTeamId: number) => void;
   onClose: () => void;
 }
@@ -48,6 +51,7 @@ function searchParticipants(
 
 export function TeamSearchOverlay({
   participants,
+  sharedCounts,
   onConfirm,
   onClose,
 }: TeamSearchOverlayProps) {
@@ -55,7 +59,14 @@ export function TeamSearchOverlay({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const debouncedQuery = useDebounce(searchQuery, DEBOUNCE_DELAY_MS);
-  const results = searchParticipants(participants, debouncedQuery);
+
+  // Filter by search query, then sort by friendship if counts available
+  const results = useMemo(() => {
+    const filtered = searchParticipants(participants, debouncedQuery);
+    return sharedCounts
+      ? sortParticipantsByFriendship(filtered, sharedCounts)
+      : filtered;
+  }, [participants, debouncedQuery, sharedCounts]);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,9 +132,20 @@ export function TeamSearchOverlay({
                   className="flex items-center justify-between p-3 rounded-md border bg-card hover:bg-accent transition-colors"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-foreground truncate">
-                      {participant.fplTeamName}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-foreground truncate">
+                        {participant.fplTeamName}
+                      </p>
+                      {sharedCounts &&
+                        (sharedCounts.get(participant.fplTeamId) ?? 0) > 0 && (
+                          <Badge variant="secondary" className="flex-shrink-0">
+                            {sharedCounts.get(participant.fplTeamId)} shared{' '}
+                            {sharedCounts.get(participant.fplTeamId) === 1
+                              ? 'league'
+                              : 'leagues'}
+                          </Badge>
+                        )}
+                    </div>
                     <p className="text-sm text-muted-foreground truncate">
                       {participant.managerName}
                     </p>
