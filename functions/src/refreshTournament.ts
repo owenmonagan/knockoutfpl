@@ -302,8 +302,9 @@ export const refreshTournament = onCall(
       }
 
       // 5. Fetch scores from FPL API
+      // Use treatMissingAsZero to handle deleted/missing FPL teams (they get 0 points)
       logInfo('fetching_scores', { tournamentId, entryCount: entryIds.size, event });
-      const scoresMap = await fetchScoresForEntries(Array.from(entryIds), event);
+      const scoresMap = await fetchScoresForEntries(Array.from(entryIds), event, { treatMissingAsZero: true });
 
       // 6. Update pick records with scores
       for (const [entryId, picks] of scoresMap) {

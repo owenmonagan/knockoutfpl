@@ -5,7 +5,7 @@ const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Import after mocking
-import { fetchEventStatus } from './fpl-scores';
+import { fetchEventStatus, fetchScoresForEntries, SyntheticPicksResponse } from './fpl-scores';
 
 describe('fetchEventStatus', () => {
   beforeEach(() => {
@@ -114,5 +114,81 @@ describe('fetchEventStatus', () => {
     const result = await fetchEventStatus();
 
     expect(result).toBeNull();
+  });
+});
+
+describe('fetchScoresForEntries', () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
+  const mockPicksResponse = {
+    entry_history: { points: 65, total_points: 500, rank: 100 },
+    active_chip: null,
+    picks: [],
+  };
+
+  it('returns scores for all valid entries', async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => mockPicksResponse })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...mockPicksResponse, entry_history: { points: 70, total_points: 520, rank: 90 } }) });
+
+    const result = await fetchScoresForEntries([100, 200], 19);
+
+    expect(result.size).toBe(2);
+    expect(result.get(100)?.entry_history.points).toBe(65);
+    expect(result.get(200)?.entry_history.points).toBe(70);
+  });
+
+  it('excludes missing entries by default', async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => mockPicksResponse })
+      .mockResolvedValueOnce({ ok: false, status: 404 }); // Entry 200 deleted
+
+    const result = await fetchScoresForEntries([100, 200], 19);
+
+    expect(result.size).toBe(1);
+    expect(result.has(100)).toBe(true);
+    expect(result.has(200)).toBe(false);
+  });
+
+  it('returns synthetic 0-point response for missing entries when treatMissingAsZero is true', async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => mockPicksResponse })
+      .mockResolvedValueOnce({ ok: false, status: 404 }); // Entry 200 deleted
+
+    const result = await fetchScoresForEntries([100, 200], 19, { treatMissingAsZero: true });
+
+    expect(result.size).toBe(2);
+    expect(result.get(100)?.entry_history.points).toBe(65);
+
+    const synthetic = result.get(200) as SyntheticPicksResponse;
+    expect(synthetic.entry_history.points).toBe(0);
+    expect(synthetic._synthetic).toBe(true);
+    expect(synthetic._reason).toBe('team_deleted');
+  });
+
+  it('returns all synthetic when all entries missing with treatMissingAsZero', async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: false, status: 404 })
+      .mockResolvedValueOnce({ ok: false, status: 404 });
+
+    const result = await fetchScoresForEntries([100, 200], 19, { treatMissingAsZero: true });
+
+    expect(result.size).toBe(2);
+    expect((result.get(100) as SyntheticPicksResponse)._synthetic).toBe(true);
+    expect((result.get(200) as SyntheticPicksResponse)._synthetic).toBe(true);
+  });
+
+  it('handles network errors for individual entries with treatMissingAsZero', async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => mockPicksResponse })
+      .mockRejectedValueOnce(new Error('Network error')); // Entry 200 network error
+
+    const result = await fetchScoresForEntries([100, 200], 19, { treatMissingAsZero: true });
+
+    expect(result.size).toBe(2);
+    expect(result.get(100)?.entry_history.points).toBe(65);
+    expect((result.get(200) as SyntheticPicksResponse)._synthetic).toBe(true);
   });
 });

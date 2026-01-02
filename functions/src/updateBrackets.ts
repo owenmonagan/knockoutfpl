@@ -69,8 +69,9 @@ async function processRound(round: ActiveRound, event: number): Promise<void> {
   }
 
   // 3. Fetch scores from FPL API
+  // Use treatMissingAsZero to handle deleted/missing FPL teams (they get 0 points)
   console.log(`[updateBrackets] Fetching scores for ${entryIds.size} entries`);
-  const scoresMap = await fetchScoresForEntries(Array.from(entryIds), event);
+  const scoresMap = await fetchScoresForEntries(Array.from(entryIds), event, { treatMissingAsZero: true });
 
   // 4. Update pick records with final scores
   for (const [entryId, picks] of scoresMap) {

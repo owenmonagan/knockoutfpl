@@ -11,6 +11,26 @@ import type { PicksResponse, BootstrapResponse } from './types/fplApiResponses';
 export type { PicksResponse as FPLPicksResponse } from './types/fplApiResponses';
 
 /**
+ * Synthetic response for missing/deleted FPL teams
+ * Used when treatMissingAsZero option is enabled
+ */
+export interface SyntheticPicksResponse {
+  entry_history: {
+    points: 0;
+    total_points: number;
+    rank: number;
+  };
+  active_chip: null;
+  picks: [];
+  _synthetic: true;
+  _reason: 'team_deleted' | 'api_error';
+}
+
+export interface FetchScoresOptions {
+  treatMissingAsZero?: boolean;
+}
+
+/**
  * FPL event-status endpoint types
  * Endpoint: /api/event-status/
  */
@@ -102,12 +122,18 @@ export async function fetchCurrentGameweek(): Promise<GameweekStatus | null> {
 
 /**
  * Batch fetch scores for multiple entries
+ *
+ * @param entryIds - Array of FPL entry IDs to fetch
+ * @param event - Gameweek number
+ * @param options - Optional settings
+ * @param options.treatMissingAsZero - If true, missing entries get synthetic 0-point responses
  */
 export async function fetchScoresForEntries(
   entryIds: number[],
-  event: number
-): Promise<Map<number, PicksResponse>> {
-  const results = new Map<number, PicksResponse>();
+  event: number,
+  options?: FetchScoresOptions
+): Promise<Map<number, PicksResponse | SyntheticPicksResponse>> {
+  const results = new Map<number, PicksResponse | SyntheticPicksResponse>();
 
   // Fetch in parallel with rate limiting (max 10 concurrent)
   const batchSize = 10;
@@ -124,6 +150,26 @@ export async function fetchScoresForEntries(
     // Small delay between batches to be nice to FPL API
     if (i + batchSize < entryIds.length) {
       await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+
+  // If treatMissingAsZero is enabled, add synthetic entries for missing responses
+  if (options?.treatMissingAsZero) {
+    const missingEntryIds: number[] = [];
+    for (const entryId of entryIds) {
+      if (!results.has(entryId)) {
+        missingEntryIds.push(entryId);
+        results.set(entryId, {
+          entry_history: { points: 0, total_points: 0, rank: 0 },
+          active_chip: null,
+          picks: [],
+          _synthetic: true,
+          _reason: 'team_deleted',
+        });
+      }
+    }
+    if (missingEntryIds.length > 0) {
+      console.warn(`[fpl-scores] Missing entries treated as 0 points in GW${event}: ${missingEntryIds.join(', ')}`);
     }
   }
 
