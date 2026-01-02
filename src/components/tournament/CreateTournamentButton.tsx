@@ -14,7 +14,7 @@ import {
 import { getFPLBootstrapData } from '../../services/fpl';
 
 interface CreateTournamentButtonProps {
-  onCreate: (startEvent: number) => Promise<void>;
+  onCreate: (startEvent: number, matchSize: number) => Promise<void>;
 }
 
 export function CreateTournamentButton({ onCreate }: CreateTournamentButtonProps) {
@@ -23,6 +23,7 @@ export function CreateTournamentButton({ onCreate }: CreateTournamentButtonProps
   const [error, setError] = useState<string | null>(null);
   const [currentGameweek, setCurrentGameweek] = useState<number | null>(null);
   const [selectedGameweek, setSelectedGameweek] = useState<number>(1);
+  const [matchSize, setMatchSize] = useState<number>(2);
 
   useEffect(() => {
     async function loadBootstrapData() {
@@ -47,7 +48,7 @@ export function CreateTournamentButton({ onCreate }: CreateTournamentButtonProps
     setError(null);
 
     try {
-      await onCreate(selectedGameweek);
+      await onCreate(selectedGameweek, matchSize);
       setIsComplete(true);
       // Brief pause to show completion state before parent handles navigation
       await new Promise((r) => setTimeout(r, 500));
@@ -95,6 +96,24 @@ export function CreateTournamentButton({ onCreate }: CreateTournamentButtonProps
                 GW {gw}{gw === currentGameweek ? ' (current)' : ''}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="match-size-select">Match Size</Label>
+        <Select
+          value={matchSize.toString()}
+          onValueChange={(value) => setMatchSize(parseInt(value, 10))}
+          disabled={isCreating}
+        >
+          <SelectTrigger id="match-size-select">
+            <SelectValue placeholder="Select match size" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="2">1v1 (Traditional)</SelectItem>
+            <SelectItem value="3">3-way (Top 1 advances)</SelectItem>
+            <SelectItem value="4">4-way (Top 1 advances)</SelectItem>
           </SelectContent>
         </Select>
       </div>

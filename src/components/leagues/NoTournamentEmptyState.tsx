@@ -7,7 +7,7 @@ interface NoTournamentEmptyStateProps {
   leagueName: string;
   managerCount: number;
   isAuthenticated: boolean;
-  onCreate: (startEvent: number) => Promise<void>;
+  onCreate: (startEvent: number, matchSize: number) => Promise<void>;
   isLocked?: boolean;
 }
 

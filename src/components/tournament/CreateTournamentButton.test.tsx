@@ -33,7 +33,29 @@ describe('CreateTournamentButton', () => {
     await waitFor(() => {
       expect(screen.getByText('Starting Gameweek')).toBeInTheDocument();
     });
-    expect(screen.getByRole('combobox')).toBeInTheDocument();
+    // There should be two comboboxes: gameweek and match size
+    const comboboxes = screen.getAllByRole('combobox');
+    expect(comboboxes.length).toBe(2);
+  });
+
+  it('should render match size dropdown', async () => {
+    render(<CreateTournamentButton onCreate={async () => {}} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Match Size')).toBeInTheDocument();
+    });
+    // There should be two comboboxes: gameweek and match size
+    const comboboxes = screen.getAllByRole('combobox');
+    expect(comboboxes.length).toBe(2);
+  });
+
+  it('should default match size to 2 (1v1)', async () => {
+    render(<CreateTournamentButton onCreate={async () => {}} />);
+
+    await waitFor(() => {
+      const matchSizeSelect = screen.getAllByRole('combobox')[1];
+      expect(matchSizeSelect).toHaveTextContent('1v1 (Traditional)');
+    });
   });
 
   it('should default to next gameweek (current + 1)', async () => {
@@ -41,7 +63,7 @@ describe('CreateTournamentButton', () => {
     render(<CreateTournamentButton onCreate={async () => {}} />);
 
     await waitFor(() => {
-      expect(screen.getByRole('combobox')).toHaveTextContent('GW 21');
+      expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('GW 21');
     });
   });
 
@@ -50,7 +72,7 @@ describe('CreateTournamentButton', () => {
     render(<CreateTournamentButton onCreate={async () => {}} />);
 
     await waitFor(() => {
-      expect(screen.getByRole('combobox')).toHaveTextContent('GW 1');
+      expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('GW 1');
     });
   });
 
@@ -58,13 +80,13 @@ describe('CreateTournamentButton', () => {
     render(<CreateTournamentButton onCreate={async () => {}} />);
 
     await waitFor(() => {
-      expect(screen.getByRole('combobox')).toBeInTheDocument();
+      expect(screen.getAllByRole('combobox').length).toBe(2);
     });
 
     // The dropdown should have a value (showing the default GW 21)
     // We can't easily test all 38 options due to jsdom limitations with Radix Select,
     // but we verify the combobox renders and has the expected default value
-    expect(screen.getByRole('combobox')).toHaveTextContent('GW 21');
+    expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('GW 21');
   });
 
   it('should mark current gameweek with "(current)" when selected', async () => {
@@ -73,13 +95,13 @@ describe('CreateTournamentButton', () => {
     render(<CreateTournamentButton onCreate={async () => {}} />);
 
     await waitFor(() => {
-      expect(screen.getByRole('combobox')).toBeInTheDocument();
+      expect(screen.getAllByRole('combobox').length).toBe(2);
     });
 
     // Default will be GW 2 (current + 1)
     // We verify the dropdown renders with the label
     expect(screen.getByText('Starting Gameweek')).toBeInTheDocument();
-    expect(screen.getByRole('combobox')).toHaveTextContent('GW 2');
+    expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('GW 2');
   });
 
   it('should pass selected gameweek to onCreate', async () => {
@@ -94,8 +116,25 @@ describe('CreateTournamentButton', () => {
     fireEvent.click(screen.getByRole('button', { name: /create tournament/i }));
 
     await waitFor(() => {
-      // Default is current + 1 = 21
-      expect(handleCreate).toHaveBeenCalledWith(21);
+      // Default gameweek is current + 1 = 21, default matchSize is 2
+      expect(handleCreate).toHaveBeenCalledWith(21, 2);
+    });
+  });
+
+  it('should pass matchSize to onCreate', async () => {
+    const handleCreate = vi.fn().mockResolvedValue(undefined);
+    mockGetFPLBootstrapData.mockResolvedValue({ currentGameweek: 20 });
+    render(<CreateTournamentButton onCreate={handleCreate} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /create tournament/i })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /create tournament/i }));
+
+    await waitFor(() => {
+      // Default gameweek is 21 (current + 1), default matchSize is 2
+      expect(handleCreate).toHaveBeenCalledWith(21, 2);
     });
   });
 
@@ -107,17 +146,17 @@ describe('CreateTournamentButton', () => {
     render(<CreateTournamentButton onCreate={handleCreate} />);
 
     await waitFor(() => {
-      expect(screen.getByRole('combobox')).toBeInTheDocument();
+      expect(screen.getAllByRole('combobox').length).toBe(2);
     });
 
     // Verify default is current + 1 = 16
-    expect(screen.getByRole('combobox')).toHaveTextContent('GW 16');
+    expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('GW 16');
 
     // Click create button
     fireEvent.click(screen.getByRole('button', { name: /create tournament/i }));
 
     await waitFor(() => {
-      expect(handleCreate).toHaveBeenCalledWith(16);
+      expect(handleCreate).toHaveBeenCalledWith(16, 2);
     });
   });
 
@@ -126,7 +165,7 @@ describe('CreateTournamentButton', () => {
     render(<CreateTournamentButton onCreate={slowCreate} />);
 
     await waitFor(() => {
-      expect(screen.getByRole('combobox')).toBeInTheDocument();
+      expect(screen.getAllByRole('combobox').length).toBe(2);
     });
 
     // Start creation
@@ -136,7 +175,7 @@ describe('CreateTournamentButton', () => {
     await waitFor(() => {
       expect(screen.getByText('Creating Your Tournament')).toBeInTheDocument();
     });
-    // Select is no longer visible when showing checklist
+    // Selects are no longer visible when showing checklist
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
 
@@ -257,7 +296,7 @@ describe('CreateTournamentButton', () => {
 
     await waitFor(() => {
       // Should show GW 38, not GW 39
-      expect(screen.getByRole('combobox')).toHaveTextContent('GW 38');
+      expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('GW 38');
     });
   });
 });
