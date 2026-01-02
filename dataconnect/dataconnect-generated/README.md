@@ -44,6 +44,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetUserVerdictMatchPicks*](#getuserverdictmatchpicks)
   - [*GetMatchParticipants*](#getmatchparticipants)
   - [*GetPickScores*](#getpickscores)
+  - [*GetRoundMatchesWithPriority*](#getroundmatcheswithpriority)
 - [**Mutations**](#mutations)
   - [*UpsertUser*](#upsertuser)
   - [*ConnectFplEntry*](#connectfplentry)
@@ -4427,6 +4428,133 @@ console.log(data.picks);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.picks);
+});
+```
+
+## GetRoundMatchesWithPriority
+You can execute the `GetRoundMatchesWithPriority` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getRoundMatchesWithPriority(vars: GetRoundMatchesWithPriorityVariables): QueryPromise<GetRoundMatchesWithPriorityData, GetRoundMatchesWithPriorityVariables>;
+
+interface GetRoundMatchesWithPriorityRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetRoundMatchesWithPriorityVariables): QueryRef<GetRoundMatchesWithPriorityData, GetRoundMatchesWithPriorityVariables>;
+}
+export const getRoundMatchesWithPriorityRef: GetRoundMatchesWithPriorityRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getRoundMatchesWithPriority(dc: DataConnect, vars: GetRoundMatchesWithPriorityVariables): QueryPromise<GetRoundMatchesWithPriorityData, GetRoundMatchesWithPriorityVariables>;
+
+interface GetRoundMatchesWithPriorityRef {
+  ...
+  (dc: DataConnect, vars: GetRoundMatchesWithPriorityVariables): QueryRef<GetRoundMatchesWithPriorityData, GetRoundMatchesWithPriorityVariables>;
+}
+export const getRoundMatchesWithPriorityRef: GetRoundMatchesWithPriorityRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getRoundMatchesWithPriorityRef:
+```typescript
+const name = getRoundMatchesWithPriorityRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetRoundMatchesWithPriority` query requires an argument of type `GetRoundMatchesWithPriorityVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetRoundMatchesWithPriorityVariables {
+  tournamentId: UUIDString;
+  roundNumber: number;
+}
+```
+### Return Type
+Recall that executing the `GetRoundMatchesWithPriority` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetRoundMatchesWithPriorityData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetRoundMatchesWithPriorityData {
+  matches: ({
+    matchId: number;
+    roundNumber: number;
+    positionInRound: number;
+    status: string;
+    winnerEntryId?: number | null;
+    qualifiesToMatchId?: number | null;
+    matchPicks_on_match: ({
+      entryId: number;
+      slot: number;
+      participant: {
+        seed: number;
+        uid?: string | null;
+      };
+    })[];
+  })[];
+}
+```
+### Using `GetRoundMatchesWithPriority`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getRoundMatchesWithPriority, GetRoundMatchesWithPriorityVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetRoundMatchesWithPriority` query requires an argument of type `GetRoundMatchesWithPriorityVariables`:
+const getRoundMatchesWithPriorityVars: GetRoundMatchesWithPriorityVariables = {
+  tournamentId: ..., 
+  roundNumber: ..., 
+};
+
+// Call the `getRoundMatchesWithPriority()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getRoundMatchesWithPriority(getRoundMatchesWithPriorityVars);
+// Variables can be defined inline as well.
+const { data } = await getRoundMatchesWithPriority({ tournamentId: ..., roundNumber: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getRoundMatchesWithPriority(dataConnect, getRoundMatchesWithPriorityVars);
+
+console.log(data.matches);
+
+// Or, you can use the `Promise` API.
+getRoundMatchesWithPriority(getRoundMatchesWithPriorityVars).then((response) => {
+  const data = response.data;
+  console.log(data.matches);
+});
+```
+
+### Using `GetRoundMatchesWithPriority`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getRoundMatchesWithPriorityRef, GetRoundMatchesWithPriorityVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetRoundMatchesWithPriority` query requires an argument of type `GetRoundMatchesWithPriorityVariables`:
+const getRoundMatchesWithPriorityVars: GetRoundMatchesWithPriorityVariables = {
+  tournamentId: ..., 
+  roundNumber: ..., 
+};
+
+// Call the `getRoundMatchesWithPriorityRef()` function to get a reference to the query.
+const ref = getRoundMatchesWithPriorityRef(getRoundMatchesWithPriorityVars);
+// Variables can be defined inline as well.
+const ref = getRoundMatchesWithPriorityRef({ tournamentId: ..., roundNumber: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getRoundMatchesWithPriorityRef(dataConnect, getRoundMatchesWithPriorityVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.matches);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.matches);
 });
 ```
 

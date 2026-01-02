@@ -630,3 +630,40 @@ query GetPickScores($entryIds: [Int!]!, $event: Int!) @auth(level: PUBLIC) {
     points
   }
 }
+
+# =============================================================================
+# BRACKET UPDATE QUERIES
+# =============================================================================
+
+# Get matches for a round with claimed user priority ordering
+# Returns matches where participants may have claimed (has uid)
+# Sorting by claimed status happens in TypeScript code
+query GetRoundMatchesWithPriority(
+  $tournamentId: UUID!,
+  $roundNumber: Int!
+) @auth(level: PUBLIC) {
+  matches(
+    where: {
+      tournamentId: { eq: $tournamentId }
+      roundNumber: { eq: $roundNumber }
+      status: { ne: "complete" }
+      isBye: { eq: false }
+    }
+    orderBy: { positionInRound: ASC }
+  ) {
+    matchId
+    roundNumber
+    positionInRound
+    status
+    winnerEntryId
+    qualifiesToMatchId
+    matchPicks_on_match {
+      entryId
+      slot
+      participant {
+        seed
+        uid
+      }
+    }
+  }
+}
