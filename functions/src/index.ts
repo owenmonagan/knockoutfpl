@@ -95,3 +95,6 @@ export { refreshTournament } from './refreshTournament';
 
 // Export scheduled event finalization checker
 export { checkEventStatus } from './checkEventStatus';
+
+// Export scheduled verdict email queue function
+export { queueVerdicts } from './queueVerdicts';
