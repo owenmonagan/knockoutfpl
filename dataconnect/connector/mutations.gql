@@ -247,6 +247,18 @@ mutation UpdateRound(
   )
 }
 
+# Update round's updatedAt timestamp
+mutation UpdateRoundUpdatedAt(
+  $tournamentId: UUID!
+  $roundNumber: Int!
+  $updatedAt: Timestamp!
+) @auth(level: PUBLIC) {
+  round_update(
+    key: { tournamentId: $tournamentId, roundNumber: $roundNumber }
+    data: { updatedAt: $updatedAt }
+  )
+}
+
 # =============================================================================
 # PARTICIPANT MUTATIONS
 # =============================================================================
