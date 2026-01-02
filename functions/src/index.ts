@@ -93,6 +93,9 @@ export { fixAllTournamentByes } from './fixAllTournamentByes';
 // Export eager refresh function for tournament viewing
 export { refreshTournament } from './refreshTournament';
 
+// Export scoped refresh function for visible matches (pagination)
+export { refreshVisibleMatches } from './refreshVisibleMatches';
+
 // Export scheduled event finalization checker
 export { checkEventStatus } from './checkEventStatus';
 
