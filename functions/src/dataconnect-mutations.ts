@@ -513,6 +513,24 @@ const UPDATE_PARTICIPANT_STATUS_MUTATION = `
   }
 `;
 
+// Email queue mutation
+const CREATE_EMAIL_QUEUE_ENTRY_MUTATION = `
+  mutation CreateEmailQueueEntry(
+    $userUid: String!
+    $type: String!
+    $event: Int!
+  ) {
+    emailQueue_insert(
+      data: {
+        userUid: $userUid
+        type: $type
+        event: $event
+        status: "pending"
+      }
+    )
+  }
+`;
+
 // Type definitions for mutation inputs
 export interface UpsertEntryInput {
   entryId: number;
@@ -990,6 +1008,24 @@ export async function updateTournamentCurrentRound(
   await dataConnectAdmin.executeGraphql(
     UPDATE_TOURNAMENT_CURRENT_ROUND_MUTATION,
     { variables: { id: tournamentId, currentRound } }
+  );
+}
+
+// =============================================================================
+// EMAIL QUEUE FUNCTIONS
+// =============================================================================
+
+/**
+ * Create an email queue entry for scheduled delivery
+ */
+export async function createEmailQueueEntry(
+  userUid: string,
+  type: 'matchup' | 'verdict',
+  event: number
+): Promise<void> {
+  await dataConnectAdmin.executeGraphql(
+    CREATE_EMAIL_QUEUE_ENTRY_MUTATION,
+    { variables: { userUid, type, event } }
   );
 }
 

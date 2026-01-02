@@ -259,6 +259,18 @@ mutation UpdateRoundUpdatedAt(
   )
 }
 
+# Update match's updatedAt timestamp
+mutation UpdateMatchUpdatedAt(
+  $tournamentId: UUID!
+  $matchId: Int!
+  $updatedAt: Timestamp!
+) @auth(level: PUBLIC) {
+  match_update(
+    key: { tournamentId: $tournamentId, matchId: $matchId }
+    data: { updatedAt: $updatedAt }
+  )
+}
+
 # =============================================================================
 # PARTICIPANT MUTATIONS
 # =============================================================================
@@ -430,4 +442,24 @@ mutation DeleteParticipantsByTournament($tournamentId: UUID!)
 mutation DeleteTournamentById($id: UUID!)
   @auth(level: PUBLIC, insecureReason: "Admin cleanup script - requires valid tournament ID") {
   tournament_delete(id: $id)
+}
+
+# =============================================================================
+# EMAIL QUEUE MUTATIONS
+# =============================================================================
+
+# Create email queue entry
+mutation CreateEmailQueueEntry(
+  $userUid: String!
+  $type: String!
+  $event: Int!
+) @auth(level: PUBLIC, insecureReason: "Server-side function for queueing emails") {
+  emailQueue_insert(
+    data: {
+      userUid: $userUid
+      type: $type
+      event: $event
+      status: "pending"
+    }
+  )
 }
