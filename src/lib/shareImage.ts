@@ -66,11 +66,11 @@ export async function renderShareImage(
   ctx.fillText(leagueName, 30, 100);
 
   // Round name badge
+  ctx.font = 'bold 14px system-ui, sans-serif'; // Set font BEFORE measuring
   ctx.fillStyle = COLORS.primary;
   roundRect(ctx, 30, 120, ctx.measureText(data.roundName).width + 24, 32, 6);
   ctx.fill();
   ctx.fillStyle = COLORS.text;
-  ctx.font = 'bold 14px system-ui, sans-serif';
   ctx.fillText(data.roundName, 42, 141);
 
   // Participant count
