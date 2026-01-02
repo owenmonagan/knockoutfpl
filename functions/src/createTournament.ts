@@ -139,8 +139,8 @@ export function validateLeagueStandings(standings: any): void {
 
   const count = standings.standings.results.length;
 
-  if (count < 4) {
-    throw new HttpsError('failed-precondition', 'League must have at least 4 participants');
+  if (count < 2) {
+    throw new HttpsError('failed-precondition', 'League must have at least 2 participants');
   }
 
   if (count > 48) {

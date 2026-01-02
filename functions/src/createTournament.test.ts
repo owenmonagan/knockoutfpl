@@ -84,9 +84,9 @@ describe('createTournament', () => {
       expect(() => validateLeagueStandings(null)).toThrow('League not found');
     });
 
-    it('throws if less than 4 participants', () => {
-      const standings = { standings: { results: [{}, {}, {}] } };
-      expect(() => validateLeagueStandings(standings)).toThrow('at least 4');
+    it('throws if less than 2 participants', () => {
+      const standings = { standings: { results: [{}] } };
+      expect(() => validateLeagueStandings(standings)).toThrow('at least 2');
     });
 
     it('throws if more than 48 participants', () => {
