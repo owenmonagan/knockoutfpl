@@ -96,6 +96,7 @@ type Event @table(name: "events", key: ["event", "season"]) {
   name: String!
   deadlineTime: Timestamp! @col(name: "deadline_time")
   finished: Boolean! @default(value: false)
+  finalizedAt: Timestamp @col(name: "finalized_at")  # When bonus+leagues complete
   isCurrent: Boolean! @col(name: "is_current") @default(value: false)
   isNext: Boolean! @col(name: "is_next") @default(value: false)
 
