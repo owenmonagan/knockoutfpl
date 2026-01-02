@@ -484,12 +484,14 @@ const UPDATE_TOURNAMENT_STATUS_MUTATION = `
     $id: UUID!
     $status: String!
     $winnerEntryId: Int
+    $updatedAt: Timestamp!
   ) {
     tournament_update(
       id: $id
       data: {
         status: $status
         winnerEntryId: $winnerEntryId
+        updatedAt: $updatedAt
       }
     )
   }
@@ -577,6 +579,28 @@ const GET_EXISTING_EMAIL_QUEUE_QUERY = `
     ) {
       id
       status
+    }
+  }
+`;
+
+const GET_ENTRY_MATCHES_IN_EVENT_QUERY = `
+  query GetEntryMatchesInEvent($entryId: Int!, $event: Int!) {
+    matchPicks(where: { entryId: { eq: $entryId } }) {
+      tournamentId
+      matchId
+      entryId
+      slot
+      match {
+        matchId
+        status
+        winnerEntryId
+        updatedAt
+        isBye
+        round {
+          event
+          roundNumber
+        }
+      }
     }
   }
 `;
@@ -1042,11 +1066,12 @@ export async function updateMatchUpdatedAt(
 export async function updateTournamentStatus(
   tournamentId: string,
   status: string,
+  updatedAt: Date,
   winnerEntryId?: number
 ): Promise<void> {
   await dataConnectAdmin.executeGraphql(
     UPDATE_TOURNAMENT_STATUS_MUTATION,
-    { variables: { id: tournamentId, status, winnerEntryId } }
+    { variables: { id: tournamentId, status, winnerEntryId, updatedAt: updatedAt.toISOString() } }
   );
 }
 
@@ -1155,6 +1180,66 @@ export async function emailAlreadyQueued(
   );
 
   return result.data.emailQueues.length > 0;
+}
+
+/**
+ * Match data for an entry in a specific event
+ * Used to check if matches have been updated after gameweek finalization
+ */
+export interface EntryMatchInEvent {
+  tournamentId: string;
+  matchId: number;
+  entryId: number;
+  status: string;
+  winnerEntryId: number | null;
+  updatedAt: string;
+  isBye: boolean;
+  event: number;
+  roundNumber: number;
+}
+
+/**
+ * Get all matches for a specific entry in a specific gameweek
+ * Used by queueVerdicts to check if all matches have fresh results after finalization
+ */
+export async function getEntryMatchesInEvent(
+  entryId: number,
+  event: number
+): Promise<EntryMatchInEvent[]> {
+  const result = await dataConnectAdmin.executeGraphql<{
+    matchPicks: Array<{
+      tournamentId: string;
+      matchId: number;
+      entryId: number;
+      slot: number;
+      match: {
+        matchId: number;
+        status: string;
+        winnerEntryId: number | null;
+        updatedAt: string;
+        isBye: boolean;
+        round: {
+          event: number;
+          roundNumber: number;
+        };
+      };
+    }>;
+  }, { entryId: number; event: number }>(GET_ENTRY_MATCHES_IN_EVENT_QUERY, { variables: { entryId, event } });
+
+  // Filter to only matches in the requested event
+  return result.data.matchPicks
+    .filter(mp => mp.match.round.event === event)
+    .map(mp => ({
+      tournamentId: mp.tournamentId,
+      matchId: mp.matchId,
+      entryId: mp.entryId,
+      status: mp.match.status,
+      winnerEntryId: mp.match.winnerEntryId,
+      updatedAt: mp.match.updatedAt,
+      isBye: mp.match.isBye,
+      event: mp.match.round.event,
+      roundNumber: mp.match.round.roundNumber,
+    }));
 }
 
 // =============================================================================

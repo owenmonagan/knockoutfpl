@@ -548,3 +548,25 @@ query GetExistingEmailQueue(
     status
   }
 }
+
+# Get all matches for a specific entry in a specific gameweek
+# Returns match details including updatedAt for staleness check
+query GetEntryMatchesInEvent($entryId: Int!, $event: Int!) @auth(level: PUBLIC) {
+  matchPicks(where: { entryId: { eq: $entryId } }) {
+    tournamentId
+    matchId
+    entryId
+    slot
+    match {
+      matchId
+      status
+      winnerEntryId
+      updatedAt
+      isBye
+      round {
+        event
+        roundNumber
+      }
+    }
+  }
+}
