@@ -2,7 +2,7 @@ import { Card, CardContent } from '../ui/card';
 import { Skeleton } from '../ui/skeleton';
 import { LeagueSummaryCard } from './LeagueSummaryCard';
 import type { LeagueSummaryCardProps } from './LeagueSummaryCard';
-import { MAX_TOURNAMENT_PARTICIPANTS } from '../../constants/tournament';
+import { MIN_TOURNAMENT_PARTICIPANTS, MAX_TOURNAMENT_PARTICIPANTS } from '../../constants/tournament';
 
 // Extend LeagueSummaryCardProps without the onClick handler
 export interface LeagueData extends Omit<LeagueSummaryCardProps, 'onClick'> {
@@ -65,12 +65,16 @@ function LeagueCardSkeleton() {
 export function YourLeaguesSection(props: YourLeaguesSectionProps) {
   const { leagues, onLeagueClick, isLoading = false } = props;
 
-  // Split leagues into unlocked (can create tournaments) and locked (too large)
+  // Split leagues into unlocked (can create tournaments) and locked (too small or too large)
   const unlockedLeagues = leagues.filter(
-    (league) => league.memberCount <= MAX_TOURNAMENT_PARTICIPANTS
+    (league) =>
+      league.memberCount >= MIN_TOURNAMENT_PARTICIPANTS &&
+      league.memberCount <= MAX_TOURNAMENT_PARTICIPANTS
   );
   const lockedLeagues = leagues.filter(
-    (league) => league.memberCount > MAX_TOURNAMENT_PARTICIPANTS
+    (league) =>
+      league.memberCount < MIN_TOURNAMENT_PARTICIPANTS ||
+      league.memberCount > MAX_TOURNAMENT_PARTICIPANTS
   );
 
   const sortedUnlockedLeagues = sortLeagues(unlockedLeagues);
@@ -129,8 +133,7 @@ export function YourLeaguesSection(props: YourLeaguesSectionProps) {
                 No eligible leagues found.
               </p>
               <p className="text-muted-foreground mt-1">
-                All your leagues have more than {MAX_TOURNAMENT_PARTICIPANTS}{' '}
-                members.
+                Leagues need {MIN_TOURNAMENT_PARTICIPANTS}-{MAX_TOURNAMENT_PARTICIPANTS} members for tournaments.
               </p>
             </CardContent>
           </Card>
@@ -173,7 +176,7 @@ export function YourLeaguesSection(props: YourLeaguesSectionProps) {
               Your Locked Leagues
             </h2>
             <span className="text-sm text-muted-foreground">
-              (more than {MAX_TOURNAMENT_PARTICIPANTS} members)
+              (requires {MIN_TOURNAMENT_PARTICIPANTS}-{MAX_TOURNAMENT_PARTICIPANTS} members)
             </span>
           </div>
 

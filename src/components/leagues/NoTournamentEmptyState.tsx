@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { CreateTournamentButton } from '../tournament/CreateTournamentButton';
+import { MIN_TOURNAMENT_PARTICIPANTS } from '../../constants/tournament';
 
 interface NoTournamentEmptyStateProps {
   leagueName: string;
@@ -19,6 +20,14 @@ export function NoTournamentEmptyState({
   isLocked = false,
 }: NoTournamentEmptyStateProps) {
   if (isLocked) {
+    const isTooSmall = managerCount < MIN_TOURNAMENT_PARTICIPANTS;
+    const title = isTooSmall
+      ? 'Knockout tournaments require at least 2 managers to compete'
+      : 'This league is too large for a tournament';
+    const description = isTooSmall
+      ? `${leagueName} needs more managers to create a knockout tournament.`
+      : `${leagueName} has too many managers to create a knockout tournament.`;
+
     return (
       <Card className="w-full max-w-lg mx-auto overflow-hidden">
         {/* Hero Area */}
@@ -42,10 +51,10 @@ export function NoTournamentEmptyState({
         {/* Content Body */}
         <div className="px-8 pb-10 pt-6 flex flex-col items-center text-center">
           <h1 className="text-2xl md:text-3xl font-bold mb-3 tracking-tight">
-            This league is too large for a tournament
+            {title}
           </h1>
           <p className="text-muted-foreground text-base max-w-xs mx-auto leading-relaxed">
-            <span className="text-foreground font-semibold">{leagueName}</span> has too many managers to create a knockout tournament.
+            <span className="text-foreground font-semibold">{leagueName}</span> {description.split(leagueName)[1]}
           </p>
         </div>
       </Card>
