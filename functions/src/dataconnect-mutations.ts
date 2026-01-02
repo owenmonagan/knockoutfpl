@@ -273,6 +273,7 @@ const GET_PENDING_ACTIVE_ROUNDS_QUERY = `
       roundNumber
       event
       status
+      updatedAt
       tournament {
         id
         status
@@ -607,6 +608,7 @@ export interface ActiveRound {
   roundNumber: number;
   event: number;
   status: string;
+  updatedAt: string;
   tournament: {
     id: string;
     status: string;

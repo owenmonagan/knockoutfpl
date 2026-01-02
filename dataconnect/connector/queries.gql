@@ -343,6 +343,30 @@ query GetActiveRounds($event: Int!) @auth(level: PUBLIC) {
   }
 }
 
+# Get pending active rounds for any finished gameweek (catch-up mode)
+query GetPendingActiveRounds($maxEvent: Int!) @auth(level: PUBLIC) {
+  rounds(
+    where: {
+      status: { eq: "active" }
+      event: { le: $maxEvent }
+    }
+    orderBy: { event: ASC }
+  ) {
+    tournamentId
+    roundNumber
+    event
+    status
+    updatedAt
+    tournament {
+      id
+      fplLeagueId
+      fplLeagueName
+      totalRounds
+      status
+    }
+  }
+}
+
 # =============================================================================
 # MATCH QUERIES
 # =============================================================================
