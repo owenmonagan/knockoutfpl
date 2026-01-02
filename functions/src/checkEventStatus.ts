@@ -65,12 +65,12 @@ export const checkEventStatus = onSchedule(
           event: matchingEvent.event,
           season: matchingEvent.season,
           name: matchingEvent.name,
-          deadlineTime: now, // Will be preserved by existing value in upsert
+          deadlineTime: matchingEvent.deadlineTime,
           finished: true,
           finalizedAt: now,
-          isCurrent: false,
-          isNext: false,
-          rawJson: JSON.stringify({ finalizedAt: now }),
+          isCurrent: matchingEvent.isCurrent,
+          isNext: matchingEvent.isNext,
+          rawJson: matchingEvent.rawJson,
         });
 
         console.log(`[checkEventStatus] Marked GW${status.event} as finalized at ${now}`);

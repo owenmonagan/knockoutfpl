@@ -363,6 +363,10 @@ const GET_EVENTS_NEEDING_FINALIZATION_QUERY = `
       name
       finished
       finalizedAt
+      deadlineTime
+      rawJson
+      isCurrent
+      isNext
     }
   }
 `;
@@ -613,6 +617,10 @@ export interface EventNeedingFinalization {
   name: string;
   finished: boolean;
   finalizedAt: string | null;
+  deadlineTime: string;
+  rawJson: string;
+  isCurrent: boolean;
+  isNext: boolean;
 }
 
 // Mutation functions - execute as admin (internal mutations use NO_ACCESS auth)

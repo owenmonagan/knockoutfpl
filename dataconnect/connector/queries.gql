@@ -159,6 +159,10 @@ query GetEventsNeedingFinalization($season: String!) @auth(level: PUBLIC) {
     name
     finished
     finalizedAt
+    deadlineTime
+    rawJson
+    isCurrent
+    isNext
   }
 }
 
