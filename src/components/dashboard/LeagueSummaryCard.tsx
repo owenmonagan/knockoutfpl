@@ -63,18 +63,30 @@ function getCardClasses(variant: CardVariant): string {
     case 'active':
       return cn(
         baseClasses,
-        'border-primary/50 shadow-[0_0_20px_rgba(0,255,136,0.1)]'
+        'border-primary/50 shadow-[0_0_20px_rgba(0,255,136,0.1)]',
+        'hover:border-primary/70 hover:shadow-[0_0_25px_rgba(0,255,136,0.15)]'
       );
     case 'winner':
       return cn(
         baseClasses,
-        'border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.1)]'
+        'border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.1)]',
+        'hover:border-amber-500/70'
       );
     case 'eliminated':
     case 'completed':
-      return cn(baseClasses, 'opacity-80');
+      return cn(
+        baseClasses,
+        'opacity-90',
+        'hover:border-red-900/50'
+      );
     case 'no-tournament':
-      return cn(baseClasses, 'border-dashed');
+      return cn(
+        baseClasses,
+        'border-dashed border-[#273a31]',
+        '[&_[data-testid=league-card-header]]:grayscale',
+        'hover:[&_[data-testid=league-card-header]]:grayscale-0',
+        'hover:border-text-subtle'
+      );
     default:
       return baseClasses;
   }
@@ -320,6 +332,9 @@ export function LeagueSummaryCard(props: LeagueSummaryCardProps) {
           getHeaderGradient(variant)
         )}
       >
+        {/* Texture overlay */}
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none" />
+
         {/* Top row: Badge + Manager count */}
         <div className="relative z-10 flex justify-between items-start">
           {renderBadge()}

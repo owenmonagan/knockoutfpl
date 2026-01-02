@@ -432,7 +432,7 @@ describe('LeagueSummaryCard', () => {
         />
       );
 
-      const card = container.querySelector('.opacity-80');
+      const card = container.querySelector('.opacity-90');
       expect(card).toBeInTheDocument();
     });
   });
@@ -536,7 +536,7 @@ describe('LeagueSummaryCard', () => {
         />
       );
 
-      const card = container.querySelector('.opacity-80');
+      const card = container.querySelector('.opacity-90');
       expect(card).toBeInTheDocument();
     });
   });
