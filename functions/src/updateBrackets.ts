@@ -21,6 +21,8 @@ import {
   updateTournamentStatus,
   updateParticipantStatus,
   createMatchPickAdmin,
+  getEventFinalization,
+  updateRoundUpdatedAt,
   ActiveRound,
   RoundMatch,
   AuthClaims,
@@ -28,6 +30,9 @@ import {
 import { sendDiscordAlert } from './discord';
 import { fetchCurrentGameweek, fetchScoresForEntries } from './fpl-scores';
 import { resolveMatch, getNextRoundSlot, MatchResult } from './match-resolver';
+
+// Current FPL season
+const CURRENT_SEASON = '2024-25';
 
 // Auth claims for admin operations
 const SYSTEM_AUTH_CLAIMS: AuthClaims = {
@@ -196,7 +201,7 @@ async function advanceWinnersToNextRound(
 
 /**
  * Main scheduled function - runs every 2 hours
- * Enhanced with catch-up mode to process all pending rounds
+ * Only processes rounds when gameweek is truly finalized (bonus + leagues done)
  */
 export const updateBrackets = onSchedule(
   {
@@ -208,7 +213,7 @@ export const updateBrackets = onSchedule(
     console.log('[updateBrackets] Starting bracket update check...');
 
     try {
-      // 1. Check current gameweek status
+      // 1. Check current gameweek status (still needed to know max event)
       const currentGW = await fetchCurrentGameweek();
 
       if (!currentGW) {
@@ -218,7 +223,7 @@ export const updateBrackets = onSchedule(
 
       console.log(`[updateBrackets] Current gameweek: ${currentGW.event}, finished: ${currentGW.finished}`);
 
-      // 2. Catch-up mode: find ALL active rounds for finished gameweeks
+      // 2. Determine max event to check
       const maxEvent = currentGW.finished ? currentGW.event : currentGW.event - 1;
 
       if (maxEvent < 1) {
@@ -226,52 +231,70 @@ export const updateBrackets = onSchedule(
         return;
       }
 
-      // 3. Loop to process all pending rounds (max 10 iterations for safety)
-      const MAX_ITERATIONS = 10;
-      let iteration = 0;
+      // 3. Find all active rounds up to maxEvent
+      const pendingRounds = await getPendingActiveRounds(maxEvent);
+      console.log(`[updateBrackets] Found ${pendingRounds.length} active rounds`);
+
+      if (pendingRounds.length === 0) {
+        console.log('[updateBrackets] No active rounds to process');
+        return;
+      }
+
+      // 4. Group rounds by event for finalization check
+      const roundsByEvent = new Map<number, ActiveRound[]>();
+      for (const round of pendingRounds) {
+        if (!roundsByEvent.has(round.event)) {
+          roundsByEvent.set(round.event, []);
+        }
+        roundsByEvent.get(round.event)!.push(round);
+      }
+
+      // 5. Process each event's rounds (only if finalized)
       let totalRoundsProcessed = 0;
 
-      while (iteration < MAX_ITERATIONS) {
-        iteration++;
-        console.log(`[updateBrackets] Catch-up iteration ${iteration}...`);
+      for (const [event, rounds] of roundsByEvent) {
+        // Check if this event is finalized
+        const eventStatus = await getEventFinalization(event, CURRENT_SEASON);
 
-        // Find active rounds for any finished gameweek
-        const pendingRounds = await getPendingActiveRounds(maxEvent);
-        console.log(`[updateBrackets] Found ${pendingRounds.length} pending active rounds`);
-
-        if (pendingRounds.length === 0) {
-          console.log('[updateBrackets] No more pending rounds, catch-up complete');
-          break;
+        if (!eventStatus?.finalizedAt) {
+          console.log(`[updateBrackets] GW${event} not finalized yet, skipping ${rounds.length} rounds`);
+          continue;
         }
 
-        // Process each round
-        for (const round of pendingRounds) {
+        const finalizedAt = new Date(eventStatus.finalizedAt);
+        console.log(`[updateBrackets] GW${event} finalized at ${eventStatus.finalizedAt}`);
+
+        // Process rounds that are stale (updatedAt < finalizedAt)
+        for (const round of rounds) {
+          const roundUpdatedAt = new Date(round.updatedAt);
+
+          if (roundUpdatedAt >= finalizedAt) {
+            console.log(`[updateBrackets] Round ${round.roundNumber} of ${round.tournamentId} already up-to-date, skipping`);
+            continue;
+          }
+
+          console.log(`[updateBrackets] Round ${round.roundNumber} is stale (${round.updatedAt} < ${eventStatus.finalizedAt})`);
+
           try {
-            await processRound(round, round.event);
+            await processRound(round, event);
+
+            // Update round.updatedAt to mark as processed
+            await updateRoundUpdatedAt(round.tournamentId, round.roundNumber, new Date());
+
             totalRoundsProcessed++;
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             console.error(`[updateBrackets] Error processing round ${round.roundNumber} of ${round.tournamentId}:`, error);
 
-            // Send Discord alert for processing errors
             await sendDiscordAlert(
               `🔴 updateBrackets error: Round ${round.roundNumber} of tournament ${round.tournamentId} (League: ${round.tournament.fplLeagueName} #${round.tournament.fplLeagueId}) failed: ${errorMessage}`,
               DISCORD_WEBHOOK_URL
             );
-            // Continue with other rounds
           }
         }
       }
 
-      if (iteration >= MAX_ITERATIONS) {
-        console.warn('[updateBrackets] Hit max iterations, may have more rounds to process');
-        await sendDiscordAlert(
-          `⚠️ updateBrackets hit max iterations (${MAX_ITERATIONS}), may have more rounds pending`,
-          DISCORD_WEBHOOK_URL
-        );
-      }
-
-      console.log(`[updateBrackets] Bracket update complete. Processed ${totalRoundsProcessed} rounds in ${iteration} iterations.`);
+      console.log(`[updateBrackets] Bracket update complete. Processed ${totalRoundsProcessed} rounds.`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('[updateBrackets] Fatal error:', error);
@@ -279,7 +302,7 @@ export const updateBrackets = onSchedule(
         `🔴 updateBrackets crashed: ${errorMessage}`,
         DISCORD_WEBHOOK_URL
       );
-      throw error; // Re-throw for retry
+      throw error;
     }
   }
 );
