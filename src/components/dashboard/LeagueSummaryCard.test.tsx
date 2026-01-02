@@ -3,6 +3,33 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { LeagueSummaryCard } from './LeagueSummaryCard';
 
 describe('LeagueSummaryCard', () => {
+  describe('User Rank Display', () => {
+    // TODO: This test will pass after Task 4 (stats grid implementation)
+    it.skip('should display user rank with ordinal suffix', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Work Colleagues League"
+          memberCount={14}
+          userRank={1}
+          tournament={{
+            startGameweek: 12,
+            endGameweek: 15,
+            currentRound: 3,
+            totalRounds: 4,
+            status: 'active',
+          }}
+          userProgress={{
+            status: 'active',
+            currentRoundName: 'Semi-finals',
+          }}
+          onClick={() => {}}
+        />
+      );
+
+      expect(screen.getByText('1st')).toBeInTheDocument();
+    });
+  });
+
   describe('League with Active Tournament (user still alive)', () => {
     it('should render league name', () => {
       render(
