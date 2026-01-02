@@ -1,7 +1,7 @@
 /**
  * Bracket Update Scheduled Function
  *
- * Runs every 2 hours to:
+ * Runs every 15 minutes to:
  * 1. Check if current gameweek is finished
  * 2. Find active rounds for that gameweek
  * 3. Fetch final scores from FPL API
@@ -205,12 +205,12 @@ async function advanceWinnersToNextRound(
 }
 
 /**
- * Main scheduled function - runs every 2 hours
+ * Main scheduled function - runs every 15 minutes
  * Only processes rounds when gameweek is truly finalized (bonus + leagues done)
  */
 export const updateBrackets = onSchedule(
   {
-    schedule: 'every 2 hours',
+    schedule: 'every 15 minutes',
     timeZone: 'Europe/London',
     retryCount: 3,
   },
