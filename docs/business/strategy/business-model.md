@@ -188,6 +188,12 @@ Knockout FPL is a free tournament platform for FPL players, funded by ads and vo
 
 ---
 
+## Implementation Plans
+
+- [Google Ads & Analytics Design](../../plans/2026-01-02-google-ads-design.md) - Technical design for Phase 1 ad revenue integration
+
+---
+
 ## Related
 
 - [vision.md](./vision.md) - Why we exist and where we're headed
