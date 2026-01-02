@@ -17,6 +17,9 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetCurrentEvent*](#getcurrentevent)
   - [*GetEvent*](#getevent)
   - [*GetSeasonEvents*](#getseasonevents)
+  - [*GetEventsNeedingFinalization*](#geteventsneedingfinalization)
+  - [*GetFinalizedEvents*](#getfinalizedevents)
+  - [*GetEventFinalization*](#geteventfinalization)
   - [*GetTournament*](#gettournament)
   - [*GetTournamentWithParticipants*](#gettournamentwithparticipants)
   - [*GetUserTournaments*](#getusertournaments)
@@ -25,6 +28,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetTournamentRounds*](#gettournamentrounds)
   - [*GetRound*](#getround)
   - [*GetActiveRounds*](#getactiverounds)
+  - [*GetPendingActiveRounds*](#getpendingactiverounds)
   - [*GetRoundMatches*](#getroundmatches)
   - [*GetMatch*](#getmatch)
   - [*GetMatchPicks*](#getmatchpicks)
@@ -46,6 +50,8 @@ This README will guide you through the process of using the generated JavaScript
   - [*AdvanceTournamentRound*](#advancetournamentround)
   - [*CreateRound*](#createround)
   - [*UpdateRound*](#updateround)
+  - [*UpdateRoundUpdatedAt*](#updateroundupdatedat)
+  - [*UpdateMatchUpdatedAt*](#updatematchupdatedat)
   - [*CreateParticipant*](#createparticipant)
   - [*UpdateParticipant*](#updateparticipant)
   - [*CreateMatch*](#creatematch)
@@ -57,6 +63,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*DeleteRoundsByTournament*](#deleteroundsbytournament)
   - [*DeleteParticipantsByTournament*](#deleteparticipantsbytournament)
   - [*DeleteTournamentById*](#deletetournamentbyid)
+  - [*CreateEmailQueueEntry*](#createemailqueueentry)
 
 # Accessing the connector
 A connector is a collection of Queries and Mutations. One SDK is generated for each connector - this SDK is generated for the connector `default`. You can find more information about connectors in the [Data Connect documentation](https://firebase.google.com/docs/data-connect#how-does).
@@ -1175,6 +1182,357 @@ executeQuery(ref).then((response) => {
 });
 ```
 
+## GetEventsNeedingFinalization
+You can execute the `GetEventsNeedingFinalization` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getEventsNeedingFinalization(vars: GetEventsNeedingFinalizationVariables): QueryPromise<GetEventsNeedingFinalizationData, GetEventsNeedingFinalizationVariables>;
+
+interface GetEventsNeedingFinalizationRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetEventsNeedingFinalizationVariables): QueryRef<GetEventsNeedingFinalizationData, GetEventsNeedingFinalizationVariables>;
+}
+export const getEventsNeedingFinalizationRef: GetEventsNeedingFinalizationRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getEventsNeedingFinalization(dc: DataConnect, vars: GetEventsNeedingFinalizationVariables): QueryPromise<GetEventsNeedingFinalizationData, GetEventsNeedingFinalizationVariables>;
+
+interface GetEventsNeedingFinalizationRef {
+  ...
+  (dc: DataConnect, vars: GetEventsNeedingFinalizationVariables): QueryRef<GetEventsNeedingFinalizationData, GetEventsNeedingFinalizationVariables>;
+}
+export const getEventsNeedingFinalizationRef: GetEventsNeedingFinalizationRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getEventsNeedingFinalizationRef:
+```typescript
+const name = getEventsNeedingFinalizationRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetEventsNeedingFinalization` query requires an argument of type `GetEventsNeedingFinalizationVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetEventsNeedingFinalizationVariables {
+  season: string;
+}
+```
+### Return Type
+Recall that executing the `GetEventsNeedingFinalization` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetEventsNeedingFinalizationData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetEventsNeedingFinalizationData {
+  events: ({
+    event: number;
+    season: string;
+    name: string;
+    finished: boolean;
+    finalizedAt?: TimestampString | null;
+    deadlineTime: TimestampString;
+    rawJson: string;
+    isCurrent: boolean;
+    isNext: boolean;
+  } & Event_Key)[];
+}
+```
+### Using `GetEventsNeedingFinalization`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getEventsNeedingFinalization, GetEventsNeedingFinalizationVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetEventsNeedingFinalization` query requires an argument of type `GetEventsNeedingFinalizationVariables`:
+const getEventsNeedingFinalizationVars: GetEventsNeedingFinalizationVariables = {
+  season: ..., 
+};
+
+// Call the `getEventsNeedingFinalization()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getEventsNeedingFinalization(getEventsNeedingFinalizationVars);
+// Variables can be defined inline as well.
+const { data } = await getEventsNeedingFinalization({ season: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getEventsNeedingFinalization(dataConnect, getEventsNeedingFinalizationVars);
+
+console.log(data.events);
+
+// Or, you can use the `Promise` API.
+getEventsNeedingFinalization(getEventsNeedingFinalizationVars).then((response) => {
+  const data = response.data;
+  console.log(data.events);
+});
+```
+
+### Using `GetEventsNeedingFinalization`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getEventsNeedingFinalizationRef, GetEventsNeedingFinalizationVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetEventsNeedingFinalization` query requires an argument of type `GetEventsNeedingFinalizationVariables`:
+const getEventsNeedingFinalizationVars: GetEventsNeedingFinalizationVariables = {
+  season: ..., 
+};
+
+// Call the `getEventsNeedingFinalizationRef()` function to get a reference to the query.
+const ref = getEventsNeedingFinalizationRef(getEventsNeedingFinalizationVars);
+// Variables can be defined inline as well.
+const ref = getEventsNeedingFinalizationRef({ season: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getEventsNeedingFinalizationRef(dataConnect, getEventsNeedingFinalizationVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.events);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.events);
+});
+```
+
+## GetFinalizedEvents
+You can execute the `GetFinalizedEvents` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getFinalizedEvents(vars: GetFinalizedEventsVariables): QueryPromise<GetFinalizedEventsData, GetFinalizedEventsVariables>;
+
+interface GetFinalizedEventsRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetFinalizedEventsVariables): QueryRef<GetFinalizedEventsData, GetFinalizedEventsVariables>;
+}
+export const getFinalizedEventsRef: GetFinalizedEventsRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getFinalizedEvents(dc: DataConnect, vars: GetFinalizedEventsVariables): QueryPromise<GetFinalizedEventsData, GetFinalizedEventsVariables>;
+
+interface GetFinalizedEventsRef {
+  ...
+  (dc: DataConnect, vars: GetFinalizedEventsVariables): QueryRef<GetFinalizedEventsData, GetFinalizedEventsVariables>;
+}
+export const getFinalizedEventsRef: GetFinalizedEventsRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getFinalizedEventsRef:
+```typescript
+const name = getFinalizedEventsRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetFinalizedEvents` query requires an argument of type `GetFinalizedEventsVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetFinalizedEventsVariables {
+  season: string;
+}
+```
+### Return Type
+Recall that executing the `GetFinalizedEvents` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetFinalizedEventsData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetFinalizedEventsData {
+  events: ({
+    event: number;
+    season: string;
+    name: string;
+    finished: boolean;
+    finalizedAt?: TimestampString | null;
+  } & Event_Key)[];
+}
+```
+### Using `GetFinalizedEvents`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getFinalizedEvents, GetFinalizedEventsVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetFinalizedEvents` query requires an argument of type `GetFinalizedEventsVariables`:
+const getFinalizedEventsVars: GetFinalizedEventsVariables = {
+  season: ..., 
+};
+
+// Call the `getFinalizedEvents()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getFinalizedEvents(getFinalizedEventsVars);
+// Variables can be defined inline as well.
+const { data } = await getFinalizedEvents({ season: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getFinalizedEvents(dataConnect, getFinalizedEventsVars);
+
+console.log(data.events);
+
+// Or, you can use the `Promise` API.
+getFinalizedEvents(getFinalizedEventsVars).then((response) => {
+  const data = response.data;
+  console.log(data.events);
+});
+```
+
+### Using `GetFinalizedEvents`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getFinalizedEventsRef, GetFinalizedEventsVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetFinalizedEvents` query requires an argument of type `GetFinalizedEventsVariables`:
+const getFinalizedEventsVars: GetFinalizedEventsVariables = {
+  season: ..., 
+};
+
+// Call the `getFinalizedEventsRef()` function to get a reference to the query.
+const ref = getFinalizedEventsRef(getFinalizedEventsVars);
+// Variables can be defined inline as well.
+const ref = getFinalizedEventsRef({ season: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getFinalizedEventsRef(dataConnect, getFinalizedEventsVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.events);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.events);
+});
+```
+
+## GetEventFinalization
+You can execute the `GetEventFinalization` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getEventFinalization(vars: GetEventFinalizationVariables): QueryPromise<GetEventFinalizationData, GetEventFinalizationVariables>;
+
+interface GetEventFinalizationRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetEventFinalizationVariables): QueryRef<GetEventFinalizationData, GetEventFinalizationVariables>;
+}
+export const getEventFinalizationRef: GetEventFinalizationRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getEventFinalization(dc: DataConnect, vars: GetEventFinalizationVariables): QueryPromise<GetEventFinalizationData, GetEventFinalizationVariables>;
+
+interface GetEventFinalizationRef {
+  ...
+  (dc: DataConnect, vars: GetEventFinalizationVariables): QueryRef<GetEventFinalizationData, GetEventFinalizationVariables>;
+}
+export const getEventFinalizationRef: GetEventFinalizationRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getEventFinalizationRef:
+```typescript
+const name = getEventFinalizationRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetEventFinalization` query requires an argument of type `GetEventFinalizationVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetEventFinalizationVariables {
+  event: number;
+  season: string;
+}
+```
+### Return Type
+Recall that executing the `GetEventFinalization` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetEventFinalizationData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetEventFinalizationData {
+  events: ({
+    event: number;
+    season: string;
+    finished: boolean;
+    finalizedAt?: TimestampString | null;
+  } & Event_Key)[];
+}
+```
+### Using `GetEventFinalization`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getEventFinalization, GetEventFinalizationVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetEventFinalization` query requires an argument of type `GetEventFinalizationVariables`:
+const getEventFinalizationVars: GetEventFinalizationVariables = {
+  event: ..., 
+  season: ..., 
+};
+
+// Call the `getEventFinalization()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getEventFinalization(getEventFinalizationVars);
+// Variables can be defined inline as well.
+const { data } = await getEventFinalization({ event: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getEventFinalization(dataConnect, getEventFinalizationVars);
+
+console.log(data.events);
+
+// Or, you can use the `Promise` API.
+getEventFinalization(getEventFinalizationVars).then((response) => {
+  const data = response.data;
+  console.log(data.events);
+});
+```
+
+### Using `GetEventFinalization`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getEventFinalizationRef, GetEventFinalizationVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetEventFinalization` query requires an argument of type `GetEventFinalizationVariables`:
+const getEventFinalizationVars: GetEventFinalizationVariables = {
+  event: ..., 
+  season: ..., 
+};
+
+// Call the `getEventFinalizationRef()` function to get a reference to the query.
+const ref = getEventFinalizationRef(getEventFinalizationVars);
+// Variables can be defined inline as well.
+const ref = getEventFinalizationRef({ event: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getEventFinalizationRef(dataConnect, getEventFinalizationVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.events);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.events);
+});
+```
+
 ## GetTournament
 You can execute the `GetTournament` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
@@ -2120,6 +2478,128 @@ const ref = getActiveRoundsRef({ event: ..., });
 // You can also pass in a `DataConnect` instance to the `QueryRef` function.
 const dataConnect = getDataConnect(connectorConfig);
 const ref = getActiveRoundsRef(dataConnect, getActiveRoundsVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.rounds);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.rounds);
+});
+```
+
+## GetPendingActiveRounds
+You can execute the `GetPendingActiveRounds` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getPendingActiveRounds(vars: GetPendingActiveRoundsVariables): QueryPromise<GetPendingActiveRoundsData, GetPendingActiveRoundsVariables>;
+
+interface GetPendingActiveRoundsRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetPendingActiveRoundsVariables): QueryRef<GetPendingActiveRoundsData, GetPendingActiveRoundsVariables>;
+}
+export const getPendingActiveRoundsRef: GetPendingActiveRoundsRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getPendingActiveRounds(dc: DataConnect, vars: GetPendingActiveRoundsVariables): QueryPromise<GetPendingActiveRoundsData, GetPendingActiveRoundsVariables>;
+
+interface GetPendingActiveRoundsRef {
+  ...
+  (dc: DataConnect, vars: GetPendingActiveRoundsVariables): QueryRef<GetPendingActiveRoundsData, GetPendingActiveRoundsVariables>;
+}
+export const getPendingActiveRoundsRef: GetPendingActiveRoundsRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getPendingActiveRoundsRef:
+```typescript
+const name = getPendingActiveRoundsRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetPendingActiveRounds` query requires an argument of type `GetPendingActiveRoundsVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetPendingActiveRoundsVariables {
+  maxEvent: number;
+}
+```
+### Return Type
+Recall that executing the `GetPendingActiveRounds` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetPendingActiveRoundsData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetPendingActiveRoundsData {
+  rounds: ({
+    tournamentId: UUIDString;
+    roundNumber: number;
+    event: number;
+    status: string;
+    updatedAt: TimestampString;
+    tournament: {
+      id: UUIDString;
+      fplLeagueId: number;
+      fplLeagueName: string;
+      totalRounds: number;
+      status: string;
+    } & Tournament_Key;
+  } & Round_Key)[];
+}
+```
+### Using `GetPendingActiveRounds`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getPendingActiveRounds, GetPendingActiveRoundsVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetPendingActiveRounds` query requires an argument of type `GetPendingActiveRoundsVariables`:
+const getPendingActiveRoundsVars: GetPendingActiveRoundsVariables = {
+  maxEvent: ..., 
+};
+
+// Call the `getPendingActiveRounds()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getPendingActiveRounds(getPendingActiveRoundsVars);
+// Variables can be defined inline as well.
+const { data } = await getPendingActiveRounds({ maxEvent: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getPendingActiveRounds(dataConnect, getPendingActiveRoundsVars);
+
+console.log(data.rounds);
+
+// Or, you can use the `Promise` API.
+getPendingActiveRounds(getPendingActiveRoundsVars).then((response) => {
+  const data = response.data;
+  console.log(data.rounds);
+});
+```
+
+### Using `GetPendingActiveRounds`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getPendingActiveRoundsRef, GetPendingActiveRoundsVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetPendingActiveRounds` query requires an argument of type `GetPendingActiveRoundsVariables`:
+const getPendingActiveRoundsVars: GetPendingActiveRoundsVariables = {
+  maxEvent: ..., 
+};
+
+// Call the `getPendingActiveRoundsRef()` function to get a reference to the query.
+const ref = getPendingActiveRoundsRef(getPendingActiveRoundsVars);
+// Variables can be defined inline as well.
+const ref = getPendingActiveRoundsRef({ maxEvent: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getPendingActiveRoundsRef(dataConnect, getPendingActiveRoundsVars);
 
 // Call `executeQuery()` on the reference to execute the query.
 // You can use the `await` keyword to wait for the promise to resolve.
@@ -3778,6 +4258,7 @@ export interface UpsertEventVariables {
   name: string;
   deadlineTime: TimestampString;
   finished: boolean;
+  finalizedAt?: TimestampString | null;
   isCurrent: boolean;
   isNext: boolean;
   rawJson: string;
@@ -3805,6 +4286,7 @@ const upsertEventVars: UpsertEventVariables = {
   name: ..., 
   deadlineTime: ..., 
   finished: ..., 
+  finalizedAt: ..., // optional
   isCurrent: ..., 
   isNext: ..., 
   rawJson: ..., 
@@ -3814,7 +4296,7 @@ const upsertEventVars: UpsertEventVariables = {
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await upsertEvent(upsertEventVars);
 // Variables can be defined inline as well.
-const { data } = await upsertEvent({ event: ..., season: ..., name: ..., deadlineTime: ..., finished: ..., isCurrent: ..., isNext: ..., rawJson: ..., });
+const { data } = await upsertEvent({ event: ..., season: ..., name: ..., deadlineTime: ..., finished: ..., finalizedAt: ..., isCurrent: ..., isNext: ..., rawJson: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -3842,6 +4324,7 @@ const upsertEventVars: UpsertEventVariables = {
   name: ..., 
   deadlineTime: ..., 
   finished: ..., 
+  finalizedAt: ..., // optional
   isCurrent: ..., 
   isNext: ..., 
   rawJson: ..., 
@@ -3850,7 +4333,7 @@ const upsertEventVars: UpsertEventVariables = {
 // Call the `upsertEventRef()` function to get a reference to the mutation.
 const ref = upsertEventRef(upsertEventVars);
 // Variables can be defined inline as well.
-const ref = upsertEventRef({ event: ..., season: ..., name: ..., deadlineTime: ..., finished: ..., isCurrent: ..., isNext: ..., rawJson: ..., });
+const ref = upsertEventRef({ event: ..., season: ..., name: ..., deadlineTime: ..., finished: ..., finalizedAt: ..., isCurrent: ..., isNext: ..., rawJson: ..., });
 
 // You can also pass in a `DataConnect` instance to the `MutationRef` function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -4568,6 +5051,236 @@ console.log(data.round_upsert);
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.round_upsert);
+});
+```
+
+## UpdateRoundUpdatedAt
+You can execute the `UpdateRoundUpdatedAt` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+updateRoundUpdatedAt(vars: UpdateRoundUpdatedAtVariables): MutationPromise<UpdateRoundUpdatedAtData, UpdateRoundUpdatedAtVariables>;
+
+interface UpdateRoundUpdatedAtRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateRoundUpdatedAtVariables): MutationRef<UpdateRoundUpdatedAtData, UpdateRoundUpdatedAtVariables>;
+}
+export const updateRoundUpdatedAtRef: UpdateRoundUpdatedAtRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+updateRoundUpdatedAt(dc: DataConnect, vars: UpdateRoundUpdatedAtVariables): MutationPromise<UpdateRoundUpdatedAtData, UpdateRoundUpdatedAtVariables>;
+
+interface UpdateRoundUpdatedAtRef {
+  ...
+  (dc: DataConnect, vars: UpdateRoundUpdatedAtVariables): MutationRef<UpdateRoundUpdatedAtData, UpdateRoundUpdatedAtVariables>;
+}
+export const updateRoundUpdatedAtRef: UpdateRoundUpdatedAtRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the updateRoundUpdatedAtRef:
+```typescript
+const name = updateRoundUpdatedAtRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `UpdateRoundUpdatedAt` mutation requires an argument of type `UpdateRoundUpdatedAtVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface UpdateRoundUpdatedAtVariables {
+  tournamentId: UUIDString;
+  roundNumber: number;
+  updatedAt: TimestampString;
+}
+```
+### Return Type
+Recall that executing the `UpdateRoundUpdatedAt` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `UpdateRoundUpdatedAtData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface UpdateRoundUpdatedAtData {
+  round_update?: Round_Key | null;
+}
+```
+### Using `UpdateRoundUpdatedAt`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, updateRoundUpdatedAt, UpdateRoundUpdatedAtVariables } from '@knockoutfpl/dataconnect';
+
+// The `UpdateRoundUpdatedAt` mutation requires an argument of type `UpdateRoundUpdatedAtVariables`:
+const updateRoundUpdatedAtVars: UpdateRoundUpdatedAtVariables = {
+  tournamentId: ..., 
+  roundNumber: ..., 
+  updatedAt: ..., 
+};
+
+// Call the `updateRoundUpdatedAt()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await updateRoundUpdatedAt(updateRoundUpdatedAtVars);
+// Variables can be defined inline as well.
+const { data } = await updateRoundUpdatedAt({ tournamentId: ..., roundNumber: ..., updatedAt: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await updateRoundUpdatedAt(dataConnect, updateRoundUpdatedAtVars);
+
+console.log(data.round_update);
+
+// Or, you can use the `Promise` API.
+updateRoundUpdatedAt(updateRoundUpdatedAtVars).then((response) => {
+  const data = response.data;
+  console.log(data.round_update);
+});
+```
+
+### Using `UpdateRoundUpdatedAt`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, updateRoundUpdatedAtRef, UpdateRoundUpdatedAtVariables } from '@knockoutfpl/dataconnect';
+
+// The `UpdateRoundUpdatedAt` mutation requires an argument of type `UpdateRoundUpdatedAtVariables`:
+const updateRoundUpdatedAtVars: UpdateRoundUpdatedAtVariables = {
+  tournamentId: ..., 
+  roundNumber: ..., 
+  updatedAt: ..., 
+};
+
+// Call the `updateRoundUpdatedAtRef()` function to get a reference to the mutation.
+const ref = updateRoundUpdatedAtRef(updateRoundUpdatedAtVars);
+// Variables can be defined inline as well.
+const ref = updateRoundUpdatedAtRef({ tournamentId: ..., roundNumber: ..., updatedAt: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = updateRoundUpdatedAtRef(dataConnect, updateRoundUpdatedAtVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.round_update);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.round_update);
+});
+```
+
+## UpdateMatchUpdatedAt
+You can execute the `UpdateMatchUpdatedAt` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+updateMatchUpdatedAt(vars: UpdateMatchUpdatedAtVariables): MutationPromise<UpdateMatchUpdatedAtData, UpdateMatchUpdatedAtVariables>;
+
+interface UpdateMatchUpdatedAtRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateMatchUpdatedAtVariables): MutationRef<UpdateMatchUpdatedAtData, UpdateMatchUpdatedAtVariables>;
+}
+export const updateMatchUpdatedAtRef: UpdateMatchUpdatedAtRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+updateMatchUpdatedAt(dc: DataConnect, vars: UpdateMatchUpdatedAtVariables): MutationPromise<UpdateMatchUpdatedAtData, UpdateMatchUpdatedAtVariables>;
+
+interface UpdateMatchUpdatedAtRef {
+  ...
+  (dc: DataConnect, vars: UpdateMatchUpdatedAtVariables): MutationRef<UpdateMatchUpdatedAtData, UpdateMatchUpdatedAtVariables>;
+}
+export const updateMatchUpdatedAtRef: UpdateMatchUpdatedAtRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the updateMatchUpdatedAtRef:
+```typescript
+const name = updateMatchUpdatedAtRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `UpdateMatchUpdatedAt` mutation requires an argument of type `UpdateMatchUpdatedAtVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface UpdateMatchUpdatedAtVariables {
+  tournamentId: UUIDString;
+  matchId: number;
+  updatedAt: TimestampString;
+}
+```
+### Return Type
+Recall that executing the `UpdateMatchUpdatedAt` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `UpdateMatchUpdatedAtData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface UpdateMatchUpdatedAtData {
+  match_update?: Match_Key | null;
+}
+```
+### Using `UpdateMatchUpdatedAt`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, updateMatchUpdatedAt, UpdateMatchUpdatedAtVariables } from '@knockoutfpl/dataconnect';
+
+// The `UpdateMatchUpdatedAt` mutation requires an argument of type `UpdateMatchUpdatedAtVariables`:
+const updateMatchUpdatedAtVars: UpdateMatchUpdatedAtVariables = {
+  tournamentId: ..., 
+  matchId: ..., 
+  updatedAt: ..., 
+};
+
+// Call the `updateMatchUpdatedAt()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await updateMatchUpdatedAt(updateMatchUpdatedAtVars);
+// Variables can be defined inline as well.
+const { data } = await updateMatchUpdatedAt({ tournamentId: ..., matchId: ..., updatedAt: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await updateMatchUpdatedAt(dataConnect, updateMatchUpdatedAtVars);
+
+console.log(data.match_update);
+
+// Or, you can use the `Promise` API.
+updateMatchUpdatedAt(updateMatchUpdatedAtVars).then((response) => {
+  const data = response.data;
+  console.log(data.match_update);
+});
+```
+
+### Using `UpdateMatchUpdatedAt`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, updateMatchUpdatedAtRef, UpdateMatchUpdatedAtVariables } from '@knockoutfpl/dataconnect';
+
+// The `UpdateMatchUpdatedAt` mutation requires an argument of type `UpdateMatchUpdatedAtVariables`:
+const updateMatchUpdatedAtVars: UpdateMatchUpdatedAtVariables = {
+  tournamentId: ..., 
+  matchId: ..., 
+  updatedAt: ..., 
+};
+
+// Call the `updateMatchUpdatedAtRef()` function to get a reference to the mutation.
+const ref = updateMatchUpdatedAtRef(updateMatchUpdatedAtVars);
+// Variables can be defined inline as well.
+const ref = updateMatchUpdatedAtRef({ tournamentId: ..., matchId: ..., updatedAt: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = updateMatchUpdatedAtRef(dataConnect, updateMatchUpdatedAtVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.match_update);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.match_update);
 });
 ```
 
@@ -5863,6 +6576,121 @@ console.log(data.tournament_delete);
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.tournament_delete);
+});
+```
+
+## CreateEmailQueueEntry
+You can execute the `CreateEmailQueueEntry` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+createEmailQueueEntry(vars: CreateEmailQueueEntryVariables): MutationPromise<CreateEmailQueueEntryData, CreateEmailQueueEntryVariables>;
+
+interface CreateEmailQueueEntryRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateEmailQueueEntryVariables): MutationRef<CreateEmailQueueEntryData, CreateEmailQueueEntryVariables>;
+}
+export const createEmailQueueEntryRef: CreateEmailQueueEntryRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+createEmailQueueEntry(dc: DataConnect, vars: CreateEmailQueueEntryVariables): MutationPromise<CreateEmailQueueEntryData, CreateEmailQueueEntryVariables>;
+
+interface CreateEmailQueueEntryRef {
+  ...
+  (dc: DataConnect, vars: CreateEmailQueueEntryVariables): MutationRef<CreateEmailQueueEntryData, CreateEmailQueueEntryVariables>;
+}
+export const createEmailQueueEntryRef: CreateEmailQueueEntryRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the createEmailQueueEntryRef:
+```typescript
+const name = createEmailQueueEntryRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `CreateEmailQueueEntry` mutation requires an argument of type `CreateEmailQueueEntryVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface CreateEmailQueueEntryVariables {
+  userUid: string;
+  type: string;
+  event: number;
+}
+```
+### Return Type
+Recall that executing the `CreateEmailQueueEntry` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `CreateEmailQueueEntryData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface CreateEmailQueueEntryData {
+  emailQueue_insert: EmailQueue_Key;
+}
+```
+### Using `CreateEmailQueueEntry`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, createEmailQueueEntry, CreateEmailQueueEntryVariables } from '@knockoutfpl/dataconnect';
+
+// The `CreateEmailQueueEntry` mutation requires an argument of type `CreateEmailQueueEntryVariables`:
+const createEmailQueueEntryVars: CreateEmailQueueEntryVariables = {
+  userUid: ..., 
+  type: ..., 
+  event: ..., 
+};
+
+// Call the `createEmailQueueEntry()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await createEmailQueueEntry(createEmailQueueEntryVars);
+// Variables can be defined inline as well.
+const { data } = await createEmailQueueEntry({ userUid: ..., type: ..., event: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await createEmailQueueEntry(dataConnect, createEmailQueueEntryVars);
+
+console.log(data.emailQueue_insert);
+
+// Or, you can use the `Promise` API.
+createEmailQueueEntry(createEmailQueueEntryVars).then((response) => {
+  const data = response.data;
+  console.log(data.emailQueue_insert);
+});
+```
+
+### Using `CreateEmailQueueEntry`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, createEmailQueueEntryRef, CreateEmailQueueEntryVariables } from '@knockoutfpl/dataconnect';
+
+// The `CreateEmailQueueEntry` mutation requires an argument of type `CreateEmailQueueEntryVariables`:
+const createEmailQueueEntryVars: CreateEmailQueueEntryVariables = {
+  userUid: ..., 
+  type: ..., 
+  event: ..., 
+};
+
+// Call the `createEmailQueueEntryRef()` function to get a reference to the mutation.
+const ref = createEmailQueueEntryRef(createEmailQueueEntryVars);
+// Variables can be defined inline as well.
+const ref = createEmailQueueEntryRef({ userUid: ..., type: ..., event: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = createEmailQueueEntryRef(dataConnect, createEmailQueueEntryVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.emailQueue_insert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.emailQueue_insert);
 });
 ```
 

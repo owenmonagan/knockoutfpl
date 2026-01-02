@@ -1,0 +1,273 @@
+
+> knockoutfpl@0.0.0 test
+> vitest
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+ RUN  v3.2.4 /Users/owen/work/knockoutfpl
+
+stdout | integration/createTournament.integration.test.ts > createTournament Integration Tests
+Signed in as test user
+
+ ✓ src/pages/LandingPage.test.tsx (4 tests) 216ms
+ ✓ functions/src/fplApi.test.ts (6 tests) 369ms
+stderr | src/components/dashboard/FPLConnectionCard.test.tsx > FPLConnectionCard > PHASE 4: Editing State > Step 35: update calls onUpdate with new team ID
+An update to FPLConnectionCard inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/dashboard/FPLConnectionCard.test.tsx (37 tests) 313ms
+stderr | src/components/profile/ProfileForm.test.tsx > ProfileForm > shows loading state while saving
+An update to ProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to ProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/profile/ProfileForm.test.tsx (12 tests) 334ms
+ ✓ src/pages/ConnectPage.test.tsx (10 tests) 763ms
+   ✓ ConnectPage > saves team to Firestore and redirects to /leagues  368ms
+stderr | src/components/auth/LoginForm.test.tsx > LoginForm > should show loading state during login
+An update to LoginForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/auth/LoginForm.test.tsx (10 tests) 922ms
+ ✓ src/components/tournament/CreateTournamentButton.test.tsx (16 tests) 1127ms
+ ✓ src/pages/LeaguesPage.test.tsx (11 tests) 230ms
+ ✓ src/components/UserMenu.test.tsx (4 tests) 183ms
+ ✓ src/pages/ForgotPasswordPage.test.tsx (4 tests) 320ms
+ ✓ src/components/tournament/CreationProgressChecklist.test.tsx (9 tests) 166ms
+stderr | src/components/auth/SignUpForm.test.tsx > SignUpForm > should show loading state during signup
+An update to SignUpForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/dashboard/YourMatchesSection.test.tsx (25 tests) 199ms
+ ✓ src/components/dashboard/LeagueSummaryCard.test.tsx (24 tests) 121ms
+ ✓ src/components/auth/SignUpForm.test.tsx (11 tests) 1897ms
+   ✓ SignUpForm > should create user profile after successful signup  303ms
+   ✓ SignUpForm > should navigate to dashboard after successful signup  357ms
+ ✓ src/components/leagues/LeaguesTable.test.tsx (18 tests) 272ms
+ ✓ src/components/dashboard/YourLeaguesSection.test.tsx (31 tests) 201ms
+ ✓ src/components/dashboard/MatchSummaryCard.test.tsx (33 tests) 195ms
+ ✓ src/pages/LeaguePage.test.tsx (3 tests) 215ms
+stderr | src/pages/ProfilePage.test.tsx > ProfilePage > fetches user profile on mount
+An update to ProfilePage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to ProfilePage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/router.test.tsx > Router > should redirect /dashboard to /leagues when authenticated
+An update to ProtectedRoute inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to ProtectedRoute inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to LeaguesPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to LeaguesPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to ProtectedRoute inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to ProtectedRoute inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/router.test.tsx (6 tests) 231ms
+ ✓ src/components/layout/AppHeader.test.tsx (12 tests) 145ms
+ ✓ src/pages/ProfilePage.test.tsx (7 tests) 244ms
+ ✓ src/components/tournament/BracketView.test.tsx (8 tests) 194ms
+ ✓ src/components/landing/Hero.test.tsx (7 tests) 234ms
+ ✓ src/components/dashboard/TeamIdentity.test.tsx (16 tests) 165ms
+ ✓ src/components/landing/BracketPreview.test.tsx (3 tests) 89ms
+stdout | integration/createTournament.integration.test.ts > createTournament Integration Tests > Tournament creation with batched mutations > should create tournament for 'Test league 249' (league 249)
+Tournament created in 3246ms: {
+  tournamentId: [32m'13a81750-4a81-410a-9665-0072010402d8'[39m,
+  participantCount: [33m50[39m,
+  totalRounds: [33m6[39m,
+  startEvent: [33m20[39m
+}
+
+ ✓ src/components/tournament/BracketMatchCard.test.tsx (14 tests) 226ms
+ ✓ src/components/landing/Features.test.tsx (3 tests) 76ms
+ ✓ src/components/tournament/BracketRound.test.tsx (4 tests) 109ms
+ ✓ src/components/layout/AppLayout.test.tsx (12 tests) 76ms
+ ✓ src/components/tournament/BracketLayout.test.tsx (4 tests) 119ms
+ ✓ src/components/tournament/RoundSection.test.tsx (5 tests) 70ms
+ ✓ src/components/leagues/LeagueList.test.tsx (5 tests) 99ms
+ ✓ src/components/dashboard/EmptyState.test.tsx (8 tests) 133ms
+ ✓ src/components/dashboard/StatCard.test.tsx (4 tests) 136ms
+ ✓ src/components/landing/Testimonials.test.tsx (5 tests) 191ms
+ ✓ src/components/leagues/LeagueCard.test.tsx (6 tests) 141ms
+ ✓ src/components/tournament/MatchCard.test.tsx (12 tests) 140ms
+ ✓ src/components/auth/ProtectedRoute.test.tsx (6 tests) 107ms
+ ✓ src/pages/DashboardPage.test.tsx (1 test) 17ms
+ ✓ src/contexts/AuthContext.test.tsx (4 tests) 46ms
+ ✓ src/components/landing/Footer.test.tsx (3 tests) 31ms
+ ✓ integration/tournament-lifecycle.test.ts (29 tests) 18ms
+stderr | src/services/tournament.test.ts > callRefreshTournament > should return null on error without throwing
+[WARN] Failed to refresh tournament: Error: Network error
+    at [90m/Users/owen/work/knockoutfpl/[39msrc/services/tournament.test.ts:183:52
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at [90mfile:///Users/owen/work/knockoutfpl/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+ ✓ src/services/tournament.test.ts (14 tests) 11ms
+stderr | functions/src/match-resolver.test.ts > resolveMatch > should return null for matches with invalid player count
+Match 1 has 3 players, expected 2
+
+stderr | functions/src/match-resolver.test.ts > resolveMatch > should return null when one player score is missing
+Match 1: Cannot resolve - missing scores for entry IDs: 200
+
+stderr | functions/src/match-resolver.test.ts > resolveMatch > should return null when both player scores are missing
+Match 1: Cannot resolve - missing scores for entry IDs: 100, 200
+
+ ✓ functions/src/match-resolver.test.ts (18 tests) 8ms
+ ✓ functions/src/createTournament.test.ts (23 tests) 7ms
+ ✓ src/lib/bracket.test.ts (18 tests) 4ms
+ ✓ functions/src/fplApiFetcher.test.ts (10 tests) 4ms
+ ✓ src/services/fpl.test.ts (8 tests) 7ms
+stdout | functions/src/discord.test.ts > sendDiscordAlert > should skip when no webhook URL provided
+[discord] No webhook URL configured, skipping alert
+
+ ✓ functions/src/discord.test.ts (3 tests) 5ms
+ ✓ functions/src/bracketGenerator.test.ts (12 tests) 5ms
+ ✓ functions/src/checkStuckTournaments.test.ts (3 tests) 1ms
+ ✓ test-fixtures/index.test.ts (4 tests) 5ms
+ ✓ functions/src/types/fplApiResponses.test.ts (7 tests) 4ms
+ ✓ src/lib/stakes.test.ts (10 tests) 5ms
+ ✓ src/lib/initials.test.ts (7 tests) 1ms
+ ✓ src/types/fpl-snapshot.test.ts (3 tests) 2ms
+stdout | integration/createTournament.integration.test.ts > createTournament Integration Tests > Tournament creation with batched mutations > should create tournament for 'Test league 39776' (league 39776)
+Tournament created in 3030ms: {
+  tournamentId: [32m'948d7bd6-785b-46b4-ac49-e912f68556bf'[39m,
+  participantCount: [33m50[39m,
+  totalRounds: [33m6[39m,
+  startEvent: [33m20[39m
+}
+
+stdout | integration/createTournament.integration.test.ts > Batch mutation verification > batch size of 20 handles various tournament sizes
+8 participants:
+  Old: 51 calls
+  New: 7 batches
+  Reduction: 86%
+16 participants:
+  Old: 116 calls
+  New: 9 batches
+  Reduction: 92%
+32 participants:
+  Old: 261 calls
+  New: 16 batches
+  Reduction: 94%
+50 participants:
+  Old: 470 calls
+  New: 27 batches
+  Reduction: 94%
+
+ ✓ integration/createTournament.integration.test.ts (5 tests) 6712ms
+   ✓ createTournament Integration Tests > Tournament creation with batched mutations > should create tournament for 'Test league 249' (league 249)  3247ms
+   ✓ createTournament Integration Tests > Tournament creation with batched mutations > should create tournament for 'Test league 39776' (league 39776)  3030ms
+
+ Test Files  57 passed (57)
+      Tests  597 passed (597)
+   Start at  18:50:47
+   Duration  7.74s (transform 1.06s, setup 7.08s, collect 4.59s, tests 17.86s, environment 20.59s, prepare 3.31s)
+
