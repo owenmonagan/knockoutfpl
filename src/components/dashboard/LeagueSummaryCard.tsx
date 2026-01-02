@@ -81,6 +81,21 @@ function getCardClasses(variant: CardVariant): string {
   }
 }
 
+function getHeaderGradient(variant: CardVariant): string {
+  switch (variant) {
+    case 'active':
+      return 'bg-gradient-to-br from-[#1a4d38] to-background-dark';
+    case 'winner':
+      return 'bg-gradient-to-br from-amber-900/50 to-background-dark';
+    case 'eliminated':
+    case 'completed':
+      return 'bg-gradient-to-br from-[#2e1616] to-background-dark';
+    case 'no-tournament':
+    default:
+      return 'bg-gradient-to-br from-[#273a31] to-background-dark';
+  }
+}
+
 function getGameweekRange(
   tournament: NonNullable<LeagueSummaryCardProps['tournament']>
 ): string {
@@ -125,39 +140,18 @@ export function LeagueSummaryCard(props: LeagueSummaryCardProps) {
   const variant = getCardVariant(props);
   const hasTournament = !!tournament;
 
-  // Line 1: League name
-  const renderLine1 = () => {
-    const isWinner = userProgress?.status === 'winner';
+  // Badge placeholder - will be implemented in Task 3
+  const renderBadge = () => {
     return (
-      <span className="font-semibold text-foreground">
-        {leagueName}
-        {isWinner && <span className="ml-2">&#127942;</span>}
+      <span className="px-2 py-1 text-[10px] font-bold rounded uppercase tracking-wide">
+        Badge
       </span>
     );
   };
 
-  // Line 2: Member count and gameweek range
-  const renderLine2 = () => {
-    const managersText = `${memberCount} managers`;
-    const gwText = tournament ? getGameweekRange(tournament) : '\u2014';
-    return (
-      <span className="text-sm text-muted-foreground">
-        {managersText} &middot; {gwText}
-      </span>
-    );
-  };
-
-  // Line 3: Progress info (only when tournament exists)
-  const renderLine3 = () => {
-    if (!tournament) {
-      return null;
-    }
-
-    return (
-      <span className="text-sm text-muted-foreground">
-        {getUserProgressText(tournament, userProgress)}
-      </span>
-    );
+  // Stats grid placeholder - will be implemented in Task 4
+  const renderStatsGrid = () => {
+    return <div>Stats placeholder</div>;
   };
 
   // Button
@@ -166,7 +160,7 @@ export function LeagueSummaryCard(props: LeagueSummaryCardProps) {
       return (
         <Button
           size="sm"
-          className="mt-3 w-full"
+          className="w-full"
           onClick={(e) => {
             e.stopPropagation();
             onClick();
@@ -181,7 +175,7 @@ export function LeagueSummaryCard(props: LeagueSummaryCardProps) {
       <Button
         variant="outline"
         size="sm"
-        className="mt-3 w-full"
+        className="w-full"
         onClick={(e) => {
           e.stopPropagation();
           onClick();
@@ -192,21 +186,44 @@ export function LeagueSummaryCard(props: LeagueSummaryCardProps) {
     );
   };
 
-  const line3 = renderLine3();
-
   return (
     <Card
       role="article"
       className={cn(
         getCardClasses(variant),
-        'cursor-pointer hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_0_20px_rgba(0,255,136,0.1)]'
+        'cursor-pointer hover:-translate-y-1 overflow-hidden'
       )}
       onClick={onClick}
     >
-      <CardContent className="p-4 space-y-1">
-        <div>{renderLine1()}</div>
-        <div>{renderLine2()}</div>
-        {line3 && <div>{line3}</div>}
+      {/* Header Section */}
+      <div
+        data-testid="league-card-header"
+        className={cn(
+          'relative h-24 p-4 flex flex-col justify-between overflow-hidden',
+          getHeaderGradient(variant)
+        )}
+      >
+        {/* Top row: Badge + Manager count */}
+        <div className="relative z-10 flex justify-between items-start">
+          {renderBadge()}
+          <span className="text-white/60 text-xs font-medium">
+            {memberCount} Managers
+          </span>
+        </div>
+        {/* Bottom: League name */}
+        <div className="relative z-10">
+          <h3 className="text-lg font-bold text-white line-clamp-1">
+            {leagueName}
+            {userProgress?.status === 'winner' && (
+              <span className="ml-2">&#127942;</span>
+            )}
+          </h3>
+        </div>
+      </div>
+
+      {/* Content Section */}
+      <CardContent className="p-4 flex flex-col gap-3">
+        {renderStatsGrid()}
         {renderButton()}
       </CardContent>
     </Card>

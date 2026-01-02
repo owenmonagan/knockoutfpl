@@ -3,6 +3,45 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { LeagueSummaryCard } from './LeagueSummaryCard';
 
 describe('LeagueSummaryCard', () => {
+  describe('Header Section', () => {
+    it('should render league name in header', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Work Colleagues"
+          memberCount={14}
+          userRank={1}
+          tournament={{
+            startGameweek: 12,
+            endGameweek: 15,
+            currentRound: 3,
+            totalRounds: 4,
+            status: 'active',
+          }}
+          userProgress={{ status: 'active' }}
+          onClick={() => {}}
+        />
+      );
+
+      const header = screen.getByTestId('league-card-header');
+      expect(header).toBeInTheDocument();
+      expect(header).toHaveTextContent('Work Colleagues');
+    });
+
+    it('should render manager count in header', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Work Colleagues"
+          memberCount={14}
+          tournament={null}
+          onClick={() => {}}
+        />
+      );
+
+      const header = screen.getByTestId('league-card-header');
+      expect(header).toHaveTextContent('14 Managers');
+    });
+  });
+
   describe('User Rank Display', () => {
     // TODO: This test will pass after Task 4 (stats grid implementation)
     it.skip('should display user rank with ordinal suffix', () => {
