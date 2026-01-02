@@ -81,7 +81,7 @@ describe('ConnectPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Let's see what you're made of.")).toBeInTheDocument();
+      expect(screen.getByText(/Enter your unique FPL Team ID to sync your leagues/)).toBeInTheDocument();
     });
   });
 
@@ -105,11 +105,11 @@ describe('ConnectPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Where's my Team ID?")).toBeInTheDocument();
+      expect(screen.getByText(/Where do I find my Team ID/)).toBeInTheDocument();
     });
   });
 
-  it('renders the Find My Team button', async () => {
+  it('renders the Connect & Continue button', async () => {
     render(
       <BrowserRouter>
         <ConnectPage />
@@ -117,7 +117,7 @@ describe('ConnectPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Find My Team' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Connect & Continue/i })).toBeInTheDocument();
     });
   });
 
@@ -137,20 +137,22 @@ describe('ConnectPage', () => {
     });
 
     await user.type(screen.getByLabelText('FPL Team ID'), '158256');
-    await user.click(screen.getByRole('button', { name: 'Find My Team' }));
+    await user.click(screen.getByRole('button', { name: /Connect & Continue/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Finding your team...')).toBeInTheDocument();
+      expect(screen.getByText(/Connecting.../i)).toBeInTheDocument();
     });
   });
 
-  it('shows success confirmation after finding team', async () => {
+  it('redirects immediately on successful team connection', async () => {
     const user = userEvent.setup();
+
     (getFPLTeamInfo as ReturnType<typeof vi.fn>).mockResolvedValue({
       teamId: 158256,
       teamName: 'Owen FC',
       overallRank: 245892,
     });
+    (connectFPLTeam as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
     render(
       <BrowserRouter>
@@ -158,18 +160,16 @@ describe('ConnectPage', () => {
       </BrowserRouter>
     );
 
-    // Wait for initial loading to complete
     await waitFor(() => {
       expect(screen.getByLabelText('FPL Team ID')).toBeInTheDocument();
     });
 
     await user.type(screen.getByLabelText('FPL Team ID'), '158256');
-    await user.click(screen.getByRole('button', { name: 'Find My Team' }));
+    await user.click(screen.getByRole('button', { name: /Connect & Continue/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Owen FC')).toBeInTheDocument();
-      expect(screen.getByText('Overall Rank: 245,892')).toBeInTheDocument();
-      expect(screen.getByText("Let's go.")).toBeInTheDocument();
+      expect(connectFPLTeam).toHaveBeenCalledWith('test-user-id', 'test@example.com', 158256);
+      expect(window.location.href).toBe('/leagues');
     });
   });
 
@@ -189,14 +189,14 @@ describe('ConnectPage', () => {
     });
 
     await user.type(screen.getByLabelText('FPL Team ID'), '999999');
-    await user.click(screen.getByRole('button', { name: 'Find My Team' }));
+    await user.click(screen.getByRole('button', { name: /Connect & Continue/i }));
 
     await waitFor(() => {
       expect(screen.getByText('Team not found. Check your ID and try again.')).toBeInTheDocument();
     });
   });
 
-  it('opens help modal when clicking "Where\'s my Team ID?"', async () => {
+  it('expands help accordion when clicking "Where do I find my Team ID?"', async () => {
     const user = userEvent.setup();
 
     render(
@@ -205,53 +205,17 @@ describe('ConnectPage', () => {
       </BrowserRouter>
     );
 
-    // Wait for initial loading to complete
     await waitFor(() => {
-      expect(screen.getByText("Where's my Team ID?")).toBeInTheDocument();
+      expect(screen.getByText(/Where do I find my Team ID/)).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText("Where's my Team ID?"));
+    // Accordion content should not be visible initially
+    expect(screen.queryByText(/fantasy.premierleague.com\/entry/)).not.toBeInTheDocument();
+
+    await user.click(screen.getByText(/Where do I find my Team ID/));
 
     await waitFor(() => {
       expect(screen.getByText(/fantasy.premierleague.com\/entry/)).toBeInTheDocument();
     });
-  });
-
-  it('saves team to Firestore and redirects to /leagues', async () => {
-    const user = userEvent.setup();
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-
-    (getFPLTeamInfo as ReturnType<typeof vi.fn>).mockResolvedValue({
-      teamId: 158256,
-      teamName: 'Owen FC',
-      overallRank: 245892,
-    });
-
-    render(
-      <BrowserRouter>
-        <ConnectPage />
-      </BrowserRouter>
-    );
-
-    // Wait for initial loading to complete
-    await waitFor(() => {
-      expect(screen.getByLabelText('FPL Team ID')).toBeInTheDocument();
-    });
-
-    await user.type(screen.getByLabelText('FPL Team ID'), '158256');
-    await user.click(screen.getByRole('button', { name: 'Find My Team' }));
-
-    await waitFor(() => {
-      expect(connectFPLTeam).toHaveBeenCalledWith('test-user-id', 'test@example.com', 158256);
-    });
-
-    // Advance timer for auto-redirect (1.5s)
-    vi.advanceTimersByTime(1500);
-
-    await waitFor(() => {
-      expect(window.location.href).toBe('/leagues');
-    });
-
-    vi.useRealTimers();
   });
 });
