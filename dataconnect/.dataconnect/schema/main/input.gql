@@ -125,6 +125,14 @@ input EmailQueue_Data {
   """
   event_update: [Int_Update!]
   """
+  ✨ Generated from Field `EmailQueue`.`htmlBody` of type `String!`
+  """
+  htmlBody: String
+  """
+  ✨ `_expr` server value variant of `htmlBody` (✨ Generated from Field `EmailQueue`.`htmlBody` of type `String!`)
+  """
+  htmlBody_expr: String_Expr
+  """
   ✨ Generated from Field `EmailQueue`.`processedAt` of type `Timestamp`
   """
   processedAt: Timestamp
@@ -148,6 +156,22 @@ input EmailQueue_Data {
   ✨ `_expr` server value variant of `status` (✨ Generated from Field `EmailQueue`.`status` of type `String!`)
   """
   status_expr: String_Expr
+  """
+  ✨ Generated from Field `EmailQueue`.`subject` of type `String!`
+  """
+  subject: String
+  """
+  ✨ `_expr` server value variant of `subject` (✨ Generated from Field `EmailQueue`.`subject` of type `String!`)
+  """
+  subject_expr: String_Expr
+  """
+  ✨ Generated from Field `EmailQueue`.`toEmail` of type `String!`
+  """
+  toEmail: String
+  """
+  ✨ `_expr` server value variant of `toEmail` (✨ Generated from Field `EmailQueue`.`toEmail` of type `String!`)
+  """
+  toEmail_expr: String_Expr
   """
   ✨ Generated from Field `EmailQueue`.`type` of type `String!`
   """
@@ -198,6 +222,10 @@ input EmailQueue_Filter {
   """
   event: Int_Filter
   """
+  ✨ Generated from Field `EmailQueue`.`htmlBody` of type `String!`
+  """
+  htmlBody: String_Filter
+  """
   ✨ Generated from Field `EmailQueue`.`processedAt` of type `Timestamp`
   """
   processedAt: Timestamp_Filter
@@ -205,6 +233,14 @@ input EmailQueue_Filter {
   ✨ Generated from Field `EmailQueue`.`status` of type `String!`
   """
   status: String_Filter
+  """
+  ✨ Generated from Field `EmailQueue`.`subject` of type `String!`
+  """
+  subject: String_Filter
+  """
+  ✨ Generated from Field `EmailQueue`.`toEmail` of type `String!`
+  """
+  toEmail: String_Filter
   """
   ✨ Generated from Field `EmailQueue`.`type` of type `String!`
   """
@@ -260,6 +296,10 @@ input EmailQueue_Having {
   """
   event_count: Int_Filter
   """
+  ✨ Generated from Field `EmailQueue`.`htmlBody_count` of type `Int!`
+  """
+  htmlBody_count: Int_Filter
+  """
   ✨ Generated from Field `EmailQueue`.`id_count` of type `Int!`
   """
   id_count: Int_Filter
@@ -271,6 +311,14 @@ input EmailQueue_Having {
   ✨ Generated from Field `EmailQueue`.`status_count` of type `Int!`
   """
   status_count: Int_Filter
+  """
+  ✨ Generated from Field `EmailQueue`.`subject_count` of type `Int!`
+  """
+  subject_count: Int_Filter
+  """
+  ✨ Generated from Field `EmailQueue`.`toEmail_count` of type `Int!`
+  """
+  toEmail_count: Int_Filter
   """
   ✨ Generated from Field `EmailQueue`.`type_count` of type `Int!`
   """
@@ -367,6 +415,10 @@ input EmailQueue_Order {
   """
   event: OrderDirection
   """
+  ✨ Generated from Field `EmailQueue`.`htmlBody` of type `String!`
+  """
+  htmlBody: OrderDirection
+  """
   ✨ Generated from Field `EmailQueue`.`processedAt` of type `Timestamp`
   """
   processedAt: OrderDirection
@@ -374,6 +426,14 @@ input EmailQueue_Order {
   ✨ Generated from Field `EmailQueue`.`status` of type `String!`
   """
   status: OrderDirection
+  """
+  ✨ Generated from Field `EmailQueue`.`subject` of type `String!`
+  """
+  subject: OrderDirection
+  """
+  ✨ Generated from Field `EmailQueue`.`toEmail` of type `String!`
+  """
+  toEmail: OrderDirection
   """
   ✨ Generated from Field `EmailQueue`.`type` of type `String!`
   """
@@ -395,6 +455,10 @@ input EmailQueue_Order {
   """
   event_count: OrderDirection
   """
+  ✨ Generated from Field `EmailQueue`.`htmlBody_count` of type `Int!`
+  """
+  htmlBody_count: OrderDirection
+  """
   ✨ Generated from Field `EmailQueue`.`id_count` of type `Int!`
   """
   id_count: OrderDirection
@@ -406,6 +470,14 @@ input EmailQueue_Order {
   ✨ Generated from Field `EmailQueue`.`status_count` of type `Int!`
   """
   status_count: OrderDirection
+  """
+  ✨ Generated from Field `EmailQueue`.`subject_count` of type `Int!`
+  """
+  subject_count: OrderDirection
+  """
+  ✨ Generated from Field `EmailQueue`.`toEmail_count` of type `Int!`
+  """
+  toEmail_count: OrderDirection
   """
   ✨ Generated from Field `EmailQueue`.`type_count` of type `Int!`
   """
@@ -4337,19 +4409,19 @@ input Round_Data {
   """
   status_expr: String_Expr
   """
-  ✨ Generated from Field `Round`.`updatedAt` of type `Timestamp!`
+  ✨ Generated from Field `Round`.`updatedAt` of type `Timestamp`
   """
   updatedAt: Timestamp
   """
-  ✨ `_expr` server value variant of `updatedAt` (✨ Generated from Field `Round`.`updatedAt` of type `Timestamp!`)
+  ✨ `_expr` server value variant of `updatedAt` (✨ Generated from Field `Round`.`updatedAt` of type `Timestamp`)
   """
   updatedAt_expr: Timestamp_Expr
   """
-  ✨ `_time` server value variant of `updatedAt` (✨ Generated from Field `Round`.`updatedAt` of type `Timestamp!`)
+  ✨ `_time` server value variant of `updatedAt` (✨ Generated from Field `Round`.`updatedAt` of type `Timestamp`)
   """
   updatedAt_time: Timestamp_Relative
   """
-  ✨ `_update` server value variant of `updatedAt` (✨ Generated from Field `Round`.`updatedAt` of type `Timestamp!`)
+  ✨ `_update` server value variant of `updatedAt` (✨ Generated from Field `Round`.`updatedAt` of type `Timestamp`)
   """
   updatedAt_update: [Timestamp_Update!]
 }
@@ -4398,7 +4470,7 @@ input Round_Filter {
   """
   status: String_Filter
   """
-  ✨ Generated from Field `Round`.`updatedAt` of type `Timestamp!`
+  ✨ Generated from Field `Round`.`updatedAt` of type `Timestamp`
   """
   updatedAt: Timestamp_Filter
 }
@@ -4591,7 +4663,7 @@ input Round_Order {
   """
   status: OrderDirection
   """
-  ✨ Generated from Field `Round`.`updatedAt` of type `Timestamp!`
+  ✨ Generated from Field `Round`.`updatedAt` of type `Timestamp`
   """
   updatedAt: OrderDirection
   """

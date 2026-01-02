@@ -35,6 +35,15 @@ extend type EmailQueue {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "EmailQueue.event", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `EmailQueue` table where the `htmlBody` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  htmlBody_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "EmailQueue.htmlBody", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `EmailQueue` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   id_count(
@@ -61,6 +70,24 @@ extend type EmailQueue {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "EmailQueue.status", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `EmailQueue` table where the `subject` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  subject_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "EmailQueue.subject", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `EmailQueue` table where the `toEmail` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  toEmail_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "EmailQueue.toEmail", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `EmailQueue` table where the `type` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """

@@ -5,17 +5,19 @@
  * 1. Find finalized events
  * 2. For each user with matches in that event:
  *    a. Check if all their matches have updatedAt >= finalizedAt
- *    b. If yes, queue a verdict email
+ *    b. If yes, build the email and queue it
  */
 
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import {
   getFinalizedEvents,
   getUsersWithMatchesInEvent,
-  getEntryMatchesInEvent,
+  getUserVerdictResults,
+  getPickScores,
   emailAlreadyQueued,
   createEmailQueueEntry,
 } from './dataconnect-mutations';
+import { buildVerdictEmail } from './email/buildVerdictEmail';
 
 const CURRENT_SEASON = '2024-25';
 
@@ -42,66 +44,65 @@ export const queueVerdicts = onSchedule(
       for (const event of finalizedEvents) {
         console.log(`[queueVerdicts] Processing GW${event.event} (finalized: ${event.finalizedAt})`);
 
-        const finalizedAt = new Date(event.finalizedAt);
-
         // 2. Get all users with matches in this event
         const users = await getUsersWithMatchesInEvent(event.event);
-        console.log(`[queueVerdicts] Found ${users.length} users with matches in GW${event.event}`);
+        console.log(`[queueVerdicts] Found ${users.length} users with matches`);
 
         for (const user of users) {
-          // 3. Check if already queued
-          const alreadyQueued = await emailAlreadyQueued(user.uid, 'verdict', event.event);
-          if (alreadyQueued) {
-            continue;
-          }
-
-          // 4. Get all matches for this user in this event
-          const matches = await getEntryMatchesInEvent(user.entryId, event.event);
-
-          if (matches.length === 0) {
-            continue;
-          }
-
-          // 5. Check if ALL matches are updated after finalization
-          const allMatchesUpdated = matches.every(match => {
-            // Byes don't need updating
-            if (match.isBye) return true;
-
-            const matchUpdatedAt = new Date(match.updatedAt);
-            return matchUpdatedAt >= finalizedAt;
-          });
-
-          if (!allMatchesUpdated) {
-            console.log(`[queueVerdicts] User ${user.uid} has stale matches, skipping`);
-            continue;
-          }
-
-          // 6. Check all matches have results (winner determined or bye)
-          const allMatchesResolved = matches.every(match => {
-            return match.isBye || match.winnerEntryId !== null;
-          });
-
-          if (!allMatchesResolved) {
-            console.log(`[queueVerdicts] User ${user.uid} has unresolved matches, skipping`);
-            continue;
-          }
-
-          // 7. Queue the verdict email
-          // TODO: Task 6 will replace this with actual rendered email content
           try {
+            // 3. Check if already queued
+            const alreadyQueued = await emailAlreadyQueued(user.uid, 'verdict', event.event);
+            if (alreadyQueued) {
+              continue;
+            }
+
+            // 4. Get all match results for this user
+            const results = await getUserVerdictResults(user.entryId, event.event);
+
+            if (results.length === 0) {
+              continue;
+            }
+
+            // 5. Check if ALL matches are resolved (winner determined or bye)
+            const allResolved = results.every(r => r.isBye || r.winnerEntryId !== null);
+            if (!allResolved) {
+              console.log(`[queueVerdicts] User ${user.uid} has unresolved matches, skipping`);
+              continue;
+            }
+
+            // 6. Get scores for all participants
+            const allEntryIds = results.flatMap(r =>
+              [r.userEntryId, r.opponentEntryId].filter((id): id is number => id !== null)
+            );
+            const scores = await getPickScores(allEntryIds, event.event);
+
+            // 7. Attach scores to results
+            for (const result of results) {
+              result.userScore = scores.get(result.userEntryId) ?? null;
+              if (result.opponentEntryId) {
+                result.opponentScore = scores.get(result.opponentEntryId) ?? null;
+              }
+            }
+
+            // 8. Build email content
+            const emailContent = buildVerdictEmail(event.event, results);
+
+            // 9. Queue the email
             await createEmailQueueEntry({
               userUid: user.uid,
               toEmail: user.email,
               type: 'verdict',
               event: event.event,
-              subject: `Your Knockout FPL Results for GW${event.event}`,
-              htmlBody: `<p>Your match results for Gameweek ${event.event} are ready!</p>`,
+              subject: emailContent.subject,
+              htmlBody: emailContent.htmlBody,
             });
+
             totalQueued++;
-            console.log(`[queueVerdicts] Queued verdict email for user ${user.uid} (GW${event.event})`);
+            console.log(`[queueVerdicts] Queued verdict for ${user.uid}: "${emailContent.subject}"`);
+
           } catch (error) {
-            // May fail due to unique constraint if race condition - that's OK
-            console.log(`[queueVerdicts] Could not queue for ${user.uid}: ${error}`);
+            console.error(`[queueVerdicts] Error processing user ${user.uid}:`, error);
+            // Continue with other users
           }
         }
       }

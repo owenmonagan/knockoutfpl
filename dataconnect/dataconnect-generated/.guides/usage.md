@@ -14,38 +14,38 @@ If a user is not using a supported framework, they can use the generated SDK dir
 Here's an example of how to use it with the first 5 operations:
 
 ```js
-import { upsertUser, connectFplEntry, upsertEntry, upsertPick, upsertLeague, upsertEvent, createTournament, updateTournamentStatus, setTournamentWinner, advanceTournamentRound } from '@knockoutfpl/dataconnect';
+import { getUser, getEntry, getEntries, getPick, getPicksForEvent, getLeague, getCurrentEvent, getEvent, getSeasonEvents, getEventsNeedingFinalization } from '@knockoutfpl/dataconnect';
 
 
-// Operation UpsertUser:  For variables, look at type UpsertUserVars in ../index.d.ts
-const { data } = await UpsertUser(dataConnect, upsertUserVars);
+// Operation GetUser:  For variables, look at type GetUserVars in ../index.d.ts
+const { data } = await GetUser(dataConnect, getUserVars);
 
-// Operation ConnectFplEntry:  For variables, look at type ConnectFplEntryVars in ../index.d.ts
-const { data } = await ConnectFplEntry(dataConnect, connectFplEntryVars);
+// Operation GetEntry:  For variables, look at type GetEntryVars in ../index.d.ts
+const { data } = await GetEntry(dataConnect, getEntryVars);
 
-// Operation UpsertEntry:  For variables, look at type UpsertEntryVars in ../index.d.ts
-const { data } = await UpsertEntry(dataConnect, upsertEntryVars);
+// Operation GetEntries:  For variables, look at type GetEntriesVars in ../index.d.ts
+const { data } = await GetEntries(dataConnect, getEntriesVars);
 
-// Operation UpsertPick:  For variables, look at type UpsertPickVars in ../index.d.ts
-const { data } = await UpsertPick(dataConnect, upsertPickVars);
+// Operation GetPick:  For variables, look at type GetPickVars in ../index.d.ts
+const { data } = await GetPick(dataConnect, getPickVars);
 
-// Operation UpsertLeague:  For variables, look at type UpsertLeagueVars in ../index.d.ts
-const { data } = await UpsertLeague(dataConnect, upsertLeagueVars);
+// Operation GetPicksForEvent:  For variables, look at type GetPicksForEventVars in ../index.d.ts
+const { data } = await GetPicksForEvent(dataConnect, getPicksForEventVars);
 
-// Operation UpsertEvent:  For variables, look at type UpsertEventVars in ../index.d.ts
-const { data } = await UpsertEvent(dataConnect, upsertEventVars);
+// Operation GetLeague:  For variables, look at type GetLeagueVars in ../index.d.ts
+const { data } = await GetLeague(dataConnect, getLeagueVars);
 
-// Operation CreateTournament:  For variables, look at type CreateTournamentVars in ../index.d.ts
-const { data } = await CreateTournament(dataConnect, createTournamentVars);
+// Operation GetCurrentEvent:  For variables, look at type GetCurrentEventVars in ../index.d.ts
+const { data } = await GetCurrentEvent(dataConnect, getCurrentEventVars);
 
-// Operation UpdateTournamentStatus:  For variables, look at type UpdateTournamentStatusVars in ../index.d.ts
-const { data } = await UpdateTournamentStatus(dataConnect, updateTournamentStatusVars);
+// Operation GetEvent:  For variables, look at type GetEventVars in ../index.d.ts
+const { data } = await GetEvent(dataConnect, getEventVars);
 
-// Operation SetTournamentWinner:  For variables, look at type SetTournamentWinnerVars in ../index.d.ts
-const { data } = await SetTournamentWinner(dataConnect, setTournamentWinnerVars);
+// Operation GetSeasonEvents:  For variables, look at type GetSeasonEventsVars in ../index.d.ts
+const { data } = await GetSeasonEvents(dataConnect, getSeasonEventsVars);
 
-// Operation AdvanceTournamentRound:  For variables, look at type AdvanceTournamentRoundVars in ../index.d.ts
-const { data } = await AdvanceTournamentRound(dataConnect, advanceTournamentRoundVars);
+// Operation GetEventsNeedingFinalization:  For variables, look at type GetEventsNeedingFinalizationVars in ../index.d.ts
+const { data } = await GetEventsNeedingFinalization(dataConnect, getEventsNeedingFinalizationVars);
 
 
 ```
