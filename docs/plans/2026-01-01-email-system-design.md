@@ -244,6 +244,353 @@ Removed from the original `tournament-experience.md` spec:
 
 ---
 
+# Technical Implementation
+
+## Architecture Overview
+
+```
+Cloud Scheduler
+    │
+    ├── checkDeadline (every 5 mins)
+    │       └── Sets deadlinePassedAt → queues Matchup emails
+    │
+    ├── checkFinished (every 15 mins)
+    │       └── Sets fplFinishedAt when FPL marks gameweek complete
+    │
+    ├── refreshBrackets (every 15 mins)
+    │       └── Fetches scores, resolves matches, sets bracketRefreshedAt
+    │
+    ├── queueVerdicts (every 5 mins)
+    │       └── Only runs after bracketRefreshedAt is set → queues Verdict emails
+    │
+    └── processEmailQueue (every 1 min)
+            └── Sends pending emails via Resend API
+```
+
+**Critical guarantee:** Verdict emails never send until bracket refresh completes. This ensures match results are accurate.
+
+---
+
+## Dependency Tracking
+
+The `GameweekStatus` table tracks pipeline state:
+
+```
+┌──────────┬─────────────────┬───────────────────┬───────────────┐
+│ gameweek │ fplFinishedAt   │ bracketRefreshedAt│ verdictsQueued│
+├──────────┼─────────────────┼───────────────────┼───────────────┤
+│ 24       │ 2026-01-01 22:00│ 2026-01-01 22:15  │ true          │
+│ 25       │ null            │ null              │ false         │
+└──────────┴─────────────────┴───────────────────┴───────────────┘
+```
+
+**Job dependencies:**
+
+| Job | Runs | Precondition | Action |
+|-----|------|--------------|--------|
+| checkDeadline | Every 5 mins | Deadline passed | Set `deadlinePassedAt`, queue Matchup emails |
+| checkFinished | Every 15 mins | FPL `finished: true` | Set `fplFinishedAt` |
+| refreshBrackets | Every 15 mins | `fplFinishedAt` is set | Fetch scores, resolve matches, set `bracketRefreshedAt` |
+| queueVerdicts | Every 5 mins | `bracketRefreshedAt` is set | Queue Verdict emails, set `verdictsQueued = true` |
+| processEmailQueue | Every 1 min | Pending emails exist | Send via Resend, update status |
+
+---
+
+## Schema (DataConnect/PostgreSQL)
+
+### GameweekStatus Table
+
+```graphql
+type GameweekStatus @table {
+  id: Int! @default(expr: "request.data.gameweek")
+  gameweek: Int! @unique
+
+  # Matchup pipeline
+  deadlinePassedAt: Timestamp
+  matchupsQueued: Boolean! @default(value: false)
+
+  # Verdict pipeline
+  fplFinishedAt: Timestamp
+  bracketRefreshedAt: Timestamp
+  verdictsQueued: Boolean! @default(value: false)
+}
+```
+
+### EmailQueue Table
+
+```graphql
+type EmailQueue @table {
+  id: UUID! @default(expr: "uuidV4()")
+  user: User!
+  type: String!              # 'matchup' | 'verdict'
+  gameweek: Int!
+  status: String!            # 'pending' | 'processing' | 'sent' | 'failed'
+  errorMessage: String       # if failed, why
+  createdAt: Timestamp! @default(expr: "request.time")
+  processedAt: Timestamp
+
+  @@unique([user, type, gameweek])  # prevent duplicate emails
+}
+```
+
+**Key constraints:**
+- `@@unique([user, type, gameweek])` — One matchup and one verdict email per user per gameweek
+- `GameweekStatus` uses gameweek number as ID for simple lookup
+
+---
+
+## Cloud Functions
+
+### checkDeadline (Every 5 mins)
+
+```typescript
+// functions/src/email/checkDeadline.ts
+
+export const checkDeadline = onSchedule('every 5 minutes', async () => {
+  // 1. Get current gameweek from FPL
+  const bootstrap = await fetchBootstrapData();
+  const currentEvent = bootstrap.events.find(e => e.is_current);
+  if (!currentEvent) return;
+
+  const gameweek = currentEvent.id;
+  const deadline = new Date(currentEvent.deadline_time);
+  const now = new Date();
+
+  // 2. Check if deadline just passed
+  if (now < deadline) return;
+
+  // 3. Check if already processed
+  const status = await getGameweekStatus(gameweek);
+  if (status?.matchupsQueued) return;
+
+  // 4. Mark deadline passed
+  if (!status?.deadlinePassedAt) {
+    await setDeadlinePassed(gameweek, now);
+  }
+
+  // 5. Queue matchup emails
+  await queueMatchupEmails(gameweek);
+});
+```
+
+### checkFinished (Every 15 mins)
+
+```typescript
+// functions/src/email/checkFinished.ts
+
+export const checkFinished = onSchedule('every 15 minutes', async () => {
+  const bootstrap = await fetchBootstrapData();
+
+  for (const event of bootstrap.events) {
+    if (!event.finished) continue;
+
+    const status = await getGameweekStatus(event.id);
+    if (status?.fplFinishedAt) continue;
+
+    await setFplFinished(event.id, new Date());
+  }
+});
+```
+
+### refreshBrackets (Every 15 mins)
+
+```typescript
+// functions/src/email/refreshBrackets.ts
+
+export const refreshBrackets = onSchedule('every 15 minutes', async () => {
+  // Find gameweeks ready for refresh
+  // WHERE fplFinishedAt IS NOT NULL AND bracketRefreshedAt IS NULL
+  const ready = await getGameweeksNeedingRefresh();
+
+  for (const gameweek of ready) {
+    try {
+      await refreshTournamentBrackets(gameweek);
+      await setBracketRefreshed(gameweek, new Date());
+    } catch (error) {
+      console.error(`Failed to refresh GW${gameweek}:`, error);
+      // Will retry next run
+    }
+  }
+});
+```
+
+### queueVerdicts (Every 5 mins)
+
+```typescript
+// functions/src/email/queueVerdicts.ts
+
+export const queueVerdicts = onSchedule('every 5 minutes', async () => {
+  // Find gameweeks ready for verdict emails
+  // WHERE bracketRefreshedAt IS NOT NULL AND verdictsQueued = false
+  const ready = await getGameweeksReadyForVerdicts();
+
+  for (const gameweek of ready) {
+    await queueVerdictEmails(gameweek);
+    await setVerdictsQueued(gameweek, true);
+  }
+});
+```
+
+### processEmailQueue (Every 1 min)
+
+```typescript
+// functions/src/email/processQueue.ts
+
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export const processEmailQueue = onSchedule('every 1 minutes', async () => {
+  // 1. Fetch pending emails (batch of 50)
+  const pending = await getPendingEmails(50);
+  if (pending.length === 0) return;
+
+  // 2. Mark as processing (prevents double-send)
+  const ids = pending.map(e => e.id);
+  await markAsProcessing(ids);
+
+  // 3. Process each email
+  for (const email of pending) {
+    try {
+      const content = email.type === 'matchup'
+        ? await buildMatchupEmail(email.user, email.gameweek)
+        : await buildVerdictEmail(email.user, email.gameweek);
+
+      await resend.emails.send({
+        from: 'Knockout FPL <noreply@knockoutfpl.com>',
+        to: email.user.email,
+        subject: content.subject,
+        html: content.html,
+      });
+
+      await markAsSent(email.id);
+    } catch (error) {
+      await markAsFailed(email.id, error.message);
+    }
+  }
+});
+```
+
+---
+
+## Email Content Builders
+
+### buildMatchupEmail
+
+```typescript
+// functions/src/email/builders/matchup.ts
+
+export async function buildMatchupEmail(
+  user: User,
+  gameweek: number
+): Promise<{ subject: string; html: string }> {
+  // 1. Get all active matches for this user
+  const matches = await getUserMatchesForGameweek(user.fplTeamId, gameweek);
+
+  if (matches.length === 0) {
+    throw new Error(`No matches found for user ${user.id} in GW${gameweek}`);
+  }
+
+  // 2. Sort by priority (closest to trophy first)
+  const sorted = matches.sort((a, b) => a.roundsToTrophy - b.roundsToTrophy);
+  const headline = sorted[0];
+  const others = sorted.slice(1);
+
+  // 3. Build subject line
+  const subject = others.length > 0
+    ? `GW${gameweek}: ${headline.roundName} vs ${headline.opponentName}. Plus ${others.length} more.`
+    : `GW${gameweek}: ${headline.roundName} vs ${headline.opponentName}. One survives.`;
+
+  // 4. Build HTML
+  const html = renderMatchupEmail({ gameweek, headline, others });
+
+  return { subject, html };
+}
+```
+
+### buildVerdictEmail
+
+```typescript
+// functions/src/email/builders/verdict.ts
+
+export async function buildVerdictEmail(
+  user: User,
+  gameweek: number
+): Promise<{ subject: string; html: string }> {
+  // 1. Get all results for this user
+  const results = await getUserResultsForGameweek(user.fplTeamId, gameweek);
+
+  if (results.length === 0) {
+    throw new Error(`No results found for user ${user.id} in GW${gameweek}`);
+  }
+
+  // 2. Group by outcome
+  const championships = results.filter(r => r.isChampionship && r.won);
+  const victories = results.filter(r => r.won && !r.isChampionship);
+  const eliminations = results.filter(r => !r.won);
+
+  // 3. Build subject line
+  const subject = buildVerdictSubject(championships, victories, eliminations, gameweek);
+
+  // 4. Build HTML
+  const html = renderVerdictEmail({ gameweek, championships, victories, eliminations });
+
+  return { subject, html };
+}
+
+function buildVerdictSubject(
+  championships: Result[],
+  victories: Result[],
+  eliminations: Result[],
+  gameweek: number
+): string {
+  if (championships.length > 0) {
+    const extra = victories.length + eliminations.length;
+    return extra > 0
+      ? `GW${gameweek}: You're a champion. Plus ${extra} more results.`
+      : `GW${gameweek}: You're a champion.`;
+  }
+
+  if (victories.length > 0 && eliminations.length > 0) {
+    return `GW${gameweek}: ${victories.length} ${victories.length === 1 ? 'victory' : 'victories'}. ${eliminations.length} ${eliminations.length === 1 ? 'elimination' : 'eliminations'}.`;
+  }
+
+  if (victories.length > 0) {
+    return `GW${gameweek}: All ${victories.length} matches won. The run continues.`;
+  }
+
+  return `GW${gameweek}: Tough week. But you can still watch.`;
+}
+```
+
+---
+
+## External Dependencies
+
+| Service | Purpose | Free Tier |
+|---------|---------|-----------|
+| Resend | Email delivery | 3,000 emails/month, 100/day |
+
+---
+
+## Guarantees
+
+- **Verdicts never send before bracket refresh** — `queueVerdicts` checks `bracketRefreshedAt` is set
+- **No duplicate emails** — Unique constraint on `[user, type, gameweek]`
+- **Failed emails can retry** — Status tracked, can re-queue failed emails
+- **Full audit trail** — `EmailQueue` table logs all sent/failed emails
+
+---
+
+## Not Included (Future)
+
+- Email preferences/unsubscribe (needs User table column + preferences UI)
+- React Email templates (using inline HTML for MVP)
+- Push notifications (separate feature)
+- Email analytics/tracking (opens, clicks)
+
+---
+
 ## Related
 
 - See [../business/product/features/tournament-experience.md](../business/product/features/tournament-experience.md) for original (now superseded) email spec
