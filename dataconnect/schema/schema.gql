@@ -1,10 +1,10 @@
 # Knockout FPL Data Schema
 # Based on docs/business/technical/data/data-dictionary.md
 #
-# 10 tables across 4 layers:
+# 11 tables across 4 layers:
 # - FPL Cache (2): events, leagues
 # - FPL Records (2): entries, picks
-# - User (1): users
+# - User (2): users, email_queue
 # - Tournament (5): tournaments, rounds, participants, matches, match_picks
 
 # =============================================================================
@@ -18,6 +18,29 @@ type User @table(key: "uid") {
   entryId2025: Int @col(name: "entry_id_2025")
   createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
   updatedAt: Timestamp! @col(name: "updated_at") @default(expr: "request.time")
+}
+
+# Email queue for scheduled delivery
+type EmailQueue @table(name: "email_queue", key: "id") {
+  id: UUID! @default(expr: "uuidV4()")
+
+  # Target user
+  userUid: String! @col(name: "user_uid")
+
+  # Email details
+  type: String!              # 'matchup' | 'verdict'
+  event: Int!                # Gameweek number
+
+  # Processing state
+  status: String! @default(value: "pending")  # 'pending' | 'processing' | 'sent' | 'failed'
+  errorMessage: String @col(name: "error_message")
+
+  # Timestamps
+  createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
+  processedAt: Timestamp @col(name: "processed_at")
+
+  # Relations
+  user: User!
 }
 
 # =============================================================================
