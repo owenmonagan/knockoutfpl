@@ -43,6 +43,39 @@ describe('createTournament', () => {
     it('passes when startEvent is undefined (optional)', () => {
       expect(() => validateTournamentRequest({ fplLeagueId: 12345, startEvent: undefined })).not.toThrow();
     });
+
+    // matchSize validation tests
+    it('accepts valid matchSize', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 123, matchSize: 3 })).not.toThrow();
+      expect(() => validateTournamentRequest({ fplLeagueId: 123, matchSize: 4 })).not.toThrow();
+    });
+
+    it('accepts matchSize of 2 (minimum/default)', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 123, matchSize: 2 })).not.toThrow();
+    });
+
+    it('accepts matchSize of 8 (maximum)', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 123, matchSize: 8 })).not.toThrow();
+    });
+
+    it('rejects matchSize less than 2', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 123, matchSize: 1 }))
+        .toThrow('matchSize must be between 2 and 8');
+    });
+
+    it('rejects matchSize greater than 8', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 123, matchSize: 10 }))
+        .toThrow('matchSize must be between 2 and 8');
+    });
+
+    it('rejects non-number matchSize', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 123, matchSize: 'three' }))
+        .toThrow('matchSize must be a number');
+    });
+
+    it('passes when matchSize is undefined (optional)', () => {
+      expect(() => validateTournamentRequest({ fplLeagueId: 123, matchSize: undefined })).not.toThrow();
+    });
   });
 
   describe('validateLeagueStandings', () => {

@@ -81,6 +81,7 @@ interface MatchPickRecord {
 export interface CreateTournamentRequest {
   fplLeagueId: number;
   startEvent?: number;  // Optional, defaults to currentGW + 1
+  matchSize?: number;   // Optional, defaults to 2 (1v1)
 }
 
 export interface CreateTournamentResponse {
@@ -107,6 +108,15 @@ export function validateTournamentRequest(data: any): asserts data is CreateTour
     }
     if (data.startEvent < 1 || data.startEvent > 38) {
       throw new HttpsError('invalid-argument', 'startEvent must be between 1 and 38');
+    }
+  }
+  // Validate optional matchSize if provided
+  if (data.matchSize !== undefined) {
+    if (typeof data.matchSize !== 'number') {
+      throw new HttpsError('invalid-argument', 'matchSize must be a number');
+    }
+    if (data.matchSize < 2 || data.matchSize > 8) {
+      throw new HttpsError('invalid-argument', 'matchSize must be between 2 and 8');
     }
   }
 }
