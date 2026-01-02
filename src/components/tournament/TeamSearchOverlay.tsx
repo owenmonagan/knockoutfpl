@@ -80,7 +80,7 @@ export function TeamSearchOverlay({
   const hasResults = results.length > 0;
 
   return (
-    <Card className="absolute inset-0 z-10 bg-background/95 backdrop-blur-sm">
+    <Card>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Find Your Team</CardTitle>

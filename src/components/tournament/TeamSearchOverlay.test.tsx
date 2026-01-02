@@ -286,22 +286,6 @@ describe('TeamSearchOverlay', () => {
     });
   });
 
-  describe('Overlay Styling', () => {
-    it('should have overlay positioning classes', () => {
-      const { container } = render(<TeamSearchOverlay {...defaultProps} />);
-
-      const card = container.querySelector('.absolute.inset-0.z-10');
-      expect(card).toBeInTheDocument();
-    });
-
-    it('should have backdrop blur styling', () => {
-      const { container } = render(<TeamSearchOverlay {...defaultProps} />);
-
-      const card = container.querySelector('.backdrop-blur-sm');
-      expect(card).toBeInTheDocument();
-    });
-  });
-
   describe('Debounce Behavior', () => {
     it('should reset debounce timer on subsequent inputs', async () => {
       render(<TeamSearchOverlay {...defaultProps} />);

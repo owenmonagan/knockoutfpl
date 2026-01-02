@@ -199,6 +199,96 @@ export function BracketView({
 
   return (
     <div className="space-y-6">
+      {/* Find Your Team Section - FIRST for unauthenticated users */}
+      {!isAuthenticated && tournament.rounds.length > 0 && (
+        <>
+          {/* Team Search (renders as its own Card) */}
+          {overlayMounted && (
+            <div
+              className={`transition-opacity duration-200 ${
+                overlayVisible ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <TeamSearchOverlay
+                participants={tournament.participants}
+                onConfirm={handleTeamConfirm}
+                onClose={handleSearchClose}
+              />
+            </div>
+          )}
+
+          {/* Your Matches Section - shown after team is selected */}
+          {previewedTeamId && !showSearch && (
+            <Card>
+              <CardContent className="pt-6">
+                {/* Selected Team Header */}
+                {previewedParticipant && (
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        Viewing as
+                      </span>
+                      <span className="font-medium">
+                        {previewedParticipant.fplTeamName}
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleChangeTeam}
+                    >
+                      Change team
+                    </Button>
+                  </div>
+                )}
+
+                {/* Your Matches Section */}
+                <YourMatchesSection
+                  matches={previewedMatches}
+                  currentGameweek={tournament.currentGameweek}
+                  isLive={hasLiveMatch}
+                />
+              </CardContent>
+
+              {/* Signup CTA with slide-in animation */}
+              {onClaimTeam && (
+                <div
+                  className={`border-t bg-muted/30 px-6 py-4 transition-all duration-300 ease-out ${
+                    ctaVisible
+                      ? 'opacity-100 translate-y-0'
+                      : 'opacity-0 translate-y-4'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p className="text-sm text-muted-foreground text-center sm:text-left">
+                      Sign up to get notified when results are in
+                    </p>
+                    <Button onClick={handleSignupClick}>
+                      Sign up and claim team
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </Card>
+          )}
+
+          {/* Placeholder when search closed without selecting team */}
+          {!previewedTeamId && !showSearch && (
+            <Card>
+              <CardContent className="py-8 text-center">
+                <p className="text-muted-foreground mb-4">
+                  Select your team to see your matches
+                </p>
+                <Button variant="outline" onClick={handleChangeTeam}>
+                  Find your team
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
+
+      {/* Bracket Card */}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -236,90 +326,7 @@ export function BracketView({
         </CardContent>
       </Card>
 
-      {/* Your Matches Section - for unauthenticated users with team preview */}
-      {!isAuthenticated && tournament.rounds.length > 0 && (
-        <Card className="relative">
-          <CardContent className="pt-6">
-            {/* Team Search Overlay with fade animation */}
-            {overlayMounted && (
-              <div
-                className={`transition-opacity duration-200 ${
-                  overlayVisible ? 'opacity-100' : 'opacity-0'
-                }`}
-              >
-                <TeamSearchOverlay
-                  participants={tournament.participants}
-                  onConfirm={handleTeamConfirm}
-                  onClose={handleSearchClose}
-                />
-              </div>
-            )}
-
-            {/* Selected Team Header */}
-            {previewedParticipant && !showSearch && (
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Viewing as
-                  </span>
-                  <span className="font-medium">
-                    {previewedParticipant.fplTeamName}
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleChangeTeam}
-                >
-                  Change team
-                </Button>
-              </div>
-            )}
-
-            {/* Your Matches Section */}
-            {previewedTeamId && !showSearch && (
-              <YourMatchesSection
-                matches={previewedMatches}
-                currentGameweek={tournament.currentGameweek}
-                isLive={hasLiveMatch}
-              />
-            )}
-
-            {/* Placeholder when no team selected and search closed */}
-            {!previewedTeamId && !showSearch && (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground mb-4">
-                  Select your team to see your matches
-                </p>
-                <Button variant="outline" onClick={handleChangeTeam}>
-                  Find your team
-                </Button>
-              </div>
-            )}
-          </CardContent>
-
-          {/* Signup CTA with slide-in animation */}
-          {previewedTeamId && !showSearch && onClaimTeam && (
-            <div
-              className={`border-t bg-muted/30 px-6 py-4 transition-all duration-300 ease-out ${
-                ctaVisible
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 translate-y-4'
-              }`}
-            >
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-sm text-muted-foreground text-center sm:text-left">
-                  Sign up to get notified when results are in
-                </p>
-                <Button onClick={handleSignupClick}>
-                  Sign up and claim team
-                </Button>
-              </div>
-            </div>
-          )}
-        </Card>
-      )}
-
+      {/* Participants Table */}
       {tournament.rounds.length > 0 && (
         <Card>
           <CardContent className="pt-6">
