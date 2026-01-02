@@ -145,6 +145,7 @@ type Round @table(name: "rounds", key: ["tournamentId", "roundNumber"]) {
 
   startedAt: Timestamp @col(name: "started_at")
   completedAt: Timestamp @col(name: "completed_at")
+  updatedAt: Timestamp! @col(name: "updated_at") @default(expr: "request.time")
 
   # Relations
   tournament: Tournament!
