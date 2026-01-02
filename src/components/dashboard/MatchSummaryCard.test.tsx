@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MatchSummaryCard } from './MatchSummaryCard';
+import { getFplTeamUrl } from '@/lib/fpl-urls';
 
 describe('MatchSummaryCard', () => {
   describe('Team Avatars', () => {
@@ -562,6 +563,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="upcoming"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           leagueName="Work League"
           roundName="Finals"
           gameweek={15}
@@ -570,6 +572,154 @@ describe('MatchSummaryCard', () => {
 
       // gameweek - 1 = 14
       expect(screen.getByText(/Opponent TBD after GW14/)).toBeInTheDocument();
+    });
+  });
+
+  describe('FPL Team Links', () => {
+    it('renders clickable links for both teams in live match', () => {
+      render(
+        <MatchSummaryCard
+          type="live"
+          yourTeamName="My Team"
+          yourFplTeamId={12345}
+          opponentTeamName="Their Team"
+          opponentFplTeamId={67890}
+          leagueName="Test League"
+          roundName="Round 1"
+          yourScore={50}
+          theirScore={40}
+          gameweek={15}
+        />
+      );
+
+      const yourLink = screen.getByRole('link', { name: /you/i });
+      const opponentLink = screen.getByRole('link', { name: /their team/i });
+
+      // Live match has roundStarted = true, so uses event URL
+      expect(yourLink).toHaveAttribute('href', getFplTeamUrl(12345, 15, true));
+      expect(opponentLink).toHaveAttribute('href', getFplTeamUrl(67890, 15, true));
+      expect(yourLink).toHaveAttribute('target', '_blank');
+      expect(opponentLink).toHaveAttribute('target', '_blank');
+    });
+
+    it('renders clickable links for both teams in finished match', () => {
+      render(
+        <MatchSummaryCard
+          type="finished"
+          yourTeamName="My Team"
+          yourFplTeamId={12345}
+          opponentTeamName="Their Team"
+          opponentFplTeamId={67890}
+          leagueName="Test League"
+          roundName="Round 1"
+          yourScore={60}
+          theirScore={55}
+          result="won"
+          gameweek={15}
+        />
+      );
+
+      const yourLink = screen.getByRole('link', { name: /you/i });
+      const opponentLink = screen.getByRole('link', { name: /their team/i });
+
+      // Finished match has roundStarted = true, so uses event URL
+      expect(yourLink).toHaveAttribute('href', getFplTeamUrl(12345, 15, true));
+      expect(opponentLink).toHaveAttribute('href', getFplTeamUrl(67890, 15, true));
+      expect(yourLink).toHaveAttribute('target', '_blank');
+      expect(opponentLink).toHaveAttribute('target', '_blank');
+    });
+
+    it('renders clickable links for both teams in upcoming match with history URL', () => {
+      render(
+        <MatchSummaryCard
+          type="upcoming"
+          yourTeamName="My Team"
+          yourFplTeamId={12345}
+          opponentTeamName="Their Team"
+          opponentFplTeamId={67890}
+          leagueName="Test League"
+          roundName="Round 2"
+          gameweek={16}
+        />
+      );
+
+      const yourLink = screen.getByRole('link', { name: /you/i });
+      const opponentLink = screen.getByRole('link', { name: /their team/i });
+
+      // Upcoming match has roundStarted = false, so uses history URL
+      expect(yourLink).toHaveAttribute('href', getFplTeamUrl(12345, 16, false));
+      expect(opponentLink).toHaveAttribute('href', getFplTeamUrl(67890, 16, false));
+      expect(yourLink).toHaveAttribute('target', '_blank');
+      expect(opponentLink).toHaveAttribute('target', '_blank');
+    });
+
+    it('does not render link for TBD opponent', () => {
+      render(
+        <MatchSummaryCard
+          type="upcoming"
+          yourTeamName="My Team"
+          yourFplTeamId={12345}
+          // No opponentTeamName or opponentFplTeamId
+          leagueName="Test League"
+          roundName="Round 2"
+          gameweek={16}
+        />
+      );
+
+      // Your team should still have a link
+      expect(screen.getByRole('link', { name: /you/i })).toBeInTheDocument();
+
+      // TBD should NOT be a link
+      expect(screen.queryByRole('link', { name: /tbd/i })).not.toBeInTheDocument();
+    });
+
+    it('does not call card onClick when team link is clicked', () => {
+      const handleCardClick = vi.fn();
+
+      render(
+        <MatchSummaryCard
+          type="live"
+          yourTeamName="My Team"
+          yourFplTeamId={12345}
+          opponentTeamName="Their Team"
+          opponentFplTeamId={67890}
+          leagueName="Test League"
+          roundName="Round 1"
+          yourScore={50}
+          theirScore={40}
+          gameweek={15}
+          onClick={handleCardClick}
+        />
+      );
+
+      const yourLink = screen.getByRole('link', { name: /you/i });
+      fireEvent.click(yourLink);
+
+      // Card onClick should NOT have been called due to stopPropagation
+      expect(handleCardClick).not.toHaveBeenCalled();
+    });
+
+    it('has rel="noopener noreferrer" for security', () => {
+      render(
+        <MatchSummaryCard
+          type="live"
+          yourTeamName="My Team"
+          yourFplTeamId={12345}
+          opponentTeamName="Their Team"
+          opponentFplTeamId={67890}
+          leagueName="Test League"
+          roundName="Round 1"
+          yourScore={50}
+          theirScore={40}
+          gameweek={15}
+        />
+      );
+
+      const yourLink = screen.getByRole('link', { name: /you/i });
+      const opponentLink = screen.getByRole('link', { name: /their team/i });
+
+      expect(yourLink).toHaveAttribute('rel', 'noopener noreferrer');
+      expect(opponentLink).toHaveAttribute('rel', 'noopener noreferrer');
     });
   });
 });
