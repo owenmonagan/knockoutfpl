@@ -60,6 +60,7 @@ export interface UserProgress {
 interface CreateTournamentRequest {
   fplLeagueId: number;
   startEvent?: number;
+  matchSize?: number;
 }
 
 interface CreateTournamentResponse {
@@ -246,7 +247,8 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
  */
 export async function callCreateTournament(
   fplLeagueId: number,
-  startEvent?: number
+  startEvent?: number,
+  matchSize?: number
 ): Promise<CreateTournamentResponse> {
   const createTournamentFn = httpsCallable<
     CreateTournamentRequest,
@@ -256,6 +258,9 @@ export async function callCreateTournament(
   const request: CreateTournamentRequest = { fplLeagueId };
   if (startEvent !== undefined) {
     request.startEvent = startEvent;
+  }
+  if (matchSize !== undefined) {
+    request.matchSize = matchSize;
   }
 
   const result = await createTournamentFn(request);

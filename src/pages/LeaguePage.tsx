@@ -88,10 +88,8 @@ export function LeaguePage() {
   const handleCreateTournament = async (startEvent: number, matchSize: number) => {
     if (!leagueId || !user) return;
 
-    // Call the Cloud Function to create the tournament with the selected start gameweek
-    // TODO: Pass matchSize to callCreateTournament once backend supports it
-    await callCreateTournament(Number(leagueId), startEvent);
-    console.log('Tournament created with matchSize:', matchSize);
+    // Call the Cloud Function to create the tournament with the selected start gameweek and match size
+    await callCreateTournament(Number(leagueId), startEvent, matchSize);
 
     // Reload tournament data
     const newTournament = await getTournamentByLeague(Number(leagueId));
