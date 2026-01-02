@@ -1,14 +1,16 @@
 // src/components/tournament/BracketView.tsx
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { Share2 } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Spinner } from '../ui/spinner';
 import { BracketLayout } from './BracketLayout';
 import { ParticipantsTable } from './ParticipantsTable';
+import { ShareTournamentDialog } from './ShareTournamentDialog';
 import { TeamSearchOverlay } from './TeamSearchOverlay';
 import { YourMatchesSection } from '../dashboard/YourMatchesSection';
-import type { Tournament, Participant } from '../../types/tournament';
+import type { Participant, Tournament } from '../../types/tournament';
 import { getMatchPlayers } from '../../types/tournament';
 import type { MatchSummaryCardProps } from '../dashboard/MatchSummaryCard';
 
@@ -101,6 +103,14 @@ export function BracketView({
   // Animation timing constants
   const FADE_ANIMATION_DURATION_MS = 200;
   const CTA_SLIDE_IN_DELAY_MS = 100;
+
+  // State for share dialog
+  const [showShareDialog, setShowShareDialog] = useState(false);
+
+  // Get current round for share dialog
+  const currentRound = tournament.rounds.find(
+    (r) => r.roundNumber === tournament.currentRound
+  );
 
   // Check if the authenticated user is a participant in this tournament
   const userIsParticipant = useMemo(() => {
@@ -349,6 +359,14 @@ export function BracketView({
               <Badge variant={tournament.status === 'completed' ? 'secondary' : 'default'}>
                 {tournament.status === 'completed' ? 'Completed' : 'Active'}
               </Badge>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowShareDialog(true)}
+                aria-label="Share tournament"
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -383,6 +401,16 @@ export function BracketView({
           </CardContent>
         </Card>
       )}
+
+      {/* Share Tournament Dialog */}
+      <ShareTournamentDialog
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        leagueId={tournament.fplLeagueId}
+        leagueName={tournament.fplLeagueName}
+        roundName={currentRound?.name}
+        participantCount={tournament.participants.length}
+      />
     </div>
   );
 }

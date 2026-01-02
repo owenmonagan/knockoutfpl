@@ -5,6 +5,27 @@ import { describe, it, expect, vi } from 'vitest';
 import { BracketView } from './BracketView';
 import type { Tournament } from '../../types/tournament';
 
+// Mock ShareTournamentDialog to simplify testing
+vi.mock('./ShareTournamentDialog', () => ({
+  ShareTournamentDialog: ({ isOpen, onClose, leagueId, leagueName, roundName, participantCount }: {
+    isOpen: boolean;
+    onClose: () => void;
+    leagueId: number;
+    leagueName: string;
+    roundName?: string;
+    participantCount?: number;
+  }) =>
+    isOpen ? (
+      <div data-testid="share-dialog">
+        <span data-testid="share-league-id">{leagueId}</span>
+        <span data-testid="share-league-name">{leagueName}</span>
+        {roundName && <span data-testid="share-round-name">{roundName}</span>}
+        {participantCount && <span data-testid="share-participant-count">{participantCount}</span>}
+        <button onClick={onClose}>Close</button>
+      </div>
+    ) : null,
+}));
+
 describe('BracketView', () => {
   const mockTournament: Tournament = {
     id: 'tour-1',
@@ -533,6 +554,47 @@ describe('BracketView', () => {
       // Scores should appear in the matches section
       expect(screen.getAllByText('75').length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText('62').length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('Share functionality', () => {
+    it('renders share button in header', () => {
+      render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+
+      expect(screen.getByRole('button', { name: 'Share tournament' })).toBeInTheDocument();
+    });
+
+    it('opens share dialog when share button clicked', async () => {
+      const user = userEvent.setup();
+      render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+
+      // Dialog should not be visible initially
+      expect(screen.queryByTestId('share-dialog')).not.toBeInTheDocument();
+
+      // Click share button
+      await user.click(screen.getByRole('button', { name: 'Share tournament' }));
+
+      // Dialog should be visible
+      expect(screen.getByTestId('share-dialog')).toBeInTheDocument();
+      expect(screen.getByTestId('share-league-id')).toHaveTextContent('123');
+      expect(screen.getByTestId('share-league-name')).toHaveTextContent('Test League');
+      expect(screen.getByTestId('share-round-name')).toHaveTextContent('Semi-Finals');
+      expect(screen.getByTestId('share-participant-count')).toHaveTextContent('4');
+    });
+
+    it('closes share dialog when close button clicked', async () => {
+      const user = userEvent.setup();
+      render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+
+      // Open dialog
+      await user.click(screen.getByRole('button', { name: 'Share tournament' }));
+      expect(screen.getByTestId('share-dialog')).toBeInTheDocument();
+
+      // Close dialog
+      await user.click(screen.getByRole('button', { name: 'Close' }));
+
+      // Dialog should be closed
+      expect(screen.queryByTestId('share-dialog')).not.toBeInTheDocument();
     });
   });
 });
