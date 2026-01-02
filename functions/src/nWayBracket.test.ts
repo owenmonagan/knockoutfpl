@@ -97,4 +97,13 @@ describe('distributeByesAcrossGroups', () => {
     expect(result.groupsWithTwoByes).toBe(9);
     expect(result.autoAdvanceCount).toBe(9);
   });
+
+  it('distributes byes for matchSize=4', () => {
+    const result = distributeByesAcrossGroups(16, 14, 4);
+    // 14 byes across 16 groups: 14 groups get 1 bye each, 2 groups are full
+    expect(result.groupsWithByes).toBe(14);
+    expect(result.fullGroups).toBe(2);
+    // autoAdvanceCount is 0 for matchSize=4 (not yet implemented)
+    expect(result.autoAdvanceCount).toBe(0);
+  });
 });

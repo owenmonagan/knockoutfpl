@@ -66,8 +66,6 @@ export function distributeByesAcrossGroups(
   byeCount: number,
   matchSize: number
 ): ByeDistribution {
-  const maxByesPerGroup = matchSize - 1; // Can't have matchSize byes (no players)
-
   // First pass: give each group up to 1 bye
   const firstPassByes = Math.min(byeCount, groupCount);
   let remainingByes = byeCount - firstPassByes;
@@ -81,7 +79,10 @@ export function distributeByesAcrossGroups(
   const groupsWithByes = firstPassByes;
   const fullGroups = groupCount - firstPassByes;
 
-  // Auto-advance happens when a group has matchSize-1 byes
+  // Auto-advance happens when a group has matchSize-1 byes (only 1 real player).
+  // TODO: Generalize for matchSize > 3. Currently only handles matchSize=3 where
+  // 2 byes = auto-advance. For matchSize=4, would need 3 byes for auto-advance,
+  // which requires tracking groupsWithThreeByes. Deferred until matchSize=4 is needed.
   const autoAdvanceCount = matchSize === 3 ? groupsWithTwoByes : 0;
 
   return {
