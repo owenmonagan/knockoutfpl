@@ -99,3 +99,25 @@ export async function getFPLBootstrapData(): Promise<FPLBootstrapData> {
     currentGameweek: currentEvent?.id || 1,
   };
 }
+
+export interface FPLLeagueInfo {
+  id: number;
+  name: string;
+  memberCount: number;
+}
+
+export async function getLeagueInfo(leagueId: number): Promise<FPLLeagueInfo> {
+  const response = await fetch(`/api/fpl/leagues-classic/${leagueId}/standings/`);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch league info');
+  }
+
+  const data = await response.json();
+
+  return {
+    id: data.league.id,
+    name: data.league.name,
+    memberCount: data.standings?.results?.length || 0,
+  };
+}

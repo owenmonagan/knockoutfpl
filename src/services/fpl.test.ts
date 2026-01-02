@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getFPLTeamInfo, getUserMiniLeagues, getLeagueStandings } from './fpl';
+import { getFPLTeamInfo, getUserMiniLeagues, getLeagueStandings, getLeagueInfo } from './fpl';
 
 describe('FPL Service', () => {
   describe('getFPLTeamInfo', () => {
@@ -182,6 +182,55 @@ describe('FPL Service', () => {
         totalPoints: 500,
       });
       expect(fetch).toHaveBeenCalledWith('/api/fpl/leagues-classic/123/standings/');
+    });
+  });
+
+  describe('getLeagueInfo', () => {
+    it('should return league info with name and member count', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          league: {
+            id: 29895,
+            name: 'London Pub League',
+          },
+          standings: {
+            results: Array(12).fill({ entry: 1 }),
+          },
+        }),
+      });
+
+      const result = await getLeagueInfo(29895);
+
+      expect(result).toEqual({
+        id: 29895,
+        name: 'London Pub League',
+        memberCount: 12,
+      });
+      expect(fetch).toHaveBeenCalledWith('/api/fpl/leagues-classic/29895/standings/');
+    });
+
+    it('should throw error when fetch fails', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+      });
+
+      await expect(getLeagueInfo(99999)).rejects.toThrow('Failed to fetch league info');
+    });
+
+    it('should return 0 memberCount when standings is empty', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          league: { id: 123, name: 'Empty League' },
+          standings: { results: [] },
+        }),
+      });
+
+      const result = await getLeagueInfo(123);
+
+      expect(result.memberCount).toBe(0);
     });
   });
 });
