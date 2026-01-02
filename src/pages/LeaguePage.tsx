@@ -13,6 +13,7 @@ import {
 import { getLeagueInfo, type FPLLeagueInfo } from '../services/fpl';
 import { useAuth } from '../contexts/AuthContext';
 import type { Tournament } from '../types/tournament';
+import { MAX_TOURNAMENT_PARTICIPANTS } from '../constants/tournament';
 
 export function LeaguePage() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -106,6 +107,8 @@ export function LeaguePage() {
     );
   }
 
+  const isLocked = leagueInfo ? leagueInfo.memberCount > MAX_TOURNAMENT_PARTICIPANTS : false;
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       {tournament ? (
@@ -116,6 +119,7 @@ export function LeaguePage() {
           managerCount={leagueInfo.memberCount}
           isAuthenticated={!!user}
           onCreate={handleCreateTournament}
+          isLocked={isLocked}
         />
       ) : (
         <Card className="w-full max-w-lg mx-auto">

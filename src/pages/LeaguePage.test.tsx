@@ -7,6 +7,7 @@ import { AuthContext } from '../contexts/AuthContext';
 import type { User as FirebaseUser } from 'firebase/auth';
 import * as fplService from '../services/fpl';
 import * as tournamentService from '../services/tournament';
+import { MAX_TOURNAMENT_PARTICIPANTS } from '../constants/tournament';
 
 // Mock services
 vi.mock('../services/fpl', () => ({
@@ -139,6 +140,38 @@ describe('LeaguePage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('London Pub League')).toBeInTheDocument();
+    });
+  });
+
+  describe('locked leagues', () => {
+    it('should pass isLocked=true when league exceeds max participants', async () => {
+      vi.mocked(tournamentService.getTournamentByLeague).mockResolvedValue(null);
+      vi.mocked(fplService.getLeagueInfo).mockResolvedValue({
+        id: 123,
+        name: 'Big League',
+        memberCount: MAX_TOURNAMENT_PARTICIPANTS + 1,
+      });
+
+      renderLeaguePage('123');
+
+      await waitFor(() => {
+        expect(screen.getByText('This league is too large for a tournament')).toBeInTheDocument();
+      });
+    });
+
+    it('should pass isLocked=false when league is within limit', async () => {
+      vi.mocked(tournamentService.getTournamentByLeague).mockResolvedValue(null);
+      vi.mocked(fplService.getLeagueInfo).mockResolvedValue({
+        id: 123,
+        name: 'Small League',
+        memberCount: MAX_TOURNAMENT_PARTICIPANTS,
+      });
+
+      renderLeaguePage('123');
+
+      await waitFor(() => {
+        expect(screen.getByText('No Tournament Yet')).toBeInTheDocument();
+      });
     });
   });
 });
