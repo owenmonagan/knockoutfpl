@@ -48,6 +48,12 @@ describe('LeaguePage', () => {
     vi.clearAllMocks();
     // Default mock for bootstrap data
     vi.mocked(fplService.getFPLBootstrapData).mockResolvedValue({ currentGameweek: 20 });
+    // Default mock for league info
+    vi.mocked(fplService.getLeagueInfo).mockResolvedValue({
+      id: 123,
+      name: 'Test League',
+      memberCount: 12,
+    });
   });
 
   it('should render loading skeleton initially', () => {
