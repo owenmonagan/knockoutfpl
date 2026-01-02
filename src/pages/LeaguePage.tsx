@@ -167,6 +167,11 @@ export function LeaguePage() {
       leagueInfo.memberCount > MAX_TOURNAMENT_PARTICIPANTS
     : false;
 
+  // Get current round info for share dialog
+  const currentRound = tournament?.rounds.find(
+    (r) => r.roundNumber === tournament.currentRound
+  );
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       {tournament ? (
@@ -198,6 +203,8 @@ export function LeaguePage() {
         onClose={() => setShowShareModal(false)}
         leagueId={Number(leagueId)}
         leagueName={leagueInfo?.name ?? 'Your League'}
+        roundName={currentRound?.name}
+        participantCount={tournament?.participants.length}
       />
     </div>
   );
