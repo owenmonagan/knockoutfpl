@@ -79,6 +79,15 @@ export interface RefreshTournamentResponse {
   matchesResolved: number;
 }
 
+interface RefreshVisibleMatchesRequest {
+  tournamentId: string;
+  matchIds: number[];
+}
+
+export interface RefreshVisibleMatchesResponse {
+  picksRefreshed: number;
+}
+
 /**
  * Generate round name based on round number and total rounds
  */
@@ -509,4 +518,28 @@ export async function getTournamentSummaryForLeague(
   };
 
   return { tournament: tournamentSummary, userProgress };
+}
+
+/**
+ * Refreshes scores for specific visible matches.
+ * Used for paginated bracket view - only refreshes what user sees.
+ * Rate limited to once per 30 seconds.
+ */
+export async function refreshVisibleMatches(
+  tournamentId: string,
+  matchIds: number[]
+): Promise<RefreshVisibleMatchesResponse | null> {
+  try {
+    const refreshVisibleMatchesFn = httpsCallable<
+      RefreshVisibleMatchesRequest,
+      RefreshVisibleMatchesResponse
+    >(functions, 'refreshVisibleMatches');
+
+    const result = await refreshVisibleMatchesFn({ tournamentId, matchIds });
+    return result.data;
+  } catch (error) {
+    // Silently handle rate limiting and other errors
+    console.warn('[WARN] Failed to refresh visible matches:', error);
+    return null;
+  }
 }

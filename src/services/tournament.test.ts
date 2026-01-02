@@ -5,6 +5,7 @@ import {
   callCreateTournament,
   callRefreshTournament,
   getTournamentSummaryForLeague,
+  refreshVisibleMatches,
 } from './tournament';
 
 // Mock Firebase
@@ -656,5 +657,52 @@ describe('getTournamentSummaryForLeague', () => {
 
     expect(result.tournament?.startGameweek).toBe(15);
     expect(result.tournament?.endGameweek).toBe(17); // 15 + 3 - 1
+  });
+});
+
+describe('refreshVisibleMatches', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls cloud function with match IDs', async () => {
+    const { httpsCallable } = await import('firebase/functions');
+    const mockCallable = vi.fn().mockResolvedValue({
+      data: { picksRefreshed: 4, matchIds: [1, 2] },
+    });
+    (mockCallable as any).stream = vi.fn();
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable as any);
+
+    const result = await refreshVisibleMatches('tour-1', [1, 2]);
+
+    expect(mockCallable).toHaveBeenCalledWith({
+      tournamentId: 'tour-1',
+      matchIds: [1, 2],
+    });
+    expect(result?.picksRefreshed).toBe(4);
+  });
+
+  it('returns null on rate limit error', async () => {
+    const { httpsCallable } = await import('firebase/functions');
+    const mockCallable = vi.fn().mockRejectedValue({
+      code: 'functions/resource-exhausted',
+    });
+    (mockCallable as any).stream = vi.fn();
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable as any);
+
+    const result = await refreshVisibleMatches('tour-1', [1, 2]);
+
+    expect(result).toBeNull();
+  });
+
+  it('returns null on any error without throwing', async () => {
+    const { httpsCallable } = await import('firebase/functions');
+    const mockCallable = vi.fn().mockRejectedValue(new Error('Network error'));
+    (mockCallable as any).stream = vi.fn();
+    vi.mocked(httpsCallable).mockReturnValue(mockCallable as any);
+
+    const result = await refreshVisibleMatches('tour-1', [1, 2]);
+
+    expect(result).toBeNull();
   });
 });
