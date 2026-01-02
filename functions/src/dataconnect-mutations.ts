@@ -466,6 +466,19 @@ const UPDATE_ROUND_UPDATED_AT_MUTATION = `
   }
 `;
 
+const UPDATE_MATCH_UPDATED_AT_MUTATION = `
+  mutation UpdateMatchUpdatedAt(
+    $tournamentId: UUID!
+    $matchId: Int!
+    $updatedAt: Timestamp!
+  ) {
+    match_update(
+      key: { tournamentId: $tournamentId, matchId: $matchId }
+      data: { updatedAt: $updatedAt }
+    )
+  }
+`;
+
 const UPDATE_TOURNAMENT_STATUS_MUTATION = `
   mutation UpdateTournamentStatus(
     $id: UUID!
@@ -975,6 +988,17 @@ export async function updateRoundUpdatedAt(
   await dataConnectAdmin.executeGraphql(
     UPDATE_ROUND_UPDATED_AT_MUTATION,
     { variables: { tournamentId, roundNumber, updatedAt: updatedAt.toISOString() } }
+  );
+}
+
+export async function updateMatchUpdatedAt(
+  tournamentId: string,
+  matchId: number,
+  updatedAt: Date
+): Promise<void> {
+  await dataConnectAdmin.executeGraphql(
+    UPDATE_MATCH_UPDATED_AT_MUTATION,
+    { variables: { tournamentId, matchId, updatedAt: updatedAt.toISOString() } }
   );
 }
 

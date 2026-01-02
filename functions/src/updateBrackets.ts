@@ -17,6 +17,7 @@ import {
   getRoundMatches,
   upsertPickAdmin,
   updateMatchWinner,
+  updateMatchUpdatedAt,
   updateRoundStatus,
   updateTournamentStatus,
   updateParticipantStatus,
@@ -106,6 +107,9 @@ async function processRound(round: ActiveRound, event: number): Promise<void> {
 
       // Update match with winner
       await updateMatchWinner(round.tournamentId, match.matchId, result.winnerId);
+
+      // Mark match as updated with final scores
+      await updateMatchUpdatedAt(round.tournamentId, match.matchId, new Date());
 
       // Update loser's participant status
       if (result.loserId) {
