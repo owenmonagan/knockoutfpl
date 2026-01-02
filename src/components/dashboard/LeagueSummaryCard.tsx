@@ -23,6 +23,9 @@ export interface LeagueSummaryCardProps {
     eliminationRound?: number | null;
   } | null;
 
+  // Whether the league is too large to create a tournament
+  isLocked?: boolean;
+
   onClick: () => void;
 }
 
@@ -202,7 +205,7 @@ function getUserProgressText(
 }
 
 export function LeagueSummaryCard(props: LeagueSummaryCardProps) {
-  const { leagueName, memberCount, userRank, tournament, userProgress, onClick } = props;
+  const { leagueName, memberCount, userRank, tournament, userProgress, isLocked = false, onClick } = props;
 
   const variant = getCardVariant(props);
   const hasTournament = !!tournament;
@@ -344,10 +347,18 @@ export function LeagueSummaryCard(props: LeagueSummaryCardProps) {
         </div>
         {/* Bottom: League name */}
         <div className="relative z-10">
-          <h3 className="text-lg font-bold text-white line-clamp-1">
-            {leagueName}
+          <h3 className="text-lg font-bold text-white line-clamp-1 flex items-center gap-2">
+            <span>{leagueName}</span>
+            {isLocked && (
+              <span
+                className="material-symbols-outlined text-base text-white/60"
+                aria-label="League too large"
+              >
+                lock
+              </span>
+            )}
             {userProgress?.status === 'winner' && (
-              <span className="ml-2">&#127942;</span>
+              <span>&#127942;</span>
             )}
           </h3>
         </div>

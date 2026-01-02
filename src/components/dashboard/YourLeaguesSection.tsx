@@ -2,6 +2,7 @@ import { Card, CardContent } from '../ui/card';
 import { Skeleton } from '../ui/skeleton';
 import { LeagueSummaryCard } from './LeagueSummaryCard';
 import type { LeagueSummaryCardProps } from './LeagueSummaryCard';
+import { MAX_TOURNAMENT_PARTICIPANTS } from '../../constants/tournament';
 
 // Extend LeagueSummaryCardProps without the onClick handler
 export interface LeagueData extends Omit<LeagueSummaryCardProps, 'onClick'> {
@@ -111,17 +112,21 @@ export function YourLeaguesSection(props: YourLeaguesSectionProps) {
       {/* League Cards Grid */}
       {!isLoading && hasLeagues && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedLeagues.map((league) => (
-            <LeagueSummaryCard
-              key={league.leagueId}
-              leagueName={league.leagueName}
-              memberCount={league.memberCount}
-              userRank={league.userRank}
-              tournament={league.tournament}
-              userProgress={league.userProgress}
-              onClick={() => onLeagueClick(league.leagueId)}
-            />
-          ))}
+          {sortedLeagues.map((league) => {
+            const isLocked = league.memberCount > MAX_TOURNAMENT_PARTICIPANTS;
+            return (
+              <LeagueSummaryCard
+                key={league.leagueId}
+                leagueName={league.leagueName}
+                memberCount={league.memberCount}
+                userRank={league.userRank}
+                tournament={league.tournament}
+                userProgress={league.userProgress}
+                isLocked={isLocked}
+                onClick={() => onLeagueClick(league.leagueId)}
+              />
+            );
+          })}
         </div>
       )}
     </section>

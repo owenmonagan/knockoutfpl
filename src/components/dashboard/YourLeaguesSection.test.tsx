@@ -456,4 +456,64 @@ describe('YourLeaguesSection', () => {
       expect(leagues).toEqual(originalOrder);
     });
   });
+
+  describe('isLocked based on member count', () => {
+    it('should show lock icon for leagues with more than 48 members', () => {
+      const lockedLeague: LeagueData = {
+        leagueId: 9999,
+        leagueName: 'Large League',
+        memberCount: 100, // > 48
+        tournament: null,
+        userProgress: null,
+      };
+
+      render(<YourLeaguesSection leagues={[lockedLeague]} onLeagueClick={() => {}} />);
+
+      const lockIcon = screen.getByLabelText('League too large');
+      expect(lockIcon).toBeInTheDocument();
+    });
+
+    it('should not show lock icon for leagues with exactly 48 members', () => {
+      const borderlineLeague: LeagueData = {
+        leagueId: 9998,
+        leagueName: 'Borderline League',
+        memberCount: 48, // exactly 48, not locked
+        tournament: null,
+        userProgress: null,
+      };
+
+      render(<YourLeaguesSection leagues={[borderlineLeague]} onLeagueClick={() => {}} />);
+
+      expect(screen.queryByLabelText('League too large')).not.toBeInTheDocument();
+    });
+
+    it('should not show lock icon for leagues with fewer than 48 members', () => {
+      const smallLeague: LeagueData = {
+        leagueId: 9997,
+        leagueName: 'Small League',
+        memberCount: 20,
+        tournament: null,
+        userProgress: null,
+      };
+
+      render(<YourLeaguesSection leagues={[smallLeague]} onLeagueClick={() => {}} />);
+
+      expect(screen.queryByLabelText('League too large')).not.toBeInTheDocument();
+    });
+
+    it('should show lock icon for league with 49 members (one over limit)', () => {
+      const justOverLeague: LeagueData = {
+        leagueId: 9996,
+        leagueName: 'Just Over League',
+        memberCount: 49, // > 48
+        tournament: null,
+        userProgress: null,
+      };
+
+      render(<YourLeaguesSection leagues={[justOverLeague]} onLeagueClick={() => {}} />);
+
+      const lockIcon = screen.getByLabelText('League too large');
+      expect(lockIcon).toBeInTheDocument();
+    });
+  });
 });

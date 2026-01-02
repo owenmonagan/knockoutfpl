@@ -665,6 +665,51 @@ describe('LeagueSummaryCard', () => {
     });
   });
 
+  describe('isLocked prop', () => {
+    it('should show lock icon when isLocked is true', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Big League"
+          memberCount={100}
+          tournament={null}
+          isLocked={true}
+          onClick={() => {}}
+        />
+      );
+
+      const lockIcon = screen.getByLabelText('League too large');
+      expect(lockIcon).toBeInTheDocument();
+      expect(lockIcon).toHaveTextContent('lock');
+    });
+
+    it('should not show lock icon when isLocked is false', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Small League"
+          memberCount={20}
+          tournament={null}
+          isLocked={false}
+          onClick={() => {}}
+        />
+      );
+
+      expect(screen.queryByLabelText('League too large')).not.toBeInTheDocument();
+    });
+
+    it('should not show lock icon when isLocked is not provided', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Normal League"
+          memberCount={30}
+          tournament={null}
+          onClick={() => {}}
+        />
+      );
+
+      expect(screen.queryByLabelText('League too large')).not.toBeInTheDocument();
+    });
+  });
+
   describe('Edge Cases', () => {
     it('should handle tournament without userProgress', () => {
       render(
