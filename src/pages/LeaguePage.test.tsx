@@ -13,6 +13,7 @@ vi.mock('../services/fpl', () => ({
   getLeagueStandings: vi.fn(),
   getCurrentGameweek: vi.fn(),
   getFPLBootstrapData: vi.fn(),
+  getLeagueInfo: vi.fn(),
 }));
 
 vi.mock('../services/tournament', () => ({
@@ -60,6 +61,11 @@ describe('LeaguePage', () => {
   });
 
   it('should show CreateTournamentButton when no tournament exists', async () => {
+    vi.mocked(fplService.getLeagueInfo).mockResolvedValue({
+      id: 123,
+      name: 'Test League',
+      memberCount: 12,
+    });
     vi.mocked(tournamentService.getTournamentByLeague).mockResolvedValue(null);
 
     renderLeaguePage();
@@ -70,6 +76,11 @@ describe('LeaguePage', () => {
   });
 
   it('should show BracketView when tournament exists', async () => {
+    vi.mocked(fplService.getLeagueInfo).mockResolvedValue({
+      id: 123,
+      name: 'Test League',
+      memberCount: 12,
+    });
     vi.mocked(tournamentService.getTournamentByLeague).mockResolvedValue({
       id: 'tournament-1',
       fplLeagueId: 123,
@@ -91,6 +102,36 @@ describe('LeaguePage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Test League')).toBeInTheDocument();
+    });
+  });
+
+  it('should fetch league info on mount', async () => {
+    vi.mocked(fplService.getLeagueInfo).mockResolvedValue({
+      id: 123,
+      name: 'Test League',
+      memberCount: 12,
+    });
+    vi.mocked(tournamentService.getTournamentByLeague).mockResolvedValue(null);
+
+    renderLeaguePage('123');
+
+    await waitFor(() => {
+      expect(fplService.getLeagueInfo).toHaveBeenCalledWith(123);
+    });
+  });
+
+  it('should display league name from fetched info when no tournament', async () => {
+    vi.mocked(fplService.getLeagueInfo).mockResolvedValue({
+      id: 123,
+      name: 'London Pub League',
+      memberCount: 12,
+    });
+    vi.mocked(tournamentService.getTournamentByLeague).mockResolvedValue(null);
+
+    renderLeaguePage('123');
+
+    await waitFor(() => {
+      expect(screen.getByText('London Pub League')).toBeInTheDocument();
     });
   });
 });
