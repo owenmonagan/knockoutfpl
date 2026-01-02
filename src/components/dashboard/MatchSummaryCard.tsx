@@ -64,7 +64,7 @@ function TeamAvatar({ teamName, isYou, isWinner, isLoser, isTBD }: TeamAvatarPro
 
   if (isLoser) {
     return (
-      <div className={cn(baseClasses, 'border border-muted bg-muted/50 text-muted-foreground grayscale')}>
+      <div className={cn(baseClasses, 'border border-muted bg-muted/30 text-muted-foreground')}>
         {initials}
       </div>
     );
@@ -141,9 +141,14 @@ export function MatchSummaryCard(props: MatchSummaryCardProps) {
   const cardClasses = cn(
     'overflow-hidden transition-all duration-200',
     {
-      'border-2 border-primary shadow-[0_0_20px_rgba(0,255,136,0.1)]': type === 'live',
-      'border-dashed': type === 'upcoming',
-      'opacity-90': youLost,
+      // Live match: prominent border with glow
+      'border-2 border-primary shadow-[0_0_20px_rgba(0,255,136,0.2)]': type === 'live',
+      // Finished (won): subtle primary border with faint glow
+      'border border-primary/30 shadow-[0_0_10px_rgba(0,255,136,0.05)]': type === 'finished' && youWon,
+      // Finished (lost): muted border, no glow
+      'border border-muted': type === 'finished' && youLost,
+      // Upcoming: dashed muted border with hover effect
+      'border-2 border-dashed border-muted hover:border-muted-foreground': type === 'upcoming',
     },
     isClickable && 'cursor-pointer hover:-translate-y-1'
   );
@@ -192,23 +197,30 @@ export function MatchSummaryCard(props: MatchSummaryCardProps) {
 
     return (
       <div className="flex flex-col items-center gap-1">
-        <div className="text-2xl font-black tracking-wider tabular-nums">
-          {yourScore}
-          <span className="text-muted-foreground mx-1">-</span>
-          {theirScore}
+        <div className="text-3xl font-black tracking-wider tabular-nums">
+          <span className={type === 'finished' ? (youWon ? 'text-foreground' : 'text-muted-foreground') : undefined}>
+            {yourScore}
+          </span>
+          <span className="text-muted-foreground mx-2">-</span>
+          <span className={type === 'finished' ? (youLost ? 'text-foreground' : 'text-muted-foreground') : undefined}>
+            {theirScore}
+          </span>
         </div>
         {type === 'live' && scoreDiff !== 0 && (
-          <Badge variant={scoreDiff > 0 ? 'default' : 'destructive'} className="text-xs">
+          <Badge variant={scoreDiff > 0 ? 'default' : 'destructive'} className="text-xs px-3 py-1">
             {scoreDiff > 0 ? '+' : ''}{scoreDiff} pts
           </Badge>
         )}
         {type === 'live' && scoreDiff === 0 && (
-          <Badge variant="secondary" className="text-xs">
+          <Badge variant="secondary" className="text-xs px-3 py-1">
             Tied
           </Badge>
         )}
         {type === 'finished' && (
-          <Badge variant={youWon ? 'default' : 'destructive'} className="text-xs">
+          <Badge
+            variant={youWon ? 'default' : 'destructive'}
+            className={cn('text-xs px-3 py-1', youWon && 'shadow-[0_0_8px_rgba(0,255,136,0.3)]')}
+          >
             {youWon ? 'Won' : 'Lost'}
           </Badge>
         )}
@@ -254,7 +266,10 @@ export function MatchSummaryCard(props: MatchSummaryCardProps) {
             fplTeamId={yourFplTeamId}
             gameweek={gameweek}
             roundStarted={type === 'live' || type === 'finished'}
-            className="flex flex-col items-center gap-2 flex-1"
+            className={cn(
+              'flex flex-col items-center gap-2 flex-1',
+              youLost && 'opacity-60 grayscale'
+            )}
           >
             <TeamAvatar
               teamName={yourTeamName}
@@ -273,7 +288,10 @@ export function MatchSummaryCard(props: MatchSummaryCardProps) {
             fplTeamId={opponentFplTeamId}
             gameweek={gameweek}
             roundStarted={type === 'live' || type === 'finished'}
-            className="flex flex-col items-center gap-2 flex-1"
+            className={cn(
+              'flex flex-col items-center gap-2 flex-1',
+              youWon && 'opacity-60 grayscale'
+            )}
           >
             <TeamAvatar
               teamName={opponentTeamName}
