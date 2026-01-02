@@ -166,6 +166,23 @@ query GetEventsNeedingFinalization($season: String!) @auth(level: PUBLIC) {
   }
 }
 
+# Get events that have been finalized (scores are final)
+query GetFinalizedEvents($season: String!) @auth(level: PUBLIC) {
+  events(
+    where: {
+      season: { eq: $season }
+      finalizedAt: { isNull: false }
+    }
+    orderBy: { event: DESC }
+  ) {
+    event
+    season
+    name
+    finished
+    finalizedAt
+  }
+}
+
 # =============================================================================
 # TOURNAMENT QUERIES
 # =============================================================================
