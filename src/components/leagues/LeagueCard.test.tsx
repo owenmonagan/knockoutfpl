@@ -43,4 +43,21 @@ describe('LeagueCard', () => {
     render(<LeagueCard league={mockLeague} onClick={() => {}} hasTournament={true} tournamentStatus="completed" />);
     expect(screen.getByText(/tournament complete/i)).toBeInTheDocument();
   });
+
+  describe('locked state', () => {
+    it('should show lock icon when isLocked is true', () => {
+      render(<LeagueCard league={mockLeague} onClick={() => {}} isLocked={true} />);
+      expect(screen.getByText('lock')).toBeInTheDocument();
+    });
+
+    it('should not show lock icon when isLocked is false', () => {
+      render(<LeagueCard league={mockLeague} onClick={() => {}} isLocked={false} />);
+      expect(screen.queryByText('lock')).not.toBeInTheDocument();
+    });
+
+    it('should not show lock icon by default', () => {
+      render(<LeagueCard league={mockLeague} onClick={() => {}} />);
+      expect(screen.queryByText('lock')).not.toBeInTheDocument();
+    });
+  });
 });

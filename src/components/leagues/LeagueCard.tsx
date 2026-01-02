@@ -8,6 +8,7 @@ interface LeagueCardProps {
   onClick: () => void;
   hasTournament?: boolean;
   tournamentStatus?: 'active' | 'completed';
+  isLocked?: boolean;
 }
 
 export function LeagueCard({
@@ -15,6 +16,7 @@ export function LeagueCard({
   onClick,
   hasTournament = false,
   tournamentStatus,
+  isLocked = false,
 }: LeagueCardProps) {
   return (
     <Card
@@ -24,7 +26,14 @@ export function LeagueCard({
     >
       <CardHeader>
         <CardTitle className="text-lg flex items-center justify-between">
-          <span>{league.name}</span>
+          <span className="flex items-center gap-2">
+            {league.name}
+            {isLocked && (
+              <span className="material-symbols-outlined text-base text-muted-foreground" aria-label="League too large">
+                lock
+              </span>
+            )}
+          </span>
           {hasTournament && tournamentStatus && (
             <Badge variant={tournamentStatus === 'active' ? 'default' : 'secondary'}>
               {tournamentStatus === 'active' ? 'Tournament Active' : 'Tournament Complete'}
