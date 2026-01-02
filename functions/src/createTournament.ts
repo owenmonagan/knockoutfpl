@@ -143,7 +143,9 @@ export function validateLeagueStandings(standings: any): void {
     throw new HttpsError('failed-precondition', 'League must have at least 2 participants');
   }
 
-  if (count > 48) {
+  // In dev/local, allow larger tournaments for testing
+  const isProduction = process.env.ENVIRONMENT === 'production';
+  if (isProduction && count > 48) {
     throw new HttpsError('failed-precondition', 'League exceeds maximum 48 participants');
   }
 }

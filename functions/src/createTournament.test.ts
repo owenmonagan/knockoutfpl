@@ -89,10 +89,28 @@ describe('createTournament', () => {
       expect(() => validateLeagueStandings(standings)).toThrow('at least 2');
     });
 
-    it('throws if more than 48 participants', () => {
-      const results = Array(49).fill({});
-      const standings = { standings: { results } };
-      expect(() => validateLeagueStandings(standings)).toThrow('maximum 48');
+    it('throws if more than 48 participants in production', () => {
+      const originalEnv = process.env.ENVIRONMENT;
+      process.env.ENVIRONMENT = 'production';
+      try {
+        const results = Array(49).fill({});
+        const standings = { standings: { results } };
+        expect(() => validateLeagueStandings(standings)).toThrow('maximum 48');
+      } finally {
+        process.env.ENVIRONMENT = originalEnv;
+      }
+    });
+
+    it('allows more than 48 participants in dev/local', () => {
+      const originalEnv = process.env.ENVIRONMENT;
+      process.env.ENVIRONMENT = 'development';
+      try {
+        const results = Array(100).fill({});
+        const standings = { standings: { results } };
+        expect(() => validateLeagueStandings(standings)).not.toThrow();
+      } finally {
+        process.env.ENVIRONMENT = originalEnv;
+      }
     });
 
     it('passes with exactly 48 participants', () => {
