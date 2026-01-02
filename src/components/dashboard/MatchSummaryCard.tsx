@@ -2,6 +2,7 @@ import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 import { getInitials } from '@/lib/initials';
+import { getFplTeamUrl } from '@/lib/fpl-urls';
 
 export interface MatchSummaryCardProps {
   type: 'live' | 'upcoming' | 'finished';
@@ -9,6 +10,10 @@ export interface MatchSummaryCardProps {
   // Team info
   yourTeamName: string;
   opponentTeamName?: string; // undefined = TBD
+
+  // FPL Team IDs for linking
+  yourFplTeamId: number;
+  opponentFplTeamId?: number; // undefined for TBD
 
   // Context
   leagueName: string;
@@ -81,11 +86,39 @@ function TeamAvatar({ teamName, isYou, isWinner, isLoser, isTBD }: TeamAvatarPro
   );
 }
 
+interface TeamLinkProps {
+  fplTeamId?: number;
+  gameweek?: number;
+  roundStarted: boolean;
+  children: React.ReactNode;
+  className?: string;
+}
+
+function TeamLink({ fplTeamId, gameweek, roundStarted, children, className }: TeamLinkProps) {
+  if (!fplTeamId || !gameweek) {
+    return <div className={className}>{children}</div>;
+  }
+
+  return (
+    <a
+      href={getFplTeamUrl(fplTeamId, gameweek, roundStarted)}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className={cn(className, 'hover:opacity-80 transition-opacity')}
+    >
+      {children}
+    </a>
+  );
+}
+
 export function MatchSummaryCard(props: MatchSummaryCardProps) {
   const {
     type,
     yourTeamName,
     opponentTeamName,
+    yourFplTeamId,
+    opponentFplTeamId,
     leagueName,
     roundName,
     yourScore,
@@ -217,7 +250,12 @@ export function MatchSummaryCard(props: MatchSummaryCardProps) {
       <CardContent className="p-4">
         <div className="flex items-center justify-between gap-4">
           {/* Your team */}
-          <div className="flex flex-col items-center gap-2 flex-1">
+          <TeamLink
+            fplTeamId={yourFplTeamId}
+            gameweek={gameweek}
+            roundStarted={type === 'live' || type === 'finished'}
+            className="flex flex-col items-center gap-2 flex-1"
+          >
             <TeamAvatar
               teamName={yourTeamName}
               isYou
@@ -225,13 +263,18 @@ export function MatchSummaryCard(props: MatchSummaryCardProps) {
               isLoser={youLost}
             />
             <span className="text-xs font-medium text-center line-clamp-1">You</span>
-          </div>
+          </TeamLink>
 
           {/* Score/VS */}
           {renderScoreSection()}
 
           {/* Opponent */}
-          <div className="flex flex-col items-center gap-2 flex-1">
+          <TeamLink
+            fplTeamId={opponentFplTeamId}
+            gameweek={gameweek}
+            roundStarted={type === 'live' || type === 'finished'}
+            className="flex flex-col items-center gap-2 flex-1"
+          >
             <TeamAvatar
               teamName={opponentTeamName}
               isTBD={isTBD}
@@ -241,7 +284,7 @@ export function MatchSummaryCard(props: MatchSummaryCardProps) {
             <span className="text-xs font-medium text-muted-foreground text-center line-clamp-1">
               {isTBD ? 'TBD' : opponentTeamName}
             </span>
-          </div>
+          </TeamLink>
         </div>
       </CardContent>
 
