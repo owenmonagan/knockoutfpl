@@ -30,7 +30,7 @@ export function NoTournamentEmptyState({
         />
         {/* Trophy icon */}
         <div className="relative z-10 bg-primary/20 p-6 rounded-full backdrop-blur-sm">
-          <span className="material-symbols-outlined text-6xl text-primary">
+          <span className="material-symbols-outlined text-6xl text-primary" aria-hidden="true">
             emoji_events
           </span>
         </div>
@@ -73,7 +73,7 @@ export function NoTournamentEmptyState({
             {/* Feature 1: Auto-Seeding */}
             <div className="flex items-start gap-3 text-left">
               <div className="mt-0.5 min-w-5 text-primary">
-                <span className="material-symbols-outlined text-[20px]">leaderboard</span>
+                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">leaderboard</span>
               </div>
               <div>
                 <p className="text-sm font-medium">Auto-Seeding</p>
@@ -86,7 +86,7 @@ export function NoTournamentEmptyState({
             {/* Feature 2: Head-to-Head */}
             <div className="flex items-start gap-3 text-left">
               <div className="mt-0.5 min-w-5 text-primary">
-                <span className="material-symbols-outlined text-[20px]">swords</span>
+                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">swords</span>
               </div>
               <div>
                 <p className="text-sm font-medium">Head-to-Head</p>
@@ -99,7 +99,7 @@ export function NoTournamentEmptyState({
             {/* Feature 3: Auto-Updates */}
             <div className="flex items-start gap-3 text-left">
               <div className="mt-0.5 min-w-5 text-primary">
-                <span className="material-symbols-outlined text-[20px]">sync</span>
+                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">sync</span>
               </div>
               <div>
                 <p className="text-sm font-medium">Auto-Updates</p>
