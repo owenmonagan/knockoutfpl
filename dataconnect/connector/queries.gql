@@ -510,22 +510,28 @@ query GetUserParticipations($uid: String!) @auth(level: USER) {
 # EMAIL QUEUE QUERIES
 # =============================================================================
 
-# Get users who participated in matches for a specific gameweek
+# Get rounds for a specific gameweek (for finding users with matches)
 # Used to find users who may need verdict emails
-query GetUsersWithMatchesInEvent($event: Int!) @auth(level: PUBLIC) {
+# Note: Participants are queried separately since Tournament doesn't have direct participants relation
+query GetRoundsInEvent($event: Int!) @auth(level: PUBLIC) {
   rounds(where: { event: { eq: $event } }) {
     tournamentId
     roundNumber
     event
-    tournament {
-      participants {
-        uid
-        entryId
-        user {
-          uid
-          email
-        }
-      }
+  }
+}
+
+# Get participants for a tournament with their user data
+# Used in combination with GetRoundsInEvent to find users needing verdict emails
+query GetTournamentParticipantsWithUsers($tournamentId: UUID!) @auth(level: PUBLIC) {
+  participants(where: { tournamentId: { eq: $tournamentId }, uid: { isNull: false } }) {
+    tournamentId
+    uid
+    entryId
+    teamName
+    user {
+      uid
+      email
     }
   }
 }
@@ -549,9 +555,9 @@ query GetExistingEmailQueue(
   }
 }
 
-# Get all matches for a specific entry in a specific gameweek
-# Returns match details including updatedAt for staleness check
-query GetEntryMatchesInEvent($entryId: Int!, $event: Int!) @auth(level: PUBLIC) {
+# Get all match picks for a specific entry
+# Note: Match doesn't have a round relation, so we get roundNumber and filter by event via rounds query
+query GetEntryMatchPicks($entryId: Int!) @auth(level: PUBLIC) {
   matchPicks(where: { entryId: { eq: $entryId } }) {
     tournamentId
     matchId
@@ -559,14 +565,11 @@ query GetEntryMatchesInEvent($entryId: Int!, $event: Int!) @auth(level: PUBLIC) 
     slot
     match {
       matchId
+      roundNumber
       status
       winnerEntryId
       updatedAt
       isBye
-      round {
-        event
-        roundNumber
-      }
     }
   }
 }
@@ -575,10 +578,11 @@ query GetEntryMatchesInEvent($entryId: Int!, $event: Int!) @auth(level: PUBLIC) 
 # VERDICT EMAIL QUERIES
 # =============================================================================
 
-# Get all match results for a user in a specific gameweek
-# Includes all data needed to build verdict email content
-# Note: Event filtering is done client-side after fetching all matchPicks for the entry
-query GetUserVerdictResults($entryId: Int!) @auth(level: PUBLIC) {
+# Get all match results for a user
+# Includes match data needed to build verdict email content
+# Note: Match doesn't have round relation, so we get roundNumber and cross-reference with rounds
+# Note: Match doesn't have matchPicks relation, so opponent data must be fetched separately
+query GetUserVerdictMatchPicks($entryId: Int!) @auth(level: PUBLIC) {
   matchPicks(where: { entryId: { eq: $entryId } }) {
     tournamentId
     matchId
@@ -586,29 +590,34 @@ query GetUserVerdictResults($entryId: Int!) @auth(level: PUBLIC) {
     slot
     match {
       matchId
+      roundNumber
       status
       winnerEntryId
       isBye
       positionInRound
-      round {
-        event
-        roundNumber
-        tournament {
-          id
-          fplLeagueName
-          totalRounds
-        }
+      tournament {
+        id
+        fplLeagueName
+        totalRounds
       }
-      # Get all participants in this match for scores/names
-      matchPicks {
-        entryId
-        slot
-        participant {
-          entryId
-          teamName
-          seed
-        }
-      }
+    }
+    participant {
+      entryId
+      teamName
+      seed
+    }
+  }
+}
+
+# Get all match picks for a specific match (to find opponents)
+query GetMatchParticipants($tournamentId: UUID!, $matchId: Int!) @auth(level: PUBLIC) {
+  matchPicks(where: { tournamentId: { eq: $tournamentId }, matchId: { eq: $matchId } }) {
+    entryId
+    slot
+    participant {
+      entryId
+      teamName
+      seed
     }
   }
 }

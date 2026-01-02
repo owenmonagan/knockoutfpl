@@ -553,21 +553,26 @@ const CREATE_EMAIL_QUEUE_ENTRY_MUTATION = `
 `;
 
 // Email queue queries
-const GET_USERS_WITH_MATCHES_IN_EVENT_QUERY = `
-  query GetUsersWithMatchesInEvent($event: Int!) {
+const GET_ROUNDS_IN_EVENT_QUERY = `
+  query GetRoundsInEvent($event: Int!) {
     rounds(where: { event: { eq: $event } }) {
       tournamentId
       roundNumber
       event
-      tournament {
-        participants {
-          uid
-          entryId
-          user {
-            uid
-            email
-          }
-        }
+    }
+  }
+`;
+
+const GET_TOURNAMENT_PARTICIPANTS_WITH_USERS_QUERY = `
+  query GetTournamentParticipantsWithUsers($tournamentId: UUID!) {
+    participants(where: { tournamentId: { eq: $tournamentId }, uid: { isNull: false } }) {
+      tournamentId
+      uid
+      entryId
+      teamName
+      user {
+        uid
+        email
       }
     }
   }
@@ -589,8 +594,8 @@ const GET_EXISTING_EMAIL_QUEUE_QUERY = `
   }
 `;
 
-const GET_ENTRY_MATCHES_IN_EVENT_QUERY = `
-  query GetEntryMatchesInEvent($entryId: Int!, $event: Int!) {
+const GET_ENTRY_MATCH_PICKS_QUERY = `
+  query GetEntryMatchPicks($entryId: Int!) {
     matchPicks(where: { entryId: { eq: $entryId } }) {
       tournamentId
       matchId
@@ -598,22 +603,19 @@ const GET_ENTRY_MATCHES_IN_EVENT_QUERY = `
       slot
       match {
         matchId
+        roundNumber
         status
         winnerEntryId
         updatedAt
         isBye
-        round {
-          event
-          roundNumber
-        }
       }
     }
   }
 `;
 
 // Verdict email queries
-const GET_USER_VERDICT_RESULTS_QUERY = `
-  query GetUserVerdictResults($entryId: Int!) {
+const GET_USER_VERDICT_MATCH_PICKS_QUERY = `
+  query GetUserVerdictMatchPicks($entryId: Int!) {
     matchPicks(where: { entryId: { eq: $entryId } }) {
       tournamentId
       matchId
@@ -621,28 +623,35 @@ const GET_USER_VERDICT_RESULTS_QUERY = `
       slot
       match {
         matchId
+        roundNumber
         status
         winnerEntryId
         isBye
         positionInRound
-        round {
-          event
-          roundNumber
-          tournament {
-            id
-            fplLeagueName
-            totalRounds
-          }
+        tournament {
+          id
+          fplLeagueName
+          totalRounds
         }
-        matchPicks {
-          entryId
-          slot
-          participant {
-            entryId
-            teamName
-            seed
-          }
-        }
+      }
+      participant {
+        entryId
+        teamName
+        seed
+      }
+    }
+  }
+`;
+
+const GET_MATCH_PARTICIPANTS_QUERY = `
+  query GetMatchParticipants($tournamentId: UUID!, $matchId: Int!) {
+    matchPicks(where: { tournamentId: { eq: $tournamentId }, matchId: { eq: $matchId } }) {
+      entryId
+      slot
+      participant {
+        entryId
+        teamName
+        seed
       }
     }
   }
@@ -1186,37 +1195,53 @@ export interface UserWithMatches {
 /**
  * Get all users who have matches in a specific gameweek
  * Used to find users who may need verdict emails
+ *
+ * Note: This requires two queries because Tournament doesn't have a direct participants relation:
+ * 1. Get rounds for the event to find tournament IDs
+ * 2. Get participants with users for each tournament
  */
 export async function getUsersWithMatchesInEvent(
   event: number
 ): Promise<UserWithMatches[]> {
-  const result = await dataConnectAdmin.executeGraphql<{
+  // First, get all rounds in this event
+  const roundsResult = await dataConnectAdmin.executeGraphql<{
     rounds: Array<{
       tournamentId: string;
       roundNumber: number;
       event: number;
-      tournament: {
-        participants: Array<{
-          uid: string | null;
-          entryId: number;
-          user: { uid: string; email: string } | null;
-        }>;
-      };
     }>;
-  }, { event: number }>(GET_USERS_WITH_MATCHES_IN_EVENT_QUERY, { variables: { event } });
+  }, { event: number }>(GET_ROUNDS_IN_EVENT_QUERY, { variables: { event } });
+
+  // Get unique tournament IDs
+  const tournamentIds = [...new Set(roundsResult.data.rounds.map(r => r.tournamentId))];
+
+  if (tournamentIds.length === 0) {
+    return [];
+  }
 
   // Flatten and dedupe users (a user might be in multiple tournaments)
   const userMap = new Map<string, UserWithMatches>();
 
-  for (const round of result.data.rounds) {
-    for (const participant of round.tournament.participants) {
+  // Query participants for each tournament
+  for (const tournamentId of tournamentIds) {
+    const participantsResult = await dataConnectAdmin.executeGraphql<{
+      participants: Array<{
+        tournamentId: string;
+        uid: string | null;
+        entryId: number;
+        teamName: string;
+        user: { uid: string; email: string } | null;
+      }>;
+    }, { tournamentId: string }>(GET_TOURNAMENT_PARTICIPANTS_WITH_USERS_QUERY, { variables: { tournamentId } });
+
+    for (const participant of participantsResult.data.participants) {
       // Only include participants who have a linked User account
       if (participant.uid && participant.user) {
         userMap.set(participant.uid, {
           uid: participant.user.uid,
           email: participant.user.email,
           entryId: participant.entryId,
-          tournamentId: round.tournamentId,
+          tournamentId: participant.tournamentId,
         });
       }
     }
@@ -1255,19 +1280,23 @@ export interface EntryMatchInEvent {
   winnerEntryId: number | null;
   updatedAt: string;
   isBye: boolean;
-  event: number;
   roundNumber: number;
 }
 
 /**
  * Get all matches for a specific entry in a specific gameweek
  * Used by queueVerdicts to check if all matches have fresh results after finalization
+ *
+ * Note: Since Match doesn't have a round relation, we need to:
+ * 1. Get all match picks for the entry
+ * 2. Get round info separately to filter by event
  */
 export async function getEntryMatchesInEvent(
   entryId: number,
   event: number
 ): Promise<EntryMatchInEvent[]> {
-  const result = await dataConnectAdmin.executeGraphql<{
+  // Get all match picks for the entry
+  const matchPicksResult = await dataConnectAdmin.executeGraphql<{
     matchPicks: Array<{
       tournamentId: string;
       matchId: number;
@@ -1275,21 +1304,57 @@ export async function getEntryMatchesInEvent(
       slot: number;
       match: {
         matchId: number;
+        roundNumber: number;
         status: string;
         winnerEntryId: number | null;
         updatedAt: string;
         isBye: boolean;
-        round: {
-          event: number;
-          roundNumber: number;
-        };
       };
     }>;
-  }, { entryId: number; event: number }>(GET_ENTRY_MATCHES_IN_EVENT_QUERY, { variables: { entryId, event } });
+  }, { entryId: number }>(GET_ENTRY_MATCH_PICKS_QUERY, { variables: { entryId } });
 
-  // Filter to only matches in the requested event
-  return result.data.matchPicks
-    .filter(mp => mp.match.round.event === event)
+  if (matchPicksResult.data.matchPicks.length === 0) {
+    return [];
+  }
+
+  // Get unique tournament/round combinations to check events
+  const tournamentRounds = new Map<string, Set<number>>();
+  for (const mp of matchPicksResult.data.matchPicks) {
+    const rounds = tournamentRounds.get(mp.tournamentId) || new Set();
+    rounds.add(mp.match.roundNumber);
+    tournamentRounds.set(mp.tournamentId, rounds);
+  }
+
+  // Query rounds to find which ones are in the target event
+  const roundsInEvent = new Set<string>(); // "tournamentId-roundNumber"
+  for (const [tournamentId, roundNumbers] of tournamentRounds) {
+    const roundsResult = await dataConnectAdmin.executeGraphql<{
+      rounds: Array<{
+        tournamentId: string;
+        roundNumber: number;
+        event: number;
+      }>;
+    }, { tournamentId: string }>(
+      `query GetTournamentRoundsForEvent($tournamentId: UUID!) {
+        rounds(where: { tournamentId: { eq: $tournamentId } }) {
+          tournamentId
+          roundNumber
+          event
+        }
+      }`,
+      { variables: { tournamentId } }
+    );
+
+    for (const round of roundsResult.data.rounds) {
+      if (round.event === event && roundNumbers.has(round.roundNumber)) {
+        roundsInEvent.add(`${round.tournamentId}-${round.roundNumber}`);
+      }
+    }
+  }
+
+  // Filter and transform matches
+  return matchPicksResult.data.matchPicks
+    .filter(mp => roundsInEvent.has(`${mp.tournamentId}-${mp.match.roundNumber}`))
     .map(mp => ({
       tournamentId: mp.tournamentId,
       matchId: mp.matchId,
@@ -1298,8 +1363,7 @@ export async function getEntryMatchesInEvent(
       winnerEntryId: mp.match.winnerEntryId,
       updatedAt: mp.match.updatedAt,
       isBye: mp.match.isBye,
-      event: mp.match.round.event,
-      roundNumber: mp.match.round.roundNumber,
+      roundNumber: mp.match.roundNumber,
     }));
 }
 
@@ -1332,11 +1396,17 @@ export interface VerdictMatchResult {
 /**
  * Get all match results for a user in a specific gameweek
  * Used to build verdict email content with complete match context
+ *
+ * Note: Since Match doesn't have round relation or matchPicks relation, we need to:
+ * 1. Get user's match picks with match and tournament data
+ * 2. Get round data separately to filter by event
+ * 3. Get opponent data for each match via separate query
  */
 export async function getUserVerdictResults(
   entryId: number,
   event: number
 ): Promise<VerdictMatchResult[]> {
+  // Step 1: Get user's match picks
   const result = await dataConnectAdmin.executeGraphql<{
     matchPicks: Array<{
       tournamentId: string;
@@ -1345,64 +1415,113 @@ export async function getUserVerdictResults(
       slot: number;
       match: {
         matchId: number;
+        roundNumber: number;
         status: string;
         winnerEntryId: number | null;
         isBye: boolean;
         positionInRound: number;
-        round: {
-          event: number;
-          roundNumber: number;
-          tournament: {
-            id: string;
-            fplLeagueName: string;
-            totalRounds: number;
-          };
+        tournament: {
+          id: string;
+          fplLeagueName: string;
+          totalRounds: number;
         };
-        matchPicks: Array<{
-          entryId: number;
-          slot: number;
-          participant: {
-            entryId: number;
-            teamName: string;
-            seed: number;
-          };
-        }>;
+      };
+      participant: {
+        entryId: number;
+        teamName: string;
+        seed: number;
       };
     }>;
-  }, { entryId: number }>(GET_USER_VERDICT_RESULTS_QUERY, { variables: { entryId } });
+  }, { entryId: number }>(GET_USER_VERDICT_MATCH_PICKS_QUERY, { variables: { entryId } });
 
-  // Filter to matches in this event and transform
-  return result.data.matchPicks
-    .filter(mp => mp.match.round.event === event)
-    .map(mp => {
-      const match = mp.match;
-      const tournament = match.round.tournament;
+  if (result.data.matchPicks.length === 0) {
+    return [];
+  }
 
-      // Find user and opponent in match
-      const userPick = match.matchPicks.find(p => p.entryId === entryId);
-      const opponentPick = match.matchPicks.find(p => p.entryId !== entryId);
+  // Step 2: Get round data to filter by event
+  const tournamentIds = [...new Set(result.data.matchPicks.map(mp => mp.tournamentId))];
+  const roundEventMap = new Map<string, number>(); // "tournamentId-roundNumber" -> event
 
-      const isChampionship = match.round.roundNumber === tournament.totalRounds;
-      const won = match.winnerEntryId === entryId;
+  for (const tournamentId of tournamentIds) {
+    const roundsResult = await dataConnectAdmin.executeGraphql<{
+      rounds: Array<{
+        tournamentId: string;
+        roundNumber: number;
+        event: number;
+      }>;
+    }, { tournamentId: string }>(
+      `query GetTournamentRoundsForVerdicts($tournamentId: UUID!) {
+        rounds(where: { tournamentId: { eq: $tournamentId } }) {
+          tournamentId
+          roundNumber
+          event
+        }
+      }`,
+      { variables: { tournamentId } }
+    );
 
-      return {
-        tournamentId: mp.tournamentId,
-        tournamentName: tournament.fplLeagueName,
-        totalRounds: tournament.totalRounds,
-        roundNumber: match.round.roundNumber,
-        matchId: match.matchId,
-        isBye: match.isBye,
-        userEntryId: entryId,
-        userTeamName: userPick?.participant.teamName ?? 'Unknown',
-        userScore: null,  // Will be filled from Pick table via getPickScores
-        opponentEntryId: opponentPick?.entryId ?? null,
-        opponentTeamName: opponentPick?.participant.teamName ?? null,
-        opponentScore: null,  // Will be filled from Pick table via getPickScores
-        winnerEntryId: match.winnerEntryId,
-        isChampionship,
-        won,
-      };
+    for (const round of roundsResult.data.rounds) {
+      roundEventMap.set(`${round.tournamentId}-${round.roundNumber}`, round.event);
+    }
+  }
+
+  // Filter to matches in this event
+  const matchesInEvent = result.data.matchPicks.filter(mp => {
+    const key = `${mp.tournamentId}-${mp.match.roundNumber}`;
+    return roundEventMap.get(key) === event;
+  });
+
+  if (matchesInEvent.length === 0) {
+    return [];
+  }
+
+  // Step 3: Get opponent data for each match
+  const verdictResults: VerdictMatchResult[] = [];
+
+  for (const mp of matchesInEvent) {
+    const match = mp.match;
+    const tournament = match.tournament;
+
+    // Get all participants in this match to find opponent
+    const opponentsResult = await dataConnectAdmin.executeGraphql<{
+      matchPicks: Array<{
+        entryId: number;
+        slot: number;
+        participant: {
+          entryId: number;
+          teamName: string;
+          seed: number;
+        };
+      }>;
+    }, { tournamentId: string; matchId: number }>(GET_MATCH_PARTICIPANTS_QUERY, {
+      variables: { tournamentId: mp.tournamentId, matchId: match.matchId }
     });
+
+    const opponentPick = opponentsResult.data.matchPicks.find(p => p.entryId !== entryId);
+
+    const isChampionship = match.roundNumber === tournament.totalRounds;
+    const won = match.winnerEntryId === entryId;
+
+    verdictResults.push({
+      tournamentId: mp.tournamentId,
+      tournamentName: tournament.fplLeagueName,
+      totalRounds: tournament.totalRounds,
+      roundNumber: match.roundNumber,
+      matchId: match.matchId,
+      isBye: match.isBye,
+      userEntryId: entryId,
+      userTeamName: mp.participant.teamName,
+      userScore: null,  // Will be filled from Pick table via getPickScores
+      opponentEntryId: opponentPick?.entryId ?? null,
+      opponentTeamName: opponentPick?.participant.teamName ?? null,
+      opponentScore: null,  // Will be filled from Pick table via getPickScores
+      winnerEntryId: match.winnerEntryId,
+      isChampionship,
+      won,
+    });
+  }
+
+  return verdictResults;
 }
 
 /**
