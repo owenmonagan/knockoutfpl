@@ -21,9 +21,9 @@ The path from first visit to creating a tournament and sharing the link.
 <!-- TODO: Expand each step with details, edge cases, error states -->
 
 1. Land on `knockoutfpl.com` (sign-in button only)
-2. Sign in with Google
+2. Sign up or log in (email/password or Google)
 3. Enter FPL Team ID
-4. View dashboard (league list)
+4. View leagues page (league list)
 5. Click "Create Tournament" on a league
 6. Land on bracket page with "Share this link" prompt
 

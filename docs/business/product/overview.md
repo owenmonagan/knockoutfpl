@@ -29,14 +29,15 @@ For detailed specifications, see [features/](./features/CLAUDE.md). For terminol
 
 ### Authentication
 
-Google Auth only. Standard Firebase setup.
+Email/password and Google sign-in. Standard Firebase setup.
 
 **Key behaviors:**
-- One-click Google sign-in
+- Email/password sign-in with signup and password recovery flows
+- Google sign-in as an alternative option
 - Session persists across browser refreshes
 - Logout clears session and returns to landing page
 
-*Scope limits: No email/password authentication. No other social providers.*
+*Scope limits: No other social providers (Apple, Facebook, etc.). No account linking between methods.*
 
 ---
 
@@ -124,8 +125,8 @@ Three primary ways users interact with Knockout FPL:
 
 New user who creates a tournament for their league.
 
-1. `knockoutfpl.com` → Sign in with Google
-2. Enter FPL Team ID → Dashboard (league list)
+1. `knockoutfpl.com` → Sign up or log in (email/password or Google)
+2. Enter FPL Team ID → Leagues page (league list)
 3. Click "Create Tournament" on a league
 4. Lands on bracket page with "Share this link" prompt
 
@@ -137,8 +138,8 @@ Someone clicking a shared tournament link.
 
 1. `knockoutfpl.com/league/634129` → Views bracket immediately (no auth required)
 2. Each team in bracket has "Claim team" button
-3. Clicking "Claim team" triggers Google sign-in (FPL Team ID already known from context)
-4. After sign-in → Dashboard with their leagues
+3. Clicking "Claim team" triggers sign-in (FPL Team ID already known from context)
+4. After sign-in → Leagues page with their leagues
 
 See: [journeys/shared-link-viewer.md](./journeys/shared-link-viewer.md)
 
@@ -146,8 +147,8 @@ See: [journeys/shared-link-viewer.md](./journeys/shared-link-viewer.md)
 
 Authenticated user checking back on tournaments.
 
-1. `knockoutfpl.com` → Sign in with Google
-2. Dashboard shows their leagues with "View" or "Create" for each
+1. `knockoutfpl.com` → Log in (email/password or Google)
+2. Leagues page shows their leagues with "View" or "Create" for each
 3. Click "View Tournament" to see bracket and current state
 
 See: [journeys/returning-user.md](./journeys/returning-user.md)

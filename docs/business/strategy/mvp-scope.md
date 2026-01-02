@@ -14,8 +14,9 @@ This document defines the explicit boundary of MVP. Features are either IN or OU
 ## IN: MVP Features
 
 ### Authentication
-- [x] Google Sign-In only
-- [x] Single auth flow, no password management
+- [x] Email/password sign-in and sign-up
+- [x] Google Sign-In as alternative option
+- [x] Password reset flow via email
 
 ### FPL Connection
 - [x] Enter FPL Team ID manually
@@ -58,10 +59,9 @@ This document defines the explicit boundary of MVP. Features are either IN or OU
 ## OUT: Not in MVP
 
 ### Authentication
-- [ ] Email/password login
-- [ ] Social logins (Twitter, Facebook, Apple)
-- [ ] Account linking
-- [ ] Password reset flows
+- [ ] Social logins beyond Google (Twitter, Facebook, Apple)
+- [ ] Account linking (connecting Google and email/password accounts)
+- [ ] Email verification before sign-in
 
 ### FPL Connection
 - [ ] Search for team by name
@@ -146,7 +146,7 @@ This document defines the explicit boundary of MVP. Features are either IN or OU
 
 | Decision | Rationale | Date |
 |----------|-----------|------|
-| Google-only auth | Simplest flow, no password management | Dec 2025 |
+| Email/password + Google auth | Flexible sign-in options, password reset for user convenience | Dec 2025 |
 | Single elim only | Core experience, other formats add complexity | Dec 2025 |
 | Final scores only | Live scores require polling, edge cases, complexity | Dec 2025 |
 | Desktop-first | Bracket visualization is complex on mobile | Dec 2025 |

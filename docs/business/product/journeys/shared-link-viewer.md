@@ -24,8 +24,8 @@ The path from clicking a shared link to claiming a team and signing up.
 2. View bracket immediately (no auth required)
 3. Find my team in the bracket
 4. Click "Claim team" button on my team
-5. Sign in with Google (FPL Team ID already known from context)
-6. Land on dashboard showing my leagues
+5. Sign up or log in (FPL Team ID already known from context)
+6. Land on leagues page showing my leagues
 
 ---
 
@@ -43,8 +43,8 @@ The path from clicking a shared link to claiming a team and signing up.
 <!-- TODO: Document what happens when things go wrong -->
 
 - Tournament doesn't exist for this league ID
-- User claims a team but their Google account is already linked to a different FPL Team ID
-- User clicks claim but cancels Google sign-in
+- User claims a team but their account is already linked to a different FPL Team ID
+- User clicks claim but cancels sign-in
 
 ---
 

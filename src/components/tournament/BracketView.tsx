@@ -96,6 +96,10 @@ export function BracketView({
   isAuthenticated,
   onClaimTeam,
 }: BracketViewProps) {
+  // Animation timing constants
+  const FADE_ANIMATION_DURATION_MS = 200;
+  const CTA_SLIDE_IN_DELAY_MS = 100;
+
   // State for previewed team (unauthenticated users only)
   const [previewedTeamId, setPreviewedTeamId] = useState<number | null>(null);
   const [showSearch, setShowSearch] = useState(!isAuthenticated);
@@ -104,6 +108,17 @@ export function BracketView({
   const [overlayMounted, setOverlayMounted] = useState(!isAuthenticated);
   // Track CTA visibility for slide-in animation
   const [ctaVisible, setCtaVisible] = useState(false);
+
+  // Reset state when user becomes authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      setShowSearch(false);
+      setOverlayVisible(false);
+      setOverlayMounted(false);
+      setPreviewedTeamId(null);
+      setCtaVisible(false);
+    }
+  }, [isAuthenticated]);
 
   // Build matches for the previewed team
   const previewedMatches = useMemo(() => {
@@ -126,22 +141,29 @@ export function BracketView({
 
   // Handle overlay fade animation
   useEffect(() => {
+    let rafId: number;
+    let timerId: ReturnType<typeof setTimeout>;
+
     if (showSearch) {
       // Show: mount first, then fade in
       setOverlayMounted(true);
       // Small delay to ensure mount happens before opacity transition
-      requestAnimationFrame(() => {
+      rafId = requestAnimationFrame(() => {
         setOverlayVisible(true);
       });
     } else {
       // Hide: fade out first, then unmount
       setOverlayVisible(false);
-      const timer = setTimeout(() => {
+      timerId = setTimeout(() => {
         setOverlayMounted(false);
-      }, 200); // Match transition duration
-      return () => clearTimeout(timer);
+      }, FADE_ANIMATION_DURATION_MS);
     }
-  }, [showSearch]);
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (timerId) clearTimeout(timerId);
+    };
+  }, [showSearch, FADE_ANIMATION_DURATION_MS]);
 
   // Handle CTA slide-in animation when team is selected
   useEffect(() => {
@@ -149,12 +171,12 @@ export function BracketView({
       // Small delay before starting slide-in animation
       const timer = setTimeout(() => {
         setCtaVisible(true);
-      }, 100);
+      }, CTA_SLIDE_IN_DELAY_MS);
       return () => clearTimeout(timer);
     } else {
       setCtaVisible(false);
     }
-  }, [previewedTeamId, showSearch]);
+  }, [previewedTeamId, showSearch, CTA_SLIDE_IN_DELAY_MS]);
 
   const handleTeamConfirm = useCallback((fplTeamId: number) => {
     setPreviewedTeamId(fplTeamId);

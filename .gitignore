@@ -53,3 +53,8 @@ dataconnect-data/
 
 # Git worktrees
 .worktrees/
+
+# Visual regression testing
+visual-tests/current/
+visual-tests/diffs/
+visual-tests/reports/

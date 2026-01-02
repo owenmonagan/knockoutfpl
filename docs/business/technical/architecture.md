@@ -164,11 +164,12 @@ Type-safe GraphQL layer between frontend and PostgreSQL:
 - **Rate limiting** - Control request frequency
 - **Error handling** - Consistent error responses
 
-### Why Google Auth only?
+### Why Email/Password + Google Auth?
 
-- **Simplicity** - One auth flow to maintain
-- **Trust** - Users familiar with Google sign-in
-- **No password management** - Reduces security surface
+- **Flexibility** - Users choose their preferred sign-in method
+- **Accessibility** - Some users prefer not to use social login
+- **Password recovery** - Self-service password reset reduces support burden
+- **Google option** - Familiar one-click sign-in for those who prefer it
 
 ---
 

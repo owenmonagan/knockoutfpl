@@ -21,8 +21,8 @@ The path for an authenticated user checking back on their tournaments.
 <!-- TODO: Expand each step with details, edge cases, error states -->
 
 1. Land on `knockoutfpl.com`
-2. Sign in with Google (or already signed in)
-3. View dashboard showing my leagues
+2. Log in (or already signed in)
+3. View leagues page showing my leagues
 4. Each league shows "View Tournament" or "Create Tournament"
 5. Click "View Tournament" on an active tournament
 6. See bracket with current round, my match, and results

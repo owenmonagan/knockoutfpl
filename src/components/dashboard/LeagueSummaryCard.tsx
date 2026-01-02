@@ -166,43 +166,9 @@ function getStatusText(
   }
 }
 
-function getGameweekRange(
-  tournament: NonNullable<LeagueSummaryCardProps['tournament']>
-): string {
-  return `GW${tournament.startGameweek} → GW${tournament.endGameweek}`;
-}
-
-function getUserProgressText(
-  tournament: NonNullable<LeagueSummaryCardProps['tournament']>,
-  userProgress: LeagueSummaryCardProps['userProgress']
-): string {
-  const roundInfo = `Round ${tournament.currentRound} of ${tournament.totalRounds}`;
-
-  if (!userProgress) {
-    return roundInfo;
-  }
-
-  if (userProgress.status === 'winner') {
-    return `Completed \u00B7 You: Winner`;
-  }
-
-  if (userProgress.status === 'eliminated') {
-    const eliminatedText = userProgress.eliminationRound
-      ? `Eliminated R${userProgress.eliminationRound}`
-      : 'Eliminated';
-
-    if (tournament.status === 'completed') {
-      return `Completed \u00B7 You: ${eliminatedText}`;
-    }
-    return `${roundInfo} \u00B7 You: ${eliminatedText}`;
-  }
-
-  // User is still active
-  const roundName =
-    userProgress.currentRoundName ||
-    getRoundName(tournament.currentRound, tournament.totalRounds);
-  return `${roundInfo} \u00B7 You: ${roundName}`;
-}
+// Utility functions reserved for future use
+// function getGameweekRange(tournament) { return `GW${tournament.startGameweek} → GW${tournament.endGameweek}`; }
+// function getUserProgressText(tournament, userProgress) { ... }
 
 export function LeagueSummaryCard(props: LeagueSummaryCardProps) {
   const { leagueName, memberCount, userRank, tournament, userProgress, isLocked = false, onClick } = props;

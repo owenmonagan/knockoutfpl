@@ -6,6 +6,7 @@ import type { MatchSummaryCardProps } from './MatchSummaryCard';
 const mockLiveMatch: MatchSummaryCardProps = {
   type: 'live',
   yourTeamName: 'My Team',
+  yourFplTeamId: 12345,
   opponentTeamName: "Dave's Dumpster Fire",
   leagueName: 'Work League',
   roundName: 'Semi-finals',
@@ -16,6 +17,7 @@ const mockLiveMatch: MatchSummaryCardProps = {
 const mockUpcomingMatch: MatchSummaryCardProps = {
   type: 'upcoming',
   yourTeamName: 'My Team',
+  yourFplTeamId: 12345,
   opponentTeamName: 'Uncle Terry XI',
   leagueName: 'Family Cup',
   roundName: 'Quarter-finals',
@@ -25,6 +27,7 @@ const mockUpcomingMatch: MatchSummaryCardProps = {
 const mockFinishedWonMatch: MatchSummaryCardProps = {
   type: 'finished',
   yourTeamName: 'My Team',
+  yourFplTeamId: 12345,
   opponentTeamName: 'John FC',
   leagueName: 'Office League',
   roundName: 'Round of 16',
@@ -36,6 +39,7 @@ const mockFinishedWonMatch: MatchSummaryCardProps = {
 const mockFinishedLostMatch: MatchSummaryCardProps = {
   type: 'finished',
   yourTeamName: 'My Team',
+  yourFplTeamId: 12345,
   opponentTeamName: 'Mike United',
   leagueName: 'Friends League',
   roundName: 'Quarter-finals',

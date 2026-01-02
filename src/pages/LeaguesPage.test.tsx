@@ -413,6 +413,7 @@ describe('LeaguesPage', () => {
           currentMatch: {
             opponentTeamName: 'Rival Team',
             opponentManagerName: 'Rival Manager',
+            opponentFplTeamId: 654321,
             roundNumber: 1,
             roundName: 'Round 1',
             gameweek: 15,

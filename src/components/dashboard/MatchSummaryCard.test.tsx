@@ -10,6 +10,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="Haaland's Hairband"
+          yourFplTeamId={12345}
           opponentTeamName="Salah's Legacy"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -26,6 +27,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="Haaland's Hairband"
+          yourFplTeamId={12345}
           opponentTeamName="Salah's Legacy"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -42,6 +44,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="upcoming"
           yourTeamName="Haaland's Hairband"
+          yourFplTeamId={12345}
           leagueName="Work League"
           roundName="Semi-finals"
           gameweek={14}
@@ -60,6 +63,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Their Team"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -76,6 +80,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Their Team"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -92,6 +97,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="upcoming"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Their Team"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -109,6 +115,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -125,6 +132,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -142,6 +150,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -160,6 +169,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -176,6 +186,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -192,6 +203,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -210,6 +222,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -229,6 +242,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="upcoming"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -244,6 +258,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="upcoming"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -259,6 +274,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="upcoming"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -275,6 +291,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="upcoming"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -292,6 +309,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="finished"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -309,6 +327,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="finished"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -326,6 +345,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="finished"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -345,6 +365,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="finished"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -364,6 +385,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="finished"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -381,6 +403,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="finished"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -398,6 +421,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="finished"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Quarter-finals"
@@ -420,6 +444,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -439,6 +464,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -457,6 +483,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -476,6 +503,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -497,6 +525,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -515,6 +544,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="live"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -532,6 +562,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="upcoming"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           opponentTeamName="Dave's Dumpster Fire"
           leagueName="Work League"
           roundName="Semi-finals"
@@ -547,6 +578,7 @@ describe('MatchSummaryCard', () => {
         <MatchSummaryCard
           type="upcoming"
           yourTeamName="My Team"
+          yourFplTeamId={12345}
           leagueName="Work League"
           roundName="Finals"
           gameweek={15}
