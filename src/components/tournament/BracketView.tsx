@@ -1,10 +1,16 @@
 // src/components/tournament/BracketView.tsx
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Spinner } from '../ui/spinner';
 import { BracketLayout } from './BracketLayout';
 import { ParticipantsTable } from './ParticipantsTable';
-import type { Tournament } from '../../types/tournament';
+import { TeamSearchOverlay } from './TeamSearchOverlay';
+import { YourMatchesSection } from '../dashboard/YourMatchesSection';
+import type { Tournament, Participant } from '../../types/tournament';
+import { getMatchPlayers } from '../../types/tournament';
+import type { MatchSummaryCardProps } from '../dashboard/MatchSummaryCard';
 
 interface BracketViewProps {
   tournament: Tournament;
@@ -13,12 +19,162 @@ interface BracketViewProps {
   onClaimTeam?: (fplTeamId: number) => void;
 }
 
+/**
+ * Builds match cards for a specific team from tournament data.
+ * Shows the team's journey through the tournament.
+ */
+function buildMatchesForTeam(
+  tournament: Tournament,
+  fplTeamId: number
+): MatchSummaryCardProps[] {
+  const participantMap = new Map<number, Participant>(
+    tournament.participants.map((p) => [p.fplTeamId, p])
+  );
+
+  const yourParticipant = participantMap.get(fplTeamId);
+  if (!yourParticipant) return [];
+
+  const matches: MatchSummaryCardProps[] = [];
+
+  for (const round of tournament.rounds) {
+    for (const match of round.matches) {
+      const players = getMatchPlayers(match);
+      const yourPlayer = players.find((p) => p.fplTeamId === fplTeamId);
+
+      if (!yourPlayer) continue;
+
+      // Find opponent(s) - for 1v1, there's just one
+      const opponents = players.filter((p) => p.fplTeamId !== fplTeamId);
+      const opponent = opponents[0]; // For now, assume 1v1
+
+      const opponentParticipant = opponent
+        ? participantMap.get(opponent.fplTeamId)
+        : null;
+
+      // Determine match type and result
+      const roundStarted = round.gameweek <= tournament.currentGameweek;
+      const hasScores =
+        yourPlayer.score !== null &&
+        (!opponent || opponent.score !== null);
+      const isComplete = round.isComplete && hasScores;
+
+      let matchType: 'live' | 'upcoming' | 'finished';
+      let result: 'won' | 'lost' | undefined;
+
+      if (isComplete) {
+        matchType = 'finished';
+        result = match.winnerId === fplTeamId ? 'won' : 'lost';
+      } else if (roundStarted && !round.isComplete) {
+        matchType = 'live';
+      } else {
+        matchType = 'upcoming';
+      }
+
+      matches.push({
+        type: matchType,
+        yourTeamName: yourParticipant.fplTeamName,
+        yourFplTeamId: fplTeamId,
+        opponentTeamName: opponentParticipant?.fplTeamName,
+        opponentFplTeamId: opponent?.fplTeamId,
+        leagueName: tournament.fplLeagueName,
+        roundName: round.name,
+        yourScore: yourPlayer.score,
+        theirScore: opponent?.score ?? null,
+        gameweek: round.gameweek,
+        result,
+      });
+    }
+  }
+
+  // Sort by round (ascending - earliest round first)
+  return matches.sort((a, b) => (a.gameweek ?? 0) - (b.gameweek ?? 0));
+}
+
 export function BracketView({
   tournament,
   isRefreshing = false,
   isAuthenticated,
   onClaimTeam,
 }: BracketViewProps) {
+  // State for previewed team (unauthenticated users only)
+  const [previewedTeamId, setPreviewedTeamId] = useState<number | null>(null);
+  const [showSearch, setShowSearch] = useState(!isAuthenticated);
+  // Track overlay visibility for fade animation (separate from mount state)
+  const [overlayVisible, setOverlayVisible] = useState(!isAuthenticated);
+  const [overlayMounted, setOverlayMounted] = useState(!isAuthenticated);
+  // Track CTA visibility for slide-in animation
+  const [ctaVisible, setCtaVisible] = useState(false);
+
+  // Build matches for the previewed team
+  const previewedMatches = useMemo(() => {
+    if (!previewedTeamId) return [];
+    return buildMatchesForTeam(tournament, previewedTeamId);
+  }, [tournament, previewedTeamId]);
+
+  // Get the previewed participant for displaying info
+  const previewedParticipant = useMemo(() => {
+    if (!previewedTeamId) return null;
+    return tournament.participants.find(
+      (p) => p.fplTeamId === previewedTeamId
+    );
+  }, [tournament.participants, previewedTeamId]);
+
+  // Check if any match is live
+  const hasLiveMatch = useMemo(() => {
+    return previewedMatches.some((m) => m.type === 'live');
+  }, [previewedMatches]);
+
+  // Handle overlay fade animation
+  useEffect(() => {
+    if (showSearch) {
+      // Show: mount first, then fade in
+      setOverlayMounted(true);
+      // Small delay to ensure mount happens before opacity transition
+      requestAnimationFrame(() => {
+        setOverlayVisible(true);
+      });
+    } else {
+      // Hide: fade out first, then unmount
+      setOverlayVisible(false);
+      const timer = setTimeout(() => {
+        setOverlayMounted(false);
+      }, 200); // Match transition duration
+      return () => clearTimeout(timer);
+    }
+  }, [showSearch]);
+
+  // Handle CTA slide-in animation when team is selected
+  useEffect(() => {
+    if (previewedTeamId && !showSearch) {
+      // Small delay before starting slide-in animation
+      const timer = setTimeout(() => {
+        setCtaVisible(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      setCtaVisible(false);
+    }
+  }, [previewedTeamId, showSearch]);
+
+  const handleTeamConfirm = useCallback((fplTeamId: number) => {
+    setPreviewedTeamId(fplTeamId);
+    setShowSearch(false);
+  }, []);
+
+  const handleSearchClose = useCallback(() => {
+    setShowSearch(false);
+  }, []);
+
+  const handleChangeTeam = useCallback(() => {
+    setShowSearch(true);
+  }, []);
+
+  const handleSignupClick = useCallback(() => {
+    if (previewedTeamId && onClaimTeam) {
+      onClaimTeam(previewedTeamId);
+    }
+  }, [previewedTeamId, onClaimTeam]);
+
   return (
     <div className="space-y-6">
       <Card>
@@ -57,6 +213,90 @@ export function BracketView({
           )}
         </CardContent>
       </Card>
+
+      {/* Your Matches Section - for unauthenticated users with team preview */}
+      {!isAuthenticated && tournament.rounds.length > 0 && (
+        <Card className="relative">
+          <CardContent className="pt-6">
+            {/* Team Search Overlay with fade animation */}
+            {overlayMounted && (
+              <div
+                className={`transition-opacity duration-200 ${
+                  overlayVisible ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <TeamSearchOverlay
+                  participants={tournament.participants}
+                  onConfirm={handleTeamConfirm}
+                  onClose={handleSearchClose}
+                />
+              </div>
+            )}
+
+            {/* Selected Team Header */}
+            {previewedParticipant && !showSearch && (
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Viewing as
+                  </span>
+                  <span className="font-medium">
+                    {previewedParticipant.fplTeamName}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleChangeTeam}
+                >
+                  Change team
+                </Button>
+              </div>
+            )}
+
+            {/* Your Matches Section */}
+            {previewedTeamId && !showSearch && (
+              <YourMatchesSection
+                matches={previewedMatches}
+                currentGameweek={tournament.currentGameweek}
+                isLive={hasLiveMatch}
+              />
+            )}
+
+            {/* Placeholder when no team selected and search closed */}
+            {!previewedTeamId && !showSearch && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  Select your team to see your matches
+                </p>
+                <Button variant="outline" onClick={handleChangeTeam}>
+                  Find your team
+                </Button>
+              </div>
+            )}
+          </CardContent>
+
+          {/* Signup CTA with slide-in animation */}
+          {previewedTeamId && !showSearch && onClaimTeam && (
+            <div
+              className={`border-t bg-muted/30 px-6 py-4 transition-all duration-300 ease-out ${
+                ctaVisible
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-4'
+              }`}
+            >
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-muted-foreground text-center sm:text-left">
+                  Sign up to get notified when results are in
+                </p>
+                <Button onClick={handleSignupClick}>
+                  Sign up and claim team
+                </Button>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
 
       {tournament.rounds.length > 0 && (
         <Card>

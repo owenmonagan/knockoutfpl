@@ -1,6 +1,7 @@
 // src/components/tournament/BracketView.test.tsx
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi } from 'vitest';
 import { BracketView } from './BracketView';
 import type { Tournament } from '../../types/tournament';
 
@@ -48,21 +49,21 @@ describe('BracketView', () => {
   };
 
   it('renders tournament header', () => {
-    render(<BracketView tournament={mockTournament} />);
+    render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
 
     expect(screen.getByText('Test League')).toBeInTheDocument();
     expect(screen.getByText('Active')).toBeInTheDocument();
   });
 
   it('renders bracket layout with all rounds', () => {
-    render(<BracketView tournament={mockTournament} />);
+    render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
 
     expect(screen.getByText('Semi-Finals')).toBeInTheDocument();
     expect(screen.getByText('Final')).toBeInTheDocument();
   });
 
   it('renders all participants in bracket and table', () => {
-    render(<BracketView tournament={mockTournament} />);
+    render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
 
     // Each team appears twice: once in bracket, once in table
     expect(screen.getAllByText('Team A')).toHaveLength(2);
@@ -72,7 +73,7 @@ describe('BracketView', () => {
   });
 
   it('renders participants table with seeds and seeding description', () => {
-    render(<BracketView tournament={mockTournament} />);
+    render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
 
     expect(screen.getByText('Participants')).toBeInTheDocument();
     expect(screen.getByText('Initial seeding based on GW19 league standings')).toBeInTheDocument();
@@ -82,27 +83,332 @@ describe('BracketView', () => {
 
   it('shows completed badge when tournament finished', () => {
     const completedTournament = { ...mockTournament, status: 'completed' as const };
-    render(<BracketView tournament={completedTournament} />);
+    render(<BracketView tournament={completedTournament} isAuthenticated={true} />);
 
     expect(screen.getByText('Completed')).toBeInTheDocument();
   });
 
   it('shows updating indicator when isRefreshing is true', () => {
-    render(<BracketView tournament={mockTournament} isRefreshing={true} />);
+    render(<BracketView tournament={mockTournament} isRefreshing={true} isAuthenticated={true} />);
 
     expect(screen.getByText('Updating...')).toBeInTheDocument();
     expect(screen.getByRole('status')).toBeInTheDocument(); // Spinner has role="status"
   });
 
   it('does not show updating indicator when isRefreshing is false', () => {
-    render(<BracketView tournament={mockTournament} isRefreshing={false} />);
+    render(<BracketView tournament={mockTournament} isRefreshing={false} isAuthenticated={true} />);
 
     expect(screen.queryByText('Updating...')).not.toBeInTheDocument();
   });
 
   it('does not show updating indicator by default (prop not provided)', () => {
-    render(<BracketView tournament={mockTournament} />);
+    render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
 
     expect(screen.queryByText('Updating...')).not.toBeInTheDocument();
+  });
+
+  describe('Team Preview for Unauthenticated Users', () => {
+    it('shows team search overlay for unauthenticated users', () => {
+      render(<BracketView tournament={mockTournament} isAuthenticated={false} />);
+
+      expect(screen.getByText('Find Your Team')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Find your team...')).toBeInTheDocument();
+    });
+
+    it('does not show team search overlay for authenticated users', () => {
+      render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+
+      expect(screen.queryByText('Find Your Team')).not.toBeInTheDocument();
+    });
+
+    it('does not show Your Matches section for authenticated users', () => {
+      render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+
+      // The YourMatchesSection heading should not appear for authenticated users
+      expect(screen.queryByText('Your Matches')).not.toBeInTheDocument();
+    });
+
+    it('shows Your Matches section after team is selected', async () => {
+      const user = userEvent.setup();
+      render(<BracketView tournament={mockTournament} isAuthenticated={false} />);
+
+      // Search for a team
+      const searchInput = screen.getByPlaceholderText('Find your team...');
+      await user.type(searchInput, 'Team A');
+
+      // Wait for debounce (300ms) and results to appear
+      // The "Manager A" text should appear in the search results listbox
+      await waitFor(
+        () => {
+          const listbox = screen.queryByRole('listbox');
+          expect(listbox).toBeInTheDocument();
+          expect(screen.getByRole('button', { name: 'This is me' })).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+
+      // Click "This is me" button
+      const confirmButton = screen.getByRole('button', { name: 'This is me' });
+      await user.click(confirmButton);
+
+      // Search overlay should fade out (wait for animation to complete)
+      await waitFor(
+        () => {
+          expect(screen.queryByText('Find Your Team')).not.toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+
+      // Your Matches section should appear
+      expect(screen.getByText('Your Matches')).toBeInTheDocument();
+
+      // Selected team header should show
+      expect(screen.getByText('Viewing as')).toBeInTheDocument();
+      // Team A appears in multiple places (header, bracket, table), check for "Viewing as" context
+      const viewingAsSection = screen.getByText('Viewing as').parentElement;
+      expect(viewingAsSection).toHaveTextContent('Team A');
+    });
+
+    it('shows signup CTA after team is selected', async () => {
+      const user = userEvent.setup();
+      const mockOnClaimTeam = vi.fn();
+
+      render(
+        <BracketView
+          tournament={mockTournament}
+          isAuthenticated={false}
+          onClaimTeam={mockOnClaimTeam}
+        />
+      );
+
+      // Search for and select a team
+      const searchInput = screen.getByPlaceholderText('Find your team...');
+      await user.type(searchInput, 'Team B');
+
+      // Wait for debounce and results
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: 'This is me' })).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+
+      const confirmButton = screen.getByRole('button', { name: 'This is me' });
+      await user.click(confirmButton);
+
+      // Signup CTA should appear
+      expect(screen.getByText('Sign up to get notified when results are in')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Sign up and claim team' })).toBeInTheDocument();
+    });
+
+    it('calls onClaimTeam with selected team ID when signup button clicked', async () => {
+      const user = userEvent.setup();
+      const mockOnClaimTeam = vi.fn();
+
+      render(
+        <BracketView
+          tournament={mockTournament}
+          isAuthenticated={false}
+          onClaimTeam={mockOnClaimTeam}
+        />
+      );
+
+      // Search for and select Team C (fplTeamId: 3)
+      const searchInput = screen.getByPlaceholderText('Find your team...');
+      await user.type(searchInput, 'Team C');
+
+      // Wait for debounce and results
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: 'This is me' })).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+
+      const confirmButton = screen.getByRole('button', { name: 'This is me' });
+      await user.click(confirmButton);
+
+      // Click signup button
+      const signupButton = screen.getByRole('button', { name: 'Sign up and claim team' });
+      await user.click(signupButton);
+
+      expect(mockOnClaimTeam).toHaveBeenCalledWith(3);
+    });
+
+    it('allows changing team after initial selection', async () => {
+      const user = userEvent.setup();
+
+      render(<BracketView tournament={mockTournament} isAuthenticated={false} />);
+
+      // Select Team A first
+      const searchInput = screen.getByPlaceholderText('Find your team...');
+      await user.type(searchInput, 'Team A');
+
+      // Wait for debounce and results
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: 'This is me' })).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+
+      await user.click(screen.getByRole('button', { name: 'This is me' }));
+
+      // Verify Team A is selected
+      expect(screen.getByText('Viewing as').parentElement).toHaveTextContent('Team A');
+
+      // Click "Change team" button
+      const changeTeamButton = screen.getByRole('button', { name: 'Change team' });
+      await user.click(changeTeamButton);
+
+      // Search overlay should reappear
+      expect(screen.getByText('Find Your Team')).toBeInTheDocument();
+    });
+
+    it('closes search overlay when close button clicked without selecting team', async () => {
+      const user = userEvent.setup();
+
+      render(<BracketView tournament={mockTournament} isAuthenticated={false} />);
+
+      // Verify search overlay is shown
+      expect(screen.getByText('Find Your Team')).toBeInTheDocument();
+
+      // Click close button
+      const closeButton = screen.getByRole('button', { name: 'Close search' });
+      await user.click(closeButton);
+
+      // Overlay should fade out (wait for animation to complete)
+      await waitFor(
+        () => {
+          expect(screen.queryByText('Find Your Team')).not.toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+
+      // Should show placeholder for selecting a team
+      expect(screen.getByText('Select your team to see your matches')).toBeInTheDocument();
+
+      // "Find your team" button should allow reopening
+      const findTeamButton = screen.getByRole('button', { name: 'Find your team' });
+      await user.click(findTeamButton);
+
+      // Overlay should reappear
+      expect(screen.getByText('Find Your Team')).toBeInTheDocument();
+    });
+
+    it('builds correct matches for selected team', async () => {
+      const user = userEvent.setup();
+
+      // Create a tournament with completed and live matches
+      const tournamentWithMatches: Tournament = {
+        ...mockTournament,
+        currentGameweek: 20,
+        rounds: [
+          {
+            roundNumber: 1,
+            name: 'Semi-Finals',
+            gameweek: 20,
+            isComplete: false,
+            matches: [
+              {
+                id: 'r1-m1',
+                player1: { fplTeamId: 1, seed: 1, score: 65 },
+                player2: { fplTeamId: 4, seed: 4, score: 58 },
+                winnerId: null,
+                isBye: false,
+              },
+              {
+                id: 'r1-m2',
+                player1: { fplTeamId: 2, seed: 2, score: 72 },
+                player2: { fplTeamId: 3, seed: 3, score: 60 },
+                winnerId: null,
+                isBye: false,
+              },
+            ],
+          },
+          {
+            roundNumber: 2,
+            name: 'Final',
+            gameweek: 21,
+            isComplete: false,
+            matches: [
+              { id: 'r2-m1', player1: null, player2: null, winnerId: null, isBye: false },
+            ],
+          },
+        ],
+      };
+
+      render(<BracketView tournament={tournamentWithMatches} isAuthenticated={false} />);
+
+      // Select Team A (fplTeamId: 1)
+      const searchInput = screen.getByPlaceholderText('Find your team...');
+      await user.type(searchInput, 'Team A');
+
+      // Wait for debounce and results
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: 'This is me' })).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+
+      await user.click(screen.getByRole('button', { name: 'This is me' }));
+
+      // Should show the match card with scores
+      // The scores appear both in the bracket and the YourMatchesSection
+      // Verify that YourMatchesSection is rendered with match cards
+      await waitFor(() => {
+        // YourMatchesSection should show the match
+        expect(screen.getByText('Your Matches')).toBeInTheDocument();
+        // There should be multiple instances of the scores (bracket + match card)
+        expect(screen.getAllByText('65').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText('58').length).toBeGreaterThanOrEqual(1);
+      });
+    });
+
+    it('does not show signup CTA when onClaimTeam is not provided', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <BracketView
+          tournament={mockTournament}
+          isAuthenticated={false}
+          // No onClaimTeam prop
+        />
+      );
+
+      // Select a team
+      const searchInput = screen.getByPlaceholderText('Find your team...');
+      await user.type(searchInput, 'Team A');
+
+      // Wait for debounce and results
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: 'This is me' })).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+
+      await user.click(screen.getByRole('button', { name: 'This is me' }));
+
+      // Signup CTA should NOT appear
+      expect(screen.queryByText('Sign up to get notified when results are in')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Sign up and claim team' })).not.toBeInTheDocument();
+    });
+
+    it('does not show Your Matches section when tournament has no rounds', () => {
+      const emptyTournament: Tournament = {
+        ...mockTournament,
+        rounds: [],
+      };
+
+      render(<BracketView tournament={emptyTournament} isAuthenticated={false} />);
+
+      // Should show the "Bracket will appear" message instead
+      expect(screen.getByText('Bracket will appear when the tournament starts.')).toBeInTheDocument();
+
+      // Should NOT show team search overlay (no rounds = no matches to preview)
+      expect(screen.queryByText('Find Your Team')).not.toBeInTheDocument();
+    });
   });
 });
