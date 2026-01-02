@@ -81,6 +81,37 @@ function getCardClasses(variant: CardVariant): string {
   }
 }
 
+function getBadgeConfig(variant: CardVariant): { text: string; className: string } {
+  switch (variant) {
+    case 'active':
+      return {
+        text: 'Active',
+        className: 'bg-primary text-background-dark',
+      };
+    case 'winner':
+      return {
+        text: 'Champion',
+        className: 'bg-amber-500 text-background-dark',
+      };
+    case 'eliminated':
+      return {
+        text: 'Eliminated',
+        className: 'bg-[#3d1f1f] text-red-400',
+      };
+    case 'completed':
+      return {
+        text: 'Completed',
+        className: 'bg-[#3d1f1f] text-red-400',
+      };
+    case 'no-tournament':
+    default:
+      return {
+        text: 'Classic',
+        className: 'bg-[#0f231a] text-text-subtle border border-[#3d5248]',
+      };
+  }
+}
+
 function getHeaderGradient(variant: CardVariant): string {
   switch (variant) {
     case 'active':
@@ -140,11 +171,16 @@ export function LeagueSummaryCard(props: LeagueSummaryCardProps) {
   const variant = getCardVariant(props);
   const hasTournament = !!tournament;
 
-  // Badge placeholder - will be implemented in Task 3
   const renderBadge = () => {
+    const { text, className } = getBadgeConfig(variant);
     return (
-      <span className="px-2 py-1 text-[10px] font-bold rounded uppercase tracking-wide">
-        Badge
+      <span
+        className={cn(
+          'px-2 py-1 text-[10px] font-bold rounded uppercase tracking-wide',
+          className
+        )}
+      >
+        {text}
       </span>
     );
   };

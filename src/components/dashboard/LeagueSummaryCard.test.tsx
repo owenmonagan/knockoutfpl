@@ -3,6 +3,101 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { LeagueSummaryCard } from './LeagueSummaryCard';
 
 describe('LeagueSummaryCard', () => {
+  describe('Status Badge', () => {
+    it('should show "Active" badge for active tournament with active user', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Work League"
+          memberCount={14}
+          tournament={{
+            startGameweek: 12,
+            endGameweek: 15,
+            currentRound: 3,
+            totalRounds: 4,
+            status: 'active',
+          }}
+          userProgress={{ status: 'active' }}
+          onClick={() => {}}
+        />
+      );
+
+      expect(screen.getByText('Active')).toBeInTheDocument();
+    });
+
+    it('should show "Champion" badge for winner', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Work League"
+          memberCount={8}
+          tournament={{
+            startGameweek: 10,
+            endGameweek: 13,
+            currentRound: 3,
+            totalRounds: 3,
+            status: 'completed',
+          }}
+          userProgress={{ status: 'winner' }}
+          onClick={() => {}}
+        />
+      );
+
+      expect(screen.getByText('Champion')).toBeInTheDocument();
+    });
+
+    it('should show "Classic" badge for league without tournament', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Family League"
+          memberCount={6}
+          tournament={null}
+          onClick={() => {}}
+        />
+      );
+
+      expect(screen.getByText('Classic')).toBeInTheDocument();
+    });
+
+    it('should show "Eliminated" badge when user is eliminated', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Work League"
+          memberCount={14}
+          tournament={{
+            startGameweek: 12,
+            endGameweek: 15,
+            currentRound: 5,
+            totalRounds: 7,
+            status: 'active',
+          }}
+          userProgress={{ status: 'eliminated', eliminationRound: 2 }}
+          onClick={() => {}}
+        />
+      );
+
+      expect(screen.getByText('Eliminated')).toBeInTheDocument();
+    });
+
+    it('should show "Completed" badge for completed tournament where user lost', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Work League"
+          memberCount={8}
+          tournament={{
+            startGameweek: 10,
+            endGameweek: 13,
+            currentRound: 3,
+            totalRounds: 3,
+            status: 'completed',
+          }}
+          userProgress={{ status: 'eliminated', eliminationRound: 2 }}
+          onClick={() => {}}
+        />
+      );
+
+      expect(screen.getByText('Completed')).toBeInTheDocument();
+    });
+  });
+
   describe('Header Section', () => {
     it('should render league name in header', () => {
       render(
