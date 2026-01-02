@@ -10,6 +10,10 @@ import {
 } from './bracketGenerator';
 import {
   calculateNWayBracket,
+  generateNWayBracketStructure,
+  assignParticipantsToNWayMatches,
+  NWayBracketMatch,
+  NWayMatchAssignment,
 } from './nWayBracket';
 import {
   createTournamentAdmin,
@@ -302,6 +306,155 @@ export function buildTournamentRecords(
 }
 
 /**
+ * Build all database records for an N-way tournament (matchSize > 2)
+ */
+export function buildNWayTournamentRecords(
+  tournamentId: string,
+  uid: string,
+  standings: any,
+  totalSlots: number,
+  totalRounds: number,
+  startEvent: number,
+  matches: NWayBracketMatch[],
+  matchAssignments: NWayMatchAssignment[],
+  matchSize: number
+): {
+  entries: EntryRecord[];
+  tournament: TournamentRecord;
+  rounds: RoundRecord[];
+  participants: ParticipantRecord[];
+  matchRecords: MatchRecord[];
+  matchPicks: MatchPickRecord[];
+} {
+  const leagueData = standings.league;
+  const standingsResults = standings.standings.results;
+
+  // Get current season (e.g., "2024-25")
+  const currentYear = new Date().getFullYear();
+  const season = `${currentYear}-${(currentYear + 1).toString().slice(-2)}`;
+
+  // Entries (FPL team data from league standings)
+  const entries: EntryRecord[] = standingsResults.map((p: any) => {
+    const nameParts = (p.player_name || '').split(' ');
+    const playerFirstName = nameParts[0] || '';
+    const playerLastName = nameParts.slice(1).join(' ') || '';
+
+    return {
+      entryId: p.entry,
+      season,
+      name: p.entry_name,
+      playerFirstName,
+      playerLastName,
+      summaryOverallPoints: p.total,
+      rawJson: JSON.stringify(p),
+    };
+  });
+
+  // Tournament
+  const tournament: TournamentRecord = {
+    fplLeagueId: leagueData.id,
+    fplLeagueName: leagueData.name,
+    creatorUid: uid,
+    participantCount: standingsResults.length,
+    totalRounds,
+    startEvent,
+    seedingMethod: 'league_rank',
+    matchSize,
+  };
+
+  // Rounds
+  const rounds: RoundRecord[] = [];
+  for (let r = 1; r <= totalRounds; r++) {
+    rounds.push({
+      tournamentId,
+      roundNumber: r,
+      event: startEvent + r - 1,
+      status: r === 1 ? 'active' : 'pending',
+    });
+  }
+
+  // Participants (seed = rank in league)
+  const participants: ParticipantRecord[] = standingsResults.map((p: any, index: number) => ({
+    tournamentId,
+    entryId: p.entry,
+    teamName: p.entry_name,
+    managerName: p.player_name,
+    seed: index + 1,
+    leagueRank: p.rank,
+    leaguePoints: p.total,
+    rawJson: JSON.stringify(p),
+  }));
+
+  // Create entry lookup by seed
+  const seedToEntry = new Map<number, number>();
+  participants.forEach(p => seedToEntry.set(p.seed, p.entryId));
+
+  // Matches (from N-way structure)
+  const matchRecords: MatchRecord[] = matches.map(m => ({
+    tournamentId,
+    matchId: m.matchId,
+    roundNumber: m.roundNumber,
+    positionInRound: m.positionInRound,
+    qualifiesToMatchId: m.qualifiesToMatchId,
+    isBye: false, // Updated below
+    status: m.roundNumber === 1 ? 'active' : 'pending',
+  }));
+
+  // Match picks (round 1 only) - N-way version
+  const matchPicks: MatchPickRecord[] = [];
+
+  for (const assignment of matchAssignments) {
+    // Find the match for this assignment (position-based)
+    const match = matchRecords.find(m => m.roundNumber === 1 && m.positionInRound === assignment.position);
+    if (!match) continue;
+
+    // Add all real players to slots
+    let slotNum = 1;
+    let realPlayerCount = 0;
+    let firstRealEntry: number | undefined;
+
+    for (const seed of assignment.seeds) {
+      if (seed !== null) {
+        const entryId = seedToEntry.get(seed);
+        if (entryId) {
+          matchPicks.push({
+            tournamentId,
+            matchId: match.matchId,
+            entryId,
+            slot: slotNum,
+          });
+          realPlayerCount++;
+          if (!firstRealEntry) firstRealEntry = entryId;
+        }
+      }
+      slotNum++;
+    }
+
+    // If only 1 real player, this is an auto-advance (bye)
+    if (realPlayerCount === 1 && firstRealEntry) {
+      match.isBye = true;
+      match.status = 'complete';
+      match.winnerEntryId = firstRealEntry;
+
+      // Advance winner to next round
+      if (match.qualifiesToMatchId) {
+        // Determine slot in next round based on position
+        // Groups 1-matchSize → next match slots 1-matchSize
+        const slotInNextRound = ((assignment.position - 1) % matchSize) + 1;
+        matchPicks.push({
+          tournamentId,
+          matchId: match.qualifiesToMatchId,
+          entryId: firstRealEntry,
+          slot: slotInNextRound,
+        });
+      }
+    }
+  }
+
+  return { entries, tournament, rounds, participants, matchRecords, matchPicks };
+}
+
+/**
  * Write tournament records to database using Data Connect Admin SDK with impersonation
  */
 async function writeTournamentToDatabase(
@@ -530,23 +683,41 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
 
   console.log(`[createTournament] Bracket: ${participantCount} participants, matchSize=${matchSize}, ${totalRounds} rounds`);
 
-  // 6. Generate bracket
-  const matches = generateBracketStructure(bracketSize);
-  const matchAssignments = assignParticipantsToMatches(bracketSize, participantCount);
-
-  // 7. Build all records
+  // 6. Generate bracket and build records
   const tournamentId = crypto.randomUUID();
-  const records = buildTournamentRecords(
-    tournamentId,
-    uid,
-    standings,
-    bracketSize,
-    totalRounds,
-    startEvent,
-    matches,
-    matchAssignments,
-    matchSize
-  );
+  let records: ReturnType<typeof buildTournamentRecords>;
+
+  if (matchSize === 2) {
+    // Traditional 1v1 bracket
+    const matches = generateBracketStructure(bracketSize);
+    const matchAssignments = assignParticipantsToMatches(bracketSize, participantCount);
+    records = buildTournamentRecords(
+      tournamentId,
+      uid,
+      standings,
+      bracketSize,
+      totalRounds,
+      startEvent,
+      matches,
+      matchAssignments,
+      matchSize
+    );
+  } else {
+    // N-way bracket (3-way, 4-way, etc.)
+    const matches = generateNWayBracketStructure(matchSize, totalRounds);
+    const matchAssignments = assignParticipantsToNWayMatches(matchSize, bracketSize, participantCount);
+    records = buildNWayTournamentRecords(
+      tournamentId,
+      uid,
+      standings,
+      bracketSize,
+      totalRounds,
+      startEvent,
+      matches,
+      matchAssignments,
+      matchSize
+    );
+  }
 
   // 8. Write to database with impersonation
   await writeTournamentToDatabase(tournamentId, records, authClaims);
