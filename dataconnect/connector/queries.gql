@@ -183,6 +183,19 @@ query GetFinalizedEvents($season: String!) @auth(level: PUBLIC) {
   }
 }
 
+# Get event finalization status for a specific gameweek
+query GetEventFinalization($event: Int!, $season: String!) @auth(level: PUBLIC) {
+  events(
+    where: { event: { eq: $event }, season: { eq: $season } }
+    limit: 1
+  ) {
+    event
+    season
+    finished
+    finalizedAt
+  }
+}
+
 # =============================================================================
 # TOURNAMENT QUERIES
 # =============================================================================
