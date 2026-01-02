@@ -678,6 +678,68 @@ describe('LeagueSummaryCard', () => {
     });
   });
 
+  describe('Button Variants', () => {
+    it('should show "View History" for eliminated user', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Work League"
+          memberCount={14}
+          tournament={{
+            startGameweek: 12,
+            endGameweek: 15,
+            currentRound: 5,
+            totalRounds: 7,
+            status: 'active',
+          }}
+          userProgress={{ status: 'eliminated', eliminationRound: 2 }}
+          onClick={() => {}}
+        />
+      );
+
+      expect(screen.getByRole('button', { name: /View History/i })).toBeInTheDocument();
+    });
+
+    it('should show "View History" for completed tournament', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Work League"
+          memberCount={8}
+          tournament={{
+            startGameweek: 10,
+            endGameweek: 13,
+            currentRound: 3,
+            totalRounds: 3,
+            status: 'completed',
+          }}
+          userProgress={{ status: 'eliminated' }}
+          onClick={() => {}}
+        />
+      );
+
+      expect(screen.getByRole('button', { name: /View History/i })).toBeInTheDocument();
+    });
+
+    it('should show "View Tournament" for winner', () => {
+      render(
+        <LeagueSummaryCard
+          leagueName="Work League"
+          memberCount={8}
+          tournament={{
+            startGameweek: 10,
+            endGameweek: 13,
+            currentRound: 3,
+            totalRounds: 3,
+            status: 'completed',
+          }}
+          userProgress={{ status: 'winner' }}
+          onClick={() => {}}
+        />
+      );
+
+      expect(screen.getByRole('button', { name: /View Tournament/i })).toBeInTheDocument();
+    });
+  });
+
   describe('Edge Cases', () => {
     it('should handle tournament without userProgress', () => {
       render(

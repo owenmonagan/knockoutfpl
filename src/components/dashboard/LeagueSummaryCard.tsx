@@ -1,5 +1,4 @@
 import { Card, CardContent } from '../ui/card';
-import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { getRoundName } from '@/lib/bracket';
 
@@ -252,33 +251,55 @@ export function LeagueSummaryCard(props: LeagueSummaryCardProps) {
 
   // Button
   const renderButton = () => {
-    if (hasTournament) {
+    const handleButtonClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onClick();
+    };
+
+    // No tournament - Create Tournament (outline)
+    if (!hasTournament) {
       return (
-        <Button
-          size="sm"
-          className="w-full"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick();
-          }}
+        <button
+          className="flex items-center justify-center gap-2 h-9 rounded border border-primary text-primary text-xs font-bold hover:bg-primary/10 transition-colors"
+          onClick={handleButtonClick}
         >
-          View Tournament
-        </Button>
+          Create Tournament
+        </button>
       );
     }
 
+    // Winner - View Tournament (solid)
+    if (variant === 'winner') {
+      return (
+        <button
+          className="flex items-center justify-center gap-2 h-9 rounded bg-[#273a31] text-white text-xs font-bold hover:bg-amber-500 hover:text-background-dark transition-colors"
+          onClick={handleButtonClick}
+        >
+          View Tournament
+        </button>
+      );
+    }
+
+    // Eliminated or Completed - View History (muted)
+    if (variant === 'eliminated' || variant === 'completed') {
+      return (
+        <button
+          className="flex items-center justify-center gap-2 h-9 rounded bg-[#273a31] text-text-subtle text-xs font-bold hover:text-white transition-colors"
+          onClick={handleButtonClick}
+        >
+          View History
+        </button>
+      );
+    }
+
+    // Active - View Tournament (solid with primary hover)
     return (
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full"
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick();
-        }}
+      <button
+        className="flex items-center justify-center gap-2 h-9 rounded bg-[#273a31] text-white text-xs font-bold hover:bg-primary hover:text-background-dark transition-colors"
+        onClick={handleButtonClick}
       >
-        Create Tournament
-      </Button>
+        View Tournament
+      </button>
     );
   };
 
