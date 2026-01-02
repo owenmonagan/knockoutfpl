@@ -29,6 +29,7 @@ export interface TournamentSummary {
 export interface MatchSummary {
   opponentTeamName: string;
   opponentManagerName: string;
+  opponentFplTeamId: number;
   roundNumber: number;
   roundName: string;
   gameweek: number;
@@ -433,6 +434,7 @@ export async function getTournamentSummaryForLeague(
       const matchSummary: MatchSummary = {
         opponentTeamName: opponentParticipant?.teamName ?? 'BYE',
         opponentManagerName: opponentParticipant?.managerName ?? '',
+        opponentFplTeamId: opponentEntryId ?? 0,
         roundNumber: round.roundNumber,
         roundName,
         gameweek: round.event,
