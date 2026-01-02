@@ -51,6 +51,7 @@ describe('LeaguePage', () => {
   });
 
   it('should render loading skeleton initially', () => {
+    vi.mocked(fplService.getLeagueInfo).mockImplementation(() => new Promise(() => {}));
     vi.mocked(tournamentService.getTournamentByLeague).mockImplementation(() => new Promise(() => {}));
 
     const { container } = renderLeaguePage();

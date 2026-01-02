@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Skeleton } from '../components/ui/skeleton';
+import { Card, CardContent } from '../components/ui/card';
 import { BracketView } from '../components/tournament/BracketView';
 import { NoTournamentEmptyState } from '../components/leagues/NoTournamentEmptyState';
 import {
@@ -33,7 +34,7 @@ export function LeaguePage() {
       try {
         // Fetch league info and tournament in parallel
         const [leagueInfoResult, existingTournament] = await Promise.all([
-          getLeagueInfo(Number(leagueId)),
+          getLeagueInfo(Number(leagueId)).catch(() => null),
           getTournamentByLeague(Number(leagueId)),
         ]);
 
@@ -116,7 +117,13 @@ export function LeaguePage() {
           isAuthenticated={!!user}
           onCreate={handleCreateTournament}
         />
-      ) : null}
+      ) : (
+        <Card className="w-full max-w-lg mx-auto">
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground">Failed to load league information.</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
