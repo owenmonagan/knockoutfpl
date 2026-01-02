@@ -1,6 +1,8 @@
 // src/components/tournament/MatchCard.tsx
+import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '../ui/badge';
 import { Card, CardContent } from '../ui/card';
+import { cn } from '@/lib/utils';
 import type { Match, Participant } from '../../types/tournament';
 import { getStakesCallout } from '../../lib/stakes';
 
@@ -10,9 +12,38 @@ interface MatchCardProps {
   gameweek: number;
   isUserMatch?: boolean;
   userTeamId?: number;
+  isGameweekActive?: boolean;
 }
 
-export function MatchCard({ match, participants, gameweek, isUserMatch, userTeamId }: MatchCardProps) {
+function StalenessIndicator({
+  updatedAt,
+  isGameweekActive,
+}: {
+  updatedAt?: Date;
+  isGameweekActive?: boolean;
+}) {
+  if (!updatedAt) return null;
+
+  const minutesAgo = Math.floor(
+    (Date.now() - updatedAt.getTime()) / (1000 * 60)
+  );
+  const isStale = isGameweekActive && minutesAgo > 30;
+
+  return (
+    <span
+      className={cn(
+        'text-xs text-muted-foreground',
+        isStale && 'text-amber-500'
+      )}
+      title={`Last updated ${formatDistanceToNow(updatedAt)} ago`}
+    >
+      {isStale && '\u26a0\ufe0f '}
+      Updated {formatDistanceToNow(updatedAt, { addSuffix: true })}
+    </span>
+  );
+}
+
+export function MatchCard({ match, participants, gameweek, isUserMatch, userTeamId, isGameweekActive }: MatchCardProps) {
   const getParticipantById = (fplTeamId: number | null): Participant | null => {
     if (!fplTeamId) return null;
     return participants.find((p) => p.fplTeamId === fplTeamId) || null;
@@ -82,6 +113,12 @@ export function MatchCard({ match, participants, gameweek, isUserMatch, userTeam
         </div>
         {stakesCallout && (
           <p className="text-sm font-medium text-amber-600 mt-2">{stakesCallout}</p>
+        )}
+        {match.updatedAt && (
+          <StalenessIndicator
+            updatedAt={new Date(match.updatedAt)}
+            isGameweekActive={isGameweekActive}
+          />
         )}
       </CardContent>
     </Card>

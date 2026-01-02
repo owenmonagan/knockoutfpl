@@ -153,4 +153,67 @@ describe('MatchCard', () => {
     const loserRow = screen.getByText('Team Beta').closest('.opacity-50');
     expect(loserRow).toBeInTheDocument();
   });
+
+  it('should display staleness indicator when updatedAt is provided', () => {
+    const recentlyUpdated = new Date(Date.now() - 5 * 60 * 1000).toISOString(); // 5 minutes ago
+    const matchWithUpdate: Match = {
+      ...mockMatch,
+      player1: { fplTeamId: 1, seed: 1, score: 65 },
+      player2: { fplTeamId: 2, seed: 4, score: 58 },
+      winnerId: 1,
+      updatedAt: recentlyUpdated,
+    };
+    render(
+      <MatchCard
+        match={matchWithUpdate}
+        participants={mockParticipants}
+        gameweek={16}
+      />
+    );
+    expect(screen.getByText(/Updated .* ago/)).toBeInTheDocument();
+  });
+
+  it('should show warning when staleness indicator is stale during active gameweek', () => {
+    const staleUpdate = new Date(Date.now() - 45 * 60 * 1000).toISOString(); // 45 minutes ago
+    const matchWithStaleUpdate: Match = {
+      ...mockMatch,
+      player1: { fplTeamId: 1, seed: 1, score: 65 },
+      player2: { fplTeamId: 2, seed: 4, score: 58 },
+      winnerId: null,
+      updatedAt: staleUpdate,
+    };
+    const { container } = render(
+      <MatchCard
+        match={matchWithStaleUpdate}
+        participants={mockParticipants}
+        gameweek={16}
+        isGameweekActive={true}
+      />
+    );
+    // Should have amber-500 class for stale indicator
+    const staleIndicator = container.querySelector('.text-amber-500');
+    expect(staleIndicator).toBeInTheDocument();
+  });
+
+  it('should not show warning when staleness is within threshold during active gameweek', () => {
+    const recentUpdate = new Date(Date.now() - 10 * 60 * 1000).toISOString(); // 10 minutes ago
+    const matchWithRecentUpdate: Match = {
+      ...mockMatch,
+      player1: { fplTeamId: 1, seed: 1, score: 65 },
+      player2: { fplTeamId: 2, seed: 4, score: 58 },
+      winnerId: null,
+      updatedAt: recentUpdate,
+    };
+    const { container } = render(
+      <MatchCard
+        match={matchWithRecentUpdate}
+        participants={mockParticipants}
+        gameweek={16}
+        isGameweekActive={true}
+      />
+    );
+    // Should NOT have amber-500 class since it's recent
+    const staleIndicator = container.querySelector('.text-amber-500');
+    expect(staleIndicator).not.toBeInTheDocument();
+  });
 });

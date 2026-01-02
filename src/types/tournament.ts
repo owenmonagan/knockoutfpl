@@ -24,6 +24,7 @@ export interface Match {
   player2?: MatchPlayer | null;
   winnerId: number | null; // FPL team ID
   isBye: boolean;
+  updatedAt?: string; // ISO timestamp of last score update
 }
 
 export interface Round {
