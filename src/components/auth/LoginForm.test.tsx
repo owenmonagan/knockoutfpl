@@ -87,7 +87,7 @@ describe('LoginForm', () => {
     await user.click(screen.getByRole('button', { name: /log in/i }));
 
     await vi.waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/connect');
+      expect(mockNavigate).toHaveBeenCalledWith('/leagues');
     });
   });
 

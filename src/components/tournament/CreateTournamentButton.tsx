@@ -12,12 +12,14 @@ import {
   SelectValue,
 } from '../ui/select';
 import { getFPLBootstrapData } from '../../services/fpl';
+import { TournamentPreview } from './TournamentPreview';
 
 interface CreateTournamentButtonProps {
   onCreate: (startEvent: number, matchSize: number) => Promise<void>;
+  managerCount: number;
 }
 
-export function CreateTournamentButton({ onCreate }: CreateTournamentButtonProps) {
+export function CreateTournamentButton({ onCreate, managerCount }: CreateTournamentButtonProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,6 +119,12 @@ export function CreateTournamentButton({ onCreate }: CreateTournamentButtonProps
           </SelectContent>
         </Select>
       </div>
+
+      <TournamentPreview
+        managerCount={managerCount}
+        matchSize={matchSize}
+        startGameweek={selectedGameweek}
+      />
 
       <Button
         onClick={handleClick}

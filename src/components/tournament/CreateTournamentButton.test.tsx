@@ -12,6 +12,10 @@ vi.mock('../../services/fpl', () => ({
 
 describe('CreateTournamentButton', () => {
   const mockGetFPLBootstrapData = vi.mocked(fplService.getFPLBootstrapData);
+  const defaultProps = {
+    onCreate: async () => {},
+    managerCount: 8, // Default manager count for tests
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -20,7 +24,7 @@ describe('CreateTournamentButton', () => {
   });
 
   it('should render button', async () => {
-    render(<CreateTournamentButton onCreate={async () => {}} />);
+    render(<CreateTournamentButton {...defaultProps} />);
     // Wait for bootstrap data to load
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /create tournament/i })).toBeInTheDocument();
@@ -28,7 +32,7 @@ describe('CreateTournamentButton', () => {
   });
 
   it('should render gameweek dropdown with label', async () => {
-    render(<CreateTournamentButton onCreate={async () => {}} />);
+    render(<CreateTournamentButton {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getByText('Starting Gameweek')).toBeInTheDocument();
@@ -39,7 +43,7 @@ describe('CreateTournamentButton', () => {
   });
 
   it('should render match size dropdown', async () => {
-    render(<CreateTournamentButton onCreate={async () => {}} />);
+    render(<CreateTournamentButton {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getByText('Match Size')).toBeInTheDocument();
@@ -50,7 +54,7 @@ describe('CreateTournamentButton', () => {
   });
 
   it('should default match size to 2 (1v1)', async () => {
-    render(<CreateTournamentButton onCreate={async () => {}} />);
+    render(<CreateTournamentButton {...defaultProps} />);
 
     await waitFor(() => {
       const matchSizeSelect = screen.getAllByRole('combobox')[1];
@@ -60,7 +64,7 @@ describe('CreateTournamentButton', () => {
 
   it('should default to next gameweek (current + 1)', async () => {
     mockGetFPLBootstrapData.mockResolvedValue({ currentGameweek: 20 });
-    render(<CreateTournamentButton onCreate={async () => {}} />);
+    render(<CreateTournamentButton {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('GW 21');
@@ -69,7 +73,7 @@ describe('CreateTournamentButton', () => {
 
   it('should default to GW 1 if bootstrap fetch fails', async () => {
     mockGetFPLBootstrapData.mockRejectedValue(new Error('Network error'));
-    render(<CreateTournamentButton onCreate={async () => {}} />);
+    render(<CreateTournamentButton {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('GW 1');
@@ -77,7 +81,7 @@ describe('CreateTournamentButton', () => {
   });
 
   it('should show all gameweeks 1-38 in dropdown', async () => {
-    render(<CreateTournamentButton onCreate={async () => {}} />);
+    render(<CreateTournamentButton {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getAllByRole('combobox').length).toBe(2);
@@ -92,7 +96,7 @@ describe('CreateTournamentButton', () => {
   it('should mark current gameweek with "(current)" when selected', async () => {
     // When current gameweek (20) is selected, it should show "(current)"
     mockGetFPLBootstrapData.mockResolvedValue({ currentGameweek: 1 });
-    render(<CreateTournamentButton onCreate={async () => {}} />);
+    render(<CreateTournamentButton {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getAllByRole('combobox').length).toBe(2);
@@ -107,7 +111,7 @@ describe('CreateTournamentButton', () => {
   it('should pass selected gameweek to onCreate', async () => {
     const handleCreate = vi.fn().mockResolvedValue(undefined);
     mockGetFPLBootstrapData.mockResolvedValue({ currentGameweek: 20 });
-    render(<CreateTournamentButton onCreate={handleCreate} />);
+    render(<CreateTournamentButton {...defaultProps} onCreate={handleCreate} />);
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /create tournament/i })).toBeInTheDocument();
@@ -124,7 +128,7 @@ describe('CreateTournamentButton', () => {
   it('should pass matchSize to onCreate', async () => {
     const handleCreate = vi.fn().mockResolvedValue(undefined);
     mockGetFPLBootstrapData.mockResolvedValue({ currentGameweek: 20 });
-    render(<CreateTournamentButton onCreate={handleCreate} />);
+    render(<CreateTournamentButton {...defaultProps} onCreate={handleCreate} />);
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /create tournament/i })).toBeInTheDocument();
@@ -143,7 +147,7 @@ describe('CreateTournamentButton', () => {
     // The dropdown selection interaction is tested via E2E (Playwright) due to jsdom limitations
     const handleCreate = vi.fn().mockResolvedValue(undefined);
     mockGetFPLBootstrapData.mockResolvedValue({ currentGameweek: 15 });
-    render(<CreateTournamentButton onCreate={handleCreate} />);
+    render(<CreateTournamentButton {...defaultProps} onCreate={handleCreate} />);
 
     await waitFor(() => {
       expect(screen.getAllByRole('combobox').length).toBe(2);
@@ -162,7 +166,7 @@ describe('CreateTournamentButton', () => {
 
   it('should disable dropdown during creation', async () => {
     const slowCreate = () => new Promise<void>(() => {}); // Never resolves
-    render(<CreateTournamentButton onCreate={slowCreate} />);
+    render(<CreateTournamentButton {...defaultProps} onCreate={slowCreate} />);
 
     await waitFor(() => {
       expect(screen.getAllByRole('combobox').length).toBe(2);
@@ -181,7 +185,7 @@ describe('CreateTournamentButton', () => {
 
   it('should show progress checklist when creating', async () => {
     const slowCreate = () => new Promise<void>(() => {}); // Never resolves
-    render(<CreateTournamentButton onCreate={slowCreate} />);
+    render(<CreateTournamentButton {...defaultProps} onCreate={slowCreate} />);
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /create tournament/i })).toBeInTheDocument();
@@ -200,7 +204,7 @@ describe('CreateTournamentButton', () => {
 
   it('should call onCreate when clicked', async () => {
     const handleCreate = vi.fn().mockResolvedValue(undefined);
-    render(<CreateTournamentButton onCreate={handleCreate} />);
+    render(<CreateTournamentButton {...defaultProps} onCreate={handleCreate} />);
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /create tournament/i })).toBeInTheDocument();
@@ -215,7 +219,7 @@ describe('CreateTournamentButton', () => {
 
   it('should show error message on failure', async () => {
     const failingCreate = vi.fn().mockRejectedValue(new Error('Network error'));
-    render(<CreateTournamentButton onCreate={failingCreate} />);
+    render(<CreateTournamentButton {...defaultProps} onCreate={failingCreate} />);
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /create tournament/i })).toBeInTheDocument();
@@ -231,7 +235,7 @@ describe('CreateTournamentButton', () => {
 
   it('should show retry button on error', async () => {
     const failingCreate = vi.fn().mockRejectedValue(new Error('Network error'));
-    render(<CreateTournamentButton onCreate={failingCreate} />);
+    render(<CreateTournamentButton {...defaultProps} onCreate={failingCreate} />);
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /create tournament/i })).toBeInTheDocument();
@@ -251,7 +255,7 @@ describe('CreateTournamentButton', () => {
       .mockRejectedValueOnce(new Error('Network error'))
       .mockResolvedValueOnce(undefined);
 
-    render(<CreateTournamentButton onCreate={onCreate} />);
+    render(<CreateTournamentButton {...defaultProps} onCreate={onCreate} />);
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /create tournament/i })).toBeInTheDocument();
@@ -276,7 +280,7 @@ describe('CreateTournamentButton', () => {
 
   it('should show completed state when creation succeeds', async () => {
     const handleCreate = vi.fn().mockResolvedValue(undefined);
-    render(<CreateTournamentButton onCreate={handleCreate} />);
+    render(<CreateTournamentButton {...defaultProps} onCreate={handleCreate} />);
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /create tournament/i })).toBeInTheDocument();
@@ -292,11 +296,20 @@ describe('CreateTournamentButton', () => {
   it('should cap default gameweek at 38', async () => {
     // If current gameweek is 38, can't go to 39
     mockGetFPLBootstrapData.mockResolvedValue({ currentGameweek: 38 });
-    render(<CreateTournamentButton onCreate={async () => {}} />);
+    render(<CreateTournamentButton {...defaultProps} />);
 
     await waitFor(() => {
       // Should show GW 38, not GW 39
       expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('GW 38');
+    });
+  });
+
+  it('should render tournament preview with manager count', async () => {
+    render(<CreateTournamentButton {...defaultProps} managerCount={8} />);
+
+    await waitFor(() => {
+      // Preview should show 3 rounds for 8 participants in 1v1
+      expect(screen.getByText('3 rounds')).toBeInTheDocument();
     });
   });
 });

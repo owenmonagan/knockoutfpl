@@ -85,7 +85,7 @@ export function NoTournamentEmptyState({
         {/* CTA Area */}
         {isAuthenticated ? (
           <div className="w-full md:w-auto min-w-[240px] mb-8">
-            <CreateTournamentButton onCreate={onCreate} />
+            <CreateTournamentButton onCreate={onCreate} managerCount={managerCount} />
           </div>
         ) : (
           <div className="mb-8">
