@@ -250,6 +250,8 @@ export const refreshTournament = onCall(
       }
 
       // 2a. Store current event in database (so frontend can get accurate current gameweek)
+      // Note: We don't set finalizedAt here - that's handled by checkEventStatus
+      // which polls /event-status/ for accurate finalization detection
       try {
         await upsertEventAdmin({
           event: gwStatus.event,
@@ -257,6 +259,7 @@ export const refreshTournament = onCall(
           name: gwStatus.name,
           deadlineTime: gwStatus.deadlineTime,
           finished: gwStatus.finished,
+          // finalizedAt intentionally omitted - preserves existing value
           isCurrent: gwStatus.isCurrent,
           isNext: gwStatus.isNext,
           rawJson: JSON.stringify(gwStatus),
