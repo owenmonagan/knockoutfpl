@@ -411,4 +411,128 @@ describe('BracketView', () => {
       expect(screen.queryByText('Find Your Team')).not.toBeInTheDocument();
     });
   });
+
+  describe('Authenticated User Matches', () => {
+    it('shows Your Matches section for authenticated users who are participants', () => {
+      render(
+        <BracketView
+          tournament={mockTournament}
+          isAuthenticated={true}
+          userFplTeamId={1}
+        />
+      );
+
+      // Should show Your Matches section
+      expect(screen.getByText('Your Matches')).toBeInTheDocument();
+
+      // Should show "Playing as" header with team name
+      expect(screen.getByText('Playing as')).toBeInTheDocument();
+      // Team A appears multiple times (header, bracket, table)
+      const playingAsSection = screen.getByText('Playing as').parentElement;
+      expect(playingAsSection).toHaveTextContent('Team A');
+    });
+
+    it('does not show Your Matches section for authenticated users not in tournament', () => {
+      render(
+        <BracketView
+          tournament={mockTournament}
+          isAuthenticated={true}
+          userFplTeamId={999} // Not a participant
+        />
+      );
+
+      // Should NOT show Your Matches section (user is not a participant)
+      expect(screen.queryByText('Your Matches')).not.toBeInTheDocument();
+      expect(screen.queryByText('Playing as')).not.toBeInTheDocument();
+
+      // Should also NOT show Find Your Team (user is authenticated)
+      expect(screen.queryByText('Find Your Team')).not.toBeInTheDocument();
+    });
+
+    it('does not show Your Matches section when userFplTeamId is null', () => {
+      render(
+        <BracketView
+          tournament={mockTournament}
+          isAuthenticated={true}
+          userFplTeamId={null}
+        />
+      );
+
+      // Should NOT show Your Matches section
+      expect(screen.queryByText('Your Matches')).not.toBeInTheDocument();
+      expect(screen.queryByText('Playing as')).not.toBeInTheDocument();
+    });
+
+    it('does not show signup CTA for authenticated users', () => {
+      const mockOnClaimTeam = vi.fn();
+
+      render(
+        <BracketView
+          tournament={mockTournament}
+          isAuthenticated={true}
+          userFplTeamId={1}
+          onClaimTeam={mockOnClaimTeam}
+        />
+      );
+
+      // Should show matches but NOT signup CTA
+      expect(screen.getByText('Your Matches')).toBeInTheDocument();
+      expect(screen.queryByText('Sign up to get notified when results are in')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Sign up and claim team' })).not.toBeInTheDocument();
+    });
+
+    it('builds correct matches for authenticated user', () => {
+      const tournamentWithScores: Tournament = {
+        ...mockTournament,
+        currentGameweek: 20,
+        rounds: [
+          {
+            roundNumber: 1,
+            name: 'Semi-Finals',
+            gameweek: 20,
+            isComplete: false,
+            matches: [
+              {
+                id: 'r1-m1',
+                player1: { fplTeamId: 1, seed: 1, score: 75 },
+                player2: { fplTeamId: 4, seed: 4, score: 62 },
+                winnerId: null,
+                isBye: false,
+              },
+              {
+                id: 'r1-m2',
+                player1: { fplTeamId: 2, seed: 2, score: 68 },
+                player2: { fplTeamId: 3, seed: 3, score: 55 },
+                winnerId: null,
+                isBye: false,
+              },
+            ],
+          },
+          {
+            roundNumber: 2,
+            name: 'Final',
+            gameweek: 21,
+            isComplete: false,
+            matches: [
+              { id: 'r2-m1', player1: null, player2: null, winnerId: null, isBye: false },
+            ],
+          },
+        ],
+      };
+
+      render(
+        <BracketView
+          tournament={tournamentWithScores}
+          isAuthenticated={true}
+          userFplTeamId={1}
+        />
+      );
+
+      // Should show the user's match with scores
+      expect(screen.getByText('Your Matches')).toBeInTheDocument();
+      // Scores should appear in the matches section
+      expect(screen.getAllByText('75').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('62').length).toBeGreaterThanOrEqual(1);
+    });
+  });
 });

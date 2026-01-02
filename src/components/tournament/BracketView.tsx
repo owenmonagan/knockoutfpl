@@ -16,6 +16,7 @@ interface BracketViewProps {
   tournament: Tournament;
   isRefreshing?: boolean;
   isAuthenticated?: boolean;
+  userFplTeamId?: number | null;
   onClaimTeam?: (fplTeamId: number) => void;
 }
 
@@ -94,18 +95,25 @@ export function BracketView({
   tournament,
   isRefreshing = false,
   isAuthenticated,
+  userFplTeamId,
   onClaimTeam,
 }: BracketViewProps) {
   // Animation timing constants
   const FADE_ANIMATION_DURATION_MS = 200;
   const CTA_SLIDE_IN_DELAY_MS = 100;
 
+  // Check if the authenticated user is a participant in this tournament
+  const userIsParticipant = useMemo(() => {
+    if (!isAuthenticated || !userFplTeamId) return false;
+    return tournament.participants.some((p) => p.fplTeamId === userFplTeamId);
+  }, [isAuthenticated, userFplTeamId, tournament.participants]);
+
   // State for previewed team (unauthenticated users only)
   const [previewedTeamId, setPreviewedTeamId] = useState<number | null>(null);
-  const [showSearch, setShowSearch] = useState(!isAuthenticated);
+  const [showSearch, setShowSearch] = useState(!isAuthenticated && !userIsParticipant);
   // Track overlay visibility for fade animation (separate from mount state)
-  const [overlayVisible, setOverlayVisible] = useState(!isAuthenticated);
-  const [overlayMounted, setOverlayMounted] = useState(!isAuthenticated);
+  const [overlayVisible, setOverlayVisible] = useState(!isAuthenticated && !userIsParticipant);
+  const [overlayMounted, setOverlayMounted] = useState(!isAuthenticated && !userIsParticipant);
   // Track CTA visibility for slide-in animation
   const [ctaVisible, setCtaVisible] = useState(false);
 
@@ -120,7 +128,7 @@ export function BracketView({
     }
   }, [isAuthenticated]);
 
-  // Build matches for the previewed team
+  // Build matches for the previewed team (unauthenticated flow)
   const previewedMatches = useMemo(() => {
     if (!previewedTeamId) return [];
     return buildMatchesForTeam(tournament, previewedTeamId);
@@ -134,10 +142,29 @@ export function BracketView({
     );
   }, [tournament.participants, previewedTeamId]);
 
-  // Check if any match is live
-  const hasLiveMatch = useMemo(() => {
+  // Check if any previewed match is live
+  const hasLivePreviewMatch = useMemo(() => {
     return previewedMatches.some((m) => m.type === 'live');
   }, [previewedMatches]);
+
+  // Build matches for authenticated user (if they're a participant)
+  const userMatches = useMemo(() => {
+    if (!userIsParticipant || !userFplTeamId) return [];
+    return buildMatchesForTeam(tournament, userFplTeamId);
+  }, [tournament, userIsParticipant, userFplTeamId]);
+
+  // Get the authenticated user's participant info
+  const userParticipant = useMemo(() => {
+    if (!userIsParticipant || !userFplTeamId) return null;
+    return tournament.participants.find(
+      (p) => p.fplTeamId === userFplTeamId
+    );
+  }, [tournament.participants, userIsParticipant, userFplTeamId]);
+
+  // Check if any of the user's matches is live
+  const hasLiveUserMatch = useMemo(() => {
+    return userMatches.some((m) => m.type === 'live');
+  }, [userMatches]);
 
   // Handle overlay fade animation
   useEffect(() => {
@@ -199,6 +226,25 @@ export function BracketView({
 
   return (
     <div className="space-y-6">
+      {/* Your Matches Section - for authenticated users who are participants */}
+      {isAuthenticated && userIsParticipant && tournament.rounds.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            {userParticipant && (
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-sm text-muted-foreground">Playing as</span>
+                <span className="font-medium">{userParticipant.fplTeamName}</span>
+              </div>
+            )}
+            <YourMatchesSection
+              matches={userMatches}
+              currentGameweek={tournament.currentGameweek}
+              isLive={hasLiveUserMatch}
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Find Your Team Section - FIRST for unauthenticated users */}
       {!isAuthenticated && tournament.rounds.length > 0 && (
         <>
@@ -246,7 +292,7 @@ export function BracketView({
                 <YourMatchesSection
                   matches={previewedMatches}
                   currentGameweek={tournament.currentGameweek}
-                  isLive={hasLiveMatch}
+                  isLive={hasLivePreviewMatch}
                 />
               </CardContent>
 

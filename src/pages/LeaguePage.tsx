@@ -13,7 +13,7 @@ import {
 } from '../services/tournament';
 import { getLeagueInfo, type FPLLeagueInfo } from '../services/fpl';
 import { signInWithGoogle } from '../services/auth';
-import { createUserProfile, connectFPLTeam } from '../services/user';
+import { createUserProfile, connectFPLTeam, getUserProfile } from '../services/user';
 import { useAuth } from '../contexts/AuthContext';
 import type { Tournament } from '../types/tournament';
 import { MIN_TOURNAMENT_PARTICIPANTS, MAX_TOURNAMENT_PARTICIPANTS } from '../constants/tournament';
@@ -27,7 +27,22 @@ export function LeaguePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [userFplTeamId, setUserFplTeamId] = useState<number | null>(null);
   const mountedRef = useRef(true);
+
+  // Fetch user's FPL team ID when authenticated
+  useEffect(() => {
+    if (!user) {
+      setUserFplTeamId(null);
+      return;
+    }
+
+    getUserProfile(user.uid).then((profile) => {
+      if (profile && profile.fplTeamId) {
+        setUserFplTeamId(profile.fplTeamId);
+      }
+    });
+  }, [user]);
 
   useEffect(() => {
     // Reset mounted ref on mount
@@ -159,6 +174,7 @@ export function LeaguePage() {
           tournament={tournament}
           isRefreshing={isRefreshing}
           isAuthenticated={!!user}
+          userFplTeamId={userFplTeamId}
           onClaimTeam={handleClaimTeam}
         />
       ) : leagueInfo ? (
