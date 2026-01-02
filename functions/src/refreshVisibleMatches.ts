@@ -11,12 +11,16 @@
  */
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { getFirestore } from 'firebase-admin/firestore';
 import { dataConnectAdmin } from './dataconnect-admin';
 import { fetchScoresForEntries } from './fpl-scores';
 import { upsertPickAdmin, AuthClaims } from './dataconnect-mutations';
 
 // Maximum matches that can be refreshed in a single call
 const MAX_MATCHES_PER_REFRESH = 20;
+
+// Rate limit: 30 seconds between refreshes per user per tournament
+const RATE_LIMIT_SECONDS = 30;
 
 // Auth claims for admin operations
 const SYSTEM_AUTH_CLAIMS: AuthClaims = {
@@ -105,6 +109,33 @@ function logError(action: string, error: string, data: Record<string, unknown>):
     error,
     ...data,
   }));
+}
+
+/**
+ * Check rate limit for user/tournament combination
+ * @returns true if allowed, false if rate limited
+ */
+async function checkRateLimit(userId: string, tournamentId: string): Promise<boolean> {
+  const db = getFirestore();
+  const rateLimitRef = db
+    .collection('rateLimits')
+    .doc(`refresh_${userId}_${tournamentId}`);
+
+  const doc = await rateLimitRef.get();
+  const now = Date.now();
+
+  if (doc.exists) {
+    const lastRefresh = doc.data()?.timestamp || 0;
+    if (now - lastRefresh < RATE_LIMIT_SECONDS * 1000) {
+      const waitTime = Math.ceil((RATE_LIMIT_SECONDS * 1000 - (now - lastRefresh)) / 1000);
+      logInfo('rate_limit_hit', { userId, tournamentId, waitTime });
+      return false; // Rate limited
+    }
+  }
+
+  // Update timestamp
+  await rateLimitRef.set({ timestamp: now });
+  return true;
 }
 
 /**
@@ -241,6 +272,7 @@ export async function refreshVisibleMatchesHandler(
  * - Only fetches scores for specified match IDs
  * - Does NOT resolve matches or advance winners
  * - Limited to 20 matches per call
+ * - Rate limited to once per 30 seconds per user per tournament
  */
 export const refreshVisibleMatches = onCall(
   {
@@ -252,7 +284,19 @@ export const refreshVisibleMatches = onCall(
       throw new HttpsError('unauthenticated', 'User must be authenticated');
     }
 
-    logInfo('refresh_visible_call', { userId: request.auth.uid });
+    const { tournamentId } = request.data as RefreshVisibleMatchesRequest;
+    const userId = request.auth.uid;
+
+    logInfo('refresh_visible_call', { userId, tournamentId });
+
+    // Check rate limit
+    const allowed = await checkRateLimit(userId, tournamentId);
+    if (!allowed) {
+      throw new HttpsError(
+        'resource-exhausted',
+        `Please wait ${RATE_LIMIT_SECONDS} seconds between refreshes`
+      );
+    }
 
     return refreshVisibleMatchesHandler(request.data as RefreshVisibleMatchesRequest);
   }
