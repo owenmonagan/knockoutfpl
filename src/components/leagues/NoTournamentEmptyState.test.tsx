@@ -85,4 +85,26 @@ describe('NoTournamentEmptyState', () => {
       expect(screen.getByText('Auto-Updates')).toBeInTheDocument();
     });
   });
+
+  describe('locked state', () => {
+    it('should show lock icon when isLocked is true', () => {
+      renderComponent({ isLocked: true });
+      expect(screen.getByText('lock')).toBeInTheDocument();
+    });
+
+    it('should show locked message when isLocked is true', () => {
+      renderComponent({ isLocked: true });
+      expect(screen.getByText('This league is too large for a tournament')).toBeInTheDocument();
+    });
+
+    it('should not show create button when isLocked is true', () => {
+      renderComponent({ isLocked: true, isAuthenticated: true });
+      expect(screen.queryByRole('button', { name: /create tournament/i })).not.toBeInTheDocument();
+    });
+
+    it('should not show How It Works section when isLocked is true', () => {
+      renderComponent({ isLocked: true });
+      expect(screen.queryByText('How it works')).not.toBeInTheDocument();
+    });
+  });
 });
