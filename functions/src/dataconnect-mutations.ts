@@ -371,6 +371,22 @@ const GET_EVENTS_NEEDING_FINALIZATION_QUERY = `
   }
 `;
 
+const GET_EVENT_BY_ID_QUERY = `
+  query GetEventById($event: Int!, $season: String!) {
+    events(
+      where: {
+        event: { eq: $event }
+        season: { eq: $season }
+      }
+      limit: 1
+    ) {
+      event
+      season
+      finalizedAt
+    }
+  }
+`;
+
 // Update mutations for bracket progression
 const UPDATE_MATCH_WINNER_MUTATION = `
   mutation UpdateMatchWinner(
@@ -623,6 +639,12 @@ export interface EventNeedingFinalization {
   isNext: boolean;
 }
 
+export interface EventById {
+  event: number;
+  season: string;
+  finalizedAt: string | null;
+}
+
 // Mutation functions - execute as admin (internal mutations use NO_ACCESS auth)
 // authClaims parameter kept for API compatibility but not used
 
@@ -805,6 +827,18 @@ export async function getEventsNeedingFinalization(
   >(GET_EVENTS_NEEDING_FINALIZATION_QUERY, { variables: { season } });
 
   return result.data.events;
+}
+
+export async function getEventById(
+  event: number,
+  season: string
+): Promise<EventById | null> {
+  const result = await dataConnectAdmin.executeGraphql<
+    { events: EventById[] },
+    { event: number; season: string }
+  >(GET_EVENT_BY_ID_QUERY, { variables: { event, season } });
+
+  return result.data.events[0] || null;
 }
 
 // Update mutation functions for bracket progression

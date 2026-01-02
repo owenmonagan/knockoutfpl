@@ -14,6 +14,7 @@ import {
   getRoundMatches,
   upsertPickAdmin,
   upsertEventAdmin,
+  getEventById,
   updateMatchWinner,
   updateRoundStatus,
   updateTournamentStatus,
@@ -250,16 +251,17 @@ export const refreshTournament = onCall(
       }
 
       // 2a. Store current event in database (so frontend can get accurate current gameweek)
-      // Note: We don't set finalizedAt here - that's handled by checkEventStatus
-      // which polls /event-status/ for accurate finalization detection
+      // Fetch existing event to preserve finalizedAt if already set
       try {
+        const existingEvent = await getEventById(gwStatus.event, '2024-25');
+
         await upsertEventAdmin({
           event: gwStatus.event,
           season: '2024-25',
           name: gwStatus.name,
           deadlineTime: gwStatus.deadlineTime,
           finished: gwStatus.finished,
-          // finalizedAt intentionally omitted - preserves existing value
+          finalizedAt: existingEvent?.finalizedAt ?? undefined, // Preserve existing value
           isCurrent: gwStatus.isCurrent,
           isNext: gwStatus.isNext,
           rawJson: JSON.stringify(gwStatus),
