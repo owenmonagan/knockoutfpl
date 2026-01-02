@@ -544,6 +544,43 @@ const CREATE_EMAIL_QUEUE_ENTRY_MUTATION = `
   }
 `;
 
+// Email queue queries
+const GET_USERS_WITH_MATCHES_IN_EVENT_QUERY = `
+  query GetUsersWithMatchesInEvent($event: Int!) {
+    rounds(where: { event: { eq: $event } }) {
+      tournamentId
+      roundNumber
+      event
+      tournament {
+        participants {
+          uid
+          entryId
+          user {
+            uid
+            email
+          }
+        }
+      }
+    }
+  }
+`;
+
+const GET_EXISTING_EMAIL_QUEUE_QUERY = `
+  query GetExistingEmailQueue($userUid: String!, $type: String!, $event: Int!) {
+    emailQueues(
+      where: {
+        userUid: { eq: $userUid }
+        type: { eq: $type }
+        event: { eq: $event }
+      }
+      limit: 1
+    ) {
+      id
+      status
+    }
+  }
+`;
+
 // Type definitions for mutation inputs
 export interface UpsertEntryInput {
   entryId: number;
@@ -1051,6 +1088,73 @@ export async function createEmailQueueEntry(
     CREATE_EMAIL_QUEUE_ENTRY_MUTATION,
     { variables: { userUid, type, event } }
   );
+}
+
+export interface UserWithMatches {
+  uid: string;
+  email: string;
+  entryId: number;
+  tournamentId: string;
+}
+
+/**
+ * Get all users who have matches in a specific gameweek
+ * Used to find users who may need verdict emails
+ */
+export async function getUsersWithMatchesInEvent(
+  event: number
+): Promise<UserWithMatches[]> {
+  const result = await dataConnectAdmin.executeGraphql<{
+    rounds: Array<{
+      tournamentId: string;
+      roundNumber: number;
+      event: number;
+      tournament: {
+        participants: Array<{
+          uid: string | null;
+          entryId: number;
+          user: { uid: string; email: string } | null;
+        }>;
+      };
+    }>;
+  }, { event: number }>(GET_USERS_WITH_MATCHES_IN_EVENT_QUERY, { variables: { event } });
+
+  // Flatten and dedupe users (a user might be in multiple tournaments)
+  const userMap = new Map<string, UserWithMatches>();
+
+  for (const round of result.data.rounds) {
+    for (const participant of round.tournament.participants) {
+      // Only include participants who have a linked User account
+      if (participant.uid && participant.user) {
+        userMap.set(participant.uid, {
+          uid: participant.user.uid,
+          email: participant.user.email,
+          entryId: participant.entryId,
+          tournamentId: round.tournamentId,
+        });
+      }
+    }
+  }
+
+  return Array.from(userMap.values());
+}
+
+/**
+ * Check if user already has email queued for this event
+ */
+export async function emailAlreadyQueued(
+  userUid: string,
+  type: 'matchup' | 'verdict',
+  event: number
+): Promise<boolean> {
+  const result = await dataConnectAdmin.executeGraphql<{
+    emailQueues: Array<{ id: string; status: string }>;
+  }, { userUid: string; type: string; event: number }>(
+    GET_EXISTING_EMAIL_QUEUE_QUERY,
+    { variables: { userUid, type, event } }
+  );
+
+  return result.data.emailQueues.length > 0;
 }
 
 // =============================================================================

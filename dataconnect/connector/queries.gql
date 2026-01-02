@@ -505,3 +505,46 @@ query GetUserParticipations($uid: String!) @auth(level: USER) {
     }
   }
 }
+
+# =============================================================================
+# EMAIL QUEUE QUERIES
+# =============================================================================
+
+# Get users who participated in matches for a specific gameweek
+# Used to find users who may need verdict emails
+query GetUsersWithMatchesInEvent($event: Int!) @auth(level: PUBLIC) {
+  rounds(where: { event: { eq: $event } }) {
+    tournamentId
+    roundNumber
+    event
+    tournament {
+      participants {
+        uid
+        entryId
+        user {
+          uid
+          email
+        }
+      }
+    }
+  }
+}
+
+# Check if user already has email queued for this event
+query GetExistingEmailQueue(
+  $userUid: String!
+  $type: String!
+  $event: Int!
+) @auth(level: PUBLIC) {
+  emailQueues(
+    where: {
+      userUid: { eq: $userUid }
+      type: { eq: $type }
+      event: { eq: $event }
+    }
+    limit: 1
+  ) {
+    id
+    status
+  }
+}
