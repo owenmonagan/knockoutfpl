@@ -91,6 +91,7 @@ export interface CreateTournamentVariables {
   totalRounds: number;
   startEvent: number;
   seedingMethod: string;
+  matchSize: number;
 }
 
 export interface DeleteMatchPicksByTournamentData {

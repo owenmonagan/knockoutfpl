@@ -120,6 +120,7 @@ type Tournament @table(name: "tournaments") {
   totalRounds: Int! @col(name: "total_rounds")
   currentRound: Int! @col(name: "current_round") @default(value: 1)
   startEvent: Int! @col(name: "start_event")
+  matchSize: Int! @col(name: "match_size") @default(value: 2)  # 2 = 1v1, 3 = 3-way, etc.
 
   seedingMethod: String! @col(name: "seeding_method") @default(value: "league_rank")
   status: String! @default(value: "active")

@@ -160,6 +160,7 @@ mutation CreateTournament(
   $totalRounds: Int!
   $startEvent: Int!
   $seedingMethod: String!
+  $matchSize: Int!
 ) @auth(level: USER) {
   tournament_insert(
     data: {
@@ -170,6 +171,7 @@ mutation CreateTournament(
       totalRounds: $totalRounds
       startEvent: $startEvent
       seedingMethod: $seedingMethod
+      matchSize: $matchSize
     }
   )
 }

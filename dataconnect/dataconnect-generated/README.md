@@ -3901,6 +3901,7 @@ export interface CreateTournamentVariables {
   totalRounds: number;
   startEvent: number;
   seedingMethod: string;
+  matchSize: number;
 }
 ```
 ### Return Type
@@ -3927,13 +3928,14 @@ const createTournamentVars: CreateTournamentVariables = {
   totalRounds: ..., 
   startEvent: ..., 
   seedingMethod: ..., 
+  matchSize: ..., 
 };
 
 // Call the `createTournament()` function to execute the mutation.
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await createTournament(createTournamentVars);
 // Variables can be defined inline as well.
-const { data } = await createTournament({ fplLeagueId: ..., fplLeagueName: ..., creatorUid: ..., participantCount: ..., totalRounds: ..., startEvent: ..., seedingMethod: ..., });
+const { data } = await createTournament({ fplLeagueId: ..., fplLeagueName: ..., creatorUid: ..., participantCount: ..., totalRounds: ..., startEvent: ..., seedingMethod: ..., matchSize: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -3963,12 +3965,13 @@ const createTournamentVars: CreateTournamentVariables = {
   totalRounds: ..., 
   startEvent: ..., 
   seedingMethod: ..., 
+  matchSize: ..., 
 };
 
 // Call the `createTournamentRef()` function to get a reference to the mutation.
 const ref = createTournamentRef(createTournamentVars);
 // Variables can be defined inline as well.
-const ref = createTournamentRef({ fplLeagueId: ..., fplLeagueName: ..., creatorUid: ..., participantCount: ..., totalRounds: ..., startEvent: ..., seedingMethod: ..., });
+const ref = createTournamentRef({ fplLeagueId: ..., fplLeagueName: ..., creatorUid: ..., participantCount: ..., totalRounds: ..., startEvent: ..., seedingMethod: ..., matchSize: ..., });
 
 // You can also pass in a `DataConnect` instance to the `MutationRef` function.
 const dataConnect = getDataConnect(connectorConfig);
