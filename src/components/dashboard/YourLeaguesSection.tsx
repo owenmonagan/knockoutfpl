@@ -116,6 +116,7 @@ export function YourLeaguesSection(props: YourLeaguesSectionProps) {
               key={league.leagueId}
               leagueName={league.leagueName}
               memberCount={league.memberCount}
+              userRank={league.userRank}
               tournament={league.tournament}
               userProgress={league.userProgress}
               onClick={() => onLeagueClick(league.leagueId)}
