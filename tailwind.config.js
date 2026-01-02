@@ -23,6 +23,12 @@ export default {
         'primary-hover': '#00CC6A',
         'surface-card': '#18241F',
         'text-dim': '#6B8A7A',
+        // FPL connection page colors
+        'fpl-bg': '#101815',
+        'fpl-surface': '#1b2822',
+        'fpl-surface-light': '#273a31',
+        'fpl-primary': '#00ff88',
+        'fpl-text-dim': '#9abcac',
         // shadcn semantic colors (HSL format)
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
