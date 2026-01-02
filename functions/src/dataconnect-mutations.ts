@@ -1788,3 +1788,38 @@ export async function createMatchPicksBatch(
     }
   }
 }
+
+export interface CreateParticipantLeagueInput {
+  tournamentId: string;
+  entryId: number;
+  leagueId: number;
+  leagueName: string;
+  entryRank: number | null;
+}
+
+/**
+ * Batch creates participant league records.
+ * Used to store mini-league memberships for tournament participants.
+ */
+export async function createParticipantLeaguesBatch(
+  leagues: CreateParticipantLeagueInput[]
+): Promise<void> {
+  if (leagues.length === 0) return;
+
+  for (let i = 0; i < leagues.length; i += BATCH_SIZE) {
+    const batch = leagues.slice(i, i + BATCH_SIZE);
+
+    const mutations = batch.map((league, idx) => `
+      pl${idx}: participantLeague_upsert(data: {
+        tournamentId: "${league.tournamentId}"
+        entryId: ${league.entryId}
+        leagueId: ${league.leagueId}
+        leagueName: ${JSON.stringify(league.leagueName)}
+        entryRank: ${league.entryRank ?? 'null'}
+      })
+    `).join('\n');
+
+    const batchMutation = `mutation CreateParticipantLeaguesBatch { ${mutations} }`;
+    await dataConnectAdmin.executeGraphql(batchMutation, {});
+  }
+}
