@@ -532,14 +532,20 @@ const UPDATE_PARTICIPANT_STATUS_MUTATION = `
 const CREATE_EMAIL_QUEUE_ENTRY_MUTATION = `
   mutation CreateEmailQueueEntry(
     $userUid: String!
+    $toEmail: String!
     $type: String!
     $event: Int!
+    $subject: String!
+    $htmlBody: String!
   ) {
     emailQueue_insert(
       data: {
         userUid: $userUid
+        toEmail: $toEmail
         type: $type
         event: $event
+        subject: $subject
+        htmlBody: $htmlBody
         status: "pending"
       }
     )
@@ -1101,17 +1107,25 @@ export async function updateTournamentCurrentRound(
 // EMAIL QUEUE FUNCTIONS
 // =============================================================================
 
+export interface CreateEmailQueueInput {
+  userUid: string;
+  toEmail: string;
+  type: 'matchup' | 'verdict';
+  event: number;
+  subject: string;
+  htmlBody: string;
+}
+
 /**
  * Create an email queue entry for scheduled delivery
+ * Stores pre-rendered email content for later sending
  */
 export async function createEmailQueueEntry(
-  userUid: string,
-  type: 'matchup' | 'verdict',
-  event: number
+  input: CreateEmailQueueInput
 ): Promise<void> {
   await dataConnectAdmin.executeGraphql(
     CREATE_EMAIL_QUEUE_ENTRY_MUTATION,
-    { variables: { userUid, type, event } }
+    { variables: input }
   );
 }
 

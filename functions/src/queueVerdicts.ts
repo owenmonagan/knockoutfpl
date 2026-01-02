@@ -87,8 +87,16 @@ export const queueVerdicts = onSchedule(
           }
 
           // 7. Queue the verdict email
+          // TODO: Task 6 will replace this with actual rendered email content
           try {
-            await createEmailQueueEntry(user.uid, 'verdict', event.event);
+            await createEmailQueueEntry({
+              userUid: user.uid,
+              toEmail: user.email,
+              type: 'verdict',
+              event: event.event,
+              subject: `Your Knockout FPL Results for GW${event.event}`,
+              htmlBody: `<p>Your match results for Gameweek ${event.event} are ready!</p>`,
+            });
             totalQueued++;
             console.log(`[queueVerdicts] Queued verdict email for user ${user.uid} (GW${event.event})`);
           } catch (error) {

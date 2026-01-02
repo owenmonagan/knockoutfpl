@@ -450,17 +450,23 @@ mutation DeleteTournamentById($id: UUID!)
 # EMAIL QUEUE MUTATIONS
 # =============================================================================
 
-# Create email queue entry
+# Create email queue entry with pre-rendered content
 mutation CreateEmailQueueEntry(
   $userUid: String!
+  $toEmail: String!
   $type: String!
   $event: Int!
+  $subject: String!
+  $htmlBody: String!
 ) @auth(level: PUBLIC, insecureReason: "Server-side function for queueing emails") {
   emailQueue_insert(
     data: {
       userUid: $userUid
+      toEmail: $toEmail
       type: $type
       event: $event
+      subject: $subject
+      htmlBody: $htmlBody
       status: "pending"
     }
   )
