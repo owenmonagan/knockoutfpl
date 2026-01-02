@@ -22,6 +22,7 @@ import {
 } from '../components/dashboard/YourLeaguesSection';
 import { Skeleton } from '../components/ui/skeleton';
 import type { MatchSummaryCardProps } from '../components/dashboard/MatchSummaryCard';
+import { aggregateMatches, type LeagueMatchData } from '../lib/aggregateMatches';
 
 // Session storage key used by ConnectPage for persisting success state
 const CONNECT_SUCCESS_STORAGE_KEY = 'connectPage_successTeamInfo';
@@ -122,51 +123,29 @@ export function LeaguesPage() {
   };
 
   // Transform league data to YourMatchesSection format
-  const aggregateMatches = (): MatchSummaryCardProps[] => {
-    const allMatches: MatchSummaryCardProps[] = [];
-    const yourTeamName = teamInfo?.teamName ?? 'My Team';
-    const yourFplTeamId = teamInfo?.teamId ?? 0;
+  const getMatches = (): MatchSummaryCardProps[] => {
+    const leagueMatchData: LeagueMatchData[] = leagues.map((league) => ({
+      leagueId: league.id,
+      leagueName: league.name,
+      currentMatch: league.userProgress?.currentMatch
+        ? {
+            isLive: league.userProgress.currentMatch.isLive,
+            opponentTeamName: league.userProgress.currentMatch.opponentTeamName,
+            opponentFplTeamId: league.userProgress.currentMatch.opponentFplTeamId,
+            roundName: league.userProgress.currentMatch.roundName,
+            yourScore: league.userProgress.currentMatch.yourScore,
+            theirScore: league.userProgress.currentMatch.theirScore,
+            gameweek: league.userProgress.currentMatch.gameweek,
+            result: league.userProgress.currentMatch.result,
+          }
+        : null,
+    }));
 
-    for (const league of leagues) {
-      // Add current match if exists
-      if (league.userProgress?.currentMatch) {
-        const match = league.userProgress.currentMatch;
-        allMatches.push({
-          type: match.isLive ? 'live' : 'upcoming',
-          yourTeamName,
-          yourFplTeamId,
-          opponentTeamName: match.opponentTeamName,
-          opponentFplTeamId: match.opponentFplTeamId,
-          leagueName: league.name,
-          roundName: match.roundName,
-          yourScore: match.yourScore,
-          theirScore: match.theirScore,
-          gameweek: match.gameweek,
-          onClick: () => navigate(`/league/${league.id}`),
-        });
-      }
-
-      // Add recent result if exists
-      if (league.userProgress?.recentResult) {
-        const match = league.userProgress.recentResult;
-        allMatches.push({
-          type: 'finished',
-          yourTeamName,
-          yourFplTeamId,
-          opponentTeamName: match.opponentTeamName,
-          opponentFplTeamId: match.opponentFplTeamId,
-          leagueName: league.name,
-          roundName: match.roundName,
-          yourScore: match.yourScore,
-          theirScore: match.theirScore,
-          gameweek: match.gameweek,
-          result: match.result === 'won' ? 'won' : 'lost',
-          onClick: () => navigate(`/league/${league.id}`),
-        });
-      }
-    }
-
-    return allMatches;
+    return aggregateMatches(leagueMatchData, {
+      yourTeamName: teamInfo?.teamName ?? 'My Team',
+      yourFplTeamId: teamInfo?.teamId ?? 0,
+      onNavigate: (leagueId) => navigate(`/league/${leagueId}`),
+    });
   };
 
   // Transform league data to YourLeaguesSection format
@@ -203,7 +182,7 @@ export function LeaguesPage() {
     (league) => league.userProgress?.currentMatch?.isLive
   );
 
-  const matches = aggregateMatches();
+  const matches = getMatches();
   const leagueData = transformLeagues();
 
   return (
