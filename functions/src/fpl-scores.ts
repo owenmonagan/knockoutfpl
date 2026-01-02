@@ -11,6 +11,30 @@ import type { PicksResponse, BootstrapResponse } from './types/fplApiResponses';
 export type { PicksResponse as FPLPicksResponse } from './types/fplApiResponses';
 
 /**
+ * FPL event-status endpoint types
+ * Endpoint: /api/event-status/
+ */
+export interface EventStatusDay {
+  bonus_added: boolean;
+  date: string;
+  event: number;
+  points: string;  // "r" = ready/resolved
+}
+
+export interface EventStatusResponse {
+  status: EventStatusDay[];
+  leagues: string;  // "Updating" | "Updated"
+}
+
+export interface EventFinalizationStatus {
+  event: number;
+  isFinalized: boolean;
+  allBonusAdded: boolean;
+  allPointsReady: boolean;
+  leaguesUpdated: boolean;
+}
+
+/**
  * Fetch picks/score for an entry in a specific gameweek
  */
 export async function fetchEntryPicks(
@@ -104,4 +128,45 @@ export async function fetchScoresForEntries(
   }
 
   return results;
+}
+
+/**
+ * Fetch event status to check if scores are truly final
+ *
+ * Scores are final when:
+ * - All days have bonus_added: true
+ * - All days have points: "r" (ready)
+ * - leagues: "Updated"
+ */
+export async function fetchEventStatus(): Promise<EventFinalizationStatus | null> {
+  try {
+    const url = `${FPL_API_BASE}/event-status/`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error(`FPL API event-status error: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json() as EventStatusResponse;
+
+    if (!data.status || data.status.length === 0) {
+      return null;
+    }
+
+    const allBonusAdded = data.status.every(day => day.bonus_added);
+    const allPointsReady = data.status.every(day => day.points === 'r');
+    const leaguesUpdated = data.leagues === 'Updated';
+
+    return {
+      event: data.status[0].event,
+      isFinalized: allBonusAdded && allPointsReady && leaguesUpdated,
+      allBonusAdded,
+      allPointsReady,
+      leaguesUpdated,
+    };
+  } catch (error) {
+    console.error('Failed to fetch event status:', error);
+    return null;
+  }
 }
