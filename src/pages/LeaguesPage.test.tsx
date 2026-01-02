@@ -432,6 +432,176 @@ describe('LeaguesPage', () => {
       const opponentText = await screen.findByText(/Rival Team/);
       expect(opponentText).toBeInTheDocument();
     });
+
+    it('shows only live matches when multiple matches exist', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: { uid: 'test-uid', email: 'test@example.com', displayName: 'Test User' } as any,
+        loading: false,
+        isAuthenticated: true,
+        connectionError: false,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(fplService.getUserMiniLeagues).mockResolvedValue([
+        { id: 123, name: 'League A', entryRank: 1 },
+        { id: 456, name: 'League B', entryRank: 2 },
+      ]);
+
+      vi.mocked(fplService.getLeagueStandings).mockResolvedValue([
+        { fplTeamId: 1, teamName: 'Team 1', managerName: 'Manager 1', rank: 1, totalPoints: 100 },
+      ]);
+
+      // League A has live match, League B has upcoming
+      vi.mocked(tournamentService.getTournamentSummaryForLeague)
+        .mockResolvedValueOnce({
+          tournament: { id: 't1', status: 'active', currentRound: 1, totalRounds: 4, startGameweek: 15, endGameweek: 18 },
+          userProgress: {
+            status: 'active',
+            eliminationRound: null,
+            currentRoundName: 'Round 1',
+            currentMatch: {
+              opponentTeamName: 'Live Opponent',
+              opponentManagerName: 'Manager',
+              opponentFplTeamId: 789,
+              roundNumber: 1,
+              roundName: 'Round 1',
+              gameweek: 15,
+              yourScore: 50,
+              theirScore: 45,
+              isLive: true,
+              result: 'pending',
+            },
+            recentResult: null,
+            nextOpponent: null,
+          },
+        })
+        .mockResolvedValueOnce({
+          tournament: { id: 't2', status: 'active', currentRound: 1, totalRounds: 4, startGameweek: 16, endGameweek: 19 },
+          userProgress: {
+            status: 'active',
+            eliminationRound: null,
+            currentRoundName: 'Round 1',
+            currentMatch: {
+              opponentTeamName: 'Upcoming Opponent',
+              opponentManagerName: 'Manager',
+              opponentFplTeamId: 999,
+              roundNumber: 1,
+              roundName: 'Round 1',
+              gameweek: 16,
+              yourScore: null,
+              theirScore: null,
+              isLive: false,
+              result: 'pending',
+            },
+            recentResult: null,
+            nextOpponent: null,
+          },
+        });
+
+      renderWithRouter(<LeaguesPage />);
+
+      // Should show the live opponent, not the upcoming one
+      await waitFor(() => {
+        expect(screen.getByText(/Live Opponent/)).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/Upcoming Opponent/)).not.toBeInTheDocument();
+    });
+
+    it('shows nearest upcoming match when no live matches', async () => {
+      vi.mocked(AuthContext.useAuth).mockReturnValue({
+        user: { uid: 'test-uid', email: 'test@example.com', displayName: 'Test User' } as any,
+        loading: false,
+        isAuthenticated: true,
+        connectionError: false,
+      });
+
+      vi.mocked(userService.getUserProfile).mockResolvedValue({
+        userId: 'test-uid',
+        fplTeamId: 123456,
+        fplTeamName: 'Test Team',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        wins: 0,
+        losses: 0,
+        createdAt: {} as any,
+        updatedAt: {} as any,
+      });
+
+      vi.mocked(fplService.getUserMiniLeagues).mockResolvedValue([
+        { id: 123, name: 'League A', entryRank: 1 },
+        { id: 456, name: 'League B', entryRank: 2 },
+      ]);
+
+      vi.mocked(fplService.getLeagueStandings).mockResolvedValue([
+        { fplTeamId: 1, teamName: 'Team 1', managerName: 'Manager 1', rank: 1, totalPoints: 100 },
+      ]);
+
+      // Both leagues have upcoming matches, different gameweeks
+      vi.mocked(tournamentService.getTournamentSummaryForLeague)
+        .mockResolvedValueOnce({
+          tournament: { id: 't1', status: 'active', currentRound: 1, totalRounds: 4, startGameweek: 18, endGameweek: 21 },
+          userProgress: {
+            status: 'active',
+            eliminationRound: null,
+            currentRoundName: 'Round 1',
+            currentMatch: {
+              opponentTeamName: 'Far Opponent',
+              opponentManagerName: 'Manager',
+              opponentFplTeamId: 789,
+              roundNumber: 1,
+              roundName: 'Round 1',
+              gameweek: 18,
+              yourScore: null,
+              theirScore: null,
+              isLive: false,
+              result: 'pending',
+            },
+            recentResult: null,
+            nextOpponent: null,
+          },
+        })
+        .mockResolvedValueOnce({
+          tournament: { id: 't2', status: 'active', currentRound: 1, totalRounds: 4, startGameweek: 16, endGameweek: 19 },
+          userProgress: {
+            status: 'active',
+            eliminationRound: null,
+            currentRoundName: 'Round 1',
+            currentMatch: {
+              opponentTeamName: 'Near Opponent',
+              opponentManagerName: 'Manager',
+              opponentFplTeamId: 999,
+              roundNumber: 1,
+              roundName: 'Round 1',
+              gameweek: 16,
+              yourScore: null,
+              theirScore: null,
+              isLive: false,
+              result: 'pending',
+            },
+            recentResult: null,
+            nextOpponent: null,
+          },
+        });
+
+      renderWithRouter(<LeaguesPage />);
+
+      // Should show only the nearest upcoming (gameweek 16)
+      await waitFor(() => {
+        expect(screen.getByText(/Near Opponent/)).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/Far Opponent/)).not.toBeInTheDocument();
+    });
   });
 
   describe('Sync Functionality', () => {
