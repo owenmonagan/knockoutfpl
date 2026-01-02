@@ -350,6 +350,7 @@ async function writeTournamentToDatabase(
       startEvent: records.tournament.startEvent,
       seedingMethod: records.tournament.seedingMethod,
       isTest,
+      matchSize: 2,  // Test tournaments always use 1v1
     },
     SYSTEM_AUTH_CLAIMS
   );

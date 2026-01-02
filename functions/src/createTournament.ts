@@ -9,6 +9,9 @@ import {
   MatchAssignment,
 } from './bracketGenerator';
 import {
+  calculateNWayBracket,
+} from './nWayBracket';
+import {
   createTournamentAdmin,
   upsertEntriesBatch,
   upsertPicksBatch,
@@ -40,6 +43,7 @@ interface TournamentRecord {
   totalRounds: number;
   startEvent: number;
   seedingMethod: string;
+  matchSize: number;
 }
 
 interface RoundRecord {
@@ -162,7 +166,8 @@ export function buildTournamentRecords(
   totalRounds: number,
   startEvent: number,
   matches: BracketMatch[],
-  matchAssignments: MatchAssignment[]
+  matchAssignments: MatchAssignment[],
+  matchSize: number = 2
 ): {
   entries: EntryRecord[];
   tournament: TournamentRecord;
@@ -205,6 +210,7 @@ export function buildTournamentRecords(
     totalRounds,
     startEvent,
     seedingMethod: 'league_rank',
+    matchSize,
   };
 
   // Rounds
@@ -353,6 +359,7 @@ async function writeTournamentToDatabase(
       totalRounds: records.tournament.totalRounds,
       startEvent: records.tournament.startEvent,
       seedingMethod: records.tournament.seedingMethod,
+      matchSize: records.tournament.matchSize,
     },
     authClaims
   );
@@ -500,11 +507,28 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
 
   // 5. Calculate bracket structure
   const participantCount = standings.standings.results.length;
-  const bracketSize = calculateBracketSize(participantCount);
-  const totalRounds = calculateTotalRounds(bracketSize);
+  const matchSize = request.data.matchSize ?? 2;
+
+  // Use N-way bracket calculator for matchSize > 2
+  let bracketSize: number;
+  let totalRounds: number;
+
+  if (matchSize === 2) {
+    // Traditional 1v1 bracket
+    bracketSize = calculateBracketSize(participantCount);
+    totalRounds = calculateTotalRounds(bracketSize);
+  } else {
+    // N-way bracket
+    const nWayResult = calculateNWayBracket(participantCount, matchSize);
+    bracketSize = nWayResult.totalSlots;
+    totalRounds = nWayResult.rounds;
+  }
+
   const currentGW = getCurrentGameweek(bootstrapData);
   // Use provided startEvent or default to next gameweek
   const startEvent = requestedStartEvent ?? currentGW + 1;
+
+  console.log(`[createTournament] Bracket: ${participantCount} participants, matchSize=${matchSize}, ${totalRounds} rounds`);
 
   // 6. Generate bracket
   const matches = generateBracketStructure(bracketSize);
@@ -520,7 +544,8 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
     totalRounds,
     startEvent,
     matches,
-    matchAssignments
+    matchAssignments,
+    matchSize
   );
 
   // 8. Write to database with impersonation

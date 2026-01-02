@@ -112,6 +112,7 @@ const CREATE_TOURNAMENT_MUTATION = `
     $startEvent: Int!
     $seedingMethod: String!
     $isTest: Boolean!
+    $matchSize: Int!
   ) {
     tournament_insert(
       data: {
@@ -124,6 +125,7 @@ const CREATE_TOURNAMENT_MUTATION = `
         startEvent: $startEvent
         seedingMethod: $seedingMethod
         isTest: $isTest
+        matchSize: $matchSize
       }
     )
   }
@@ -471,6 +473,7 @@ export interface CreateTournamentInput {
   startEvent: number;
   seedingMethod: string;
   isTest?: boolean;
+  matchSize: number;
 }
 
 export interface CreateRoundInput {
