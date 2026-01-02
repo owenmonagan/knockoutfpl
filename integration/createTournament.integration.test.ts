@@ -28,8 +28,8 @@ const TEST_PASSWORD = 'TestPass123!';
 
 // Test leagues with different sizes to verify batching works
 const TEST_LEAGUES = [
-  { id: 249, name: 'Test league 249', expectedParticipants: { min: 4, max: 60 } },
-  { id: 39776, name: 'Test league 39776', expectedParticipants: { min: 4, max: 60 } },
+  { id: 1813269, name: 'Test league 1813269', expectedParticipants: { min: 4, max: 48 } },
+  { id: 170748, name: 'Test league 170748', expectedParticipants: { min: 4, max: 48 } },
 ];
 
 // Firebase config for dev environment
