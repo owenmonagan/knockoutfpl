@@ -127,6 +127,31 @@ function getHeaderGradient(variant: CardVariant): string {
   }
 }
 
+function getStatusText(
+  variant: CardVariant,
+  userProgress: LeagueSummaryCardProps['userProgress'],
+  tournament: LeagueSummaryCardProps['tournament']
+): string {
+  switch (variant) {
+    case 'active':
+      if (userProgress?.currentRoundName) {
+        return userProgress.currentRoundName;
+      }
+      if (tournament) {
+        return getRoundName(tournament.currentRound, tournament.totalRounds);
+      }
+      return 'Active';
+    case 'winner':
+      return 'Champion';
+    case 'eliminated':
+    case 'completed':
+      return 'Eliminated';
+    case 'no-tournament':
+    default:
+      return 'Not Started';
+  }
+}
+
 function getGameweekRange(
   tournament: NonNullable<LeagueSummaryCardProps['tournament']>
 ): string {
@@ -166,7 +191,7 @@ function getUserProgressText(
 }
 
 export function LeagueSummaryCard(props: LeagueSummaryCardProps) {
-  const { leagueName, memberCount, tournament, userProgress, onClick } = props;
+  const { leagueName, memberCount, userRank, tournament, userProgress, onClick } = props;
 
   const variant = getCardVariant(props);
   const hasTournament = !!tournament;
@@ -185,9 +210,44 @@ export function LeagueSummaryCard(props: LeagueSummaryCardProps) {
     );
   };
 
-  // Stats grid placeholder - will be implemented in Task 4
   const renderStatsGrid = () => {
-    return <div>Stats placeholder</div>;
+    const statusText = getStatusText(variant, userProgress, tournament);
+    const rankDisplay = userRank ? getOrdinalSuffix(userRank) : '—';
+
+    const statusColorClass =
+      variant === 'active'
+        ? 'text-primary'
+        : variant === 'winner'
+          ? 'text-amber-500'
+          : variant === 'eliminated' || variant === 'completed'
+            ? 'text-red-400'
+            : 'text-text-subtle';
+
+    return (
+      <div className="grid grid-cols-2 gap-4 border-b border-[#273a31] pb-3">
+        <div className="flex flex-col">
+          <span className="text-[10px] uppercase text-text-subtle font-bold mb-1">
+            Your Rank
+          </span>
+          <span className="text-white font-bold text-sm flex items-center gap-1">
+            {variant === 'active' && (
+              <span className="material-symbols-outlined text-sm text-primary">
+                leaderboard
+              </span>
+            )}
+            {rankDisplay}
+          </span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[10px] uppercase text-text-subtle font-bold mb-1">
+            Status
+          </span>
+          <span className={cn('font-bold text-sm', statusColorClass)}>
+            {statusText}
+          </span>
+        </div>
+      </div>
+    );
   };
 
   // Button
