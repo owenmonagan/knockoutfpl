@@ -145,6 +145,23 @@ query GetSeasonEvents($season: String!) @auth(level: PUBLIC) {
   }
 }
 
+# Get events that are finished but not yet finalized (need to check /event-status/)
+query GetEventsNeedingFinalization($season: String!) @auth(level: PUBLIC) {
+  events(
+    where: {
+      season: { eq: $season }
+      finished: { eq: true }
+      finalizedAt: { isNull: true }
+    }
+  ) {
+    event
+    season
+    name
+    finished
+    finalizedAt
+  }
+}
+
 # =============================================================================
 # TOURNAMENT QUERIES
 # =============================================================================

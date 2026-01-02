@@ -349,6 +349,24 @@ const GET_CURRENT_EVENT_QUERY = `
   }
 `;
 
+const GET_EVENTS_NEEDING_FINALIZATION_QUERY = `
+  query GetEventsNeedingFinalization($season: String!) {
+    events(
+      where: {
+        season: { eq: $season }
+        finished: { eq: true }
+        finalizedAt: { isNull: true }
+      }
+    ) {
+      event
+      season
+      name
+      finished
+      finalizedAt
+    }
+  }
+`;
+
 // Update mutations for bracket progression
 const UPDATE_MATCH_WINNER_MUTATION = `
   mutation UpdateMatchWinner(
@@ -589,6 +607,14 @@ export interface StuckTournament {
   currentRound: number;
 }
 
+export interface EventNeedingFinalization {
+  event: number;
+  season: string;
+  name: string;
+  finished: boolean;
+  finalizedAt: string | null;
+}
+
 // Mutation functions - execute as admin (internal mutations use NO_ACCESS auth)
 // authClaims parameter kept for API compatibility but not used
 
@@ -760,6 +786,17 @@ export async function getCurrentEvent(season: string): Promise<CurrentEvent | nu
     { variables: { season } }
   );
   return result.data.events[0] || null;
+}
+
+export async function getEventsNeedingFinalization(
+  season: string
+): Promise<EventNeedingFinalization[]> {
+  const result = await dataConnectAdmin.executeGraphql<
+    { events: EventNeedingFinalization[] },
+    { season: string }
+  >(GET_EVENTS_NEEDING_FINALIZATION_QUERY, { variables: { season } });
+
+  return result.data.events;
 }
 
 // Update mutation functions for bracket progression
