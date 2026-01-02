@@ -25,7 +25,7 @@ const mockActiveAlive: LeagueData = {
 const mockActiveEliminated: LeagueData = {
   leagueId: 1002,
   leagueName: 'Reddit r/FantasyPL Knockout',
-  memberCount: 128,
+  memberCount: 32,
   tournament: {
     startGameweek: 8,
     endGameweek: 15,
@@ -514,6 +514,94 @@ describe('YourLeaguesSection', () => {
 
       const lockIcon = screen.getByLabelText('League too large');
       expect(lockIcon).toBeInTheDocument();
+    });
+  });
+
+  describe('Locked Leagues Section', () => {
+    it('should render separate section for locked leagues', () => {
+      const lockedLeague: LeagueData = {
+        leagueId: 9999,
+        leagueName: 'Large League',
+        memberCount: 100,
+        tournament: null,
+        userProgress: null,
+      };
+
+      render(<YourLeaguesSection leagues={[lockedLeague]} onLeagueClick={() => {}} />);
+
+      expect(
+        screen.getByRole('heading', { name: 'Your Locked Leagues' })
+      ).toBeInTheDocument();
+    });
+
+    it('should show locked leagues in separate section from unlocked', () => {
+      const unlockedLeague: LeagueData = {
+        leagueId: 1,
+        leagueName: 'Small League',
+        memberCount: 20,
+        tournament: null,
+        userProgress: null,
+      };
+      const lockedLeague: LeagueData = {
+        leagueId: 2,
+        leagueName: 'Large League',
+        memberCount: 100,
+        tournament: null,
+        userProgress: null,
+      };
+
+      render(
+        <YourLeaguesSection
+          leagues={[unlockedLeague, lockedLeague]}
+          onLeagueClick={() => {}}
+        />
+      );
+
+      // Both sections should be present
+      expect(
+        screen.getByRole('heading', { name: 'Your Leagues' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: 'Your Locked Leagues' })
+      ).toBeInTheDocument();
+
+      // Both leagues should be rendered
+      expect(screen.getByText('Small League')).toBeInTheDocument();
+      expect(screen.getByText('Large League')).toBeInTheDocument();
+    });
+
+    it('should not show locked section when no locked leagues exist', () => {
+      const unlockedLeague: LeagueData = {
+        leagueId: 1,
+        leagueName: 'Small League',
+        memberCount: 20,
+        tournament: null,
+        userProgress: null,
+      };
+
+      render(
+        <YourLeaguesSection leagues={[unlockedLeague]} onLeagueClick={() => {}} />
+      );
+
+      expect(
+        screen.queryByRole('heading', { name: 'Your Locked Leagues' })
+      ).not.toBeInTheDocument();
+    });
+
+    it('should show empty state when all leagues are locked', () => {
+      const lockedLeague: LeagueData = {
+        leagueId: 1,
+        leagueName: 'Large League',
+        memberCount: 100,
+        tournament: null,
+        userProgress: null,
+      };
+
+      render(
+        <YourLeaguesSection leagues={[lockedLeague]} onLeagueClick={() => {}} />
+      );
+
+      expect(screen.getByText('No eligible leagues found.')).toBeInTheDocument();
     });
   });
 });
