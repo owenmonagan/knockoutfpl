@@ -2,9 +2,17 @@ import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { YourMatchupCard } from '../YourMatchupCard';
 import { YourMatchesSection } from '@/components/dashboard/YourMatchesSection';
+import { TournamentStats } from '../TournamentStats';
+import { PossibleOpponents } from '../PossibleOpponents';
 import type { MatchSummaryCardProps } from '@/components/dashboard/MatchSummaryCard';
 import type { Tournament, Participant } from '@/types/tournament';
 import { getMatchPlayers } from '@/types/tournament';
+import {
+  findSiblingMatch,
+  calculateRemainingParticipants,
+  getUserStatus,
+  findEliminatedRound,
+} from '@/lib/tournament-utils';
 
 interface OverviewTabProps {
   tournament: Tournament;
@@ -81,6 +89,81 @@ export function OverviewTab({
     };
   }, [currentMatch, userParticipant, userFplTeamId, tournament]);
 
+  // Calculate tournament stats
+  const statsProps = useMemo(() => {
+    const remainingParticipants = calculateRemainingParticipants(tournament.rounds);
+    const currentRound = tournament.rounds.find(
+      (r) => r.roundNumber === tournament.currentRound
+    );
+
+    const eliminatedRound = userFplTeamId
+      ? findEliminatedRound(tournament.rounds, userFplTeamId)
+      : undefined;
+
+    const userStatus = userParticipant
+      ? getUserStatus(eliminatedRound, tournament.status === 'completed')
+      : null;
+
+    return {
+      totalParticipants: tournament.participants.length,
+      remainingParticipants,
+      currentRound: tournament.currentRound,
+      totalRounds: tournament.totalRounds,
+      currentRoundName: currentRound?.name ?? `Round ${tournament.currentRound}`,
+      currentGameweek: tournament.currentGameweek,
+      userSeed: userParticipant?.seed,
+      userStatus,
+      eliminatedRound,
+    };
+  }, [tournament, userParticipant, userFplTeamId]);
+
+  // Find possible next opponents (sibling match)
+  const possibleOpponentsProps = useMemo(() => {
+    if (!currentMatch || !userFplTeamId) return null;
+
+    const siblingData = findSiblingMatch(
+      tournament.rounds,
+      currentMatch.match,
+      currentMatch.round.roundNumber
+    );
+
+    if (!siblingData) return null;
+
+    const { match: siblingMatch, round: siblingRound } = siblingData;
+    const players = getMatchPlayers(siblingMatch);
+
+    if (players.length < 2) return null;
+
+    const team1 = tournament.participants.find((p) => p.fplTeamId === players[0]?.fplTeamId);
+    const team2 = tournament.participants.find((p) => p.fplTeamId === players[1]?.fplTeamId);
+
+    if (!team1 || !team2) return null;
+
+    const roundStarted = siblingRound.gameweek <= tournament.currentGameweek;
+    const isComplete = siblingRound.isComplete;
+
+    let matchType: 'live' | 'upcoming' | 'finished';
+    if (isComplete && siblingMatch.winnerId) {
+      matchType = 'finished';
+    } else if (roundStarted) {
+      matchType = 'live';
+    } else {
+      matchType = 'upcoming';
+    }
+
+    return {
+      team1Name: team1.fplTeamName,
+      team1Score: players[0]?.score ?? null,
+      team1Id: team1.fplTeamId,
+      team2Name: team2.fplTeamName,
+      team2Score: players[1]?.score ?? null,
+      team2Id: team2.fplTeamId,
+      matchType,
+      nextGameweek: siblingRound.gameweek + 1,
+      winnerId: siblingMatch.winnerId ?? undefined,
+    };
+  }, [currentMatch, tournament, userFplTeamId]);
+
   const isParticipant = !!userParticipant;
 
   return (
@@ -107,16 +190,9 @@ export function OverviewTab({
           )}
         </div>
 
-        {/* Tournament Stats placeholder - 1/3 width */}
+        {/* Tournament Stats - 1/3 width */}
         <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Tournament Stats</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Coming in Phase 3...</p>
-            </CardContent>
-          </Card>
+          <TournamentStats {...statsProps} />
         </div>
       </div>
 
@@ -134,16 +210,24 @@ export function OverviewTab({
           </Card>
         </div>
 
-        {/* Possible Opponents placeholder - 1/3 width */}
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Possible Next Opponents</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Coming in Phase 3...</p>
-            </CardContent>
-          </Card>
+        {/* Possible Opponents - 1/3 width */}
+        <div className="order-1 lg:order-2">
+          {possibleOpponentsProps ? (
+            <PossibleOpponents {...possibleOpponentsProps} />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Possible Next Opponents</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  {!isParticipant
+                    ? 'Connect your FPL team to see potential opponents.'
+                    : "You're in the final - no next opponent!"}
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
