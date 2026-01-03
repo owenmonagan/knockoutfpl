@@ -72,6 +72,9 @@ export function UserPathBracket({
   useEffect(() => {
     if (!focalTeamId) return;
 
+    // Capture focalTeamId in a local const to satisfy TypeScript narrowing
+    const teamId = focalTeamId;
+
     async function fetchData() {
       setIsLoading(true);
       setError(null);
@@ -80,7 +83,7 @@ export function UserPathBracket({
         // Fetch focal team's path
         const path = await fetchUserTournamentMatches(
           tournament.id,
-          focalTeamId,
+          teamId,
           tournament.totalRounds,
           currentGameweek
         );
