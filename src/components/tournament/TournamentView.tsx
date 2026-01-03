@@ -112,11 +112,13 @@ export function TournamentView({
 }: TournamentViewProps) {
   // URL-synced tab state
   const [searchParams, setSearchParams] = useSearchParams();
-  const currentTab = (searchParams.get('tab') as TabValue) || 'overview';
+  const rawTab = searchParams.get('tab');
+  const currentTab: TabValue =
+    TAB_OPTIONS.some((t) => t.value === rawTab) ? (rawTab as TabValue) : 'overview';
 
   const handleTabChange = useCallback(
     (value: string) => {
-      setSearchParams({ tab: value });
+      setSearchParams({ tab: value }, { replace: true });
     },
     [setSearchParams]
   );

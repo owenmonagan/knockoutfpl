@@ -175,6 +175,15 @@ describe('TournamentView', () => {
     expect(screen.getByRole('tab', { name: 'Participants' })).toHaveAttribute('data-state', 'active');
   });
 
+  it('defaults to Overview tab when URL has invalid tab value', () => {
+    renderWithRouter(
+      <TournamentView tournament={mockTournament} isAuthenticated={true} />,
+      { route: '/?tab=invalid' }
+    );
+
+    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('data-state', 'active');
+  });
+
   describe('Team Preview for Unauthenticated Users', () => {
     it('shows team search overlay for unauthenticated users on Overview tab', () => {
       renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={false} />);
