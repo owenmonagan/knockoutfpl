@@ -115,6 +115,11 @@ const CREATE_TOURNAMENT_MUTATION = `
     $seedingMethod: String!
     $isTest: Boolean!
     $matchSize: Int!
+    $size: String
+    $importStatus: String
+    $importProgress: Int
+    $importedCount: Int
+    $totalCount: Int
   ) {
     tournament_insert(
       data: {
@@ -128,6 +133,11 @@ const CREATE_TOURNAMENT_MUTATION = `
         seedingMethod: $seedingMethod
         isTest: $isTest
         matchSize: $matchSize
+        size: $size
+        importStatus: $importStatus
+        importProgress: $importProgress
+        importedCount: $importedCount
+        totalCount: $totalCount
       }
     )
   }
@@ -716,6 +726,12 @@ export interface CreateTournamentInput {
   seedingMethod: string;
   isTest?: boolean;
   matchSize: number;
+  // Import tracking fields (for large tournaments)
+  size?: string;            // 'standard' | 'large' | 'mega'
+  importStatus?: string;    // 'pending' | 'importing' | 'complete' | 'failed'
+  importProgress?: number;  // 0-100
+  importedCount?: number;
+  totalCount?: number;
 }
 
 export interface CreateRoundInput {

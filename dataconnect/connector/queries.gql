@@ -836,3 +836,19 @@ query GetHighestSeedRemaining(
     seed
   }
 }
+
+# =============================================================================
+# IMPORT STATUS QUERIES
+# =============================================================================
+
+# Get tournament import status for polling during large tournament creation
+query GetTournamentImportStatus($id: UUID!) @auth(level: PUBLIC) {
+  tournament(id: $id) {
+    id
+    importStatus
+    importProgress
+    importedCount
+    totalCount
+    importError
+  }
+}

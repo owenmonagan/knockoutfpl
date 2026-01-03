@@ -5,7 +5,7 @@ const FPL_API_BASE = 'https://fantasy.premierleague.com/api';
 interface StandingsPage {
   standings: {
     has_next: boolean;
-    results: { entry: number }[];
+    results: { entry: number; rank: number }[];
   };
 }
 
@@ -28,27 +28,35 @@ async function fetchStandingsPage(leagueId: number, page: number): Promise<Stand
 }
 
 /**
+ * Fetches a single page and returns the rank of the last entry.
+ * The rank IS the total count when on the last page.
+ */
+function getLastEntryRank(page: StandingsPage): number {
+  const results = page.standings.results;
+  if (results.length === 0) return 0;
+  return results[results.length - 1].rank;
+}
+
+/**
  * Uses binary search to find the total participant count for a league.
- * FPL API paginates at 50 results per page.
+ * The rank of the last entry on the last page equals the total count.
  *
  * Algorithm:
  * 1. Fetch page 1 to check if small league (no has_next)
- * 2. If has_next, exponentially probe (100, 1000, 10000) to find upper bound
- * 3. Binary search to find exact last page
- * 4. Count = (lastPage - 1) * 50 + results on last page
+ * 2. If has_next, exponentially probe to find upper bound
+ * 3. Binary search to find last page with results
+ * 4. Return rank of last entry (= total count)
  */
 export async function getLeagueParticipantCount(leagueId: number): Promise<number> {
-  const RESULTS_PER_PAGE = 50;
-
   // Step 1: Fetch page 1
   const page1 = await fetchStandingsPage(leagueId, 1);
   if (!page1) {
     throw new Error('League not found');
   }
 
-  // Small league - single page
+  // Small league - single page, return last entry's rank
   if (!page1.standings.has_next) {
-    return page1.standings.results.length;
+    return getLastEntryRank(page1);
   }
 
   // Step 2: Find upper bound via exponential probing
@@ -57,13 +65,14 @@ export async function getLeagueParticipantCount(leagueId: number): Promise<numbe
 
   while (true) {
     const probe = await fetchStandingsPage(leagueId, upperBound);
-    if (probe === null) {
+    // FPL API returns empty results[] for pages beyond last, not 404
+    if (probe === null || probe.standings.results.length === 0) {
       // Overshot - the last page is between lowerBound and upperBound
       break;
     }
     if (!probe.standings.has_next) {
-      // Found exact last page during probing
-      return (upperBound - 1) * RESULTS_PER_PAGE + probe.standings.results.length;
+      // Found exact last page - return last entry's rank
+      return getLastEntryRank(probe);
     }
     lowerBound = upperBound;
     upperBound *= 10; // 100 -> 1000 -> 10000
@@ -75,16 +84,17 @@ export async function getLeagueParticipantCount(leagueId: number): Promise<numbe
     }
   }
 
-  // Step 3: Binary search for last valid page
+  // Step 3: Binary search for last valid page with results
   while (lowerBound < upperBound - 1) {
     const mid = Math.floor((lowerBound + upperBound) / 2);
     const probe = await fetchStandingsPage(leagueId, mid);
 
-    if (probe === null) {
+    // Empty results means we've gone past the last page
+    if (probe === null || probe.standings.results.length === 0) {
       upperBound = mid;
     } else if (!probe.standings.has_next) {
-      // Found exact last page
-      return (mid - 1) * RESULTS_PER_PAGE + probe.standings.results.length;
+      // Found exact last page - return last entry's rank
+      return getLastEntryRank(probe);
     } else {
       lowerBound = mid;
     }
@@ -92,19 +102,19 @@ export async function getLeagueParticipantCount(leagueId: number): Promise<numbe
 
   // Step 4: Fetch the last page to get exact count
   const lastPage = await fetchStandingsPage(leagueId, lowerBound);
-  if (!lastPage) {
+  if (!lastPage || lastPage.standings.results.length === 0) {
     throw new Error('Unexpected: could not find last page');
   }
 
   // If this page has_next, try the next page
   if (lastPage.standings.has_next) {
     const nextPage = await fetchStandingsPage(leagueId, lowerBound + 1);
-    if (nextPage && !nextPage.standings.has_next) {
-      return lowerBound * RESULTS_PER_PAGE + nextPage.standings.results.length;
+    if (nextPage && nextPage.standings.results.length > 0 && !nextPage.standings.has_next) {
+      return getLastEntryRank(nextPage);
     }
   }
 
-  return (lowerBound - 1) * RESULTS_PER_PAGE + lastPage.standings.results.length;
+  return getLastEntryRank(lastPage);
 }
 
 /**

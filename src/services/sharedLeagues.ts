@@ -112,8 +112,8 @@ export function sortParticipantsByFriendship<T extends Participant>(
  * Currently returns unsorted participants (graceful degradation).
  */
 export async function getParticipantsSortedByFriendship<T extends Participant>(
-  tournamentId: string,
-  userFplTeamId: number,
+  _tournamentId: string,
+  _userFplTeamId: number,
   participants: T[]
 ): Promise<T[]> {
   // TODO: Implement DataConnect queries

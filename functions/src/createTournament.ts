@@ -1,5 +1,7 @@
 import { onCall, HttpsError, CallableRequest } from 'firebase-functions/v2/https';
+import { getFunctions } from 'firebase-admin/functions';
 import { fetchFPLBootstrapData, fetchFPLLeagueStandings } from './fplApi';
+import { getLeagueParticipantCount, getTournamentSizeTier } from './fplLeagueCount';
 import {
   calculateBracketSize,
   calculateTotalRounds,
@@ -97,6 +99,8 @@ export interface CreateTournamentResponse {
   participantCount: number;
   totalRounds: number;
   startEvent: number;
+  importStatus?: 'pending' | 'complete';  // For large tournaments
+  size?: 'standard' | 'large' | 'mega';   // Tournament size tier
 }
 
 /**
@@ -130,7 +134,8 @@ export function validateTournamentRequest(data: any): asserts data is CreateTour
 }
 
 /**
- * Validate league standings data
+ * Validate league standings data (first page only)
+ * Note: Large leagues will have more participants fetched via background import
  */
 export function validateLeagueStandings(standings: any): void {
   if (!standings || !standings.standings?.results) {
@@ -142,12 +147,7 @@ export function validateLeagueStandings(standings: any): void {
   if (count < 2) {
     throw new HttpsError('failed-precondition', 'League must have at least 2 participants');
   }
-
-  // In dev/local, allow larger tournaments for testing
-  const isProduction = process.env.ENVIRONMENT === 'production';
-  if (isProduction && count > 48) {
-    throw new HttpsError('failed-precondition', 'League exceeds maximum 48 participants');
-  }
+  // No upper limit - large leagues are handled via background import
 }
 
 /**
@@ -629,6 +629,105 @@ async function writeTournamentToDatabase(
 }
 
 /**
+ * Creates a tournament shell for large leagues and enqueues background import.
+ * Used for leagues with >48 participants.
+ */
+async function createLargeTournamentShell(
+  fplLeagueId: number,
+  fplLeagueName: string,
+  participantCount: number,
+  startEvent: number,
+  matchSize: number,
+  sizeTier: 'large' | 'mega',
+  authClaims: AuthClaims
+): Promise<CreateTournamentResponse> {
+  const tournamentId = crypto.randomUUID();
+
+  // Calculate total rounds based on participant count and match size
+  let totalRounds: number;
+  if (matchSize === 2) {
+    const bracketSize = calculateBracketSize(participantCount);
+    totalRounds = calculateTotalRounds(bracketSize);
+  } else {
+    const nWayResult = calculateNWayBracket(participantCount, matchSize);
+    totalRounds = nWayResult.rounds;
+  }
+
+  console.log(`[createTournament] Creating large tournament shell: ${participantCount} participants, ${totalRounds} rounds, tier=${sizeTier}`);
+
+  // Create tournament record with pending import status
+  await createTournamentAdmin(
+    {
+      id: tournamentId,
+      fplLeagueId,
+      fplLeagueName,
+      creatorUid: authClaims.sub as string,
+      participantCount: 0, // Will be updated after import
+      totalRounds,
+      startEvent,
+      seedingMethod: 'league_rank',
+      matchSize,
+      // Import tracking fields
+      size: sizeTier,
+      importStatus: 'pending',
+      importProgress: 0,
+      importedCount: 0,
+      totalCount: participantCount,
+    },
+    authClaims
+  );
+
+  // Enqueue Cloud Task for background import
+  const isEmulator = process.env.FUNCTIONS_EMULATOR === 'true';
+  if (isEmulator) {
+    console.log(`[createTournament] Running in emulator - triggering import via HTTP`);
+    // Fire-and-forget: trigger import in background via HTTP
+    const payload = {
+      tournamentId,
+      leagueId: fplLeagueId,
+      totalCount: participantCount,
+      phase: 'importing',
+      cursor: 1,
+    };
+    setTimeout(async () => {
+      try {
+        await fetch('http://127.0.0.1:5001/knockoutfpl-dev/europe-west1/processTournamentImport', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: payload }),
+        });
+        console.log(`[createTournament] Import task triggered successfully`);
+      } catch (error) {
+        console.error('[createTournament] Failed to trigger import task:', error);
+      }
+    }, 500); // Small delay to ensure tournament is created first
+  } else {
+    try {
+      const queue = getFunctions().taskQueue('processTournamentImport');
+      await queue.enqueue({
+        tournamentId,
+        leagueId: fplLeagueId,
+        totalCount: participantCount,
+      });
+      console.log(`[createTournament] Enqueued import task for tournament ${tournamentId}`);
+    } catch (error) {
+      console.error('[createTournament] Failed to enqueue import task:', error);
+      // Mark tournament as failed if we can't enqueue
+      throw new HttpsError('internal', 'Failed to start background import');
+    }
+  }
+
+  return {
+    tournamentId,
+    participantCount,
+    totalRounds,
+    startEvent,
+    importStatus: 'pending',
+    size: sizeTier,
+  };
+}
+
+/**
  * Cloud Function to create a knockout tournament
  */
 export const createTournament = onCall(async (request: CallableRequest<CreateTournamentRequest>) => {
@@ -660,7 +759,36 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
   // 4. Validate league
   validateLeagueStandings(standings);
 
-  // 5. Calculate bracket structure
+  // 5. Check if league is large (has more pages)
+  const hasMorePages = standings.standings.has_next;
+  let actualParticipantCount = standings.standings.results.length;
+
+  if (hasMorePages) {
+    console.log(`[createTournament] Large league detected (has_next=true), counting participants via binary search...`);
+    actualParticipantCount = await getLeagueParticipantCount(fplLeagueId);
+    console.log(`[createTournament] League has ${actualParticipantCount} participants`);
+  }
+
+  const sizeTier = getTournamentSizeTier(actualParticipantCount);
+  console.log(`[createTournament] Size tier: ${sizeTier}`);
+
+  // 6. For large/mega tournaments, use background import
+  if (sizeTier !== 'standard') {
+    const currentGW = getCurrentGameweek(bootstrapData);
+    const startEvent = requestedStartEvent ?? currentGW + 1;
+
+    return await createLargeTournamentShell(
+      fplLeagueId,
+      standings.league.name,
+      actualParticipantCount,
+      startEvent,
+      request.data.matchSize ?? 2,
+      sizeTier,
+      authClaims
+    );
+  }
+
+  // 7. Standard tournaments (≤48 participants) - sync flow
   const participantCount = standings.standings.results.length;
   const matchSize = request.data.matchSize ?? 2;
 

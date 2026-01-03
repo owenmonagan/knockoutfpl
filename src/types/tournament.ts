@@ -13,6 +13,8 @@ export interface MatchPlayer {
   fplTeamId: number;
   seed: number;
   score: number | null; // Stored after GW finishes
+  teamName?: string; // Included directly to avoid separate participant lookup
+  managerName?: string;
 }
 
 export interface Match {

@@ -3,12 +3,14 @@ import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { CreateTournamentButton } from '../tournament/CreateTournamentButton';
 import { MIN_TOURNAMENT_PARTICIPANTS } from '../../constants/tournament';
+import type { CreateTournamentResponse } from '../../services/tournament';
 
 interface NoTournamentEmptyStateProps {
   leagueName: string;
   managerCount: number;
   isAuthenticated: boolean;
-  onCreate: (startEvent: number, matchSize: number) => Promise<void>;
+  onCreate: (startEvent: number, matchSize: number) => Promise<CreateTournamentResponse | null>;
+  onTournamentReady: () => Promise<void>;
   isLocked?: boolean;
 }
 
@@ -17,6 +19,7 @@ export function NoTournamentEmptyState({
   managerCount,
   isAuthenticated,
   onCreate,
+  onTournamentReady,
   isLocked = false,
 }: NoTournamentEmptyStateProps) {
   if (isLocked) {
@@ -82,22 +85,26 @@ export function NoTournamentEmptyState({
       </div>
 
       {/* Content Body */}
-      <div className="px-8 pb-10 pt-6 flex flex-col items-center text-center">
+      <div className="px-8 pb-6 pt-6 flex flex-col items-center text-center">
         <h1 className="text-2xl md:text-3xl font-bold mb-3 tracking-tight">
           No Tournament Yet
         </h1>
-        <p className="text-muted-foreground text-base mb-8 max-w-xs mx-auto leading-relaxed">
+        <p className="text-muted-foreground text-base mb-6 max-w-xs mx-auto leading-relaxed">
           Be the first to create a knockout tournament for{' '}
           <span className="text-foreground font-semibold">{leagueName}</span>
         </p>
 
         {/* CTA Area */}
         {isAuthenticated ? (
-          <div className="w-full md:w-auto min-w-[240px] mb-8">
-            <CreateTournamentButton onCreate={onCreate} managerCount={managerCount} />
+          <div className="w-full md:w-auto min-w-[240px] mb-6">
+            <CreateTournamentButton
+              onCreate={onCreate}
+              onTournamentReady={onTournamentReady}
+              managerCount={managerCount}
+            />
           </div>
         ) : (
-          <div className="mb-8">
+          <div className="mb-6">
             <p className="text-sm text-muted-foreground mb-4">
               Sign in to create a knockout tournament
             </p>

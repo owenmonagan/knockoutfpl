@@ -10,6 +10,9 @@ import {
   getTournamentByLeague,
   callCreateTournament,
   callRefreshTournament,
+  getTournamentImportStatus,
+  type CreateTournamentResponse,
+  type TournamentImportStatus,
 } from '../services/tournament';
 import { getLeagueInfo, type FPLLeagueInfo } from '../services/fpl';
 import { signInWithGoogle } from '../services/auth';
@@ -105,13 +108,31 @@ export function LeaguePage() {
     };
   }, [leagueId]);
 
-  const handleCreateTournament = async (startEvent: number, matchSize: number) => {
-    if (!leagueId || !user) return;
+  const handleCreateTournament = async (startEvent: number, matchSize: number): Promise<CreateTournamentResponse | null> => {
+    if (!leagueId || !user) return null;
 
     // Call the Cloud Function to create the tournament with the selected start gameweek and match size
-    await callCreateTournament(Number(leagueId), startEvent, matchSize);
+    const response = await callCreateTournament(Number(leagueId), startEvent, matchSize);
 
-    // Reload tournament data
+    // For large tournaments, the caller (CreateTournamentButton) will handle polling
+    // and call handleTournamentReady when complete
+    if (response.importStatus === 'pending') {
+      return response;
+    }
+
+    // For small tournaments, immediately load the tournament data
+    const newTournament = await getTournamentByLeague(Number(leagueId));
+    if (newTournament) {
+      setTournament(newTournament);
+      setShowShareModal(true);
+    }
+
+    return response;
+  };
+
+  // Called when large tournament import completes
+  const handleTournamentReady = async () => {
+    if (!leagueId) return;
     const newTournament = await getTournamentByLeague(Number(leagueId));
     if (newTournament) {
       setTournament(newTournament);
@@ -188,6 +209,7 @@ export function LeaguePage() {
           managerCount={leagueInfo.memberCount}
           isAuthenticated={!!user}
           onCreate={handleCreateTournament}
+          onTournamentReady={handleTournamentReady}
           isLocked={isLocked}
         />
       ) : (

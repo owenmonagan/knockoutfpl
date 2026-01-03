@@ -165,6 +165,7 @@ type Tournament @table(name: "tournaments") {
   importedCount: Int @col(name: "imported_count")    # Actual count imported
   totalCount: Int @col(name: "total_count")          # Total to import
   importError: String @col(name: "import_error")     # Error message if failed
+  importCursor: Int @col(name: "import_cursor")      # Current page for chunked import (1-indexed)
 
   createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
   updatedAt: Timestamp! @col(name: "updated_at") @default(expr: "request.time")

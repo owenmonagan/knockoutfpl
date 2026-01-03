@@ -12,6 +12,8 @@ import {
   getUserTournamentMatches,
   getOpponentMatchHistories,
   getHighestSeedRemaining,
+  getMatchesInRange,
+  getTournamentImportStatus as getTournamentImportStatusQuery,
 } from '@knockoutfpl/dataconnect';
 import type { Tournament, Round, Match, Participant, MatchPlayer } from '../types/tournament';
 import type { UUIDString } from '@knockoutfpl/dataconnect';
@@ -66,11 +68,14 @@ interface CreateTournamentRequest {
   matchSize?: number;
 }
 
-interface CreateTournamentResponse {
+export interface CreateTournamentResponse {
   tournamentId: string;
   participantCount: number;
   totalRounds: number;
   startEvent: number;
+  // Large tournament async import fields
+  importStatus?: 'pending' | 'importing' | 'complete' | 'failed';
+  size?: 'standard' | 'large' | 'mega';
 }
 
 interface RefreshTournamentRequest {
@@ -556,9 +561,20 @@ export async function refreshVisibleMatches(
 // User Match Fetching (for large tournaments)
 // ============================================================================
 
+/**
+ * Info about a potential opponent for projected future matches
+ */
+export interface PotentialOpponent {
+  entryId: number;
+  teamName: string;
+  managerName: string;
+  seed: number;
+}
+
 export interface UserMatchInfo {
   matchId: number;
   roundNumber: number;
+  positionInRound: number;
   roundName: string;
   gameweek: number;
   yourTeamName: string;
@@ -574,6 +590,8 @@ export interface UserMatchInfo {
   status: 'pending' | 'active' | 'complete';
   winnerId: number | null;
   result: 'won' | 'lost' | 'pending';
+  // For projected matches, potential opponents from feeder matches
+  potentialOpponents?: PotentialOpponent[];
 }
 
 /**
@@ -680,6 +698,7 @@ export async function fetchUserTournamentMatches(
     matches.push({
       matchId: match.matchId,
       roundNumber: match.roundNumber,
+      positionInRound: match.positionInRound,
       roundName: getRoundName(match.roundNumber, totalRounds),
       gameweek: roundEvent,
       yourTeamName: pick.participant?.teamName ?? 'Unknown',
@@ -708,6 +727,7 @@ export async function fetchUserTournamentMatches(
   // If user is still active, add projected matches for future rounds
   if (!isEliminated && matches.length > 0) {
     const lastRoundNumber = lastMatch.roundNumber;
+    const lastPosition = lastMatch.positionInRound;
     const userTeamName = lastMatch.yourTeamName;
     const userSeed = lastMatch.yourSeed;
 
@@ -715,29 +735,82 @@ export async function fetchUserTournamentMatches(
     const allRounds = (roundsResult.data.rounds || [])
       .sort((a, b) => a.roundNumber - b.roundNumber);
 
-    // Add projected matches for rounds after the last existing match
-    for (const round of allRounds) {
-      if (round.roundNumber > lastRoundNumber) {
-        matches.push({
-          matchId: -round.roundNumber, // Negative ID indicates projected match
-          roundNumber: round.roundNumber,
-          roundName: getRoundName(round.roundNumber, totalRounds),
-          gameweek: round.event,
-          yourTeamName: userTeamName,
-          yourFplTeamId: entryId,
-          yourSeed: userSeed,
-          yourScore: null,
-          opponentTeamName: null, // TBD
-          opponentManagerName: null,
-          opponentFplTeamId: null,
-          opponentSeed: null,
-          opponentScore: null,
-          isBye: false,
-          status: 'pending',
-          winnerId: null,
-          result: 'pending',
+    // Calculate positions for future rounds
+    // In a bracket: winner of position P in round N goes to position ceil(P/2) in round N+1
+    let currentPosition = lastPosition;
+    const futureRounds = allRounds.filter((r) => r.roundNumber > lastRoundNumber);
+
+    // Fetch potential opponent matches for the immediate next round
+    // User's opponent comes from the "sibling" position in the current round
+    // If position is odd, sibling = position + 1; if even, sibling = position - 1
+    let potentialOpponentsMap = new Map<number, PotentialOpponent[]>();
+
+    if (futureRounds.length > 0) {
+      // For the next round, find the sibling match that produces the opponent
+      const siblingPosition = currentPosition % 2 === 1 ? currentPosition + 1 : currentPosition - 1;
+
+      // Fetch the sibling match from the last completed round
+      try {
+        const siblingResult = await getMatchesInRange(dataConnect, {
+          tournamentId: tournamentId as UUIDString,
+          roundNumber: lastRoundNumber,
+          startPosition: siblingPosition,
+          endPosition: siblingPosition,
         });
+
+        if (siblingResult.data.matches?.length > 0) {
+          const siblingMatch = siblingResult.data.matches[0];
+          const potentialOpponents: PotentialOpponent[] = [];
+
+          for (const pick of siblingMatch.matchPicks_on_match || []) {
+            if (pick.participant) {
+              potentialOpponents.push({
+                entryId: pick.entryId,
+                teamName: pick.participant.teamName,
+                managerName: pick.participant.managerName,
+                seed: pick.participant.seed,
+              });
+            }
+          }
+
+          // Store for the next round
+          const nextRound = lastRoundNumber + 1;
+          potentialOpponentsMap.set(nextRound, potentialOpponents);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch sibling match for potential opponents:', err);
       }
+    }
+
+    // Add projected matches for rounds after the last existing match
+    for (const round of futureRounds) {
+      // Calculate user's position in this round
+      const projectedPosition = Math.ceil(currentPosition / Math.pow(2, round.roundNumber - lastRoundNumber));
+
+      matches.push({
+        matchId: -round.roundNumber, // Negative ID indicates projected match
+        roundNumber: round.roundNumber,
+        positionInRound: projectedPosition,
+        roundName: getRoundName(round.roundNumber, totalRounds),
+        gameweek: round.event,
+        yourTeamName: userTeamName,
+        yourFplTeamId: entryId,
+        yourSeed: userSeed,
+        yourScore: null,
+        opponentTeamName: null, // TBD
+        opponentManagerName: null,
+        opponentFplTeamId: null,
+        opponentSeed: null,
+        opponentScore: null,
+        isBye: false,
+        status: 'pending',
+        winnerId: null,
+        result: 'pending',
+        potentialOpponents: potentialOpponentsMap.get(round.roundNumber),
+      });
+
+      // Update current position for next iteration
+      currentPosition = projectedPosition;
     }
   }
 
@@ -857,5 +930,46 @@ export async function fetchHighestSeedRemaining(
     teamName: participant.teamName,
     managerName: participant.managerName,
     seed: participant.seed,
+  };
+}
+
+// ============================================================================
+// Import Status for Large Tournaments
+// ============================================================================
+
+/**
+ * Tournament import status for polling during large tournament creation.
+ * Backend updates these fields as it processes the tournament in phases.
+ */
+export interface TournamentImportStatus {
+  id: string;
+  importStatus: string | null; // 'pending' | 'importing' | 'creating_rounds' | 'creating_matches' | 'creating_picks' | 'complete' | 'failed'
+  importProgress: number | null; // 0-100
+  importedCount: number | null; // Number of participants imported so far
+  totalCount: number | null; // Total participants to import
+  importError: string | null; // Error message if failed
+}
+
+/**
+ * Get the import status of a tournament.
+ * Used to poll for progress during large tournament creation.
+ */
+export async function getTournamentImportStatus(
+  tournamentId: string
+): Promise<TournamentImportStatus | null> {
+  const result = await getTournamentImportStatusQuery(dataConnect, {
+    id: tournamentId as UUIDString,
+  });
+
+  const tournament = result.data.tournament;
+  if (!tournament) return null;
+
+  return {
+    id: tournament.id,
+    importStatus: tournament.importStatus ?? null,
+    importProgress: tournament.importProgress ?? null,
+    importedCount: tournament.importedCount ?? null,
+    totalCount: tournament.totalCount ?? null,
+    importError: tournament.importError ?? null,
   };
 }

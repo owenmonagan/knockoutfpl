@@ -5201,6 +5201,18 @@ input Tournament_Data {
   """
   fplLeagueName_expr: String_Expr
   """
+  ✨ Generated from Field `Tournament`.`importCursor` of type `Int`
+  """
+  importCursor: Int
+  """
+  ✨ `_expr` server value variant of `importCursor` (✨ Generated from Field `Tournament`.`importCursor` of type `Int`)
+  """
+  importCursor_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `importCursor` (✨ Generated from Field `Tournament`.`importCursor` of type `Int`)
+  """
+  importCursor_update: [Int_Update!]
+  """
   ✨ Generated from Field `Tournament`.`importError` of type `String`
   """
   importError: String
@@ -5406,6 +5418,10 @@ input Tournament_Filter {
   """
   fplLeagueName: String_Filter
   """
+  ✨ Generated from Field `Tournament`.`importCursor` of type `Int`
+  """
+  importCursor: Int_Filter
+  """
   ✨ Generated from Field `Tournament`.`importError` of type `String`
   """
   importError: String_Filter
@@ -5544,6 +5560,10 @@ input Tournament_Having {
   """
   id_count: Int_Filter
   """
+  ✨ Generated from Field `Tournament`.`importCursor_count` of type `Int!`
+  """
+  importCursor_count: Int_Filter
+  """
   ✨ Generated from Field `Tournament`.`importError_count` of type `Int!`
   """
   importError_count: Int_Filter
@@ -5612,6 +5632,10 @@ input Tournament_Having {
   """
   fplLeagueId_sum: Int_Filter
   """
+  ✨ Generated from Field `Tournament`.`importCursor_sum` of type `Int`
+  """
+  importCursor_sum: Int_Filter
+  """
   ✨ Generated from Field `Tournament`.`importProgress_sum` of type `Int`
   """
   importProgress_sum: Int_Filter
@@ -5651,6 +5675,10 @@ input Tournament_Having {
   ✨ Generated from Field `Tournament`.`fplLeagueId_avg` of type `Float`
   """
   fplLeagueId_avg: Float_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importCursor_avg` of type `Float`
+  """
+  importCursor_avg: Float_Filter
   """
   ✨ Generated from Field `Tournament`.`importProgress_avg` of type `Float`
   """
@@ -5695,6 +5723,10 @@ input Tournament_Having {
   ✨ Generated from Field `Tournament`.`fplLeagueId_min` of type `Int`
   """
   fplLeagueId_min: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importCursor_min` of type `Int`
+  """
+  importCursor_min: Int_Filter
   """
   ✨ Generated from Field `Tournament`.`importProgress_min` of type `Int`
   """
@@ -5743,6 +5775,10 @@ input Tournament_Having {
   ✨ Generated from Field `Tournament`.`fplLeagueId_max` of type `Int`
   """
   fplLeagueId_max: Int_Filter
+  """
+  ✨ Generated from Field `Tournament`.`importCursor_max` of type `Int`
+  """
+  importCursor_max: Int_Filter
   """
   ✨ Generated from Field `Tournament`.`importProgress_max` of type `Int`
   """
@@ -5839,6 +5875,10 @@ input Tournament_Order {
   """
   fplLeagueName: OrderDirection
   """
+  ✨ Generated from Field `Tournament`.`importCursor` of type `Int`
+  """
+  importCursor: OrderDirection
+  """
   ✨ Generated from Field `Tournament`.`importError` of type `String`
   """
   importError: OrderDirection
@@ -5927,6 +5967,10 @@ input Tournament_Order {
   """
   id_count: OrderDirection
   """
+  ✨ Generated from Field `Tournament`.`importCursor_count` of type `Int!`
+  """
+  importCursor_count: OrderDirection
+  """
   ✨ Generated from Field `Tournament`.`importError_count` of type `Int!`
   """
   importError_count: OrderDirection
@@ -5995,6 +6039,10 @@ input Tournament_Order {
   """
   fplLeagueId_sum: OrderDirection
   """
+  ✨ Generated from Field `Tournament`.`importCursor_sum` of type `Int`
+  """
+  importCursor_sum: OrderDirection
+  """
   ✨ Generated from Field `Tournament`.`importProgress_sum` of type `Int`
   """
   importProgress_sum: OrderDirection
@@ -6034,6 +6082,10 @@ input Tournament_Order {
   ✨ Generated from Field `Tournament`.`fplLeagueId_avg` of type `Float`
   """
   fplLeagueId_avg: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importCursor_avg` of type `Float`
+  """
+  importCursor_avg: OrderDirection
   """
   ✨ Generated from Field `Tournament`.`importProgress_avg` of type `Float`
   """
@@ -6078,6 +6130,10 @@ input Tournament_Order {
   ✨ Generated from Field `Tournament`.`fplLeagueId_min` of type `Int`
   """
   fplLeagueId_min: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importCursor_min` of type `Int`
+  """
+  importCursor_min: OrderDirection
   """
   ✨ Generated from Field `Tournament`.`importProgress_min` of type `Int`
   """
@@ -6126,6 +6182,10 @@ input Tournament_Order {
   ✨ Generated from Field `Tournament`.`fplLeagueId_max` of type `Int`
   """
   fplLeagueId_max: OrderDirection
+  """
+  ✨ Generated from Field `Tournament`.`importCursor_max` of type `Int`
+  """
+  importCursor_max: OrderDirection
   """
   ✨ Generated from Field `Tournament`.`importProgress_max` of type `Int`
   """

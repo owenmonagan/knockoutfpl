@@ -829,6 +829,21 @@ export interface GetTournamentData {
   } & Tournament_Key;
 }
 
+export interface GetTournamentImportStatusData {
+  tournament?: {
+    id: UUIDString;
+    importStatus?: string | null;
+    importProgress?: number | null;
+    importedCount?: number | null;
+    totalCount?: number | null;
+    importError?: string | null;
+  } & Tournament_Key;
+}
+
+export interface GetTournamentImportStatusVariables {
+  id: UUIDString;
+}
+
 export interface GetTournamentParticipantsWithUsersData {
   participants: ({
     tournamentId: UUIDString;
@@ -2160,4 +2175,16 @@ export const getHighestSeedRemainingRef: GetHighestSeedRemainingRef;
 
 export function getHighestSeedRemaining(vars: GetHighestSeedRemainingVariables): QueryPromise<GetHighestSeedRemainingData, GetHighestSeedRemainingVariables>;
 export function getHighestSeedRemaining(dc: DataConnect, vars: GetHighestSeedRemainingVariables): QueryPromise<GetHighestSeedRemainingData, GetHighestSeedRemainingVariables>;
+
+interface GetTournamentImportStatusRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTournamentImportStatusVariables): QueryRef<GetTournamentImportStatusData, GetTournamentImportStatusVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetTournamentImportStatusVariables): QueryRef<GetTournamentImportStatusData, GetTournamentImportStatusVariables>;
+  operationName: string;
+}
+export const getTournamentImportStatusRef: GetTournamentImportStatusRef;
+
+export function getTournamentImportStatus(vars: GetTournamentImportStatusVariables): QueryPromise<GetTournamentImportStatusData, GetTournamentImportStatusVariables>;
+export function getTournamentImportStatus(dc: DataConnect, vars: GetTournamentImportStatusVariables): QueryPromise<GetTournamentImportStatusData, GetTournamentImportStatusVariables>;
 

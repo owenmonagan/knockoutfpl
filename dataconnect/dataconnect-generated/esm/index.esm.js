@@ -809,3 +809,14 @@ export function getHighestSeedRemaining(dcOrVars, vars) {
   return executeQuery(getHighestSeedRemainingRef(dcOrVars, vars));
 }
 
+export const getTournamentImportStatusRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetTournamentImportStatus', inputVars);
+}
+getTournamentImportStatusRef.operationName = 'GetTournamentImportStatus';
+
+export function getTournamentImportStatus(dcOrVars, vars) {
+  return executeQuery(getTournamentImportStatusRef(dcOrVars, vars));
+}
+

@@ -1,5 +1,5 @@
 // src/components/tournament/CreateTournamentButton.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '../ui/button';
 import { Trophy } from 'lucide-react';
 import { CreationProgressChecklist } from './CreationProgressChecklist';
@@ -13,19 +13,30 @@ import {
 } from '../ui/select';
 import { getFPLBootstrapData } from '../../services/fpl';
 import { TournamentPreview } from './TournamentPreview';
+import {
+  getTournamentImportStatus,
+  type CreateTournamentResponse,
+  type TournamentImportStatus,
+} from '../../services/tournament';
 
 interface CreateTournamentButtonProps {
-  onCreate: (startEvent: number, matchSize: number) => Promise<void>;
+  onCreate: (startEvent: number, matchSize: number) => Promise<CreateTournamentResponse | null>;
+  onTournamentReady: () => Promise<void>;
   managerCount: number;
 }
 
-export function CreateTournamentButton({ onCreate, managerCount }: CreateTournamentButtonProps) {
+export function CreateTournamentButton({ onCreate, onTournamentReady, managerCount }: CreateTournamentButtonProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentGameweek, setCurrentGameweek] = useState<number | null>(null);
   const [selectedGameweek, setSelectedGameweek] = useState<number>(1);
   const [matchSize, setMatchSize] = useState<number>(2);
+
+  // Large tournament polling state
+  const [isLargeTournament, setIsLargeTournament] = useState(false);
+  const [backendStatus, setBackendStatus] = useState<TournamentImportStatus | null>(null);
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     async function loadBootstrapData() {
@@ -44,19 +55,69 @@ export function CreateTournamentButton({ onCreate, managerCount }: CreateTournam
     loadBootstrapData();
   }, []);
 
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+      }
+    };
+  }, []);
+
+  // Poll for import status
+  const pollImportStatus = useCallback(async (tournamentId: string) => {
+    const status = await getTournamentImportStatus(tournamentId);
+    if (!status) return;
+
+    setBackendStatus(status);
+
+    // Check if complete or failed
+    if (status.importStatus === 'complete') {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+      await onTournamentReady();
+      setIsComplete(true);
+      setIsCreating(false);
+    } else if (status.importStatus === 'failed') {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+      setError(status.importError || 'Tournament import failed');
+      setIsCreating(false);
+    }
+  }, [onTournamentReady]);
+
   const handleClick = async () => {
     setIsCreating(true);
     setIsComplete(false);
     setError(null);
+    setIsLargeTournament(false);
+    setBackendStatus(null);
 
     try {
-      await onCreate(selectedGameweek, matchSize);
-      setIsComplete(true);
-      // Brief pause to show completion state before parent handles navigation
-      await new Promise((r) => setTimeout(r, 500));
+      const response = await onCreate(selectedGameweek, matchSize);
+
+      // Check if this is a large tournament that needs polling
+      if (response?.importStatus === 'pending') {
+        setIsLargeTournament(true);
+        // Start polling every 3 seconds
+        pollingRef.current = setInterval(() => {
+          pollImportStatus(response.tournamentId);
+        }, 3000);
+        // Also poll immediately
+        await pollImportStatus(response.tournamentId);
+      } else {
+        // Small tournament - already complete
+        setIsComplete(true);
+        // Brief pause to show completion state before parent handles navigation
+        await new Promise((r) => setTimeout(r, 500));
+        setIsCreating(false);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create tournament');
-    } finally {
       setIsCreating(false);
     }
   };
@@ -74,6 +135,8 @@ export function CreateTournamentButton({ onCreate, managerCount }: CreateTournam
         isComplete={isComplete}
         error={error}
         onRetry={handleRetry}
+        isLargeTournament={isLargeTournament}
+        backendStatus={backendStatus}
       />
     );
   }

@@ -2463,6 +2463,15 @@ extend type Tournament {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Tournament.id", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `Tournament` table where the `importCursor` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  importCursor_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Tournament.importCursor", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `Tournament` table where the `importError` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   importError_count(
@@ -2616,6 +2625,15 @@ extend type Tournament {
     distinct: Boolean = false
   ): Int @fdc_generated(from: "Tournament.fplLeagueId", purpose: QUERY_SUM)
   """
+  ✨ Sum the `importCursor` field in the `Tournament` table.
+  """
+  importCursor_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "Tournament.importCursor", purpose: QUERY_SUM)
+  """
   ✨ Sum the `importProgress` field in the `Tournament` table.
   """
   importProgress_sum(
@@ -2706,6 +2724,15 @@ extend type Tournament {
     distinct: Boolean = false
   ): Float @fdc_generated(from: "Tournament.fplLeagueId", purpose: QUERY_AVG)
   """
+  ✨ Average the `importCursor` field in the `Tournament` table.
+  """
+  importCursor_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "Tournament.importCursor", purpose: QUERY_AVG)
+  """
   ✨ Average the `importProgress` field in the `Tournament` table.
   """
   importProgress_avg(
@@ -2790,6 +2817,10 @@ extend type Tournament {
   """
   fplLeagueId_min: Int @fdc_generated(from: "Tournament.fplLeagueId", purpose: QUERY_MIN)
   """
+  ✨ Minimum of the `importCursor` field in the `Tournament` table.
+  """
+  importCursor_min: Int @fdc_generated(from: "Tournament.importCursor", purpose: QUERY_MIN)
+  """
   ✨ Minimum of the `importProgress` field in the `Tournament` table.
   """
   importProgress_min: Int @fdc_generated(from: "Tournament.importProgress", purpose: QUERY_MIN)
@@ -2837,6 +2868,10 @@ extend type Tournament {
   ✨ Maximum of the `fplLeagueId` field in the `Tournament` table.
   """
   fplLeagueId_max: Int @fdc_generated(from: "Tournament.fplLeagueId", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `importCursor` field in the `Tournament` table.
+  """
+  importCursor_max: Int @fdc_generated(from: "Tournament.importCursor", purpose: QUERY_MAX)
   """
   ✨ Maximum of the `importProgress` field in the `Tournament` table.
   """

@@ -2,15 +2,27 @@
 
 Start the Firebase emulators and Vite dev server for local development.
 
+## Options
+
+- **Reset Data Connect**: Delete `./dataconnect-data/` to start with a fresh database
+
 ## Steps
 
-1. Gracefully stop any existing Firebase emulators and Vite processes (SIGTERM first, then SIGKILL)
-2. Start Firebase emulators (auth + dataconnect + functions) in background
-3. Start Vite dev server in background
-4. Wait for startup and display status
+1. (Optional) Delete Data Connect data directory for fresh database
+2. Gracefully stop any existing Firebase emulators and Vite processes
+3. Start Firebase emulators (auth + dataconnect + functions) in background
+4. Start Vite dev server in background
+5. Wait for startup and display status
 
 ## Commands
 
+### Reset Data Connect (Optional)
+```bash
+# Delete the dataconnect-data directory for a completely fresh database
+rm -rf ./dataconnect-data/
+```
+
+### Start Environment
 ```bash
 # Graceful shutdown first (allows cleanup), then force kill if needed
 pkill -TERM -f "firebase.*emulators" 2>/dev/null; sleep 1
@@ -34,3 +46,9 @@ npm run dev
 | Auth Emulator | 127.0.0.1:9099 |
 | Data Connect | 127.0.0.1:9399 |
 | Functions | 127.0.0.1:5001 |
+
+## Notes
+
+- The `dataconnect-data/` directory contains the embedded PostgreSQL database
+- Deleting it gives you a completely fresh database with empty tables
+- The emulator automatically recreates the directory and applies the schema on startup

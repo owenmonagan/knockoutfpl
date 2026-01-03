@@ -50,6 +50,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetRoundMatchesWithPriority*](#getroundmatcheswithpriority)
   - [*GetOpponentMatchHistories*](#getopponentmatchhistories)
   - [*GetHighestSeedRemaining*](#gethighestseedremaining)
+  - [*GetTournamentImportStatus*](#gettournamentimportstatus)
 - [**Mutations**](#mutations)
   - [*UpsertUser*](#upsertuser)
   - [*ConnectFplEntry*](#connectfplentry)
@@ -5216,6 +5217,122 @@ console.log(data.participants);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.participants);
+});
+```
+
+## GetTournamentImportStatus
+You can execute the `GetTournamentImportStatus` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getTournamentImportStatus(vars: GetTournamentImportStatusVariables): QueryPromise<GetTournamentImportStatusData, GetTournamentImportStatusVariables>;
+
+interface GetTournamentImportStatusRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTournamentImportStatusVariables): QueryRef<GetTournamentImportStatusData, GetTournamentImportStatusVariables>;
+}
+export const getTournamentImportStatusRef: GetTournamentImportStatusRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getTournamentImportStatus(dc: DataConnect, vars: GetTournamentImportStatusVariables): QueryPromise<GetTournamentImportStatusData, GetTournamentImportStatusVariables>;
+
+interface GetTournamentImportStatusRef {
+  ...
+  (dc: DataConnect, vars: GetTournamentImportStatusVariables): QueryRef<GetTournamentImportStatusData, GetTournamentImportStatusVariables>;
+}
+export const getTournamentImportStatusRef: GetTournamentImportStatusRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getTournamentImportStatusRef:
+```typescript
+const name = getTournamentImportStatusRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetTournamentImportStatus` query requires an argument of type `GetTournamentImportStatusVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetTournamentImportStatusVariables {
+  id: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `GetTournamentImportStatus` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetTournamentImportStatusData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetTournamentImportStatusData {
+  tournament?: {
+    id: UUIDString;
+    importStatus?: string | null;
+    importProgress?: number | null;
+    importedCount?: number | null;
+    totalCount?: number | null;
+    importError?: string | null;
+  } & Tournament_Key;
+}
+```
+### Using `GetTournamentImportStatus`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getTournamentImportStatus, GetTournamentImportStatusVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetTournamentImportStatus` query requires an argument of type `GetTournamentImportStatusVariables`:
+const getTournamentImportStatusVars: GetTournamentImportStatusVariables = {
+  id: ..., 
+};
+
+// Call the `getTournamentImportStatus()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getTournamentImportStatus(getTournamentImportStatusVars);
+// Variables can be defined inline as well.
+const { data } = await getTournamentImportStatus({ id: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getTournamentImportStatus(dataConnect, getTournamentImportStatusVars);
+
+console.log(data.tournament);
+
+// Or, you can use the `Promise` API.
+getTournamentImportStatus(getTournamentImportStatusVars).then((response) => {
+  const data = response.data;
+  console.log(data.tournament);
+});
+```
+
+### Using `GetTournamentImportStatus`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getTournamentImportStatusRef, GetTournamentImportStatusVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetTournamentImportStatus` query requires an argument of type `GetTournamentImportStatusVariables`:
+const getTournamentImportStatusVars: GetTournamentImportStatusVariables = {
+  id: ..., 
+};
+
+// Call the `getTournamentImportStatusRef()` function to get a reference to the query.
+const ref = getTournamentImportStatusRef(getTournamentImportStatusVars);
+// Variables can be defined inline as well.
+const ref = getTournamentImportStatusRef({ id: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getTournamentImportStatusRef(dataConnect, getTournamentImportStatusVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.tournament);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.tournament);
 });
 ```
 

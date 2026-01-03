@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Spinner } from '../ui/spinner';
 import { BracketLayout } from './BracketLayout';
 import { ParticipantsTable } from './ParticipantsTable';
+import { UserPathBracket } from './UserPathBracket';
 import { ShareTournamentDialog } from './ShareTournamentDialog';
 import { TeamSearchOverlay } from './TeamSearchOverlay';
 import { YourMatchesSection } from '../dashboard/YourMatchesSection';
@@ -375,13 +376,23 @@ export function BracketView({
         </CardHeader>
         <CardContent>
           {tournament.rounds.length > 0 ? (
-            <BracketLayout
-              rounds={tournament.rounds}
-              participants={tournament.participants}
-              currentGameweek={tournament.currentGameweek}
-              isAuthenticated={isAuthenticated}
-              onClaimTeam={onClaimTeam}
-            />
+            // Use UserPathBracket for large tournaments (>64 participants)
+            tournament.participants.length > 64 ? (
+              <UserPathBracket
+                tournament={tournament}
+                userFplTeamId={userFplTeamId}
+                isAuthenticated={isAuthenticated}
+                currentGameweek={tournament.currentGameweek}
+              />
+            ) : (
+              <BracketLayout
+                rounds={tournament.rounds}
+                participants={tournament.participants}
+                currentGameweek={tournament.currentGameweek}
+                isAuthenticated={isAuthenticated}
+                onClaimTeam={onClaimTeam}
+              />
+            )
           ) : (
             <p className="text-muted-foreground text-center py-8">
               Bracket will appear when the tournament starts.

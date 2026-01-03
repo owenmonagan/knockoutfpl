@@ -1,11 +1,12 @@
 // src/components/tournament/UserPathBracket.tsx
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import { Card } from '../ui/card';
 import { Spinner } from '../ui/spinner';
-import { PathMatchCard } from './PathMatchCard';
-import { HistoryMatchCard } from './HistoryMatchCard';
+import { cn } from '../../lib/utils';
+import { getFplTeamUrl } from '../../lib/fpl-urls';
 import {
   fetchUserTournamentMatches,
   fetchOpponentHistories,
@@ -120,10 +121,148 @@ export function UserPathBracket({
     fetchData();
   }, [focalTeamId, tournament.id, tournament.totalRounds, currentGameweek]);
 
-  // Calculate max opponent history depth (for grid layout)
-  const maxHistoryDepth = useMemo(() => {
-    return Math.max(0, ...userPath.map((m) => m.roundNumber - 1));
-  }, [userPath]);
+  // Render a player row in BracketMatchCard style
+  const renderPlayerRow = (
+    teamName: string | null,
+    seed: number | null,
+    score: number | null,
+    fplTeamId: number | null,
+    isWinner: boolean,
+    isLoser: boolean,
+    isBye: boolean,
+    gameweek: number,
+    roundStarted: boolean
+  ) => {
+    if (isBye) {
+      return (
+        <div className="flex justify-between items-center px-2 py-1.5 text-muted-foreground text-sm">
+          <span>BYE</span>
+        </div>
+      );
+    }
+
+    if (!teamName) {
+      return (
+        <div className="flex justify-between items-center px-2 py-1.5 text-muted-foreground text-sm">
+          <span>TBD</span>
+        </div>
+      );
+    }
+
+    const showScore = roundStarted && score !== null;
+
+    const rowContent = (
+      <div
+        className={cn(
+          "flex justify-between items-center px-2 py-1.5 text-sm",
+          isWinner && "font-semibold bg-green-50 dark:bg-green-950",
+          isLoser && "opacity-50"
+        )}
+      >
+        <div className="flex items-center gap-1.5 truncate">
+          <span className="truncate">{teamName}</span>
+          {seed !== null && !showScore && (
+            <span className="text-muted-foreground text-xs">({seed})</span>
+          )}
+        </div>
+        {showScore && (
+          <span className={cn("tabular-nums font-medium", isWinner && "text-green-600 dark:text-green-400")}>
+            {score}
+          </span>
+        )}
+      </div>
+    );
+
+    if (fplTeamId) {
+      return (
+        <a
+          href={getFplTeamUrl(fplTeamId, gameweek, roundStarted)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block cursor-pointer hover:bg-muted/50 transition-colors"
+        >
+          {rowContent}
+        </a>
+      );
+    }
+
+    return rowContent;
+  };
+
+  // Render a match card for user's path
+  const renderPathMatchCard = (match: UserMatchInfo) => {
+    const roundStarted = match.gameweek <= currentGameweek;
+    const yourWon = match.result === 'won';
+    const yourLost = match.result === 'lost';
+    const opponentWon = match.result === 'lost';
+    const opponentLost = match.result === 'won';
+
+    return (
+      <Card className="w-44 overflow-hidden">
+        {renderPlayerRow(
+          match.yourTeamName,
+          match.yourSeed,
+          match.yourScore,
+          match.yourFplTeamId,
+          yourWon,
+          yourLost,
+          false,
+          match.gameweek,
+          roundStarted
+        )}
+        <div className="border-t" />
+        {match.isBye ? (
+          renderPlayerRow(null, null, null, null, false, false, true, match.gameweek, roundStarted)
+        ) : (
+          renderPlayerRow(
+            match.opponentTeamName,
+            match.opponentSeed,
+            match.opponentScore,
+            match.opponentFplTeamId,
+            opponentWon,
+            opponentLost,
+            false,
+            match.gameweek,
+            roundStarted
+          )
+        )}
+      </Card>
+    );
+  };
+
+  // Render opponent history match card (smaller/muted)
+  const renderHistoryMatchCard = (match: OpponentMatchInfo) => {
+    const isWinner = match.result === 'won';
+    const isLoser = match.result === 'lost';
+
+    return (
+      <Card className="w-44 overflow-hidden opacity-70">
+        {renderPlayerRow(
+          match.teamName,
+          match.seed,
+          match.score,
+          match.fplTeamId,
+          isWinner,
+          isLoser,
+          false,
+          match.gameweek,
+          true
+        )}
+        <div className="border-t" />
+        {renderPlayerRow(
+          match.opponentTeamName,
+          match.opponentSeed,
+          match.opponentScore,
+          match.opponentFplTeamId,
+          !isWinner && match.result !== 'pending',
+          isWinner,
+          false,
+          match.gameweek,
+          true
+        )}
+      </Card>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -176,45 +315,34 @@ export function UserPathBracket({
         </div>
       </div>
 
-      {/* Path visualization */}
-      <div className="space-y-4">
-        {/* Your path row */}
-        <div className="flex gap-4 overflow-x-auto pb-2">
-          {userPath.map((match, index) => (
-            <div key={match.matchId} className="flex items-center gap-2">
-              <PathMatchCard
-                match={match}
-                isFocalTeam={true}
-                currentGameweek={currentGameweek}
-              />
-              {index < userPath.length - 1 && (
-                <span className="text-muted-foreground">→</span>
-              )}
-            </div>
-          ))}
-        </div>
+      {/* Path visualization - column layout like original bracket */}
+      <div className="flex gap-4 overflow-x-auto pb-4">
+        {userPath.map((match) => {
+          const opponentId = match.opponentFplTeamId;
+          const history = opponentId ? opponentHistories.get(opponentId) : [];
 
-        {/* Opponent histories grid */}
-        {maxHistoryDepth > 0 && (
-          <div className="flex gap-4 overflow-x-auto">
-            {/* Empty space for first match (no opponent history) */}
-            <div className="w-48 shrink-0" />
-
-            {/* History columns for each future match */}
-            {userPath.slice(1).map((match) => {
-              const opponentId = match.opponentFplTeamId;
-              const history = opponentId ? opponentHistories.get(opponentId) : [];
-
-              return (
-                <div key={match.matchId} className="flex flex-col gap-2 shrink-0">
-                  {(history ?? []).map((histMatch) => (
-                    <HistoryMatchCard key={histMatch.matchId} match={histMatch} />
-                  ))}
+          return (
+            <div key={match.matchId} className="flex flex-col gap-2 shrink-0">
+              {/* Round header */}
+              <div className="text-sm font-medium">
+                {match.roundName}
+                <div className="text-xs text-muted-foreground font-normal">
+                  GW {match.gameweek}
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+
+              {/* Your match in this round */}
+              {renderPathMatchCard(match)}
+
+              {/* Opponent's previous matches (their path to face you) */}
+              {(history ?? []).map((histMatch) => (
+                <div key={histMatch.matchId}>
+                  {renderHistoryMatchCard(histMatch)}
+                </div>
+              ))}
+            </div>
+          );
+        })}
       </div>
 
       {/* Stats */}
