@@ -1,6 +1,7 @@
 // src/hooks/useTournamentFriends.ts
 import { useState, useEffect, useMemo } from 'react';
-import { getTournamentFriends, FriendInTournament } from '@/services/friends';
+import { getTournamentFriends } from '@/services/friends';
+import type { FriendInTournament } from '@/services/friends';
 import type { Participant } from '@/types/tournament';
 
 interface UseTournamentFriendsOptions {

@@ -1,5 +1,6 @@
 // src/services/matchups.ts
-import { getTournamentFriends, FriendInTournament } from './friends';
+import { getTournamentFriends } from './friends';
+import type { FriendInTournament } from './friends';
 import type { Tournament, Match, Round, Participant } from '@/types/tournament';
 import { getMatchPlayers } from '@/types/tournament';
 

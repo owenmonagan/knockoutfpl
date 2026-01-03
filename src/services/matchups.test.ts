@@ -1,10 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Tournament, Round, Match, Participant } from '@/types/tournament';
-import {
-  getTournamentMatchups,
-  MatchupOptions,
-  MatchupResult,
-} from './matchups';
+import type { Tournament, Round, Participant } from '@/types/tournament';
+import { getTournamentMatchups } from './matchups';
 
 // Mock friends service
 vi.mock('./friends', () => ({

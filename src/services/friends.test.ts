@@ -11,7 +11,7 @@ vi.mock('./tournament', () => ({
 
 import { getUserMiniLeagues } from './fpl';
 import { getParticipantLeaguesForTournament } from './tournament';
-import { getTournamentFriends, FriendInTournament } from './friends';
+import { getTournamentFriends } from './friends';
 import type { Participant } from '@/types/tournament';
 
 describe('getTournamentFriends', () => {
