@@ -852,3 +852,19 @@ query GetTournamentImportStatus($id: UUID!) @auth(level: PUBLIC) {
     importError
   }
 }
+
+# =============================================================================
+# PARTICIPANT LEAGUE QUERIES (Friends Feature)
+# =============================================================================
+
+# Get all participant league memberships for a tournament
+# Used to calculate "friends" - participants sharing leagues with the user
+query GetParticipantLeaguesForTournament($tournamentId: UUID!) @auth(level: PUBLIC) {
+  participantLeagues(where: { tournamentId: { eq: $tournamentId } }) {
+    tournamentId
+    entryId
+    leagueId
+    leagueName
+    entryRank
+  }
+}

@@ -642,6 +642,20 @@ export interface GetParticipantData {
   } & Participant_Key)[];
 }
 
+export interface GetParticipantLeaguesForTournamentData {
+  participantLeagues: ({
+    tournamentId: UUIDString;
+    entryId: number;
+    leagueId: number;
+    leagueName: string;
+    entryRank?: number | null;
+  } & ParticipantLeague_Key)[];
+}
+
+export interface GetParticipantLeaguesForTournamentVariables {
+  tournamentId: UUIDString;
+}
+
 export interface GetParticipantVariables {
   tournamentId: UUIDString;
   entryId: number;
@@ -2187,4 +2201,16 @@ export const getTournamentImportStatusRef: GetTournamentImportStatusRef;
 
 export function getTournamentImportStatus(vars: GetTournamentImportStatusVariables): QueryPromise<GetTournamentImportStatusData, GetTournamentImportStatusVariables>;
 export function getTournamentImportStatus(dc: DataConnect, vars: GetTournamentImportStatusVariables): QueryPromise<GetTournamentImportStatusData, GetTournamentImportStatusVariables>;
+
+interface GetParticipantLeaguesForTournamentRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetParticipantLeaguesForTournamentVariables): QueryRef<GetParticipantLeaguesForTournamentData, GetParticipantLeaguesForTournamentVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetParticipantLeaguesForTournamentVariables): QueryRef<GetParticipantLeaguesForTournamentData, GetParticipantLeaguesForTournamentVariables>;
+  operationName: string;
+}
+export const getParticipantLeaguesForTournamentRef: GetParticipantLeaguesForTournamentRef;
+
+export function getParticipantLeaguesForTournament(vars: GetParticipantLeaguesForTournamentVariables): QueryPromise<GetParticipantLeaguesForTournamentData, GetParticipantLeaguesForTournamentVariables>;
+export function getParticipantLeaguesForTournament(dc: DataConnect, vars: GetParticipantLeaguesForTournamentVariables): QueryPromise<GetParticipantLeaguesForTournamentData, GetParticipantLeaguesForTournamentVariables>;
 

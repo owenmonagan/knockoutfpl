@@ -51,6 +51,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetOpponentMatchHistories*](#getopponentmatchhistories)
   - [*GetHighestSeedRemaining*](#gethighestseedremaining)
   - [*GetTournamentImportStatus*](#gettournamentimportstatus)
+  - [*GetParticipantLeaguesForTournament*](#getparticipantleaguesfortournament)
 - [**Mutations**](#mutations)
   - [*UpsertUser*](#upsertuser)
   - [*ConnectFplEntry*](#connectfplentry)
@@ -5333,6 +5334,121 @@ console.log(data.tournament);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.tournament);
+});
+```
+
+## GetParticipantLeaguesForTournament
+You can execute the `GetParticipantLeaguesForTournament` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getParticipantLeaguesForTournament(vars: GetParticipantLeaguesForTournamentVariables): QueryPromise<GetParticipantLeaguesForTournamentData, GetParticipantLeaguesForTournamentVariables>;
+
+interface GetParticipantLeaguesForTournamentRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetParticipantLeaguesForTournamentVariables): QueryRef<GetParticipantLeaguesForTournamentData, GetParticipantLeaguesForTournamentVariables>;
+}
+export const getParticipantLeaguesForTournamentRef: GetParticipantLeaguesForTournamentRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getParticipantLeaguesForTournament(dc: DataConnect, vars: GetParticipantLeaguesForTournamentVariables): QueryPromise<GetParticipantLeaguesForTournamentData, GetParticipantLeaguesForTournamentVariables>;
+
+interface GetParticipantLeaguesForTournamentRef {
+  ...
+  (dc: DataConnect, vars: GetParticipantLeaguesForTournamentVariables): QueryRef<GetParticipantLeaguesForTournamentData, GetParticipantLeaguesForTournamentVariables>;
+}
+export const getParticipantLeaguesForTournamentRef: GetParticipantLeaguesForTournamentRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getParticipantLeaguesForTournamentRef:
+```typescript
+const name = getParticipantLeaguesForTournamentRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetParticipantLeaguesForTournament` query requires an argument of type `GetParticipantLeaguesForTournamentVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetParticipantLeaguesForTournamentVariables {
+  tournamentId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `GetParticipantLeaguesForTournament` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetParticipantLeaguesForTournamentData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetParticipantLeaguesForTournamentData {
+  participantLeagues: ({
+    tournamentId: UUIDString;
+    entryId: number;
+    leagueId: number;
+    leagueName: string;
+    entryRank?: number | null;
+  } & ParticipantLeague_Key)[];
+}
+```
+### Using `GetParticipantLeaguesForTournament`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getParticipantLeaguesForTournament, GetParticipantLeaguesForTournamentVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetParticipantLeaguesForTournament` query requires an argument of type `GetParticipantLeaguesForTournamentVariables`:
+const getParticipantLeaguesForTournamentVars: GetParticipantLeaguesForTournamentVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `getParticipantLeaguesForTournament()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getParticipantLeaguesForTournament(getParticipantLeaguesForTournamentVars);
+// Variables can be defined inline as well.
+const { data } = await getParticipantLeaguesForTournament({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getParticipantLeaguesForTournament(dataConnect, getParticipantLeaguesForTournamentVars);
+
+console.log(data.participantLeagues);
+
+// Or, you can use the `Promise` API.
+getParticipantLeaguesForTournament(getParticipantLeaguesForTournamentVars).then((response) => {
+  const data = response.data;
+  console.log(data.participantLeagues);
+});
+```
+
+### Using `GetParticipantLeaguesForTournament`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getParticipantLeaguesForTournamentRef, GetParticipantLeaguesForTournamentVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetParticipantLeaguesForTournament` query requires an argument of type `GetParticipantLeaguesForTournamentVariables`:
+const getParticipantLeaguesForTournamentVars: GetParticipantLeaguesForTournamentVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `getParticipantLeaguesForTournamentRef()` function to get a reference to the query.
+const ref = getParticipantLeaguesForTournamentRef(getParticipantLeaguesForTournamentVars);
+// Variables can be defined inline as well.
+const ref = getParticipantLeaguesForTournamentRef({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getParticipantLeaguesForTournamentRef(dataConnect, getParticipantLeaguesForTournamentVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.participantLeagues);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.participantLeagues);
 });
 ```
 
