@@ -699,7 +699,49 @@ export async function fetchUserTournamentMatches(
   }
 
   // Sort by round number
-  return matches.sort((a, b) => a.roundNumber - b.roundNumber);
+  matches.sort((a, b) => a.roundNumber - b.roundNumber);
+
+  // Check if user is still active (not eliminated)
+  const lastMatch = matches[matches.length - 1];
+  const isEliminated = lastMatch?.result === 'lost';
+
+  // If user is still active, add projected matches for future rounds
+  if (!isEliminated && matches.length > 0) {
+    const lastRoundNumber = lastMatch.roundNumber;
+    const userTeamName = lastMatch.yourTeamName;
+    const userSeed = lastMatch.yourSeed;
+
+    // Get all rounds sorted by round number
+    const allRounds = (roundsResult.data.rounds || [])
+      .sort((a, b) => a.roundNumber - b.roundNumber);
+
+    // Add projected matches for rounds after the last existing match
+    for (const round of allRounds) {
+      if (round.roundNumber > lastRoundNumber) {
+        matches.push({
+          matchId: -round.roundNumber, // Negative ID indicates projected match
+          roundNumber: round.roundNumber,
+          roundName: getRoundName(round.roundNumber, totalRounds),
+          gameweek: round.event,
+          yourTeamName: userTeamName,
+          yourFplTeamId: entryId,
+          yourSeed: userSeed,
+          yourScore: null,
+          opponentTeamName: null, // TBD
+          opponentManagerName: null,
+          opponentFplTeamId: null,
+          opponentSeed: null,
+          opponentScore: null,
+          isBye: false,
+          status: 'pending',
+          winnerId: null,
+          result: 'pending',
+        });
+      }
+    }
+  }
+
+  return matches;
 }
 
 // ============================================================================
