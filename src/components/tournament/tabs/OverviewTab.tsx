@@ -4,8 +4,10 @@ import { YourMatchupCard } from '../YourMatchupCard';
 import { YourMatchesSection } from '@/components/dashboard/YourMatchesSection';
 import { TournamentStats } from '../TournamentStats';
 import { PossibleOpponents } from '../PossibleOpponents';
+import { FriendsActivity } from '../FriendsActivity';
 import type { MatchSummaryCardProps } from '@/components/dashboard/MatchSummaryCard';
 import type { Tournament, Participant } from '@/types/tournament';
+import type { FriendInTournament } from '@/services/friends';
 import { getMatchPlayers } from '@/types/tournament';
 import {
   findSiblingMatch,
@@ -19,6 +21,8 @@ interface OverviewTabProps {
   userFplTeamId?: number | null;
   userParticipant?: Participant | null;
   userMatches?: MatchSummaryCardProps[];
+  friends?: FriendInTournament[] | null;
+  friendsLoading?: boolean;
 }
 
 export function OverviewTab({
@@ -26,6 +30,8 @@ export function OverviewTab({
   userFplTeamId,
   userParticipant,
   userMatches = [],
+  friends = null,
+  friendsLoading = false,
 }: OverviewTabProps) {
   // Find user's latest match (iterate in reverse to get most recent)
   const currentMatch = useMemo(() => {
@@ -229,16 +235,9 @@ export function OverviewTab({
 
       {/* Second row: Friends + Possible Opponents */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Friends Activity placeholder - 2/3 width */}
+        {/* Friends Activity - 2/3 width */}
         <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Friends Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Coming in Phase 4...</p>
-            </CardContent>
-          </Card>
+          <FriendsActivity friends={friends} isLoading={friendsLoading} />
         </div>
 
         {/* Possible Opponents - 1/3 width */}
