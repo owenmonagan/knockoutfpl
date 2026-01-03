@@ -99,12 +99,11 @@ export function YourMatchupCard({
   const yourScoreMuted = isFinished && youLost;
   const opponentScoreMuted = isFinished && youWon;
 
-  // Card styling based on state
+  // Card styling based on state - no green outlines
   const cardClasses = cn('overflow-hidden transition-all duration-200 relative', {
-    'border-2 border-primary shadow-[0_0_20px_rgba(0,255,136,0.2)]': isLive,
-    'border border-primary/30': isFinished && youWon,
+    'border border-border': isLive || (isFinished && youWon),
     'border border-muted': isFinished && youLost,
-    'border-2 border-dashed border-muted': matchType === 'upcoming',
+    'border border-dashed border-muted': matchType === 'upcoming',
   });
 
   // Status badge text and variant
