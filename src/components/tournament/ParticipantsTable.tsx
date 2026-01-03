@@ -1,4 +1,5 @@
 // src/components/tournament/ParticipantsTable.tsx
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -12,9 +13,14 @@ import type { Participant } from '../../types/tournament';
 interface ParticipantsTableProps {
   participants: Participant[];
   seedingGameweek: number;
+  friendIds?: Set<number>;
 }
 
-export function ParticipantsTable({ participants, seedingGameweek }: ParticipantsTableProps) {
+export function ParticipantsTable({
+  participants,
+  seedingGameweek,
+  friendIds = new Set(),
+}: ParticipantsTableProps) {
   const sortedParticipants = [...participants].sort((a, b) => a.seed - b.seed);
 
   return (
@@ -35,7 +41,16 @@ export function ParticipantsTable({ participants, seedingGameweek }: Participant
           {sortedParticipants.map((participant) => (
             <TableRow key={participant.fplTeamId}>
               <TableCell className="font-medium">{participant.seed}</TableCell>
-              <TableCell>{participant.fplTeamName}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <span>{participant.fplTeamName}</span>
+                  {friendIds.has(participant.fplTeamId) && (
+                    <Badge variant="outline" className="text-xs">
+                      Friend
+                    </Badge>
+                  )}
+                </div>
+              </TableCell>
               <TableCell className="text-muted-foreground">
                 {participant.managerName}
               </TableCell>

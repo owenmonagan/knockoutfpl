@@ -5,15 +5,21 @@ import type { Participant } from '@/types/tournament';
 interface ParticipantsTabProps {
   participants: Participant[];
   seedingGameweek: number;
+  friendIds?: Set<number>;
 }
 
-export function ParticipantsTab({ participants, seedingGameweek }: ParticipantsTabProps) {
+export function ParticipantsTab({
+  participants,
+  seedingGameweek,
+  friendIds = new Set(),
+}: ParticipantsTabProps) {
   return (
     <Card>
       <CardContent className="pt-6">
         <ParticipantsTable
           participants={participants}
           seedingGameweek={seedingGameweek}
+          friendIds={friendIds}
         />
       </CardContent>
     </Card>

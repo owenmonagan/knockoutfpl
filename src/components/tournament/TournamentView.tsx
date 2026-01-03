@@ -424,6 +424,7 @@ export function TournamentView({
           <ParticipantsTab
             participants={tournament.participants}
             seedingGameweek={tournament.startGameweek - 1}
+            friendIds={friendIds}
           />
         </TabsContent>
 
