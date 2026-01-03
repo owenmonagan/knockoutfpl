@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Skeleton } from '../components/ui/skeleton';
 import { Card, CardContent } from '../components/ui/card';
-import { BracketView } from '../components/tournament/BracketView';
+import { TournamentView } from '../components/tournament/TournamentView';
 import { NoTournamentEmptyState } from '../components/leagues/NoTournamentEmptyState';
 import { ShareTournamentDialog } from '../components/tournament/ShareTournamentDialog';
 import {
@@ -196,7 +196,7 @@ export function LeaguePage() {
   return (
     <div className="container mx-auto p-4 space-y-6">
       {tournament ? (
-        <BracketView
+        <TournamentView
           tournament={tournament}
           isRefreshing={isRefreshing}
           isAuthenticated={!!user}
