@@ -49,6 +49,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetPickScores*](#getpickscores)
   - [*GetRoundMatchesWithPriority*](#getroundmatcheswithpriority)
   - [*GetOpponentMatchHistories*](#getopponentmatchhistories)
+  - [*GetHighestSeedRemaining*](#gethighestseedremaining)
 - [**Mutations**](#mutations)
   - [*UpsertUser*](#upsertuser)
   - [*ConnectFplEntry*](#connectfplentry)
@@ -5101,6 +5102,120 @@ console.log(data.matchPicks);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.matchPicks);
+});
+```
+
+## GetHighestSeedRemaining
+You can execute the `GetHighestSeedRemaining` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getHighestSeedRemaining(vars: GetHighestSeedRemainingVariables): QueryPromise<GetHighestSeedRemainingData, GetHighestSeedRemainingVariables>;
+
+interface GetHighestSeedRemainingRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetHighestSeedRemainingVariables): QueryRef<GetHighestSeedRemainingData, GetHighestSeedRemainingVariables>;
+}
+export const getHighestSeedRemainingRef: GetHighestSeedRemainingRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getHighestSeedRemaining(dc: DataConnect, vars: GetHighestSeedRemainingVariables): QueryPromise<GetHighestSeedRemainingData, GetHighestSeedRemainingVariables>;
+
+interface GetHighestSeedRemainingRef {
+  ...
+  (dc: DataConnect, vars: GetHighestSeedRemainingVariables): QueryRef<GetHighestSeedRemainingData, GetHighestSeedRemainingVariables>;
+}
+export const getHighestSeedRemainingRef: GetHighestSeedRemainingRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getHighestSeedRemainingRef:
+```typescript
+const name = getHighestSeedRemainingRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetHighestSeedRemaining` query requires an argument of type `GetHighestSeedRemainingVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetHighestSeedRemainingVariables {
+  tournamentId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `GetHighestSeedRemaining` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetHighestSeedRemainingData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetHighestSeedRemainingData {
+  participants: ({
+    entryId: number;
+    teamName: string;
+    managerName: string;
+    seed: number;
+  })[];
+}
+```
+### Using `GetHighestSeedRemaining`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getHighestSeedRemaining, GetHighestSeedRemainingVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetHighestSeedRemaining` query requires an argument of type `GetHighestSeedRemainingVariables`:
+const getHighestSeedRemainingVars: GetHighestSeedRemainingVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `getHighestSeedRemaining()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getHighestSeedRemaining(getHighestSeedRemainingVars);
+// Variables can be defined inline as well.
+const { data } = await getHighestSeedRemaining({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getHighestSeedRemaining(dataConnect, getHighestSeedRemainingVars);
+
+console.log(data.participants);
+
+// Or, you can use the `Promise` API.
+getHighestSeedRemaining(getHighestSeedRemainingVars).then((response) => {
+  const data = response.data;
+  console.log(data.participants);
+});
+```
+
+### Using `GetHighestSeedRemaining`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getHighestSeedRemainingRef, GetHighestSeedRemainingVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetHighestSeedRemaining` query requires an argument of type `GetHighestSeedRemainingVariables`:
+const getHighestSeedRemainingVars: GetHighestSeedRemainingVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `getHighestSeedRemainingRef()` function to get a reference to the query.
+const ref = getHighestSeedRemainingRef(getHighestSeedRemainingVars);
+// Variables can be defined inline as well.
+const ref = getHighestSeedRemainingRef({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getHighestSeedRemainingRef(dataConnect, getHighestSeedRemainingVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.participants);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.participants);
 });
 ```
 

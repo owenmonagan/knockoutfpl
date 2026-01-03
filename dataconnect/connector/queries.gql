@@ -817,3 +817,22 @@ query GetOpponentMatchHistories(
     }
   }
 }
+
+# Get highest seed still active in tournament (for spectator default view)
+query GetHighestSeedRemaining(
+  $tournamentId: UUID!
+) @auth(level: PUBLIC) {
+  participants(
+    where: {
+      tournamentId: { eq: $tournamentId }
+      status: { eq: "active" }
+    }
+    orderBy: { seed: ASC }
+    limit: 1
+  ) {
+    entryId
+    teamName
+    managerName
+    seed
+  }
+}
