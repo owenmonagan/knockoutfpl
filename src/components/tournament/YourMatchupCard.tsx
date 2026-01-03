@@ -1,12 +1,13 @@
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getInitials } from '@/lib/initials';
 
 export interface YourMatchupCardProps {
   roundName: string;
   gameweek: number;
+  deadline?: string;
   yourTeamName: string;
   yourManagerName?: string;
   yourSeed: number;
@@ -18,72 +19,53 @@ export interface YourMatchupCardProps {
   matchType: 'live' | 'upcoming' | 'finished';
   result?: 'won' | 'lost';
   onViewDetails?: () => void;
+  onAnalyzeOpponent?: () => void;
 }
 
 interface TeamRowProps {
-  label: string;
   teamName: string;
   managerName?: string;
   seed: number;
   score: number | null;
-  isYou?: boolean;
-  isWinner?: boolean;
-  isLoser?: boolean;
+  isYourTeam: boolean;
   showScore: boolean;
+  isScoreMuted: boolean;
 }
 
 function TeamRow({
-  label,
   teamName,
   managerName,
   seed,
   score,
-  isYou,
-  isWinner,
-  isLoser,
+  isYourTeam,
   showScore,
+  isScoreMuted,
 }: TeamRowProps) {
-  const initials = getInitials(teamName);
-
   return (
-    <div
-      className={cn(
-        'flex items-center gap-3 p-3 rounded-lg',
-        isYou && 'bg-primary/5 border border-primary/20',
-        isLoser && 'opacity-60'
-      )}
-    >
-      {/* Avatar */}
-      <div
-        className={cn(
-          'h-12 w-12 rounded-full flex items-center justify-center font-bold text-sm',
-          isWinner && 'border-2 border-primary bg-primary/10 text-primary',
-          isLoser && 'border border-muted bg-muted/30 text-muted-foreground',
-          !isWinner && !isLoser && isYou && 'border-2 border-primary bg-primary/10 text-primary',
-          !isWinner && !isLoser && !isYou && 'border border-muted bg-muted/50 text-muted-foreground'
-        )}
-      >
-        {initials}
-      </div>
-
-      {/* Team Info */}
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-muted-foreground font-medium mb-0.5">
-          {label} (Seed #{seed.toLocaleString()})
-        </p>
-        <p className={cn('font-bold truncate', isLoser && 'text-muted-foreground')}>
+    <div className="flex items-start justify-between gap-4">
+      <div className="min-w-0 flex-1">
+        <p
+          className={cn(
+            'font-bold truncate text-lg',
+            isYourTeam ? 'text-primary' : 'text-foreground'
+          )}
+        >
           {teamName}
         </p>
-        {managerName && (
-          <p className="text-sm text-muted-foreground truncate">{managerName}</p>
-        )}
+        <p className="text-sm text-muted-foreground truncate">
+          {managerName && `${managerName} `}(Seed #{seed.toLocaleString()})
+        </p>
       </div>
 
-      {/* Score */}
       {showScore && score !== null && (
-        <div className={cn('text-3xl font-black tabular-nums', isLoser && 'text-muted-foreground')}>
+        <span
+          className={cn(
+            'text-3xl font-black tabular-nums shrink-0',
+            isScoreMuted ? 'text-muted-foreground' : 'text-foreground'
+          )}
+        >
           {score}
-        </div>
+        </span>
       )}
     </div>
   );
@@ -92,6 +74,7 @@ function TeamRow({
 export function YourMatchupCard({
   roundName,
   gameweek,
+  deadline,
   yourTeamName,
   yourManagerName,
   yourSeed,
@@ -103,88 +86,130 @@ export function YourMatchupCard({
   matchType,
   result,
   onViewDetails,
+  onAnalyzeOpponent,
 }: YourMatchupCardProps) {
   const showScores = matchType !== 'upcoming';
   const youWon = result === 'won';
   const youLost = result === 'lost';
   const isTBD = !opponentTeamName;
+  const isLive = matchType === 'live';
+  const isFinished = matchType === 'finished';
+
+  // Determine score muting based on result
+  const yourScoreMuted = isFinished && youLost;
+  const opponentScoreMuted = isFinished && youWon;
 
   // Card styling based on state
-  const cardClasses = cn('overflow-hidden transition-all duration-200', {
-    'border-2 border-primary shadow-[0_0_20px_rgba(0,255,136,0.2)]': matchType === 'live',
-    'border border-primary/30': matchType === 'finished' && youWon,
-    'border border-muted': matchType === 'finished' && youLost,
+  const cardClasses = cn('overflow-hidden transition-all duration-200 relative', {
+    'border-2 border-primary shadow-[0_0_20px_rgba(0,255,136,0.2)]': isLive,
+    'border border-primary/30': isFinished && youWon,
+    'border border-muted': isFinished && youLost,
     'border-2 border-dashed border-muted': matchType === 'upcoming',
   });
 
+  // Status badge text and variant
+  const getStatusBadge = () => {
+    if (isLive) {
+      return {
+        text: `${roundName} Active`,
+        variant: 'default' as const,
+        showPulse: true,
+      };
+    }
+    if (isFinished) {
+      return {
+        text: `${roundName} ${youWon ? 'Advanced' : 'Eliminated'}`,
+        variant: youWon ? 'default' as const : 'destructive' as const,
+        showPulse: false,
+      };
+    }
+    return {
+      text: `${roundName} Upcoming`,
+      variant: 'outline' as const,
+      showPulse: false,
+    };
+  };
+
+  const statusBadge = getStatusBadge();
+
+  // Gameweek info text
+  const gameweekText = isFinished ? `GW${gameweek} • Finished` : `GW${gameweek}${deadline ? ` • ${deadline}` : ''}`;
+
+  const hasActions = onViewDetails || onAnalyzeOpponent;
+
   return (
     <Card className={cardClasses}>
-      {/* Header */}
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <span className="font-bold">{roundName}</span>
-            {matchType === 'live' && (
-              <Badge variant="default" className="gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
-                Live
-              </Badge>
+      {/* Header with status badge and trophy */}
+      <CardHeader className="pb-3 relative">
+        {/* Faint Trophy Icon - decorative */}
+        <Trophy
+          className="absolute top-4 right-4 h-12 w-12 text-muted-foreground opacity-10"
+          aria-hidden="true"
+        />
+
+        <div className="space-y-1">
+          {/* Status Badge */}
+          <Badge variant={statusBadge.variant} className="gap-1.5">
+            {statusBadge.showPulse && (
+              <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
             )}
-            {matchType === 'finished' && (
-              <Badge variant={youWon ? 'default' : 'destructive'}>
-                {youWon ? 'Advanced' : 'Eliminated'}
-              </Badge>
-            )}
-            {matchType === 'upcoming' && <Badge variant="outline">Upcoming</Badge>}
-          </div>
-          <span className="text-sm text-muted-foreground">GW{gameweek}</span>
+            {statusBadge.text}
+          </Badge>
+
+          {/* Title */}
+          <h3 className="font-bold text-lg">Your Matchup</h3>
+
+          {/* Gameweek and deadline */}
+          <p className="text-sm text-muted-foreground">{gameweekText}</p>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3">
-        {/* Your Team */}
-        <TeamRow
-          label="YOU"
-          teamName={yourTeamName}
-          managerName={yourManagerName}
-          seed={yourSeed}
-          score={yourScore}
-          isYou
-          isWinner={youWon}
-          isLoser={youLost}
-          showScore={showScores}
-        />
-
-        {/* VS Divider */}
-        <div className="flex items-center justify-center py-1">
-          <span className="text-xl font-bold text-muted-foreground">VS</span>
-        </div>
-
-        {/* Opponent */}
-        {isTBD ? (
-          <div className="flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-muted">
-            <span className="text-muted-foreground">Opponent TBD</span>
-          </div>
-        ) : (
+      <CardContent className="pt-0">
+        {/* Inner Score Card */}
+        <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-4">
+          {/* Your Team (always on top) */}
           <TeamRow
-            label="OPPONENT"
-            teamName={opponentTeamName}
-            managerName={opponentManagerName}
-            seed={opponentSeed ?? 0}
-            score={opponentScore}
-            isWinner={youLost}
-            isLoser={youWon}
+            teamName={yourTeamName}
+            managerName={yourManagerName}
+            seed={yourSeed}
+            score={yourScore}
+            isYourTeam={true}
             showScore={showScores}
+            isScoreMuted={yourScoreMuted}
           />
-        )}
+
+          {/* Opponent */}
+          {isTBD ? (
+            <div className="flex items-center justify-center py-3 rounded-lg border-2 border-dashed border-muted">
+              <span className="text-muted-foreground">Opponent TBD</span>
+            </div>
+          ) : (
+            <TeamRow
+              teamName={opponentTeamName}
+              managerName={opponentManagerName}
+              seed={opponentSeed ?? 0}
+              score={opponentScore}
+              isYourTeam={false}
+              showScore={showScores}
+              isScoreMuted={opponentScoreMuted}
+            />
+          )}
+        </div>
       </CardContent>
 
-      {/* Footer with actions */}
-      {onViewDetails && (
-        <CardFooter className="border-t bg-muted/30">
-          <Button variant="default" className="w-full" onClick={onViewDetails}>
-            View Match Details
-          </Button>
+      {/* Action Buttons */}
+      {hasActions && (
+        <CardFooter className="border-t bg-muted/30 gap-2">
+          {onViewDetails && (
+            <Button variant="default" className="flex-1" onClick={onViewDetails}>
+              View Match Details
+            </Button>
+          )}
+          {onAnalyzeOpponent && !isTBD && (
+            <Button variant="ghost" className="flex-1" onClick={onAnalyzeOpponent}>
+              Analyze Opponent
+            </Button>
+          )}
         </CardFooter>
       )}
     </Card>
