@@ -6,7 +6,6 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Spinner } from '../ui/spinner';
 import { BracketLayout } from './BracketLayout';
-import { UserPathBracket } from './UserPathBracket';
 import { ParticipantsTable } from './ParticipantsTable';
 import { ShareTournamentDialog } from './ShareTournamentDialog';
 import { TeamSearchOverlay } from './TeamSearchOverlay';
@@ -14,41 +13,6 @@ import { YourMatchesSection } from '../dashboard/YourMatchesSection';
 import type { Participant, Tournament } from '../../types/tournament';
 import { getMatchPlayers } from '../../types/tournament';
 import type { MatchSummaryCardProps } from '../dashboard/MatchSummaryCard';
-import { fetchUserTournamentMatches, type UserMatchInfo } from '../../services/tournament';
-
-// Threshold for switching to paginated bracket view
-const LARGE_TOURNAMENT_THRESHOLD = 64; // More than 64 participants = paginated
-
-/**
- * Converts UserMatchInfo (from API) to MatchSummaryCardProps (for display).
- */
-function userMatchInfoToCard(
-  match: UserMatchInfo,
-  leagueName: string
-): MatchSummaryCardProps {
-  let type: 'live' | 'upcoming' | 'finished';
-  if (match.status === 'complete') {
-    type = 'finished';
-  } else if (match.status === 'active') {
-    type = 'live';
-  } else {
-    type = 'upcoming';
-  }
-
-  return {
-    type,
-    yourTeamName: match.yourTeamName,
-    yourFplTeamId: match.yourFplTeamId,
-    opponentTeamName: match.isBye ? undefined : (match.opponentTeamName ?? undefined),
-    opponentFplTeamId: match.isBye ? undefined : (match.opponentFplTeamId ?? undefined),
-    leagueName,
-    roundName: match.roundName,
-    yourScore: match.yourScore,
-    theirScore: match.opponentScore,
-    gameweek: match.gameweek,
-    result: match.result === 'pending' ? undefined : match.result,
-  };
-}
 
 interface BracketViewProps {
   tournament: Tournament;
@@ -148,50 +112,11 @@ export function BracketView({
     (r) => r.roundNumber === tournament.currentRound
   );
 
-  // Check if this is a large tournament
-  const isLargeTournament = tournament.participants.length > LARGE_TOURNAMENT_THRESHOLD;
-
-  // State for API-fetched user matches (for large tournaments)
-  const [apiUserMatches, setApiUserMatches] = useState<UserMatchInfo[] | null>(null);
-  const [isLoadingUserMatches, setIsLoadingUserMatches] = useState(false);
-
-  // For large tournaments, check participation via API
-  // For small tournaments, check in the participants array
+  // Check if the authenticated user is a participant in this tournament
   const userIsParticipant = useMemo(() => {
     if (!isAuthenticated || !userFplTeamId) return false;
-    // For large tournaments, check API result (null = still loading, [] = not participant)
-    if (isLargeTournament) {
-      // While loading or if we have matches, consider them a participant
-      return apiUserMatches === null || apiUserMatches.length > 0;
-    }
     return tournament.participants.some((p) => p.fplTeamId === userFplTeamId);
-  }, [isAuthenticated, userFplTeamId, tournament.participants, isLargeTournament, apiUserMatches]);
-
-  // Fetch user matches via API for large tournaments
-  useEffect(() => {
-    if (!isLargeTournament || !isAuthenticated || !userFplTeamId) {
-      setApiUserMatches(null);
-      return;
-    }
-
-    setIsLoadingUserMatches(true);
-    fetchUserTournamentMatches(
-      tournament.id,
-      userFplTeamId,
-      tournament.totalRounds,
-      tournament.currentGameweek
-    )
-      .then((matches) => {
-        setApiUserMatches(matches);
-      })
-      .catch((err) => {
-        console.warn('[WARN] Failed to fetch user matches:', err);
-        setApiUserMatches([]);
-      })
-      .finally(() => {
-        setIsLoadingUserMatches(false);
-      });
-  }, [isLargeTournament, isAuthenticated, userFplTeamId, tournament.id, tournament.totalRounds, tournament.currentGameweek]);
+  }, [isAuthenticated, userFplTeamId, tournament.participants]);
 
   // State for previewed team (unauthenticated users only)
   const [previewedTeamId, setPreviewedTeamId] = useState<number | null>(null);
@@ -233,40 +158,18 @@ export function BracketView({
   }, [previewedMatches]);
 
   // Build matches for authenticated user (if they're a participant)
-  // For large tournaments, use API-fetched matches
   const userMatches = useMemo(() => {
     if (!userIsParticipant || !userFplTeamId) return [];
-
-    // For large tournaments, use API-fetched data
-    if (isLargeTournament && apiUserMatches !== null) {
-      return apiUserMatches.map((m) => userMatchInfoToCard(m, tournament.fplLeagueName));
-    }
-
-    // For small tournaments, use client-side computation
     return buildMatchesForTeam(tournament, userFplTeamId);
-  }, [tournament, userIsParticipant, userFplTeamId, isLargeTournament, apiUserMatches]);
+  }, [tournament, userIsParticipant, userFplTeamId]);
 
   // Get the authenticated user's participant info
-  // For large tournaments, derive from API matches
-  const userParticipant = useMemo((): Participant | null => {
+  const userParticipant = useMemo(() => {
     if (!userIsParticipant || !userFplTeamId) return null;
-
-    // For large tournaments, derive from API data
-    if (isLargeTournament && apiUserMatches && apiUserMatches.length > 0) {
-      const firstMatch = apiUserMatches[0];
-      return {
-        fplTeamId: firstMatch.yourFplTeamId,
-        fplTeamName: firstMatch.yourTeamName,
-        managerName: '', // Not available from match data
-        seed: firstMatch.yourSeed,
-      };
-    }
-
-    // For small tournaments, find in participants array
     return tournament.participants.find(
       (p) => p.fplTeamId === userFplTeamId
-    ) ?? null;
-  }, [tournament.participants, userIsParticipant, userFplTeamId, isLargeTournament, apiUserMatches]);
+    );
+  }, [tournament.participants, userIsParticipant, userFplTeamId]);
 
   // Check if any of the user's matches is live
   const hasLiveUserMatch = useMemo(() => {
@@ -337,26 +240,17 @@ export function BracketView({
       {isAuthenticated && userIsParticipant && tournament.rounds.length > 0 && (
         <Card>
           <CardContent className="pt-6">
-            {isLoadingUserMatches ? (
-              <div className="flex items-center justify-center py-8 gap-2">
-                <Spinner className="size-4" />
-                <span className="text-sm text-muted-foreground">Loading your matches...</span>
+            {userParticipant && (
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-sm text-muted-foreground">Playing as</span>
+                <span className="font-medium">{userParticipant.fplTeamName}</span>
               </div>
-            ) : (
-              <>
-                {userParticipant && (
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-sm text-muted-foreground">Playing as</span>
-                    <span className="font-medium">{userParticipant.fplTeamName}</span>
-                  </div>
-                )}
-                <YourMatchesSection
-                  matches={userMatches}
-                  currentGameweek={tournament.currentGameweek}
-                  isLive={hasLiveUserMatch}
-                />
-              </>
             )}
+            <YourMatchesSection
+              matches={userMatches}
+              currentGameweek={tournament.currentGameweek}
+              isLive={hasLiveUserMatch}
+            />
           </CardContent>
         </Card>
       )}
@@ -481,23 +375,13 @@ export function BracketView({
         </CardHeader>
         <CardContent>
           {tournament.rounds.length > 0 ? (
-            // Use user path bracket for large tournaments
-            tournament.participants.length > LARGE_TOURNAMENT_THRESHOLD ? (
-              <UserPathBracket
-                tournament={tournament}
-                userFplTeamId={userFplTeamId}
-                isAuthenticated={isAuthenticated}
-                currentGameweek={tournament.currentGameweek}
-              />
-            ) : (
-              <BracketLayout
-                rounds={tournament.rounds}
-                participants={tournament.participants}
-                currentGameweek={tournament.currentGameweek}
-                isAuthenticated={isAuthenticated}
-                onClaimTeam={onClaimTeam}
-              />
-            )
+            <BracketLayout
+              rounds={tournament.rounds}
+              participants={tournament.participants}
+              currentGameweek={tournament.currentGameweek}
+              isAuthenticated={isAuthenticated}
+              onClaimTeam={onClaimTeam}
+            />
           ) : (
             <p className="text-muted-foreground text-center py-8">
               Bracket will appear when the tournament starts.
@@ -506,8 +390,8 @@ export function BracketView({
         </CardContent>
       </Card>
 
-      {/* Participants Table - hide for large tournaments (too many to display) */}
-      {tournament.rounds.length > 0 && tournament.participants.length <= LARGE_TOURNAMENT_THRESHOLD && (
+      {/* Participants Table */}
+      {tournament.rounds.length > 0 && (
         <Card>
           <CardContent className="pt-6">
             <ParticipantsTable
