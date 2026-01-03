@@ -1,21 +1,21 @@
-// src/components/tournament/BracketView.tsx
+// src/components/tournament/TournamentView.tsx
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Share2 } from 'lucide-react';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Spinner } from '../ui/spinner';
-import { BracketLayout } from './BracketLayout';
-import { ParticipantsTable } from './ParticipantsTable';
-import { UserPathBracket } from './UserPathBracket';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShareTournamentDialog } from './ShareTournamentDialog';
 import { TeamSearchOverlay } from './TeamSearchOverlay';
-import { YourMatchesSection } from '../dashboard/YourMatchesSection';
-import type { Participant, Tournament } from '../../types/tournament';
-import { getMatchPlayers } from '../../types/tournament';
-import type { MatchSummaryCardProps } from '../dashboard/MatchSummaryCard';
+import { YourMatchesSection } from '@/components/dashboard/YourMatchesSection';
+import { OverviewTab, MatchesTab, ParticipantsTab, BracketTab } from './tabs';
+import type { Participant, Tournament } from '@/types/tournament';
+import { getMatchPlayers } from '@/types/tournament';
+import type { MatchSummaryCardProps } from '@/components/dashboard/MatchSummaryCard';
 
-interface BracketViewProps {
+interface TournamentViewProps {
   tournament: Tournament;
   isRefreshing?: boolean;
   isAuthenticated?: boolean;
@@ -94,13 +94,33 @@ function buildMatchesForTeam(
   return matches.sort((a, b) => (a.gameweek ?? 0) - (b.gameweek ?? 0));
 }
 
-export function BracketView({
+type TabValue = 'overview' | 'matches' | 'participants' | 'bracket';
+
+const TAB_OPTIONS: { value: TabValue; label: string }[] = [
+  { value: 'overview', label: 'Overview' },
+  { value: 'matches', label: 'Matches' },
+  { value: 'participants', label: 'Participants' },
+  { value: 'bracket', label: 'Bracket' },
+];
+
+export function TournamentView({
   tournament,
   isRefreshing = false,
   isAuthenticated,
   userFplTeamId,
   onClaimTeam,
-}: BracketViewProps) {
+}: TournamentViewProps) {
+  // URL-synced tab state
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentTab = (searchParams.get('tab') as TabValue) || 'overview';
+
+  const handleTabChange = useCallback(
+    (value: string) => {
+      setSearchParams({ tab: value });
+    },
+    [setSearchParams]
+  );
+
   // Animation timing constants
   const FADE_ANIMATION_DURATION_MS = 200;
   const CTA_SLIDE_IN_DELAY_MS = 100;
@@ -237,115 +257,7 @@ export function BracketView({
 
   return (
     <div className="space-y-6">
-      {/* Your Matches Section - for authenticated users who are participants */}
-      {isAuthenticated && userIsParticipant && tournament.rounds.length > 0 && (
-        <Card>
-          <CardContent className="pt-6">
-            {userParticipant && (
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm text-muted-foreground">Playing as</span>
-                <span className="font-medium">{userParticipant.fplTeamName}</span>
-              </div>
-            )}
-            <YourMatchesSection
-              matches={userMatches}
-              currentGameweek={tournament.currentGameweek}
-              isLive={hasLiveUserMatch}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Find Your Team Section - FIRST for unauthenticated users */}
-      {!isAuthenticated && tournament.rounds.length > 0 && (
-        <>
-          {/* Team Search (renders as its own Card) */}
-          {overlayMounted && (
-            <div
-              className={`transition-opacity duration-200 ${
-                overlayVisible ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <TeamSearchOverlay
-                participants={tournament.participants}
-                onConfirm={handleTeamConfirm}
-                onClose={handleSearchClose}
-              />
-            </div>
-          )}
-
-          {/* Your Matches Section - shown after team is selected */}
-          {previewedTeamId && !showSearch && (
-            <Card>
-              <CardContent className="pt-6">
-                {/* Selected Team Header */}
-                {previewedParticipant && (
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">
-                        Viewing as
-                      </span>
-                      <span className="font-medium">
-                        {previewedParticipant.fplTeamName}
-                      </span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleChangeTeam}
-                    >
-                      Change team
-                    </Button>
-                  </div>
-                )}
-
-                {/* Your Matches Section */}
-                <YourMatchesSection
-                  matches={previewedMatches}
-                  currentGameweek={tournament.currentGameweek}
-                  isLive={hasLivePreviewMatch}
-                />
-              </CardContent>
-
-              {/* Signup CTA with slide-in animation */}
-              {onClaimTeam && (
-                <div
-                  className={`border-t bg-muted/30 px-6 py-4 transition-all duration-300 ease-out ${
-                    ctaVisible
-                      ? 'opacity-100 translate-y-0'
-                      : 'opacity-0 translate-y-4'
-                  }`}
-                >
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <p className="text-sm text-muted-foreground text-center sm:text-left">
-                      Sign up to get notified when results are in
-                    </p>
-                    <Button onClick={handleSignupClick}>
-                      Sign up and claim team
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </Card>
-          )}
-
-          {/* Placeholder when search closed without selecting team */}
-          {!previewedTeamId && !showSearch && (
-            <Card>
-              <CardContent className="py-8 text-center">
-                <p className="text-muted-foreground mb-4">
-                  Select your team to see your matches
-                </p>
-                <Button variant="outline" onClick={handleChangeTeam}>
-                  Find your team
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
-
-      {/* Bracket Card */}
+      {/* Tournament Header */}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -374,44 +286,151 @@ export function BracketView({
             Starting Gameweek {tournament.startGameweek} • {tournament.totalRounds} rounds
           </p>
         </CardHeader>
-        <CardContent>
-          {tournament.rounds.length > 0 ? (
-            // Use UserPathBracket for large tournaments (>64 participants)
-            tournament.participants.length > 64 ? (
-              <UserPathBracket
-                tournament={tournament}
-                userFplTeamId={userFplTeamId}
-                isAuthenticated={isAuthenticated}
-                currentGameweek={tournament.currentGameweek}
-              />
-            ) : (
-              <BracketLayout
-                rounds={tournament.rounds}
-                participants={tournament.participants}
-                currentGameweek={tournament.currentGameweek}
-                isAuthenticated={isAuthenticated}
-                onClaimTeam={onClaimTeam}
-              />
-            )
-          ) : (
-            <p className="text-muted-foreground text-center py-8">
-              Bracket will appear when the tournament starts.
-            </p>
-          )}
-        </CardContent>
       </Card>
 
-      {/* Participants Table */}
-      {tournament.rounds.length > 0 && (
-        <Card>
-          <CardContent className="pt-6">
-            <ParticipantsTable
-              participants={tournament.participants}
-              seedingGameweek={tournament.startGameweek - 1}
-            />
-          </CardContent>
-        </Card>
-      )}
+      {/* Tabs */}
+      <Tabs value={currentTab} onValueChange={handleTabChange}>
+        <TabsList className="grid w-full grid-cols-4">
+          {TAB_OPTIONS.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value}>
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <TabsContent value="overview" className="mt-6 space-y-6">
+          {/* Your Matches Section - for authenticated users who are participants */}
+          {isAuthenticated && userIsParticipant && tournament.rounds.length > 0 && (
+            <Card>
+              <CardContent className="pt-6">
+                {userParticipant && (
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-sm text-muted-foreground">Playing as</span>
+                    <span className="font-medium">{userParticipant.fplTeamName}</span>
+                  </div>
+                )}
+                <YourMatchesSection
+                  matches={userMatches}
+                  currentGameweek={tournament.currentGameweek}
+                  isLive={hasLiveUserMatch}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Find Your Team Section - FIRST for unauthenticated users */}
+          {!isAuthenticated && tournament.rounds.length > 0 && (
+            <>
+              {/* Team Search (renders as its own Card) */}
+              {overlayMounted && (
+                <div
+                  className={`transition-opacity duration-200 ${
+                    overlayVisible ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <TeamSearchOverlay
+                    participants={tournament.participants}
+                    onConfirm={handleTeamConfirm}
+                    onClose={handleSearchClose}
+                  />
+                </div>
+              )}
+
+              {/* Your Matches Section - shown after team is selected */}
+              {previewedTeamId && !showSearch && (
+                <Card>
+                  <CardContent className="pt-6">
+                    {/* Selected Team Header */}
+                    {previewedParticipant && (
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">
+                            Viewing as
+                          </span>
+                          <span className="font-medium">
+                            {previewedParticipant.fplTeamName}
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleChangeTeam}
+                        >
+                          Change team
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Your Matches Section */}
+                    <YourMatchesSection
+                      matches={previewedMatches}
+                      currentGameweek={tournament.currentGameweek}
+                      isLive={hasLivePreviewMatch}
+                    />
+                  </CardContent>
+
+                  {/* Signup CTA with slide-in animation */}
+                  {onClaimTeam && (
+                    <div
+                      className={`border-t bg-muted/30 px-6 py-4 transition-all duration-300 ease-out ${
+                        ctaVisible
+                          ? 'opacity-100 translate-y-0'
+                          : 'opacity-0 translate-y-4'
+                      }`}
+                    >
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p className="text-sm text-muted-foreground text-center sm:text-left">
+                          Sign up to get notified when results are in
+                        </p>
+                        <Button onClick={handleSignupClick}>
+                          Sign up and claim team
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              )}
+
+              {/* Placeholder when search closed without selecting team */}
+              {!previewedTeamId && !showSearch && (
+                <Card>
+                  <CardContent className="py-8 text-center">
+                    <p className="text-muted-foreground mb-4">
+                      Select your team to see your matches
+                    </p>
+                    <Button variant="outline" onClick={handleChangeTeam}>
+                      Find your team
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+
+          {/* Placeholder for Overview content */}
+          <OverviewTab />
+        </TabsContent>
+
+        <TabsContent value="matches" className="mt-6">
+          <MatchesTab />
+        </TabsContent>
+
+        <TabsContent value="participants" className="mt-6">
+          <ParticipantsTab
+            participants={tournament.participants}
+            seedingGameweek={tournament.startGameweek - 1}
+          />
+        </TabsContent>
+
+        <TabsContent value="bracket" className="mt-6">
+          <BracketTab
+            tournament={tournament}
+            userFplTeamId={userFplTeamId}
+            isAuthenticated={isAuthenticated}
+            onClaimTeam={onClaimTeam}
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* Share Tournament Dialog */}
       <ShareTournamentDialog

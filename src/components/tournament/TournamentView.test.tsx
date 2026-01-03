@@ -1,8 +1,9 @@
-// src/components/tournament/BracketView.test.tsx
+// src/components/tournament/TournamentView.test.tsx
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi } from 'vitest';
-import { BracketView } from './BracketView';
+import { TournamentView } from './TournamentView';
 import type { Tournament } from '../../types/tournament';
 
 // Mock ShareTournamentDialog to simplify testing
@@ -26,7 +27,16 @@ vi.mock('./ShareTournamentDialog', () => ({
     ) : null,
 }));
 
-describe('BracketView', () => {
+// Helper to render with router
+function renderWithRouter(ui: React.ReactElement, { route = '/' } = {}) {
+  return render(
+    <MemoryRouter initialEntries={[route]}>
+      {ui}
+    </MemoryRouter>
+  );
+}
+
+describe('TournamentView', () => {
   const mockTournament: Tournament = {
     id: 'tour-1',
     fplLeagueId: 123,
@@ -70,88 +80,125 @@ describe('BracketView', () => {
   };
 
   it('renders tournament header', () => {
-    render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+    renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={true} />);
 
     expect(screen.getByText('Test League')).toBeInTheDocument();
     expect(screen.getByText('Active')).toBeInTheDocument();
   });
 
-  it('renders bracket layout with all rounds', () => {
-    render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+  it('renders tab navigation with all tabs', () => {
+    renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={true} />);
 
+    expect(screen.getByRole('tab', { name: 'Overview' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Matches' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Participants' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Bracket' })).toBeInTheDocument();
+  });
+
+  it('defaults to Overview tab', () => {
+    renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={true} />);
+
+    // Overview tab should be selected by default
+    const overviewTab = screen.getByRole('tab', { name: 'Overview' });
+    expect(overviewTab).toHaveAttribute('data-state', 'active');
+  });
+
+  it('switches tabs when clicked', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={true} />);
+
+    // Click Bracket tab
+    await user.click(screen.getByRole('tab', { name: 'Bracket' }));
+    expect(screen.getByRole('tab', { name: 'Bracket' })).toHaveAttribute('data-state', 'active');
+
+    // Bracket content should be visible (check for round names)
     expect(screen.getByText('Semi-Finals')).toBeInTheDocument();
     expect(screen.getByText('Final')).toBeInTheDocument();
   });
 
-  it('renders all participants in bracket and table', () => {
-    render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+  it('renders participants in Participants tab', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={true} />);
 
-    // Each team appears twice: once in bracket, once in table
-    expect(screen.getAllByText('Team A')).toHaveLength(2);
-    expect(screen.getAllByText('Team B')).toHaveLength(2);
-    expect(screen.getAllByText('Team C')).toHaveLength(2);
-    expect(screen.getAllByText('Team D')).toHaveLength(2);
-  });
+    // Click Participants tab
+    await user.click(screen.getByRole('tab', { name: 'Participants' }));
 
-  it('renders participants table with seeds and seeding description', () => {
-    render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
-
-    expect(screen.getByText('Participants')).toBeInTheDocument();
-    expect(screen.getByText('Initial seeding based on GW19 league standings')).toBeInTheDocument();
+    // Participants table should be visible
     expect(screen.getByText('Manager A')).toBeInTheDocument();
     expect(screen.getByText('Manager B')).toBeInTheDocument();
+    expect(screen.getByText('Initial seeding based on GW19 league standings')).toBeInTheDocument();
   });
 
   it('shows completed badge when tournament finished', () => {
     const completedTournament = { ...mockTournament, status: 'completed' as const };
-    render(<BracketView tournament={completedTournament} isAuthenticated={true} />);
+    renderWithRouter(<TournamentView tournament={completedTournament} isAuthenticated={true} />);
 
     expect(screen.getByText('Completed')).toBeInTheDocument();
   });
 
   it('shows updating indicator when isRefreshing is true', () => {
-    render(<BracketView tournament={mockTournament} isRefreshing={true} isAuthenticated={true} />);
+    renderWithRouter(<TournamentView tournament={mockTournament} isRefreshing={true} isAuthenticated={true} />);
 
     expect(screen.getByText('Updating...')).toBeInTheDocument();
     expect(screen.getByRole('status')).toBeInTheDocument(); // Spinner has role="status"
   });
 
   it('does not show updating indicator when isRefreshing is false', () => {
-    render(<BracketView tournament={mockTournament} isRefreshing={false} isAuthenticated={true} />);
+    renderWithRouter(<TournamentView tournament={mockTournament} isRefreshing={false} isAuthenticated={true} />);
 
     expect(screen.queryByText('Updating...')).not.toBeInTheDocument();
   });
 
   it('does not show updating indicator by default (prop not provided)', () => {
-    render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+    renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={true} />);
 
     expect(screen.queryByText('Updating...')).not.toBeInTheDocument();
   });
 
+  it('syncs tab with URL when navigating directly', () => {
+    // Navigate directly to bracket tab via URL
+    renderWithRouter(
+      <TournamentView tournament={mockTournament} isAuthenticated={true} />,
+      { route: '/?tab=bracket' }
+    );
+
+    // Bracket tab should be active
+    expect(screen.getByRole('tab', { name: 'Bracket' })).toHaveAttribute('data-state', 'active');
+  });
+
+  it('syncs tab with URL for participants tab', () => {
+    renderWithRouter(
+      <TournamentView tournament={mockTournament} isAuthenticated={true} />,
+      { route: '/?tab=participants' }
+    );
+
+    expect(screen.getByRole('tab', { name: 'Participants' })).toHaveAttribute('data-state', 'active');
+  });
+
   describe('Team Preview for Unauthenticated Users', () => {
-    it('shows team search overlay for unauthenticated users', () => {
-      render(<BracketView tournament={mockTournament} isAuthenticated={false} />);
+    it('shows team search overlay for unauthenticated users on Overview tab', () => {
+      renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={false} />);
 
       expect(screen.getByText('Find Your Team')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('Find your team...')).toBeInTheDocument();
     });
 
     it('does not show team search overlay for authenticated users', () => {
-      render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+      renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={true} />);
 
       expect(screen.queryByText('Find Your Team')).not.toBeInTheDocument();
     });
 
-    it('does not show Your Matches section for authenticated users', () => {
-      render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+    it('does not show Your Matches section for authenticated users not in tournament', () => {
+      renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={true} userFplTeamId={999} />);
 
-      // The YourMatchesSection heading should not appear for authenticated users
+      // The YourMatchesSection heading should not appear for authenticated users not in tournament
       expect(screen.queryByText('Your Matches')).not.toBeInTheDocument();
     });
 
     it('shows Your Matches section after team is selected', async () => {
       const user = userEvent.setup();
-      render(<BracketView tournament={mockTournament} isAuthenticated={false} />);
+      renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={false} />);
 
       // Search for a team
       const searchInput = screen.getByPlaceholderText('Find your team...');
@@ -194,8 +241,8 @@ describe('BracketView', () => {
       const user = userEvent.setup();
       const mockOnClaimTeam = vi.fn();
 
-      render(
-        <BracketView
+      renderWithRouter(
+        <TournamentView
           tournament={mockTournament}
           isAuthenticated={false}
           onClaimTeam={mockOnClaimTeam}
@@ -226,8 +273,8 @@ describe('BracketView', () => {
       const user = userEvent.setup();
       const mockOnClaimTeam = vi.fn();
 
-      render(
-        <BracketView
+      renderWithRouter(
+        <TournamentView
           tournament={mockTournament}
           isAuthenticated={false}
           onClaimTeam={mockOnClaimTeam}
@@ -259,7 +306,7 @@ describe('BracketView', () => {
     it('allows changing team after initial selection', async () => {
       const user = userEvent.setup();
 
-      render(<BracketView tournament={mockTournament} isAuthenticated={false} />);
+      renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={false} />);
 
       // Select Team A first
       const searchInput = screen.getByPlaceholderText('Find your team...');
@@ -289,7 +336,7 @@ describe('BracketView', () => {
     it('closes search overlay when close button clicked without selecting team', async () => {
       const user = userEvent.setup();
 
-      render(<BracketView tournament={mockTournament} isAuthenticated={false} />);
+      renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={false} />);
 
       // Verify search overlay is shown
       expect(screen.getByText('Find Your Team')).toBeInTheDocument();
@@ -359,7 +406,7 @@ describe('BracketView', () => {
         ],
       };
 
-      render(<BracketView tournament={tournamentWithMatches} isAuthenticated={false} />);
+      renderWithRouter(<TournamentView tournament={tournamentWithMatches} isAuthenticated={false} />);
 
       // Select Team A (fplTeamId: 1)
       const searchInput = screen.getByPlaceholderText('Find your team...');
@@ -376,12 +423,11 @@ describe('BracketView', () => {
       await user.click(screen.getByRole('button', { name: 'This is me' }));
 
       // Should show the match card with scores
-      // The scores appear both in the bracket and the YourMatchesSection
       // Verify that YourMatchesSection is rendered with match cards
       await waitFor(() => {
         // YourMatchesSection should show the match
         expect(screen.getByText('Your Matches')).toBeInTheDocument();
-        // There should be multiple instances of the scores (bracket + match card)
+        // There should be at least one instance of the scores in Overview tab
         expect(screen.getAllByText('65').length).toBeGreaterThanOrEqual(1);
         expect(screen.getAllByText('58').length).toBeGreaterThanOrEqual(1);
       });
@@ -390,8 +436,8 @@ describe('BracketView', () => {
     it('does not show signup CTA when onClaimTeam is not provided', async () => {
       const user = userEvent.setup();
 
-      render(
-        <BracketView
+      renderWithRouter(
+        <TournamentView
           tournament={mockTournament}
           isAuthenticated={false}
           // No onClaimTeam prop
@@ -423,10 +469,7 @@ describe('BracketView', () => {
         rounds: [],
       };
 
-      render(<BracketView tournament={emptyTournament} isAuthenticated={false} />);
-
-      // Should show the "Bracket will appear" message instead
-      expect(screen.getByText('Bracket will appear when the tournament starts.')).toBeInTheDocument();
+      renderWithRouter(<TournamentView tournament={emptyTournament} isAuthenticated={false} />);
 
       // Should NOT show team search overlay (no rounds = no matches to preview)
       expect(screen.queryByText('Find Your Team')).not.toBeInTheDocument();
@@ -435,8 +478,8 @@ describe('BracketView', () => {
 
   describe('Authenticated User Matches', () => {
     it('shows Your Matches section for authenticated users who are participants', () => {
-      render(
-        <BracketView
+      renderWithRouter(
+        <TournamentView
           tournament={mockTournament}
           isAuthenticated={true}
           userFplTeamId={1}
@@ -454,8 +497,8 @@ describe('BracketView', () => {
     });
 
     it('does not show Your Matches section for authenticated users not in tournament', () => {
-      render(
-        <BracketView
+      renderWithRouter(
+        <TournamentView
           tournament={mockTournament}
           isAuthenticated={true}
           userFplTeamId={999} // Not a participant
@@ -471,8 +514,8 @@ describe('BracketView', () => {
     });
 
     it('does not show Your Matches section when userFplTeamId is null', () => {
-      render(
-        <BracketView
+      renderWithRouter(
+        <TournamentView
           tournament={mockTournament}
           isAuthenticated={true}
           userFplTeamId={null}
@@ -487,8 +530,8 @@ describe('BracketView', () => {
     it('does not show signup CTA for authenticated users', () => {
       const mockOnClaimTeam = vi.fn();
 
-      render(
-        <BracketView
+      renderWithRouter(
+        <TournamentView
           tournament={mockTournament}
           isAuthenticated={true}
           userFplTeamId={1}
@@ -541,8 +584,8 @@ describe('BracketView', () => {
         ],
       };
 
-      render(
-        <BracketView
+      renderWithRouter(
+        <TournamentView
           tournament={tournamentWithScores}
           isAuthenticated={true}
           userFplTeamId={1}
@@ -559,14 +602,14 @@ describe('BracketView', () => {
 
   describe('Share functionality', () => {
     it('renders share button in header', () => {
-      render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+      renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={true} />);
 
       expect(screen.getByRole('button', { name: 'Share tournament' })).toBeInTheDocument();
     });
 
     it('opens share dialog when share button clicked', async () => {
       const user = userEvent.setup();
-      render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+      renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={true} />);
 
       // Dialog should not be visible initially
       expect(screen.queryByTestId('share-dialog')).not.toBeInTheDocument();
@@ -584,7 +627,7 @@ describe('BracketView', () => {
 
     it('closes share dialog when close button clicked', async () => {
       const user = userEvent.setup();
-      render(<BracketView tournament={mockTournament} isAuthenticated={true} />);
+      renderWithRouter(<TournamentView tournament={mockTournament} isAuthenticated={true} />);
 
       // Open dialog
       await user.click(screen.getByRole('button', { name: 'Share tournament' }));
