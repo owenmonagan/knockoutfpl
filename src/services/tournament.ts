@@ -11,6 +11,7 @@ import {
   getCurrentEvent,
   getUserTournamentMatches,
   getOpponentMatchHistories,
+  getHighestSeedRemaining,
 } from '@knockoutfpl/dataconnect';
 import type { Tournament, Round, Match, Participant, MatchPlayer } from '../types/tournament';
 import type { UUIDString } from '@knockoutfpl/dataconnect';
@@ -783,4 +784,36 @@ export async function fetchOpponentHistories(
   }
 
   return historyMap;
+}
+
+/**
+ * Basic participant info for focal team selection
+ */
+export interface FocalTeamInfo {
+  entryId: number;
+  teamName: string;
+  managerName: string;
+  seed: number;
+}
+
+/**
+ * Fetch the highest seed still active in the tournament.
+ * Used as default focal team for spectators.
+ */
+export async function fetchHighestSeedRemaining(
+  tournamentId: string
+): Promise<FocalTeamInfo | null> {
+  const result = await getHighestSeedRemaining(dataConnect, {
+    tournamentId: tournamentId as UUIDString,
+  });
+
+  const participant = result.data.participants?.[0];
+  if (!participant) return null;
+
+  return {
+    entryId: participant.entryId,
+    teamName: participant.teamName,
+    managerName: participant.managerName,
+    seed: participant.seed,
+  };
 }
