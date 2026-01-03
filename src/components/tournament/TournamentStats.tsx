@@ -26,7 +26,8 @@ export function TournamentStats({
   userStatus,
   eliminatedRound,
 }: TournamentStatsProps) {
-  const progressPercent = (remainingParticipants / totalParticipants) * 100;
+  // Progress shows tournament completion: 0% at start, 100% when champion crowned
+  const progressPercent = ((totalParticipants - remainingParticipants) / (totalParticipants - 1)) * 100;
   const roundsRemaining = totalRounds - currentRound;
 
   return (
@@ -41,7 +42,7 @@ export function TournamentStats({
         {/* Teams Remaining */}
         <div>
           <div className="flex justify-between text-sm mb-1.5">
-            <span className="text-muted-foreground">Teams Remaining</span>
+            <span className="text-muted-foreground">Teams Left</span>
             <span className="font-bold">
               {remainingParticipants.toLocaleString()} / {totalParticipants.toLocaleString()}
             </span>

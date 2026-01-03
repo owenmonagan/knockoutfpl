@@ -61,13 +61,23 @@ function buildMatchesForTeam(
         yourPlayer.score !== null &&
         (!opponent || opponent.score !== null);
       const isComplete = round.isComplete && hasScores;
+      const tournamentComplete = tournament.status === 'completed';
 
       let matchType: 'live' | 'upcoming' | 'finished';
       let result: 'won' | 'lost' | undefined;
 
-      if (isComplete) {
+      if (isComplete || tournamentComplete) {
         matchType = 'finished';
-        result = match.winnerId === fplTeamId ? 'won' : 'lost';
+        if (match.winnerId) {
+          result = match.winnerId === fplTeamId ? 'won' : 'lost';
+        } else if (hasScores) {
+          // Infer from scores if winnerId missing
+          const yourScore = yourPlayer.score ?? 0;
+          const oppScore = opponent?.score ?? 0;
+          if (yourScore !== oppScore) {
+            result = yourScore > oppScore ? 'won' : 'lost';
+          }
+        }
       } else if (roundStarted && !round.isComplete) {
         matchType = 'live';
       } else {

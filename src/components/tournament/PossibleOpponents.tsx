@@ -14,6 +14,7 @@ export interface PossibleOpponentsProps {
   winnerId?: number; // For finished matches
   team1Id?: number;
   team2Id?: number;
+  isBye?: boolean; // True when opponent match is a bye
 }
 
 interface OpponentRowProps {
@@ -66,33 +67,35 @@ export function PossibleOpponents({
   winnerId,
   team1Id,
   team2Id,
+  isBye,
 }: PossibleOpponentsProps) {
-  const showScores = matchType !== 'upcoming';
+  const showScores = matchType !== 'upcoming' && !isBye;
   const team1Leading = (team1Score ?? 0) > (team2Score ?? 0);
   const team2Leading = (team2Score ?? 0) > (team1Score ?? 0);
-  const team1Won = winnerId === team1Id;
-  const team2Won = winnerId === team2Id;
+  const team1Won = winnerId === team1Id || isBye;
+  const team2Won = winnerId === team2Id && !isBye;
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Eye className="h-4 w-4" />
-          Possible Next Opponents
+          {isBye ? 'Your Next Opponent' : 'Possible Next Opponents'}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <div className="border rounded-lg mx-4 mb-4 overflow-hidden">
           {/* Match Status Header */}
           <div className="px-3 py-2 bg-muted/30 border-b flex items-center justify-between">
-            {matchType === 'live' && (
+            {isBye && <Badge variant="secondary">Bye</Badge>}
+            {!isBye && matchType === 'live' && (
               <Badge variant="default" className="gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
                 Live
               </Badge>
             )}
-            {matchType === 'upcoming' && <Badge variant="outline">Upcoming</Badge>}
-            {matchType === 'finished' && <Badge variant="secondary">Finished</Badge>}
+            {!isBye && matchType === 'upcoming' && <Badge variant="outline">Upcoming</Badge>}
+            {!isBye && matchType === 'finished' && <Badge variant="secondary">Finished</Badge>}
           </div>
 
           {/* Team 1 */}
@@ -104,24 +107,28 @@ export function PossibleOpponents({
             isWinner={team1Won}
           />
 
-          {/* Divider with VS */}
-          <div className="flex items-center px-3">
-            <div className="flex-1 border-t" />
-            {matchType === 'upcoming' && (
-              <span className="px-2 text-sm font-bold text-muted-foreground">VS</span>
-            )}
-            {matchType !== 'upcoming' && <div className="flex-1" />}
-            <div className="flex-1 border-t" />
-          </div>
+          {/* Divider with VS - hide for bye */}
+          {!isBye && (
+            <div className="flex items-center px-3">
+              <div className="flex-1 border-t" />
+              {matchType === 'upcoming' && (
+                <span className="px-2 text-sm font-bold text-muted-foreground">VS</span>
+              )}
+              {matchType !== 'upcoming' && <div className="flex-1" />}
+              <div className="flex-1 border-t" />
+            </div>
+          )}
 
-          {/* Team 2 */}
-          <OpponentRow
-            teamName={team2Name}
-            score={team2Score}
-            showScore={showScores}
-            isLeading={team2Leading}
-            isWinner={team2Won}
-          />
+          {/* Team 2 - hide for bye */}
+          {!isBye && (
+            <OpponentRow
+              teamName={team2Name}
+              score={team2Score}
+              showScore={showScores}
+              isLeading={team2Leading}
+              isWinner={team2Won}
+            />
+          )}
         </div>
       </CardContent>
 
@@ -129,7 +136,11 @@ export function PossibleOpponents({
       <CardFooter className="pt-0">
         <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/30 rounded-lg p-3 w-full">
           <Info className="h-3 w-3 mt-0.5 shrink-0" />
-          <span>If you win, you'll face the winner in GW{nextGameweek}</span>
+          <span>
+            {isBye
+              ? `If you win, you'll face ${team1Name} in GW${nextGameweek}`
+              : `If you win, you'll face the winner in GW${nextGameweek}`}
+          </span>
         </div>
       </CardFooter>
     </Card>

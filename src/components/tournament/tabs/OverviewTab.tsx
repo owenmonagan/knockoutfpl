@@ -27,12 +27,12 @@ export function OverviewTab({
   userParticipant,
   userMatches = [],
 }: OverviewTabProps) {
-  // Find user's current/next match
+  // Find user's latest match (iterate in reverse to get most recent)
   const currentMatch = useMemo(() => {
     if (!userFplTeamId) return null;
 
-    // Find match in current round or next upcoming round
-    for (const round of tournament.rounds) {
+    for (let i = tournament.rounds.length - 1; i >= 0; i--) {
+      const round = tournament.rounds[i];
       for (const match of round.matches) {
         const players = getMatchPlayers(match);
         if (players.some((p) => p.fplTeamId === userFplTeamId)) {
@@ -55,7 +55,7 @@ export function OverviewTab({
     if (!yourPlayer) return null;
 
     const roundStarted = round.gameweek <= tournament.currentGameweek;
-    const isComplete = round.isComplete;
+    const isComplete = round.isComplete || tournament.status === 'completed';
 
     let matchType: 'live' | 'upcoming' | 'finished';
     let result: 'won' | 'lost' | undefined;
@@ -63,6 +63,14 @@ export function OverviewTab({
     if (isComplete && match.winnerId) {
       matchType = 'finished';
       result = match.winnerId === userFplTeamId ? 'won' : 'lost';
+    } else if (tournament.status === 'completed') {
+      // Tournament is done but winnerId missing - infer from scores
+      matchType = 'finished';
+      const yourScore = yourPlayer.score ?? 0;
+      const oppScore = opponent?.score ?? 0;
+      if (yourScore !== oppScore) {
+        result = yourScore > oppScore ? 'won' : 'lost';
+      }
     } else if (roundStarted) {
       matchType = 'live';
     } else {
@@ -132,6 +140,27 @@ export function OverviewTab({
     const { match: siblingMatch, round: siblingRound } = siblingData;
     const players = getMatchPlayers(siblingMatch);
 
+    // Handle bye match - single player advances automatically
+    if (siblingMatch.isBye || players.length === 1) {
+      const byeRecipient = tournament.participants.find(
+        (p) => p.fplTeamId === players[0]?.fplTeamId
+      );
+      if (!byeRecipient) return null;
+
+      return {
+        team1Name: byeRecipient.fplTeamName,
+        team1Score: null,
+        team1Id: byeRecipient.fplTeamId,
+        team2Name: 'Bye',
+        team2Score: null,
+        team2Id: undefined,
+        matchType: 'finished' as const,
+        nextGameweek: siblingRound.gameweek + 1,
+        winnerId: byeRecipient.fplTeamId,
+        isBye: true,
+      };
+    }
+
     if (players.length < 2) return null;
 
     const team1 = tournament.participants.find((p) => p.fplTeamId === players[0]?.fplTeamId);
@@ -140,10 +169,12 @@ export function OverviewTab({
     if (!team1 || !team2) return null;
 
     const roundStarted = siblingRound.gameweek <= tournament.currentGameweek;
-    const isComplete = siblingRound.isComplete;
+    const isComplete = siblingRound.isComplete || tournament.status === 'completed';
 
     let matchType: 'live' | 'upcoming' | 'finished';
     if (isComplete && siblingMatch.winnerId) {
+      matchType = 'finished';
+    } else if (tournament.status === 'completed') {
       matchType = 'finished';
     } else if (roundStarted) {
       matchType = 'live';
