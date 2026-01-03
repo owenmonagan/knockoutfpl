@@ -11,6 +11,7 @@ import { ShareTournamentDialog } from './ShareTournamentDialog';
 import { TeamSearchOverlay } from './TeamSearchOverlay';
 import { YourMatchesSection } from '@/components/dashboard/YourMatchesSection';
 import { OverviewTab, MatchesTab, ParticipantsTab, BracketTab } from './tabs';
+import { useTournamentFriends } from '@/hooks/useTournamentFriends';
 import type { Participant, Tournament } from '@/types/tournament';
 import { getMatchPlayers } from '@/types/tournament';
 import type { MatchSummaryCardProps } from '@/components/dashboard/MatchSummaryCard';
@@ -203,6 +204,15 @@ export function TournamentView({
       (p) => p.fplTeamId === userFplTeamId
     );
   }, [tournament.participants, userIsParticipant, userFplTeamId]);
+
+  // Fetch friends for the tournament
+  const { friends, friendIds, isLoading: friendsLoading } = useTournamentFriends({
+    tournamentId: tournament.id,
+    tournamentLeagueId: tournament.fplLeagueId,
+    userFplTeamId: userFplTeamId ?? null,
+    participants: tournament.participants,
+    enabled: !!userFplTeamId,
+  });
 
   // Handle overlay fade animation
   useEffect(() => {
@@ -401,6 +411,8 @@ export function TournamentView({
             userFplTeamId={userFplTeamId}
             userParticipant={userParticipant}
             userMatches={userMatches}
+            friends={friends}
+            friendsLoading={friendsLoading}
           />
         </TabsContent>
 
