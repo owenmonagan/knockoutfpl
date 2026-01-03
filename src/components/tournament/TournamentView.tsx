@@ -194,11 +194,6 @@ export function TournamentView({
     );
   }, [tournament.participants, userIsParticipant, userFplTeamId]);
 
-  // Check if any of the user's matches is live
-  const hasLiveUserMatch = useMemo(() => {
-    return userMatches.some((m) => m.type === 'live');
-  }, [userMatches]);
-
   // Handle overlay fade animation
   useEffect(() => {
     let rafId: number;
@@ -301,25 +296,6 @@ export function TournamentView({
         </TabsList>
 
         <TabsContent value="overview" className="mt-6 space-y-6">
-          {/* Your Matches Section - for authenticated users who are participants */}
-          {isAuthenticated && userIsParticipant && tournament.rounds.length > 0 && (
-            <Card>
-              <CardContent className="pt-6">
-                {userParticipant && (
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-sm text-muted-foreground">Playing as</span>
-                    <span className="font-medium">{userParticipant.fplTeamName}</span>
-                  </div>
-                )}
-                <YourMatchesSection
-                  matches={userMatches}
-                  currentGameweek={tournament.currentGameweek}
-                  isLive={hasLiveUserMatch}
-                />
-              </CardContent>
-            </Card>
-          )}
-
           {/* Find Your Team Section - FIRST for unauthenticated users */}
           {!isAuthenticated && tournament.rounds.length > 0 && (
             <>
@@ -414,6 +390,7 @@ export function TournamentView({
             tournament={tournament}
             userFplTeamId={userFplTeamId}
             userParticipant={userParticipant}
+            userMatches={userMatches}
           />
         </TabsContent>
 

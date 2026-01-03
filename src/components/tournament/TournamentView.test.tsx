@@ -486,7 +486,7 @@ describe('TournamentView', () => {
   });
 
   describe('Authenticated User Matches', () => {
-    it('shows Your Matches section for authenticated users who are participants', () => {
+    it('shows Your Match History section for authenticated users who are participants', () => {
       renderWithRouter(
         <TournamentView
           tournament={mockTournament}
@@ -495,17 +495,14 @@ describe('TournamentView', () => {
         />
       );
 
-      // Should show Your Matches section
-      expect(screen.getByText('Your Matches')).toBeInTheDocument();
+      // Should show Your Match History section in OverviewTab
+      expect(screen.getByText('Your Match History')).toBeInTheDocument();
 
-      // Should show "Playing as" header with team name
-      expect(screen.getByText('Playing as')).toBeInTheDocument();
-      // Team A appears multiple times (header, bracket, table)
-      const playingAsSection = screen.getByText('Playing as').parentElement;
-      expect(playingAsSection).toHaveTextContent('Team A');
+      // Should show Your Matches section (inside the Match History card)
+      expect(screen.getByText('Your Matches')).toBeInTheDocument();
     });
 
-    it('does not show Your Matches section for authenticated users not in tournament', () => {
+    it('does not show Your Match History section for authenticated users not in tournament', () => {
       renderWithRouter(
         <TournamentView
           tournament={mockTournament}
@@ -514,15 +511,14 @@ describe('TournamentView', () => {
         />
       );
 
-      // Should NOT show Your Matches section (user is not a participant)
-      expect(screen.queryByText('Your Matches')).not.toBeInTheDocument();
-      expect(screen.queryByText('Playing as')).not.toBeInTheDocument();
+      // Should NOT show Your Match History section (user is not a participant)
+      expect(screen.queryByText('Your Match History')).not.toBeInTheDocument();
 
       // Should also NOT show Find Your Team (user is authenticated)
       expect(screen.queryByText('Find Your Team')).not.toBeInTheDocument();
     });
 
-    it('does not show Your Matches section when userFplTeamId is null', () => {
+    it('does not show Your Match History section when userFplTeamId is null', () => {
       renderWithRouter(
         <TournamentView
           tournament={mockTournament}
@@ -531,9 +527,8 @@ describe('TournamentView', () => {
         />
       );
 
-      // Should NOT show Your Matches section
-      expect(screen.queryByText('Your Matches')).not.toBeInTheDocument();
-      expect(screen.queryByText('Playing as')).not.toBeInTheDocument();
+      // Should NOT show Your Match History section
+      expect(screen.queryByText('Your Match History')).not.toBeInTheDocument();
     });
 
     it('does not show signup CTA for authenticated users', () => {

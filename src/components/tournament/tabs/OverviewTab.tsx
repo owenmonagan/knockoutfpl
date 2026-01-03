@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { YourMatchupCard } from '../YourMatchupCard';
+import { YourMatchesSection } from '@/components/dashboard/YourMatchesSection';
+import type { MatchSummaryCardProps } from '@/components/dashboard/MatchSummaryCard';
 import type { Tournament, Participant } from '@/types/tournament';
 import { getMatchPlayers } from '@/types/tournament';
 
@@ -8,12 +10,14 @@ interface OverviewTabProps {
   tournament: Tournament;
   userFplTeamId?: number | null;
   userParticipant?: Participant | null;
+  userMatches?: MatchSummaryCardProps[];
 }
 
 export function OverviewTab({
   tournament,
   userFplTeamId,
   userParticipant,
+  userMatches = [],
 }: OverviewTabProps) {
   // Find user's current/next match
   const currentMatch = useMemo(() => {
@@ -143,6 +147,21 @@ export function OverviewTab({
         </div>
       </div>
 
+      {/* Match History - full width */}
+      {userMatches.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Match History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <YourMatchesSection
+              matches={userMatches}
+              currentGameweek={tournament.currentGameweek}
+              isLive={userMatches.some((m) => m.type === 'live')}
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
