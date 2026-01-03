@@ -409,8 +409,12 @@ export function TournamentView({
             </>
           )}
 
-          {/* Placeholder for Overview content */}
-          <OverviewTab />
+          {/* Overview Tab - full layout with cards */}
+          <OverviewTab
+            tournament={tournament}
+            userFplTeamId={userFplTeamId}
+            userParticipant={userParticipant}
+          />
         </TabsContent>
 
         <TabsContent value="matches" className="mt-6">
