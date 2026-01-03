@@ -127,12 +127,103 @@ Your personal tournament dashboard - the first thing you see.
 | **Tournament Progress** | Always | Round, progress bar, remaining count |
 | **Your Status** | Identified + in tournament | Seed, still in/eliminated status |
 | **Friends** | Has friends in tournament | Summary + mini list of friend statuses |
+| **Possible Next Opponents** | Still in + not in final | Who you could face next round |
+| **Your Match History** | Identified + has played matches | Horizontal scroll of all past results |
 | **Gameweek Status** | Always | "Live now" / "Starts in 3 days" / "Complete" |
+
+---
+
+### Your Match History Section
+
+Horizontal scrollable timeline showing your complete tournament journey.
+
+**Layout:**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  YOUR MATCH HISTORY                                     │
+│  Track your progress through the tournament stages      │
+│                                                         │
+│  Status: Active        Streak: 4 Wins                   │
+│                                                         │
+│  ← Swipe horizontally →                                 │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
+│  │ Round 1 │ │ Round 2 │ │ Round 3 │ │ Round 4 │       │
+│  │ GW 21   │ │ GW 22   │ │ GW 23   │ │ GW 24   │       │
+│  │         │ │         │ │         │ │         │       │
+│  │ You  88 │ │ You  75 │ │ You  75 │ │ You  92 │       │
+│  │ Opp  60 │ │ Opp  70 │ │ Opp  45 │ │ Opp  54 │       │
+│  │         │ │         │ │         │ │         │       │
+│  │   Won   │ │   Won   │ │   Won   │ │   Won   │       │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘       │
+│                                                         │
+│  Showing all 4 completed matches                        │
+└─────────────────────────────────────────────────────────┘
+```
+
+**History Match Card:**
+
+```
+┌─────────────────┐
+│ Round 1   GW 21 │  ← Round name + gameweek
+│                 │
+│ Your Team    88 │  ← Your score (bold)
+│ Opponent     60 │  ← Opponent score
+│                 │
+│      Won        │  ← Result badge (green/red)
+└─────────────────┘
+```
+
+**Status Display:**
+
+| User State | Status Badge | Streak Display |
+|------------|--------------|----------------|
+| Still in, winning | `Active` (green) | `Streak: X Wins` |
+| Still in, after loss | `Active` (green) | — |
+| Eliminated | `Eliminated R4` (red) | `Final record: X-1` |
+| Winner | `Champion` (gold) | `Undefeated` or `Record: X-1` |
+
+**Behavior:**
+
+- Cards ordered chronologically (Round 1 → latest)
+- Current/live match appears at end with "Live" badge
+- Horizontal scroll snaps to cards
+- Tapping a card → expands to match detail or navigates to that round in Matches tab
+
+### Possible Next Opponents Section
+
+Shows who you could face in the next round (the match playing for your bracket slot).
+
+**Layout:**
+
+```
+┌─────────────────────────────────────────┐
+│  POSSIBLE NEXT OPPONENTS                │
+│  Winner of Match #124                   │
+│                                         │
+│  ┌───────────────────────────────────┐  │
+│  │ KDB De Bruyne              #82    │  │
+│  │                  vs               │  │
+│  │ No Kane No Gain            #156   │  │
+│  │                                   │  │
+│  │ Live • GW24                       │  │
+│  └───────────────────────────────────┘  │
+│                                         │
+│  If you win, you face the winner in GW25│
+└─────────────────────────────────────────┘
+```
+
+**Visibility:**
+
+- Only shown when user is still in tournament
+- Hidden in final round (no next opponent)
+- Shows "TBD" if previous rounds haven't determined opponents yet
 
 ### Touch Targets
 
 - Your Match card: tappable → expands to match detail or navigates to Matches tab
 - Friend rows: tappable → navigates to their match in Matches tab
+- History cards: tappable → navigates to that round in Matches tab
 - All interactive elements ≥ 44px touch target
 
 ---
@@ -524,12 +615,15 @@ TournamentPage
 | Component | Description |
 |-----------|-------------|
 | `TournamentTabs` | Horizontal scrollable tab bar |
-| `OverviewTab` | Your match card + stats + friends summary |
+| `OverviewTab` | Your match card + stats + friends summary + history |
 | `MatchesTab` | Round selector + grouped match list |
 | `ParticipantsTab` | Summary stats + grouped participant list |
 | `BracketTab` | Wrapper around existing `BracketLayout` (capped at 5 rounds) |
 | `TournamentStats` | Progress bar, remaining count, gameweek info |
 | `FriendsSummary` | "3 of 5 friends still in" + mini list |
+| `MatchHistory` | Horizontal scrollable timeline of past matches |
+| `HistoryMatchCard` | Compact card for match history (round, scores, result) |
+| `PossibleOpponents` | Shows the match determining your next opponent |
 | `FindYourTeam` | Prompt for unidentified users (reuse `TeamSearchOverlay`) |
 
 ### Reusable from Existing Codebase
@@ -579,17 +673,33 @@ interface FriendInTournament {
   eliminatedRound?: number;
 }
 
+// New: Match history entry
+interface MatchHistoryEntry {
+  round: number;
+  roundName: string;
+  gameweek: number;
+  yourScore: number;
+  opponentScore: number;
+  opponentTeamName: string;
+  opponentFplTeamId: number;
+  result: 'won' | 'lost' | 'live';
+  isBye: boolean;
+}
+
 // New: User tournament context
 interface UserTournamentContext {
   isIdentified: boolean;
   isParticipant: boolean;
   fplTeamId?: number;
   currentMatch?: Match;
+  matchHistory: MatchHistoryEntry[]; // All past matches
+  winStreak: number; // Current consecutive wins
   status: 'in' | 'eliminated' | 'winner';
   eliminatedRound?: number;
   seed?: number;
   friends: FriendInTournament[];
   potentialOpponents: Participant[]; // "Who's Next?"
+  nextOpponentMatch?: Match; // The match determining next opponent
 }
 ```
 
