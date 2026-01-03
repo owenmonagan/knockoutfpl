@@ -7,6 +7,498 @@ const connectorConfig = {
 };
 exports.connectorConfig = connectorConfig;
 
+const getUserRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetUser', inputVars);
+}
+getUserRef.operationName = 'GetUser';
+exports.getUserRef = getUserRef;
+
+exports.getUser = function getUser(dcOrVars, vars) {
+  return executeQuery(getUserRef(dcOrVars, vars));
+};
+
+const getEntryRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetEntry', inputVars);
+}
+getEntryRef.operationName = 'GetEntry';
+exports.getEntryRef = getEntryRef;
+
+exports.getEntry = function getEntry(dcOrVars, vars) {
+  return executeQuery(getEntryRef(dcOrVars, vars));
+};
+
+const getEntriesRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetEntries', inputVars);
+}
+getEntriesRef.operationName = 'GetEntries';
+exports.getEntriesRef = getEntriesRef;
+
+exports.getEntries = function getEntries(dcOrVars, vars) {
+  return executeQuery(getEntriesRef(dcOrVars, vars));
+};
+
+const getPickRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetPick', inputVars);
+}
+getPickRef.operationName = 'GetPick';
+exports.getPickRef = getPickRef;
+
+exports.getPick = function getPick(dcOrVars, vars) {
+  return executeQuery(getPickRef(dcOrVars, vars));
+};
+
+const getPicksForEventRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetPicksForEvent', inputVars);
+}
+getPicksForEventRef.operationName = 'GetPicksForEvent';
+exports.getPicksForEventRef = getPicksForEventRef;
+
+exports.getPicksForEvent = function getPicksForEvent(dcOrVars, vars) {
+  return executeQuery(getPicksForEventRef(dcOrVars, vars));
+};
+
+const getLeagueRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetLeague', inputVars);
+}
+getLeagueRef.operationName = 'GetLeague';
+exports.getLeagueRef = getLeagueRef;
+
+exports.getLeague = function getLeague(dcOrVars, vars) {
+  return executeQuery(getLeagueRef(dcOrVars, vars));
+};
+
+const getCurrentEventRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetCurrentEvent', inputVars);
+}
+getCurrentEventRef.operationName = 'GetCurrentEvent';
+exports.getCurrentEventRef = getCurrentEventRef;
+
+exports.getCurrentEvent = function getCurrentEvent(dcOrVars, vars) {
+  return executeQuery(getCurrentEventRef(dcOrVars, vars));
+};
+
+const getEventRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetEvent', inputVars);
+}
+getEventRef.operationName = 'GetEvent';
+exports.getEventRef = getEventRef;
+
+exports.getEvent = function getEvent(dcOrVars, vars) {
+  return executeQuery(getEventRef(dcOrVars, vars));
+};
+
+const getSeasonEventsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetSeasonEvents', inputVars);
+}
+getSeasonEventsRef.operationName = 'GetSeasonEvents';
+exports.getSeasonEventsRef = getSeasonEventsRef;
+
+exports.getSeasonEvents = function getSeasonEvents(dcOrVars, vars) {
+  return executeQuery(getSeasonEventsRef(dcOrVars, vars));
+};
+
+const getEventsNeedingFinalizationRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetEventsNeedingFinalization', inputVars);
+}
+getEventsNeedingFinalizationRef.operationName = 'GetEventsNeedingFinalization';
+exports.getEventsNeedingFinalizationRef = getEventsNeedingFinalizationRef;
+
+exports.getEventsNeedingFinalization = function getEventsNeedingFinalization(dcOrVars, vars) {
+  return executeQuery(getEventsNeedingFinalizationRef(dcOrVars, vars));
+};
+
+const getFinalizedEventsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetFinalizedEvents', inputVars);
+}
+getFinalizedEventsRef.operationName = 'GetFinalizedEvents';
+exports.getFinalizedEventsRef = getFinalizedEventsRef;
+
+exports.getFinalizedEvents = function getFinalizedEvents(dcOrVars, vars) {
+  return executeQuery(getFinalizedEventsRef(dcOrVars, vars));
+};
+
+const getEventFinalizationRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetEventFinalization', inputVars);
+}
+getEventFinalizationRef.operationName = 'GetEventFinalization';
+exports.getEventFinalizationRef = getEventFinalizationRef;
+
+exports.getEventFinalization = function getEventFinalization(dcOrVars, vars) {
+  return executeQuery(getEventFinalizationRef(dcOrVars, vars));
+};
+
+const getTournamentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetTournament', inputVars);
+}
+getTournamentRef.operationName = 'GetTournament';
+exports.getTournamentRef = getTournamentRef;
+
+exports.getTournament = function getTournament(dcOrVars, vars) {
+  return executeQuery(getTournamentRef(dcOrVars, vars));
+};
+
+const getTournamentWithParticipantsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetTournamentWithParticipants', inputVars);
+}
+getTournamentWithParticipantsRef.operationName = 'GetTournamentWithParticipants';
+exports.getTournamentWithParticipantsRef = getTournamentWithParticipantsRef;
+
+exports.getTournamentWithParticipants = function getTournamentWithParticipants(dcOrVars, vars) {
+  return executeQuery(getTournamentWithParticipantsRef(dcOrVars, vars));
+};
+
+const getUserTournamentsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetUserTournaments', inputVars);
+}
+getUserTournamentsRef.operationName = 'GetUserTournaments';
+exports.getUserTournamentsRef = getUserTournamentsRef;
+
+exports.getUserTournaments = function getUserTournaments(dcOrVars, vars) {
+  return executeQuery(getUserTournamentsRef(dcOrVars, vars));
+};
+
+const getLeagueTournamentsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetLeagueTournaments', inputVars);
+}
+getLeagueTournamentsRef.operationName = 'GetLeagueTournaments';
+exports.getLeagueTournamentsRef = getLeagueTournamentsRef;
+
+exports.getLeagueTournaments = function getLeagueTournaments(dcOrVars, vars) {
+  return executeQuery(getLeagueTournamentsRef(dcOrVars, vars));
+};
+
+const getAllTournamentsRef = (dc) => {
+  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetAllTournaments');
+}
+getAllTournamentsRef.operationName = 'GetAllTournaments';
+exports.getAllTournamentsRef = getAllTournamentsRef;
+
+exports.getAllTournaments = function getAllTournaments(dc) {
+  return executeQuery(getAllTournamentsRef(dc));
+};
+
+const getTournamentRoundsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetTournamentRounds', inputVars);
+}
+getTournamentRoundsRef.operationName = 'GetTournamentRounds';
+exports.getTournamentRoundsRef = getTournamentRoundsRef;
+
+exports.getTournamentRounds = function getTournamentRounds(dcOrVars, vars) {
+  return executeQuery(getTournamentRoundsRef(dcOrVars, vars));
+};
+
+const getRoundRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetRound', inputVars);
+}
+getRoundRef.operationName = 'GetRound';
+exports.getRoundRef = getRoundRef;
+
+exports.getRound = function getRound(dcOrVars, vars) {
+  return executeQuery(getRoundRef(dcOrVars, vars));
+};
+
+const getActiveRoundsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetActiveRounds', inputVars);
+}
+getActiveRoundsRef.operationName = 'GetActiveRounds';
+exports.getActiveRoundsRef = getActiveRoundsRef;
+
+exports.getActiveRounds = function getActiveRounds(dcOrVars, vars) {
+  return executeQuery(getActiveRoundsRef(dcOrVars, vars));
+};
+
+const getPendingActiveRoundsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetPendingActiveRounds', inputVars);
+}
+getPendingActiveRoundsRef.operationName = 'GetPendingActiveRounds';
+exports.getPendingActiveRoundsRef = getPendingActiveRoundsRef;
+
+exports.getPendingActiveRounds = function getPendingActiveRounds(dcOrVars, vars) {
+  return executeQuery(getPendingActiveRoundsRef(dcOrVars, vars));
+};
+
+const getRoundMatchesRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetRoundMatches', inputVars);
+}
+getRoundMatchesRef.operationName = 'GetRoundMatches';
+exports.getRoundMatchesRef = getRoundMatchesRef;
+
+exports.getRoundMatches = function getRoundMatches(dcOrVars, vars) {
+  return executeQuery(getRoundMatchesRef(dcOrVars, vars));
+};
+
+const getMatchesInRangeRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetMatchesInRange', inputVars);
+}
+getMatchesInRangeRef.operationName = 'GetMatchesInRange';
+exports.getMatchesInRangeRef = getMatchesInRangeRef;
+
+exports.getMatchesInRange = function getMatchesInRange(dcOrVars, vars) {
+  return executeQuery(getMatchesInRangeRef(dcOrVars, vars));
+};
+
+const getMatchRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetMatch', inputVars);
+}
+getMatchRef.operationName = 'GetMatch';
+exports.getMatchRef = getMatchRef;
+
+exports.getMatch = function getMatch(dcOrVars, vars) {
+  return executeQuery(getMatchRef(dcOrVars, vars));
+};
+
+const getMatchPicksRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetMatchPicks', inputVars);
+}
+getMatchPicksRef.operationName = 'GetMatchPicks';
+exports.getMatchPicksRef = getMatchPicksRef;
+
+exports.getMatchPicks = function getMatchPicks(dcOrVars, vars) {
+  return executeQuery(getMatchPicksRef(dcOrVars, vars));
+};
+
+const getAllTournamentMatchPicksRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetAllTournamentMatchPicks', inputVars);
+}
+getAllTournamentMatchPicksRef.operationName = 'GetAllTournamentMatchPicks';
+exports.getAllTournamentMatchPicksRef = getAllTournamentMatchPicksRef;
+
+exports.getAllTournamentMatchPicks = function getAllTournamentMatchPicks(dcOrVars, vars) {
+  return executeQuery(getAllTournamentMatchPicksRef(dcOrVars, vars));
+};
+
+const getUserMatchesRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetUserMatches', inputVars);
+}
+getUserMatchesRef.operationName = 'GetUserMatches';
+exports.getUserMatchesRef = getUserMatchesRef;
+
+exports.getUserMatches = function getUserMatches(dcOrVars, vars) {
+  return executeQuery(getUserMatchesRef(dcOrVars, vars));
+};
+
+const searchParticipantsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'SearchParticipants', inputVars);
+}
+searchParticipantsRef.operationName = 'SearchParticipants';
+exports.searchParticipantsRef = searchParticipantsRef;
+
+exports.searchParticipants = function searchParticipants(dcOrVars, vars) {
+  return executeQuery(searchParticipantsRef(dcOrVars, vars));
+};
+
+const getParticipantRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetParticipant', inputVars);
+}
+getParticipantRef.operationName = 'GetParticipant';
+exports.getParticipantRef = getParticipantRef;
+
+exports.getParticipant = function getParticipant(dcOrVars, vars) {
+  return executeQuery(getParticipantRef(dcOrVars, vars));
+};
+
+const getActiveParticipantsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetActiveParticipants', inputVars);
+}
+getActiveParticipantsRef.operationName = 'GetActiveParticipants';
+exports.getActiveParticipantsRef = getActiveParticipantsRef;
+
+exports.getActiveParticipants = function getActiveParticipants(dcOrVars, vars) {
+  return executeQuery(getActiveParticipantsRef(dcOrVars, vars));
+};
+
+const getUserParticipationsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetUserParticipations', inputVars);
+}
+getUserParticipationsRef.operationName = 'GetUserParticipations';
+exports.getUserParticipationsRef = getUserParticipationsRef;
+
+exports.getUserParticipations = function getUserParticipations(dcOrVars, vars) {
+  return executeQuery(getUserParticipationsRef(dcOrVars, vars));
+};
+
+const getRoundsInEventRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetRoundsInEvent', inputVars);
+}
+getRoundsInEventRef.operationName = 'GetRoundsInEvent';
+exports.getRoundsInEventRef = getRoundsInEventRef;
+
+exports.getRoundsInEvent = function getRoundsInEvent(dcOrVars, vars) {
+  return executeQuery(getRoundsInEventRef(dcOrVars, vars));
+};
+
+const getTournamentParticipantsWithUsersRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetTournamentParticipantsWithUsers', inputVars);
+}
+getTournamentParticipantsWithUsersRef.operationName = 'GetTournamentParticipantsWithUsers';
+exports.getTournamentParticipantsWithUsersRef = getTournamentParticipantsWithUsersRef;
+
+exports.getTournamentParticipantsWithUsers = function getTournamentParticipantsWithUsers(dcOrVars, vars) {
+  return executeQuery(getTournamentParticipantsWithUsersRef(dcOrVars, vars));
+};
+
+const getExistingEmailQueueRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetExistingEmailQueue', inputVars);
+}
+getExistingEmailQueueRef.operationName = 'GetExistingEmailQueue';
+exports.getExistingEmailQueueRef = getExistingEmailQueueRef;
+
+exports.getExistingEmailQueue = function getExistingEmailQueue(dcOrVars, vars) {
+  return executeQuery(getExistingEmailQueueRef(dcOrVars, vars));
+};
+
+const getEntryMatchPicksRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetEntryMatchPicks', inputVars);
+}
+getEntryMatchPicksRef.operationName = 'GetEntryMatchPicks';
+exports.getEntryMatchPicksRef = getEntryMatchPicksRef;
+
+exports.getEntryMatchPicks = function getEntryMatchPicks(dcOrVars, vars) {
+  return executeQuery(getEntryMatchPicksRef(dcOrVars, vars));
+};
+
+const getUserTournamentMatchesRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetUserTournamentMatches', inputVars);
+}
+getUserTournamentMatchesRef.operationName = 'GetUserTournamentMatches';
+exports.getUserTournamentMatchesRef = getUserTournamentMatchesRef;
+
+exports.getUserTournamentMatches = function getUserTournamentMatches(dcOrVars, vars) {
+  return executeQuery(getUserTournamentMatchesRef(dcOrVars, vars));
+};
+
+const getUserVerdictMatchPicksRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetUserVerdictMatchPicks', inputVars);
+}
+getUserVerdictMatchPicksRef.operationName = 'GetUserVerdictMatchPicks';
+exports.getUserVerdictMatchPicksRef = getUserVerdictMatchPicksRef;
+
+exports.getUserVerdictMatchPicks = function getUserVerdictMatchPicks(dcOrVars, vars) {
+  return executeQuery(getUserVerdictMatchPicksRef(dcOrVars, vars));
+};
+
+const getMatchParticipantsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetMatchParticipants', inputVars);
+}
+getMatchParticipantsRef.operationName = 'GetMatchParticipants';
+exports.getMatchParticipantsRef = getMatchParticipantsRef;
+
+exports.getMatchParticipants = function getMatchParticipants(dcOrVars, vars) {
+  return executeQuery(getMatchParticipantsRef(dcOrVars, vars));
+};
+
+const getPickScoresRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetPickScores', inputVars);
+}
+getPickScoresRef.operationName = 'GetPickScores';
+exports.getPickScoresRef = getPickScoresRef;
+
+exports.getPickScores = function getPickScores(dcOrVars, vars) {
+  return executeQuery(getPickScoresRef(dcOrVars, vars));
+};
+
+const getRoundMatchesWithPriorityRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetRoundMatchesWithPriority', inputVars);
+}
+getRoundMatchesWithPriorityRef.operationName = 'GetRoundMatchesWithPriority';
+exports.getRoundMatchesWithPriorityRef = getRoundMatchesWithPriorityRef;
+
+exports.getRoundMatchesWithPriority = function getRoundMatchesWithPriority(dcOrVars, vars) {
+  return executeQuery(getRoundMatchesWithPriorityRef(dcOrVars, vars));
+};
+
+const getOpponentMatchHistoriesRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetOpponentMatchHistories', inputVars);
+}
+getOpponentMatchHistoriesRef.operationName = 'GetOpponentMatchHistories';
+exports.getOpponentMatchHistoriesRef = getOpponentMatchHistoriesRef;
+
+exports.getOpponentMatchHistories = function getOpponentMatchHistories(dcOrVars, vars) {
+  return executeQuery(getOpponentMatchHistoriesRef(dcOrVars, vars));
+};
+
 const upsertUserRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -377,448 +869,4 @@ exports.upsertParticipantLeagueRef = upsertParticipantLeagueRef;
 
 exports.upsertParticipantLeague = function upsertParticipantLeague(dcOrVars, vars) {
   return executeMutation(upsertParticipantLeagueRef(dcOrVars, vars));
-};
-
-const getUserRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetUser', inputVars);
-}
-getUserRef.operationName = 'GetUser';
-exports.getUserRef = getUserRef;
-
-exports.getUser = function getUser(dcOrVars, vars) {
-  return executeQuery(getUserRef(dcOrVars, vars));
-};
-
-const getEntryRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetEntry', inputVars);
-}
-getEntryRef.operationName = 'GetEntry';
-exports.getEntryRef = getEntryRef;
-
-exports.getEntry = function getEntry(dcOrVars, vars) {
-  return executeQuery(getEntryRef(dcOrVars, vars));
-};
-
-const getEntriesRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetEntries', inputVars);
-}
-getEntriesRef.operationName = 'GetEntries';
-exports.getEntriesRef = getEntriesRef;
-
-exports.getEntries = function getEntries(dcOrVars, vars) {
-  return executeQuery(getEntriesRef(dcOrVars, vars));
-};
-
-const getPickRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetPick', inputVars);
-}
-getPickRef.operationName = 'GetPick';
-exports.getPickRef = getPickRef;
-
-exports.getPick = function getPick(dcOrVars, vars) {
-  return executeQuery(getPickRef(dcOrVars, vars));
-};
-
-const getPicksForEventRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetPicksForEvent', inputVars);
-}
-getPicksForEventRef.operationName = 'GetPicksForEvent';
-exports.getPicksForEventRef = getPicksForEventRef;
-
-exports.getPicksForEvent = function getPicksForEvent(dcOrVars, vars) {
-  return executeQuery(getPicksForEventRef(dcOrVars, vars));
-};
-
-const getLeagueRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetLeague', inputVars);
-}
-getLeagueRef.operationName = 'GetLeague';
-exports.getLeagueRef = getLeagueRef;
-
-exports.getLeague = function getLeague(dcOrVars, vars) {
-  return executeQuery(getLeagueRef(dcOrVars, vars));
-};
-
-const getCurrentEventRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetCurrentEvent', inputVars);
-}
-getCurrentEventRef.operationName = 'GetCurrentEvent';
-exports.getCurrentEventRef = getCurrentEventRef;
-
-exports.getCurrentEvent = function getCurrentEvent(dcOrVars, vars) {
-  return executeQuery(getCurrentEventRef(dcOrVars, vars));
-};
-
-const getEventRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetEvent', inputVars);
-}
-getEventRef.operationName = 'GetEvent';
-exports.getEventRef = getEventRef;
-
-exports.getEvent = function getEvent(dcOrVars, vars) {
-  return executeQuery(getEventRef(dcOrVars, vars));
-};
-
-const getSeasonEventsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetSeasonEvents', inputVars);
-}
-getSeasonEventsRef.operationName = 'GetSeasonEvents';
-exports.getSeasonEventsRef = getSeasonEventsRef;
-
-exports.getSeasonEvents = function getSeasonEvents(dcOrVars, vars) {
-  return executeQuery(getSeasonEventsRef(dcOrVars, vars));
-};
-
-const getEventsNeedingFinalizationRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetEventsNeedingFinalization', inputVars);
-}
-getEventsNeedingFinalizationRef.operationName = 'GetEventsNeedingFinalization';
-exports.getEventsNeedingFinalizationRef = getEventsNeedingFinalizationRef;
-
-exports.getEventsNeedingFinalization = function getEventsNeedingFinalization(dcOrVars, vars) {
-  return executeQuery(getEventsNeedingFinalizationRef(dcOrVars, vars));
-};
-
-const getFinalizedEventsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetFinalizedEvents', inputVars);
-}
-getFinalizedEventsRef.operationName = 'GetFinalizedEvents';
-exports.getFinalizedEventsRef = getFinalizedEventsRef;
-
-exports.getFinalizedEvents = function getFinalizedEvents(dcOrVars, vars) {
-  return executeQuery(getFinalizedEventsRef(dcOrVars, vars));
-};
-
-const getEventFinalizationRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetEventFinalization', inputVars);
-}
-getEventFinalizationRef.operationName = 'GetEventFinalization';
-exports.getEventFinalizationRef = getEventFinalizationRef;
-
-exports.getEventFinalization = function getEventFinalization(dcOrVars, vars) {
-  return executeQuery(getEventFinalizationRef(dcOrVars, vars));
-};
-
-const getTournamentRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetTournament', inputVars);
-}
-getTournamentRef.operationName = 'GetTournament';
-exports.getTournamentRef = getTournamentRef;
-
-exports.getTournament = function getTournament(dcOrVars, vars) {
-  return executeQuery(getTournamentRef(dcOrVars, vars));
-};
-
-const getTournamentWithParticipantsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetTournamentWithParticipants', inputVars);
-}
-getTournamentWithParticipantsRef.operationName = 'GetTournamentWithParticipants';
-exports.getTournamentWithParticipantsRef = getTournamentWithParticipantsRef;
-
-exports.getTournamentWithParticipants = function getTournamentWithParticipants(dcOrVars, vars) {
-  return executeQuery(getTournamentWithParticipantsRef(dcOrVars, vars));
-};
-
-const getUserTournamentsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetUserTournaments', inputVars);
-}
-getUserTournamentsRef.operationName = 'GetUserTournaments';
-exports.getUserTournamentsRef = getUserTournamentsRef;
-
-exports.getUserTournaments = function getUserTournaments(dcOrVars, vars) {
-  return executeQuery(getUserTournamentsRef(dcOrVars, vars));
-};
-
-const getLeagueTournamentsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetLeagueTournaments', inputVars);
-}
-getLeagueTournamentsRef.operationName = 'GetLeagueTournaments';
-exports.getLeagueTournamentsRef = getLeagueTournamentsRef;
-
-exports.getLeagueTournaments = function getLeagueTournaments(dcOrVars, vars) {
-  return executeQuery(getLeagueTournamentsRef(dcOrVars, vars));
-};
-
-const getAllTournamentsRef = (dc) => {
-  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetAllTournaments');
-}
-getAllTournamentsRef.operationName = 'GetAllTournaments';
-exports.getAllTournamentsRef = getAllTournamentsRef;
-
-exports.getAllTournaments = function getAllTournaments(dc) {
-  return executeQuery(getAllTournamentsRef(dc));
-};
-
-const getTournamentRoundsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetTournamentRounds', inputVars);
-}
-getTournamentRoundsRef.operationName = 'GetTournamentRounds';
-exports.getTournamentRoundsRef = getTournamentRoundsRef;
-
-exports.getTournamentRounds = function getTournamentRounds(dcOrVars, vars) {
-  return executeQuery(getTournamentRoundsRef(dcOrVars, vars));
-};
-
-const getRoundRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetRound', inputVars);
-}
-getRoundRef.operationName = 'GetRound';
-exports.getRoundRef = getRoundRef;
-
-exports.getRound = function getRound(dcOrVars, vars) {
-  return executeQuery(getRoundRef(dcOrVars, vars));
-};
-
-const getActiveRoundsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetActiveRounds', inputVars);
-}
-getActiveRoundsRef.operationName = 'GetActiveRounds';
-exports.getActiveRoundsRef = getActiveRoundsRef;
-
-exports.getActiveRounds = function getActiveRounds(dcOrVars, vars) {
-  return executeQuery(getActiveRoundsRef(dcOrVars, vars));
-};
-
-const getPendingActiveRoundsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetPendingActiveRounds', inputVars);
-}
-getPendingActiveRoundsRef.operationName = 'GetPendingActiveRounds';
-exports.getPendingActiveRoundsRef = getPendingActiveRoundsRef;
-
-exports.getPendingActiveRounds = function getPendingActiveRounds(dcOrVars, vars) {
-  return executeQuery(getPendingActiveRoundsRef(dcOrVars, vars));
-};
-
-const getRoundMatchesRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetRoundMatches', inputVars);
-}
-getRoundMatchesRef.operationName = 'GetRoundMatches';
-exports.getRoundMatchesRef = getRoundMatchesRef;
-
-exports.getRoundMatches = function getRoundMatches(dcOrVars, vars) {
-  return executeQuery(getRoundMatchesRef(dcOrVars, vars));
-};
-
-const getMatchRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetMatch', inputVars);
-}
-getMatchRef.operationName = 'GetMatch';
-exports.getMatchRef = getMatchRef;
-
-exports.getMatch = function getMatch(dcOrVars, vars) {
-  return executeQuery(getMatchRef(dcOrVars, vars));
-};
-
-const getMatchPicksRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetMatchPicks', inputVars);
-}
-getMatchPicksRef.operationName = 'GetMatchPicks';
-exports.getMatchPicksRef = getMatchPicksRef;
-
-exports.getMatchPicks = function getMatchPicks(dcOrVars, vars) {
-  return executeQuery(getMatchPicksRef(dcOrVars, vars));
-};
-
-const getAllTournamentMatchPicksRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetAllTournamentMatchPicks', inputVars);
-}
-getAllTournamentMatchPicksRef.operationName = 'GetAllTournamentMatchPicks';
-exports.getAllTournamentMatchPicksRef = getAllTournamentMatchPicksRef;
-
-exports.getAllTournamentMatchPicks = function getAllTournamentMatchPicks(dcOrVars, vars) {
-  return executeQuery(getAllTournamentMatchPicksRef(dcOrVars, vars));
-};
-
-const getUserMatchesRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetUserMatches', inputVars);
-}
-getUserMatchesRef.operationName = 'GetUserMatches';
-exports.getUserMatchesRef = getUserMatchesRef;
-
-exports.getUserMatches = function getUserMatches(dcOrVars, vars) {
-  return executeQuery(getUserMatchesRef(dcOrVars, vars));
-};
-
-const getParticipantRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetParticipant', inputVars);
-}
-getParticipantRef.operationName = 'GetParticipant';
-exports.getParticipantRef = getParticipantRef;
-
-exports.getParticipant = function getParticipant(dcOrVars, vars) {
-  return executeQuery(getParticipantRef(dcOrVars, vars));
-};
-
-const getActiveParticipantsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetActiveParticipants', inputVars);
-}
-getActiveParticipantsRef.operationName = 'GetActiveParticipants';
-exports.getActiveParticipantsRef = getActiveParticipantsRef;
-
-exports.getActiveParticipants = function getActiveParticipants(dcOrVars, vars) {
-  return executeQuery(getActiveParticipantsRef(dcOrVars, vars));
-};
-
-const getUserParticipationsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetUserParticipations', inputVars);
-}
-getUserParticipationsRef.operationName = 'GetUserParticipations';
-exports.getUserParticipationsRef = getUserParticipationsRef;
-
-exports.getUserParticipations = function getUserParticipations(dcOrVars, vars) {
-  return executeQuery(getUserParticipationsRef(dcOrVars, vars));
-};
-
-const getRoundsInEventRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetRoundsInEvent', inputVars);
-}
-getRoundsInEventRef.operationName = 'GetRoundsInEvent';
-exports.getRoundsInEventRef = getRoundsInEventRef;
-
-exports.getRoundsInEvent = function getRoundsInEvent(dcOrVars, vars) {
-  return executeQuery(getRoundsInEventRef(dcOrVars, vars));
-};
-
-const getTournamentParticipantsWithUsersRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetTournamentParticipantsWithUsers', inputVars);
-}
-getTournamentParticipantsWithUsersRef.operationName = 'GetTournamentParticipantsWithUsers';
-exports.getTournamentParticipantsWithUsersRef = getTournamentParticipantsWithUsersRef;
-
-exports.getTournamentParticipantsWithUsers = function getTournamentParticipantsWithUsers(dcOrVars, vars) {
-  return executeQuery(getTournamentParticipantsWithUsersRef(dcOrVars, vars));
-};
-
-const getExistingEmailQueueRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetExistingEmailQueue', inputVars);
-}
-getExistingEmailQueueRef.operationName = 'GetExistingEmailQueue';
-exports.getExistingEmailQueueRef = getExistingEmailQueueRef;
-
-exports.getExistingEmailQueue = function getExistingEmailQueue(dcOrVars, vars) {
-  return executeQuery(getExistingEmailQueueRef(dcOrVars, vars));
-};
-
-const getEntryMatchPicksRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetEntryMatchPicks', inputVars);
-}
-getEntryMatchPicksRef.operationName = 'GetEntryMatchPicks';
-exports.getEntryMatchPicksRef = getEntryMatchPicksRef;
-
-exports.getEntryMatchPicks = function getEntryMatchPicks(dcOrVars, vars) {
-  return executeQuery(getEntryMatchPicksRef(dcOrVars, vars));
-};
-
-const getUserVerdictMatchPicksRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetUserVerdictMatchPicks', inputVars);
-}
-getUserVerdictMatchPicksRef.operationName = 'GetUserVerdictMatchPicks';
-exports.getUserVerdictMatchPicksRef = getUserVerdictMatchPicksRef;
-
-exports.getUserVerdictMatchPicks = function getUserVerdictMatchPicks(dcOrVars, vars) {
-  return executeQuery(getUserVerdictMatchPicksRef(dcOrVars, vars));
-};
-
-const getMatchParticipantsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetMatchParticipants', inputVars);
-}
-getMatchParticipantsRef.operationName = 'GetMatchParticipants';
-exports.getMatchParticipantsRef = getMatchParticipantsRef;
-
-exports.getMatchParticipants = function getMatchParticipants(dcOrVars, vars) {
-  return executeQuery(getMatchParticipantsRef(dcOrVars, vars));
-};
-
-const getPickScoresRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetPickScores', inputVars);
-}
-getPickScoresRef.operationName = 'GetPickScores';
-exports.getPickScoresRef = getPickScoresRef;
-
-exports.getPickScores = function getPickScores(dcOrVars, vars) {
-  return executeQuery(getPickScoresRef(dcOrVars, vars));
-};
-
-const getRoundMatchesWithPriorityRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetRoundMatchesWithPriority', inputVars);
-}
-getRoundMatchesWithPriorityRef.operationName = 'GetRoundMatchesWithPriority';
-exports.getRoundMatchesWithPriorityRef = getRoundMatchesWithPriorityRef;
-
-exports.getRoundMatchesWithPriority = function getRoundMatchesWithPriority(dcOrVars, vars) {
-  return executeQuery(getRoundMatchesWithPriorityRef(dcOrVars, vars));
 };

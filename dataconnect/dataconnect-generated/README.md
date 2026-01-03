@@ -30,10 +30,12 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetActiveRounds*](#getactiverounds)
   - [*GetPendingActiveRounds*](#getpendingactiverounds)
   - [*GetRoundMatches*](#getroundmatches)
+  - [*GetMatchesInRange*](#getmatchesinrange)
   - [*GetMatch*](#getmatch)
   - [*GetMatchPicks*](#getmatchpicks)
   - [*GetAllTournamentMatchPicks*](#getalltournamentmatchpicks)
   - [*GetUserMatches*](#getusermatches)
+  - [*SearchParticipants*](#searchparticipants)
   - [*GetParticipant*](#getparticipant)
   - [*GetActiveParticipants*](#getactiveparticipants)
   - [*GetUserParticipations*](#getuserparticipations)
@@ -41,10 +43,12 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetTournamentParticipantsWithUsers*](#gettournamentparticipantswithusers)
   - [*GetExistingEmailQueue*](#getexistingemailqueue)
   - [*GetEntryMatchPicks*](#getentrymatchpicks)
+  - [*GetUserTournamentMatches*](#getusertournamentmatches)
   - [*GetUserVerdictMatchPicks*](#getuserverdictmatchpicks)
   - [*GetMatchParticipants*](#getmatchparticipants)
   - [*GetPickScores*](#getpickscores)
   - [*GetRoundMatchesWithPriority*](#getroundmatcheswithpriority)
+  - [*GetOpponentMatchHistories*](#getopponentmatchhistories)
 - [**Mutations**](#mutations)
   - [*UpsertUser*](#upsertuser)
   - [*ConnectFplEntry*](#connectfplentry)
@@ -1709,6 +1713,7 @@ The `GetTournamentWithParticipants` query requires an argument of type `GetTourn
 ```typescript
 export interface GetTournamentWithParticipantsVariables {
   id: UUIDString;
+  participantLimit?: number | null;
 }
 ```
 ### Return Type
@@ -1753,13 +1758,14 @@ import { connectorConfig, getTournamentWithParticipants, GetTournamentWithPartic
 // The `GetTournamentWithParticipants` query requires an argument of type `GetTournamentWithParticipantsVariables`:
 const getTournamentWithParticipantsVars: GetTournamentWithParticipantsVariables = {
   id: ..., 
+  participantLimit: ..., // optional
 };
 
 // Call the `getTournamentWithParticipants()` function to execute the query.
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await getTournamentWithParticipants(getTournamentWithParticipantsVars);
 // Variables can be defined inline as well.
-const { data } = await getTournamentWithParticipants({ id: ..., });
+const { data } = await getTournamentWithParticipants({ id: ..., participantLimit: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -1785,12 +1791,13 @@ import { connectorConfig, getTournamentWithParticipantsRef, GetTournamentWithPar
 // The `GetTournamentWithParticipants` query requires an argument of type `GetTournamentWithParticipantsVariables`:
 const getTournamentWithParticipantsVars: GetTournamentWithParticipantsVariables = {
   id: ..., 
+  participantLimit: ..., // optional
 };
 
 // Call the `getTournamentWithParticipantsRef()` function to get a reference to the query.
 const ref = getTournamentWithParticipantsRef(getTournamentWithParticipantsVars);
 // Variables can be defined inline as well.
-const ref = getTournamentWithParticipantsRef({ id: ..., });
+const ref = getTournamentWithParticipantsRef({ id: ..., participantLimit: ..., });
 
 // You can also pass in a `DataConnect` instance to the `QueryRef` function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -2749,6 +2756,141 @@ executeQuery(ref).then((response) => {
 });
 ```
 
+## GetMatchesInRange
+You can execute the `GetMatchesInRange` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getMatchesInRange(vars: GetMatchesInRangeVariables): QueryPromise<GetMatchesInRangeData, GetMatchesInRangeVariables>;
+
+interface GetMatchesInRangeRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetMatchesInRangeVariables): QueryRef<GetMatchesInRangeData, GetMatchesInRangeVariables>;
+}
+export const getMatchesInRangeRef: GetMatchesInRangeRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getMatchesInRange(dc: DataConnect, vars: GetMatchesInRangeVariables): QueryPromise<GetMatchesInRangeData, GetMatchesInRangeVariables>;
+
+interface GetMatchesInRangeRef {
+  ...
+  (dc: DataConnect, vars: GetMatchesInRangeVariables): QueryRef<GetMatchesInRangeData, GetMatchesInRangeVariables>;
+}
+export const getMatchesInRangeRef: GetMatchesInRangeRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getMatchesInRangeRef:
+```typescript
+const name = getMatchesInRangeRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetMatchesInRange` query requires an argument of type `GetMatchesInRangeVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetMatchesInRangeVariables {
+  tournamentId: UUIDString;
+  roundNumber: number;
+  startPosition: number;
+  endPosition: number;
+}
+```
+### Return Type
+Recall that executing the `GetMatchesInRange` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetMatchesInRangeData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetMatchesInRangeData {
+  matches: ({
+    matchId: number;
+    roundNumber: number;
+    positionInRound: number;
+    status: string;
+    winnerEntryId?: number | null;
+    isBye: boolean;
+    qualifiesToMatchId?: number | null;
+    matchPicks_on_match: ({
+      entryId: number;
+      slot: number;
+      participant: {
+        seed: number;
+        teamName: string;
+        managerName: string;
+      };
+    })[];
+  })[];
+}
+```
+### Using `GetMatchesInRange`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getMatchesInRange, GetMatchesInRangeVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetMatchesInRange` query requires an argument of type `GetMatchesInRangeVariables`:
+const getMatchesInRangeVars: GetMatchesInRangeVariables = {
+  tournamentId: ..., 
+  roundNumber: ..., 
+  startPosition: ..., 
+  endPosition: ..., 
+};
+
+// Call the `getMatchesInRange()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getMatchesInRange(getMatchesInRangeVars);
+// Variables can be defined inline as well.
+const { data } = await getMatchesInRange({ tournamentId: ..., roundNumber: ..., startPosition: ..., endPosition: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getMatchesInRange(dataConnect, getMatchesInRangeVars);
+
+console.log(data.matches);
+
+// Or, you can use the `Promise` API.
+getMatchesInRange(getMatchesInRangeVars).then((response) => {
+  const data = response.data;
+  console.log(data.matches);
+});
+```
+
+### Using `GetMatchesInRange`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getMatchesInRangeRef, GetMatchesInRangeVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetMatchesInRange` query requires an argument of type `GetMatchesInRangeVariables`:
+const getMatchesInRangeVars: GetMatchesInRangeVariables = {
+  tournamentId: ..., 
+  roundNumber: ..., 
+  startPosition: ..., 
+  endPosition: ..., 
+};
+
+// Call the `getMatchesInRangeRef()` function to get a reference to the query.
+const ref = getMatchesInRangeRef(getMatchesInRangeVars);
+// Variables can be defined inline as well.
+const ref = getMatchesInRangeRef({ tournamentId: ..., roundNumber: ..., startPosition: ..., endPosition: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getMatchesInRangeRef(dataConnect, getMatchesInRangeVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.matches);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.matches);
+});
+```
+
 ## GetMatch
 You can execute the `GetMatch` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
@@ -3051,6 +3193,11 @@ export interface GetAllTournamentMatchPicksData {
       playerFirstName?: string | null;
       playerLastName?: string | null;
     } & Entry_Key;
+      participant: {
+        seed: number;
+        teamName: string;
+        managerName: string;
+      };
   })[];
 }
 ```
@@ -3228,6 +3375,127 @@ console.log(data.matchPicks);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.matchPicks);
+});
+```
+
+## SearchParticipants
+You can execute the `SearchParticipants` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+searchParticipants(vars: SearchParticipantsVariables): QueryPromise<SearchParticipantsData, SearchParticipantsVariables>;
+
+interface SearchParticipantsRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: SearchParticipantsVariables): QueryRef<SearchParticipantsData, SearchParticipantsVariables>;
+}
+export const searchParticipantsRef: SearchParticipantsRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+searchParticipants(dc: DataConnect, vars: SearchParticipantsVariables): QueryPromise<SearchParticipantsData, SearchParticipantsVariables>;
+
+interface SearchParticipantsRef {
+  ...
+  (dc: DataConnect, vars: SearchParticipantsVariables): QueryRef<SearchParticipantsData, SearchParticipantsVariables>;
+}
+export const searchParticipantsRef: SearchParticipantsRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the searchParticipantsRef:
+```typescript
+const name = searchParticipantsRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `SearchParticipants` query requires an argument of type `SearchParticipantsVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface SearchParticipantsVariables {
+  tournamentId: UUIDString;
+  searchTerm: string;
+  limit?: number | null;
+}
+```
+### Return Type
+Recall that executing the `SearchParticipants` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `SearchParticipantsData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface SearchParticipantsData {
+  participants: ({
+    entryId: number;
+    teamName: string;
+    managerName: string;
+    seed: number;
+    status: string;
+  })[];
+}
+```
+### Using `SearchParticipants`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, searchParticipants, SearchParticipantsVariables } from '@knockoutfpl/dataconnect';
+
+// The `SearchParticipants` query requires an argument of type `SearchParticipantsVariables`:
+const searchParticipantsVars: SearchParticipantsVariables = {
+  tournamentId: ..., 
+  searchTerm: ..., 
+  limit: ..., // optional
+};
+
+// Call the `searchParticipants()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await searchParticipants(searchParticipantsVars);
+// Variables can be defined inline as well.
+const { data } = await searchParticipants({ tournamentId: ..., searchTerm: ..., limit: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await searchParticipants(dataConnect, searchParticipantsVars);
+
+console.log(data.participants);
+
+// Or, you can use the `Promise` API.
+searchParticipants(searchParticipantsVars).then((response) => {
+  const data = response.data;
+  console.log(data.participants);
+});
+```
+
+### Using `SearchParticipants`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, searchParticipantsRef, SearchParticipantsVariables } from '@knockoutfpl/dataconnect';
+
+// The `SearchParticipants` query requires an argument of type `SearchParticipantsVariables`:
+const searchParticipantsVars: SearchParticipantsVariables = {
+  tournamentId: ..., 
+  searchTerm: ..., 
+  limit: ..., // optional
+};
+
+// Call the `searchParticipantsRef()` function to get a reference to the query.
+const ref = searchParticipantsRef(searchParticipantsVars);
+// Variables can be defined inline as well.
+const ref = searchParticipantsRef({ tournamentId: ..., searchTerm: ..., limit: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = searchParticipantsRef(dataConnect, searchParticipantsVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.participants);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.participants);
 });
 ```
 
@@ -4065,6 +4333,147 @@ executeQuery(ref).then((response) => {
 });
 ```
 
+## GetUserTournamentMatches
+You can execute the `GetUserTournamentMatches` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getUserTournamentMatches(vars: GetUserTournamentMatchesVariables): QueryPromise<GetUserTournamentMatchesData, GetUserTournamentMatchesVariables>;
+
+interface GetUserTournamentMatchesRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserTournamentMatchesVariables): QueryRef<GetUserTournamentMatchesData, GetUserTournamentMatchesVariables>;
+}
+export const getUserTournamentMatchesRef: GetUserTournamentMatchesRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getUserTournamentMatches(dc: DataConnect, vars: GetUserTournamentMatchesVariables): QueryPromise<GetUserTournamentMatchesData, GetUserTournamentMatchesVariables>;
+
+interface GetUserTournamentMatchesRef {
+  ...
+  (dc: DataConnect, vars: GetUserTournamentMatchesVariables): QueryRef<GetUserTournamentMatchesData, GetUserTournamentMatchesVariables>;
+}
+export const getUserTournamentMatchesRef: GetUserTournamentMatchesRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getUserTournamentMatchesRef:
+```typescript
+const name = getUserTournamentMatchesRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetUserTournamentMatches` query requires an argument of type `GetUserTournamentMatchesVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetUserTournamentMatchesVariables {
+  tournamentId: UUIDString;
+  entryId: number;
+}
+```
+### Return Type
+Recall that executing the `GetUserTournamentMatches` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetUserTournamentMatchesData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetUserTournamentMatchesData {
+  matchPicks: ({
+    matchId: number;
+    entryId: number;
+    slot: number;
+    participant: {
+      entryId: number;
+      teamName: string;
+      managerName: string;
+      seed: number;
+      status: string;
+    };
+      match: {
+        matchId: number;
+        roundNumber: number;
+        positionInRound: number;
+        status: string;
+        winnerEntryId?: number | null;
+        isBye: boolean;
+        matchPicks_on_match: ({
+          entryId: number;
+          slot: number;
+          participant: {
+            entryId: number;
+            teamName: string;
+            managerName: string;
+            seed: number;
+          };
+        })[];
+      };
+  })[];
+}
+```
+### Using `GetUserTournamentMatches`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getUserTournamentMatches, GetUserTournamentMatchesVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetUserTournamentMatches` query requires an argument of type `GetUserTournamentMatchesVariables`:
+const getUserTournamentMatchesVars: GetUserTournamentMatchesVariables = {
+  tournamentId: ..., 
+  entryId: ..., 
+};
+
+// Call the `getUserTournamentMatches()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getUserTournamentMatches(getUserTournamentMatchesVars);
+// Variables can be defined inline as well.
+const { data } = await getUserTournamentMatches({ tournamentId: ..., entryId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getUserTournamentMatches(dataConnect, getUserTournamentMatchesVars);
+
+console.log(data.matchPicks);
+
+// Or, you can use the `Promise` API.
+getUserTournamentMatches(getUserTournamentMatchesVars).then((response) => {
+  const data = response.data;
+  console.log(data.matchPicks);
+});
+```
+
+### Using `GetUserTournamentMatches`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getUserTournamentMatchesRef, GetUserTournamentMatchesVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetUserTournamentMatches` query requires an argument of type `GetUserTournamentMatchesVariables`:
+const getUserTournamentMatchesVars: GetUserTournamentMatchesVariables = {
+  tournamentId: ..., 
+  entryId: ..., 
+};
+
+// Call the `getUserTournamentMatchesRef()` function to get a reference to the query.
+const ref = getUserTournamentMatchesRef(getUserTournamentMatchesVars);
+// Variables can be defined inline as well.
+const ref = getUserTournamentMatchesRef({ tournamentId: ..., entryId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getUserTournamentMatchesRef(dataConnect, getUserTournamentMatchesVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.matchPicks);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.matchPicks);
+});
+```
+
 ## GetUserVerdictMatchPicks
 You can execute the `GetUserVerdictMatchPicks` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
@@ -4490,6 +4899,8 @@ export interface GetRoundMatchesWithPriorityData {
       participant: {
         seed: number;
         uid?: string | null;
+        teamName: string;
+        managerName: string;
       };
     })[];
   })[];
@@ -4557,6 +4968,139 @@ console.log(data.matches);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.matches);
+});
+```
+
+## GetOpponentMatchHistories
+You can execute the `GetOpponentMatchHistories` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getOpponentMatchHistories(vars: GetOpponentMatchHistoriesVariables): QueryPromise<GetOpponentMatchHistoriesData, GetOpponentMatchHistoriesVariables>;
+
+interface GetOpponentMatchHistoriesRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetOpponentMatchHistoriesVariables): QueryRef<GetOpponentMatchHistoriesData, GetOpponentMatchHistoriesVariables>;
+}
+export const getOpponentMatchHistoriesRef: GetOpponentMatchHistoriesRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getOpponentMatchHistories(dc: DataConnect, vars: GetOpponentMatchHistoriesVariables): QueryPromise<GetOpponentMatchHistoriesData, GetOpponentMatchHistoriesVariables>;
+
+interface GetOpponentMatchHistoriesRef {
+  ...
+  (dc: DataConnect, vars: GetOpponentMatchHistoriesVariables): QueryRef<GetOpponentMatchHistoriesData, GetOpponentMatchHistoriesVariables>;
+}
+export const getOpponentMatchHistoriesRef: GetOpponentMatchHistoriesRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getOpponentMatchHistoriesRef:
+```typescript
+const name = getOpponentMatchHistoriesRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetOpponentMatchHistories` query requires an argument of type `GetOpponentMatchHistoriesVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetOpponentMatchHistoriesVariables {
+  tournamentId: UUIDString;
+  entryIds: number[];
+}
+```
+### Return Type
+Recall that executing the `GetOpponentMatchHistories` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetOpponentMatchHistoriesData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetOpponentMatchHistoriesData {
+  matchPicks: ({
+    entryId: number;
+    slot: number;
+    match: {
+      matchId: number;
+      roundNumber: number;
+      positionInRound: number;
+      status: string;
+      winnerEntryId?: number | null;
+      isBye: boolean;
+      matchPicks_on_match: ({
+        entryId: number;
+        slot: number;
+        participant: {
+          entryId: number;
+          teamName: string;
+          managerName: string;
+          seed: number;
+        };
+      })[];
+    };
+  })[];
+}
+```
+### Using `GetOpponentMatchHistories`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getOpponentMatchHistories, GetOpponentMatchHistoriesVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetOpponentMatchHistories` query requires an argument of type `GetOpponentMatchHistoriesVariables`:
+const getOpponentMatchHistoriesVars: GetOpponentMatchHistoriesVariables = {
+  tournamentId: ..., 
+  entryIds: ..., 
+};
+
+// Call the `getOpponentMatchHistories()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getOpponentMatchHistories(getOpponentMatchHistoriesVars);
+// Variables can be defined inline as well.
+const { data } = await getOpponentMatchHistories({ tournamentId: ..., entryIds: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getOpponentMatchHistories(dataConnect, getOpponentMatchHistoriesVars);
+
+console.log(data.matchPicks);
+
+// Or, you can use the `Promise` API.
+getOpponentMatchHistories(getOpponentMatchHistoriesVars).then((response) => {
+  const data = response.data;
+  console.log(data.matchPicks);
+});
+```
+
+### Using `GetOpponentMatchHistories`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getOpponentMatchHistoriesRef, GetOpponentMatchHistoriesVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetOpponentMatchHistories` query requires an argument of type `GetOpponentMatchHistoriesVariables`:
+const getOpponentMatchHistoriesVars: GetOpponentMatchHistoriesVariables = {
+  tournamentId: ..., 
+  entryIds: ..., 
+};
+
+// Call the `getOpponentMatchHistoriesRef()` function to get a reference to the query.
+const ref = getOpponentMatchHistoriesRef(getOpponentMatchHistoriesVars);
+// Variables can be defined inline as well.
+const ref = getOpponentMatchHistoriesRef({ tournamentId: ..., entryIds: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getOpponentMatchHistoriesRef(dataConnect, getOpponentMatchHistoriesVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.matchPicks);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.matchPicks);
 });
 ```
 

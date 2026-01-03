@@ -283,6 +283,11 @@ export interface GetAllTournamentMatchPicksData {
       playerFirstName?: string | null;
       playerLastName?: string | null;
     } & Entry_Key;
+      participant: {
+        seed: number;
+        teamName: string;
+        managerName: string;
+      };
   })[];
 }
 
@@ -550,6 +555,64 @@ export interface GetMatchVariables {
   matchId: number;
 }
 
+export interface GetMatchesInRangeData {
+  matches: ({
+    matchId: number;
+    roundNumber: number;
+    positionInRound: number;
+    status: string;
+    winnerEntryId?: number | null;
+    isBye: boolean;
+    qualifiesToMatchId?: number | null;
+    matchPicks_on_match: ({
+      entryId: number;
+      slot: number;
+      participant: {
+        seed: number;
+        teamName: string;
+        managerName: string;
+      };
+    })[];
+  })[];
+}
+
+export interface GetMatchesInRangeVariables {
+  tournamentId: UUIDString;
+  roundNumber: number;
+  startPosition: number;
+  endPosition: number;
+}
+
+export interface GetOpponentMatchHistoriesData {
+  matchPicks: ({
+    entryId: number;
+    slot: number;
+    match: {
+      matchId: number;
+      roundNumber: number;
+      positionInRound: number;
+      status: string;
+      winnerEntryId?: number | null;
+      isBye: boolean;
+      matchPicks_on_match: ({
+        entryId: number;
+        slot: number;
+        participant: {
+          entryId: number;
+          teamName: string;
+          managerName: string;
+          seed: number;
+        };
+      })[];
+    };
+  })[];
+}
+
+export interface GetOpponentMatchHistoriesVariables {
+  tournamentId: UUIDString;
+  entryIds: number[];
+}
+
 export interface GetParticipantData {
   participants: ({
     tournamentId: UUIDString;
@@ -685,6 +748,8 @@ export interface GetRoundMatchesWithPriorityData {
       participant: {
         seed: number;
         uid?: string | null;
+        teamName: string;
+        managerName: string;
       };
     })[];
   })[];
@@ -817,6 +882,7 @@ export interface GetTournamentWithParticipantsData {
 
 export interface GetTournamentWithParticipantsVariables {
   id: UUIDString;
+  participantLimit?: number | null;
 }
 
 export interface GetUserData {
@@ -861,6 +927,44 @@ export interface GetUserParticipationsData {
 
 export interface GetUserParticipationsVariables {
   uid: string;
+}
+
+export interface GetUserTournamentMatchesData {
+  matchPicks: ({
+    matchId: number;
+    entryId: number;
+    slot: number;
+    participant: {
+      entryId: number;
+      teamName: string;
+      managerName: string;
+      seed: number;
+      status: string;
+    };
+      match: {
+        matchId: number;
+        roundNumber: number;
+        positionInRound: number;
+        status: string;
+        winnerEntryId?: number | null;
+        isBye: boolean;
+        matchPicks_on_match: ({
+          entryId: number;
+          slot: number;
+          participant: {
+            entryId: number;
+            teamName: string;
+            managerName: string;
+            seed: number;
+          };
+        })[];
+      };
+  })[];
+}
+
+export interface GetUserTournamentMatchesVariables {
+  tournamentId: UUIDString;
+  entryId: number;
 }
 
 export interface GetUserTournamentsData {
@@ -960,6 +1064,22 @@ export interface Round_Key {
   tournamentId: UUIDString;
   roundNumber: number;
   __typename?: 'Round_Key';
+}
+
+export interface SearchParticipantsData {
+  participants: ({
+    entryId: number;
+    teamName: string;
+    managerName: string;
+    seed: number;
+    status: string;
+  })[];
+}
+
+export interface SearchParticipantsVariables {
+  tournamentId: UUIDString;
+  searchTerm: string;
+  limit?: number | null;
 }
 
 export interface SetTournamentWinnerData {
@@ -1151,6 +1271,498 @@ export interface User_Key {
   uid: string;
   __typename?: 'User_Key';
 }
+
+interface GetUserRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserVariables): QueryRef<GetUserData, GetUserVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUserVariables): QueryRef<GetUserData, GetUserVariables>;
+  operationName: string;
+}
+export const getUserRef: GetUserRef;
+
+export function getUser(vars: GetUserVariables): QueryPromise<GetUserData, GetUserVariables>;
+export function getUser(dc: DataConnect, vars: GetUserVariables): QueryPromise<GetUserData, GetUserVariables>;
+
+interface GetEntryRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetEntryVariables): QueryRef<GetEntryData, GetEntryVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetEntryVariables): QueryRef<GetEntryData, GetEntryVariables>;
+  operationName: string;
+}
+export const getEntryRef: GetEntryRef;
+
+export function getEntry(vars: GetEntryVariables): QueryPromise<GetEntryData, GetEntryVariables>;
+export function getEntry(dc: DataConnect, vars: GetEntryVariables): QueryPromise<GetEntryData, GetEntryVariables>;
+
+interface GetEntriesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetEntriesVariables): QueryRef<GetEntriesData, GetEntriesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetEntriesVariables): QueryRef<GetEntriesData, GetEntriesVariables>;
+  operationName: string;
+}
+export const getEntriesRef: GetEntriesRef;
+
+export function getEntries(vars: GetEntriesVariables): QueryPromise<GetEntriesData, GetEntriesVariables>;
+export function getEntries(dc: DataConnect, vars: GetEntriesVariables): QueryPromise<GetEntriesData, GetEntriesVariables>;
+
+interface GetPickRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetPickVariables): QueryRef<GetPickData, GetPickVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetPickVariables): QueryRef<GetPickData, GetPickVariables>;
+  operationName: string;
+}
+export const getPickRef: GetPickRef;
+
+export function getPick(vars: GetPickVariables): QueryPromise<GetPickData, GetPickVariables>;
+export function getPick(dc: DataConnect, vars: GetPickVariables): QueryPromise<GetPickData, GetPickVariables>;
+
+interface GetPicksForEventRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetPicksForEventVariables): QueryRef<GetPicksForEventData, GetPicksForEventVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetPicksForEventVariables): QueryRef<GetPicksForEventData, GetPicksForEventVariables>;
+  operationName: string;
+}
+export const getPicksForEventRef: GetPicksForEventRef;
+
+export function getPicksForEvent(vars: GetPicksForEventVariables): QueryPromise<GetPicksForEventData, GetPicksForEventVariables>;
+export function getPicksForEvent(dc: DataConnect, vars: GetPicksForEventVariables): QueryPromise<GetPicksForEventData, GetPicksForEventVariables>;
+
+interface GetLeagueRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLeagueVariables): QueryRef<GetLeagueData, GetLeagueVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetLeagueVariables): QueryRef<GetLeagueData, GetLeagueVariables>;
+  operationName: string;
+}
+export const getLeagueRef: GetLeagueRef;
+
+export function getLeague(vars: GetLeagueVariables): QueryPromise<GetLeagueData, GetLeagueVariables>;
+export function getLeague(dc: DataConnect, vars: GetLeagueVariables): QueryPromise<GetLeagueData, GetLeagueVariables>;
+
+interface GetCurrentEventRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetCurrentEventVariables): QueryRef<GetCurrentEventData, GetCurrentEventVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetCurrentEventVariables): QueryRef<GetCurrentEventData, GetCurrentEventVariables>;
+  operationName: string;
+}
+export const getCurrentEventRef: GetCurrentEventRef;
+
+export function getCurrentEvent(vars: GetCurrentEventVariables): QueryPromise<GetCurrentEventData, GetCurrentEventVariables>;
+export function getCurrentEvent(dc: DataConnect, vars: GetCurrentEventVariables): QueryPromise<GetCurrentEventData, GetCurrentEventVariables>;
+
+interface GetEventRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetEventVariables): QueryRef<GetEventData, GetEventVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetEventVariables): QueryRef<GetEventData, GetEventVariables>;
+  operationName: string;
+}
+export const getEventRef: GetEventRef;
+
+export function getEvent(vars: GetEventVariables): QueryPromise<GetEventData, GetEventVariables>;
+export function getEvent(dc: DataConnect, vars: GetEventVariables): QueryPromise<GetEventData, GetEventVariables>;
+
+interface GetSeasonEventsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetSeasonEventsVariables): QueryRef<GetSeasonEventsData, GetSeasonEventsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetSeasonEventsVariables): QueryRef<GetSeasonEventsData, GetSeasonEventsVariables>;
+  operationName: string;
+}
+export const getSeasonEventsRef: GetSeasonEventsRef;
+
+export function getSeasonEvents(vars: GetSeasonEventsVariables): QueryPromise<GetSeasonEventsData, GetSeasonEventsVariables>;
+export function getSeasonEvents(dc: DataConnect, vars: GetSeasonEventsVariables): QueryPromise<GetSeasonEventsData, GetSeasonEventsVariables>;
+
+interface GetEventsNeedingFinalizationRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetEventsNeedingFinalizationVariables): QueryRef<GetEventsNeedingFinalizationData, GetEventsNeedingFinalizationVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetEventsNeedingFinalizationVariables): QueryRef<GetEventsNeedingFinalizationData, GetEventsNeedingFinalizationVariables>;
+  operationName: string;
+}
+export const getEventsNeedingFinalizationRef: GetEventsNeedingFinalizationRef;
+
+export function getEventsNeedingFinalization(vars: GetEventsNeedingFinalizationVariables): QueryPromise<GetEventsNeedingFinalizationData, GetEventsNeedingFinalizationVariables>;
+export function getEventsNeedingFinalization(dc: DataConnect, vars: GetEventsNeedingFinalizationVariables): QueryPromise<GetEventsNeedingFinalizationData, GetEventsNeedingFinalizationVariables>;
+
+interface GetFinalizedEventsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetFinalizedEventsVariables): QueryRef<GetFinalizedEventsData, GetFinalizedEventsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetFinalizedEventsVariables): QueryRef<GetFinalizedEventsData, GetFinalizedEventsVariables>;
+  operationName: string;
+}
+export const getFinalizedEventsRef: GetFinalizedEventsRef;
+
+export function getFinalizedEvents(vars: GetFinalizedEventsVariables): QueryPromise<GetFinalizedEventsData, GetFinalizedEventsVariables>;
+export function getFinalizedEvents(dc: DataConnect, vars: GetFinalizedEventsVariables): QueryPromise<GetFinalizedEventsData, GetFinalizedEventsVariables>;
+
+interface GetEventFinalizationRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetEventFinalizationVariables): QueryRef<GetEventFinalizationData, GetEventFinalizationVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetEventFinalizationVariables): QueryRef<GetEventFinalizationData, GetEventFinalizationVariables>;
+  operationName: string;
+}
+export const getEventFinalizationRef: GetEventFinalizationRef;
+
+export function getEventFinalization(vars: GetEventFinalizationVariables): QueryPromise<GetEventFinalizationData, GetEventFinalizationVariables>;
+export function getEventFinalization(dc: DataConnect, vars: GetEventFinalizationVariables): QueryPromise<GetEventFinalizationData, GetEventFinalizationVariables>;
+
+interface GetTournamentRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTournamentVariables): QueryRef<GetTournamentData, GetTournamentVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetTournamentVariables): QueryRef<GetTournamentData, GetTournamentVariables>;
+  operationName: string;
+}
+export const getTournamentRef: GetTournamentRef;
+
+export function getTournament(vars: GetTournamentVariables): QueryPromise<GetTournamentData, GetTournamentVariables>;
+export function getTournament(dc: DataConnect, vars: GetTournamentVariables): QueryPromise<GetTournamentData, GetTournamentVariables>;
+
+interface GetTournamentWithParticipantsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTournamentWithParticipantsVariables): QueryRef<GetTournamentWithParticipantsData, GetTournamentWithParticipantsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetTournamentWithParticipantsVariables): QueryRef<GetTournamentWithParticipantsData, GetTournamentWithParticipantsVariables>;
+  operationName: string;
+}
+export const getTournamentWithParticipantsRef: GetTournamentWithParticipantsRef;
+
+export function getTournamentWithParticipants(vars: GetTournamentWithParticipantsVariables): QueryPromise<GetTournamentWithParticipantsData, GetTournamentWithParticipantsVariables>;
+export function getTournamentWithParticipants(dc: DataConnect, vars: GetTournamentWithParticipantsVariables): QueryPromise<GetTournamentWithParticipantsData, GetTournamentWithParticipantsVariables>;
+
+interface GetUserTournamentsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserTournamentsVariables): QueryRef<GetUserTournamentsData, GetUserTournamentsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUserTournamentsVariables): QueryRef<GetUserTournamentsData, GetUserTournamentsVariables>;
+  operationName: string;
+}
+export const getUserTournamentsRef: GetUserTournamentsRef;
+
+export function getUserTournaments(vars: GetUserTournamentsVariables): QueryPromise<GetUserTournamentsData, GetUserTournamentsVariables>;
+export function getUserTournaments(dc: DataConnect, vars: GetUserTournamentsVariables): QueryPromise<GetUserTournamentsData, GetUserTournamentsVariables>;
+
+interface GetLeagueTournamentsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLeagueTournamentsVariables): QueryRef<GetLeagueTournamentsData, GetLeagueTournamentsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetLeagueTournamentsVariables): QueryRef<GetLeagueTournamentsData, GetLeagueTournamentsVariables>;
+  operationName: string;
+}
+export const getLeagueTournamentsRef: GetLeagueTournamentsRef;
+
+export function getLeagueTournaments(vars: GetLeagueTournamentsVariables): QueryPromise<GetLeagueTournamentsData, GetLeagueTournamentsVariables>;
+export function getLeagueTournaments(dc: DataConnect, vars: GetLeagueTournamentsVariables): QueryPromise<GetLeagueTournamentsData, GetLeagueTournamentsVariables>;
+
+interface GetAllTournamentsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<GetAllTournamentsData, undefined>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect): QueryRef<GetAllTournamentsData, undefined>;
+  operationName: string;
+}
+export const getAllTournamentsRef: GetAllTournamentsRef;
+
+export function getAllTournaments(): QueryPromise<GetAllTournamentsData, undefined>;
+export function getAllTournaments(dc: DataConnect): QueryPromise<GetAllTournamentsData, undefined>;
+
+interface GetTournamentRoundsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTournamentRoundsVariables): QueryRef<GetTournamentRoundsData, GetTournamentRoundsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetTournamentRoundsVariables): QueryRef<GetTournamentRoundsData, GetTournamentRoundsVariables>;
+  operationName: string;
+}
+export const getTournamentRoundsRef: GetTournamentRoundsRef;
+
+export function getTournamentRounds(vars: GetTournamentRoundsVariables): QueryPromise<GetTournamentRoundsData, GetTournamentRoundsVariables>;
+export function getTournamentRounds(dc: DataConnect, vars: GetTournamentRoundsVariables): QueryPromise<GetTournamentRoundsData, GetTournamentRoundsVariables>;
+
+interface GetRoundRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetRoundVariables): QueryRef<GetRoundData, GetRoundVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetRoundVariables): QueryRef<GetRoundData, GetRoundVariables>;
+  operationName: string;
+}
+export const getRoundRef: GetRoundRef;
+
+export function getRound(vars: GetRoundVariables): QueryPromise<GetRoundData, GetRoundVariables>;
+export function getRound(dc: DataConnect, vars: GetRoundVariables): QueryPromise<GetRoundData, GetRoundVariables>;
+
+interface GetActiveRoundsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetActiveRoundsVariables): QueryRef<GetActiveRoundsData, GetActiveRoundsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetActiveRoundsVariables): QueryRef<GetActiveRoundsData, GetActiveRoundsVariables>;
+  operationName: string;
+}
+export const getActiveRoundsRef: GetActiveRoundsRef;
+
+export function getActiveRounds(vars: GetActiveRoundsVariables): QueryPromise<GetActiveRoundsData, GetActiveRoundsVariables>;
+export function getActiveRounds(dc: DataConnect, vars: GetActiveRoundsVariables): QueryPromise<GetActiveRoundsData, GetActiveRoundsVariables>;
+
+interface GetPendingActiveRoundsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetPendingActiveRoundsVariables): QueryRef<GetPendingActiveRoundsData, GetPendingActiveRoundsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetPendingActiveRoundsVariables): QueryRef<GetPendingActiveRoundsData, GetPendingActiveRoundsVariables>;
+  operationName: string;
+}
+export const getPendingActiveRoundsRef: GetPendingActiveRoundsRef;
+
+export function getPendingActiveRounds(vars: GetPendingActiveRoundsVariables): QueryPromise<GetPendingActiveRoundsData, GetPendingActiveRoundsVariables>;
+export function getPendingActiveRounds(dc: DataConnect, vars: GetPendingActiveRoundsVariables): QueryPromise<GetPendingActiveRoundsData, GetPendingActiveRoundsVariables>;
+
+interface GetRoundMatchesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetRoundMatchesVariables): QueryRef<GetRoundMatchesData, GetRoundMatchesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetRoundMatchesVariables): QueryRef<GetRoundMatchesData, GetRoundMatchesVariables>;
+  operationName: string;
+}
+export const getRoundMatchesRef: GetRoundMatchesRef;
+
+export function getRoundMatches(vars: GetRoundMatchesVariables): QueryPromise<GetRoundMatchesData, GetRoundMatchesVariables>;
+export function getRoundMatches(dc: DataConnect, vars: GetRoundMatchesVariables): QueryPromise<GetRoundMatchesData, GetRoundMatchesVariables>;
+
+interface GetMatchesInRangeRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetMatchesInRangeVariables): QueryRef<GetMatchesInRangeData, GetMatchesInRangeVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetMatchesInRangeVariables): QueryRef<GetMatchesInRangeData, GetMatchesInRangeVariables>;
+  operationName: string;
+}
+export const getMatchesInRangeRef: GetMatchesInRangeRef;
+
+export function getMatchesInRange(vars: GetMatchesInRangeVariables): QueryPromise<GetMatchesInRangeData, GetMatchesInRangeVariables>;
+export function getMatchesInRange(dc: DataConnect, vars: GetMatchesInRangeVariables): QueryPromise<GetMatchesInRangeData, GetMatchesInRangeVariables>;
+
+interface GetMatchRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetMatchVariables): QueryRef<GetMatchData, GetMatchVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetMatchVariables): QueryRef<GetMatchData, GetMatchVariables>;
+  operationName: string;
+}
+export const getMatchRef: GetMatchRef;
+
+export function getMatch(vars: GetMatchVariables): QueryPromise<GetMatchData, GetMatchVariables>;
+export function getMatch(dc: DataConnect, vars: GetMatchVariables): QueryPromise<GetMatchData, GetMatchVariables>;
+
+interface GetMatchPicksRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetMatchPicksVariables): QueryRef<GetMatchPicksData, GetMatchPicksVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetMatchPicksVariables): QueryRef<GetMatchPicksData, GetMatchPicksVariables>;
+  operationName: string;
+}
+export const getMatchPicksRef: GetMatchPicksRef;
+
+export function getMatchPicks(vars: GetMatchPicksVariables): QueryPromise<GetMatchPicksData, GetMatchPicksVariables>;
+export function getMatchPicks(dc: DataConnect, vars: GetMatchPicksVariables): QueryPromise<GetMatchPicksData, GetMatchPicksVariables>;
+
+interface GetAllTournamentMatchPicksRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetAllTournamentMatchPicksVariables): QueryRef<GetAllTournamentMatchPicksData, GetAllTournamentMatchPicksVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetAllTournamentMatchPicksVariables): QueryRef<GetAllTournamentMatchPicksData, GetAllTournamentMatchPicksVariables>;
+  operationName: string;
+}
+export const getAllTournamentMatchPicksRef: GetAllTournamentMatchPicksRef;
+
+export function getAllTournamentMatchPicks(vars: GetAllTournamentMatchPicksVariables): QueryPromise<GetAllTournamentMatchPicksData, GetAllTournamentMatchPicksVariables>;
+export function getAllTournamentMatchPicks(dc: DataConnect, vars: GetAllTournamentMatchPicksVariables): QueryPromise<GetAllTournamentMatchPicksData, GetAllTournamentMatchPicksVariables>;
+
+interface GetUserMatchesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserMatchesVariables): QueryRef<GetUserMatchesData, GetUserMatchesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUserMatchesVariables): QueryRef<GetUserMatchesData, GetUserMatchesVariables>;
+  operationName: string;
+}
+export const getUserMatchesRef: GetUserMatchesRef;
+
+export function getUserMatches(vars: GetUserMatchesVariables): QueryPromise<GetUserMatchesData, GetUserMatchesVariables>;
+export function getUserMatches(dc: DataConnect, vars: GetUserMatchesVariables): QueryPromise<GetUserMatchesData, GetUserMatchesVariables>;
+
+interface SearchParticipantsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: SearchParticipantsVariables): QueryRef<SearchParticipantsData, SearchParticipantsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: SearchParticipantsVariables): QueryRef<SearchParticipantsData, SearchParticipantsVariables>;
+  operationName: string;
+}
+export const searchParticipantsRef: SearchParticipantsRef;
+
+export function searchParticipants(vars: SearchParticipantsVariables): QueryPromise<SearchParticipantsData, SearchParticipantsVariables>;
+export function searchParticipants(dc: DataConnect, vars: SearchParticipantsVariables): QueryPromise<SearchParticipantsData, SearchParticipantsVariables>;
+
+interface GetParticipantRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetParticipantVariables): QueryRef<GetParticipantData, GetParticipantVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetParticipantVariables): QueryRef<GetParticipantData, GetParticipantVariables>;
+  operationName: string;
+}
+export const getParticipantRef: GetParticipantRef;
+
+export function getParticipant(vars: GetParticipantVariables): QueryPromise<GetParticipantData, GetParticipantVariables>;
+export function getParticipant(dc: DataConnect, vars: GetParticipantVariables): QueryPromise<GetParticipantData, GetParticipantVariables>;
+
+interface GetActiveParticipantsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetActiveParticipantsVariables): QueryRef<GetActiveParticipantsData, GetActiveParticipantsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetActiveParticipantsVariables): QueryRef<GetActiveParticipantsData, GetActiveParticipantsVariables>;
+  operationName: string;
+}
+export const getActiveParticipantsRef: GetActiveParticipantsRef;
+
+export function getActiveParticipants(vars: GetActiveParticipantsVariables): QueryPromise<GetActiveParticipantsData, GetActiveParticipantsVariables>;
+export function getActiveParticipants(dc: DataConnect, vars: GetActiveParticipantsVariables): QueryPromise<GetActiveParticipantsData, GetActiveParticipantsVariables>;
+
+interface GetUserParticipationsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserParticipationsVariables): QueryRef<GetUserParticipationsData, GetUserParticipationsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUserParticipationsVariables): QueryRef<GetUserParticipationsData, GetUserParticipationsVariables>;
+  operationName: string;
+}
+export const getUserParticipationsRef: GetUserParticipationsRef;
+
+export function getUserParticipations(vars: GetUserParticipationsVariables): QueryPromise<GetUserParticipationsData, GetUserParticipationsVariables>;
+export function getUserParticipations(dc: DataConnect, vars: GetUserParticipationsVariables): QueryPromise<GetUserParticipationsData, GetUserParticipationsVariables>;
+
+interface GetRoundsInEventRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetRoundsInEventVariables): QueryRef<GetRoundsInEventData, GetRoundsInEventVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetRoundsInEventVariables): QueryRef<GetRoundsInEventData, GetRoundsInEventVariables>;
+  operationName: string;
+}
+export const getRoundsInEventRef: GetRoundsInEventRef;
+
+export function getRoundsInEvent(vars: GetRoundsInEventVariables): QueryPromise<GetRoundsInEventData, GetRoundsInEventVariables>;
+export function getRoundsInEvent(dc: DataConnect, vars: GetRoundsInEventVariables): QueryPromise<GetRoundsInEventData, GetRoundsInEventVariables>;
+
+interface GetTournamentParticipantsWithUsersRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTournamentParticipantsWithUsersVariables): QueryRef<GetTournamentParticipantsWithUsersData, GetTournamentParticipantsWithUsersVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetTournamentParticipantsWithUsersVariables): QueryRef<GetTournamentParticipantsWithUsersData, GetTournamentParticipantsWithUsersVariables>;
+  operationName: string;
+}
+export const getTournamentParticipantsWithUsersRef: GetTournamentParticipantsWithUsersRef;
+
+export function getTournamentParticipantsWithUsers(vars: GetTournamentParticipantsWithUsersVariables): QueryPromise<GetTournamentParticipantsWithUsersData, GetTournamentParticipantsWithUsersVariables>;
+export function getTournamentParticipantsWithUsers(dc: DataConnect, vars: GetTournamentParticipantsWithUsersVariables): QueryPromise<GetTournamentParticipantsWithUsersData, GetTournamentParticipantsWithUsersVariables>;
+
+interface GetExistingEmailQueueRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetExistingEmailQueueVariables): QueryRef<GetExistingEmailQueueData, GetExistingEmailQueueVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetExistingEmailQueueVariables): QueryRef<GetExistingEmailQueueData, GetExistingEmailQueueVariables>;
+  operationName: string;
+}
+export const getExistingEmailQueueRef: GetExistingEmailQueueRef;
+
+export function getExistingEmailQueue(vars: GetExistingEmailQueueVariables): QueryPromise<GetExistingEmailQueueData, GetExistingEmailQueueVariables>;
+export function getExistingEmailQueue(dc: DataConnect, vars: GetExistingEmailQueueVariables): QueryPromise<GetExistingEmailQueueData, GetExistingEmailQueueVariables>;
+
+interface GetEntryMatchPicksRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetEntryMatchPicksVariables): QueryRef<GetEntryMatchPicksData, GetEntryMatchPicksVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetEntryMatchPicksVariables): QueryRef<GetEntryMatchPicksData, GetEntryMatchPicksVariables>;
+  operationName: string;
+}
+export const getEntryMatchPicksRef: GetEntryMatchPicksRef;
+
+export function getEntryMatchPicks(vars: GetEntryMatchPicksVariables): QueryPromise<GetEntryMatchPicksData, GetEntryMatchPicksVariables>;
+export function getEntryMatchPicks(dc: DataConnect, vars: GetEntryMatchPicksVariables): QueryPromise<GetEntryMatchPicksData, GetEntryMatchPicksVariables>;
+
+interface GetUserTournamentMatchesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserTournamentMatchesVariables): QueryRef<GetUserTournamentMatchesData, GetUserTournamentMatchesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUserTournamentMatchesVariables): QueryRef<GetUserTournamentMatchesData, GetUserTournamentMatchesVariables>;
+  operationName: string;
+}
+export const getUserTournamentMatchesRef: GetUserTournamentMatchesRef;
+
+export function getUserTournamentMatches(vars: GetUserTournamentMatchesVariables): QueryPromise<GetUserTournamentMatchesData, GetUserTournamentMatchesVariables>;
+export function getUserTournamentMatches(dc: DataConnect, vars: GetUserTournamentMatchesVariables): QueryPromise<GetUserTournamentMatchesData, GetUserTournamentMatchesVariables>;
+
+interface GetUserVerdictMatchPicksRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserVerdictMatchPicksVariables): QueryRef<GetUserVerdictMatchPicksData, GetUserVerdictMatchPicksVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUserVerdictMatchPicksVariables): QueryRef<GetUserVerdictMatchPicksData, GetUserVerdictMatchPicksVariables>;
+  operationName: string;
+}
+export const getUserVerdictMatchPicksRef: GetUserVerdictMatchPicksRef;
+
+export function getUserVerdictMatchPicks(vars: GetUserVerdictMatchPicksVariables): QueryPromise<GetUserVerdictMatchPicksData, GetUserVerdictMatchPicksVariables>;
+export function getUserVerdictMatchPicks(dc: DataConnect, vars: GetUserVerdictMatchPicksVariables): QueryPromise<GetUserVerdictMatchPicksData, GetUserVerdictMatchPicksVariables>;
+
+interface GetMatchParticipantsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetMatchParticipantsVariables): QueryRef<GetMatchParticipantsData, GetMatchParticipantsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetMatchParticipantsVariables): QueryRef<GetMatchParticipantsData, GetMatchParticipantsVariables>;
+  operationName: string;
+}
+export const getMatchParticipantsRef: GetMatchParticipantsRef;
+
+export function getMatchParticipants(vars: GetMatchParticipantsVariables): QueryPromise<GetMatchParticipantsData, GetMatchParticipantsVariables>;
+export function getMatchParticipants(dc: DataConnect, vars: GetMatchParticipantsVariables): QueryPromise<GetMatchParticipantsData, GetMatchParticipantsVariables>;
+
+interface GetPickScoresRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetPickScoresVariables): QueryRef<GetPickScoresData, GetPickScoresVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetPickScoresVariables): QueryRef<GetPickScoresData, GetPickScoresVariables>;
+  operationName: string;
+}
+export const getPickScoresRef: GetPickScoresRef;
+
+export function getPickScores(vars: GetPickScoresVariables): QueryPromise<GetPickScoresData, GetPickScoresVariables>;
+export function getPickScores(dc: DataConnect, vars: GetPickScoresVariables): QueryPromise<GetPickScoresData, GetPickScoresVariables>;
+
+interface GetRoundMatchesWithPriorityRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetRoundMatchesWithPriorityVariables): QueryRef<GetRoundMatchesWithPriorityData, GetRoundMatchesWithPriorityVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetRoundMatchesWithPriorityVariables): QueryRef<GetRoundMatchesWithPriorityData, GetRoundMatchesWithPriorityVariables>;
+  operationName: string;
+}
+export const getRoundMatchesWithPriorityRef: GetRoundMatchesWithPriorityRef;
+
+export function getRoundMatchesWithPriority(vars: GetRoundMatchesWithPriorityVariables): QueryPromise<GetRoundMatchesWithPriorityData, GetRoundMatchesWithPriorityVariables>;
+export function getRoundMatchesWithPriority(dc: DataConnect, vars: GetRoundMatchesWithPriorityVariables): QueryPromise<GetRoundMatchesWithPriorityData, GetRoundMatchesWithPriorityVariables>;
+
+interface GetOpponentMatchHistoriesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetOpponentMatchHistoriesVariables): QueryRef<GetOpponentMatchHistoriesData, GetOpponentMatchHistoriesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetOpponentMatchHistoriesVariables): QueryRef<GetOpponentMatchHistoriesData, GetOpponentMatchHistoriesVariables>;
+  operationName: string;
+}
+export const getOpponentMatchHistoriesRef: GetOpponentMatchHistoriesRef;
+
+export function getOpponentMatchHistories(vars: GetOpponentMatchHistoriesVariables): QueryPromise<GetOpponentMatchHistoriesData, GetOpponentMatchHistoriesVariables>;
+export function getOpponentMatchHistories(dc: DataConnect, vars: GetOpponentMatchHistoriesVariables): QueryPromise<GetOpponentMatchHistoriesData, GetOpponentMatchHistoriesVariables>;
 
 interface UpsertUserRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1523,448 +2135,4 @@ export const upsertParticipantLeagueRef: UpsertParticipantLeagueRef;
 
 export function upsertParticipantLeague(vars: UpsertParticipantLeagueVariables): MutationPromise<UpsertParticipantLeagueData, UpsertParticipantLeagueVariables>;
 export function upsertParticipantLeague(dc: DataConnect, vars: UpsertParticipantLeagueVariables): MutationPromise<UpsertParticipantLeagueData, UpsertParticipantLeagueVariables>;
-
-interface GetUserRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetUserVariables): QueryRef<GetUserData, GetUserVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetUserVariables): QueryRef<GetUserData, GetUserVariables>;
-  operationName: string;
-}
-export const getUserRef: GetUserRef;
-
-export function getUser(vars: GetUserVariables): QueryPromise<GetUserData, GetUserVariables>;
-export function getUser(dc: DataConnect, vars: GetUserVariables): QueryPromise<GetUserData, GetUserVariables>;
-
-interface GetEntryRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetEntryVariables): QueryRef<GetEntryData, GetEntryVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetEntryVariables): QueryRef<GetEntryData, GetEntryVariables>;
-  operationName: string;
-}
-export const getEntryRef: GetEntryRef;
-
-export function getEntry(vars: GetEntryVariables): QueryPromise<GetEntryData, GetEntryVariables>;
-export function getEntry(dc: DataConnect, vars: GetEntryVariables): QueryPromise<GetEntryData, GetEntryVariables>;
-
-interface GetEntriesRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetEntriesVariables): QueryRef<GetEntriesData, GetEntriesVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetEntriesVariables): QueryRef<GetEntriesData, GetEntriesVariables>;
-  operationName: string;
-}
-export const getEntriesRef: GetEntriesRef;
-
-export function getEntries(vars: GetEntriesVariables): QueryPromise<GetEntriesData, GetEntriesVariables>;
-export function getEntries(dc: DataConnect, vars: GetEntriesVariables): QueryPromise<GetEntriesData, GetEntriesVariables>;
-
-interface GetPickRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetPickVariables): QueryRef<GetPickData, GetPickVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetPickVariables): QueryRef<GetPickData, GetPickVariables>;
-  operationName: string;
-}
-export const getPickRef: GetPickRef;
-
-export function getPick(vars: GetPickVariables): QueryPromise<GetPickData, GetPickVariables>;
-export function getPick(dc: DataConnect, vars: GetPickVariables): QueryPromise<GetPickData, GetPickVariables>;
-
-interface GetPicksForEventRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetPicksForEventVariables): QueryRef<GetPicksForEventData, GetPicksForEventVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetPicksForEventVariables): QueryRef<GetPicksForEventData, GetPicksForEventVariables>;
-  operationName: string;
-}
-export const getPicksForEventRef: GetPicksForEventRef;
-
-export function getPicksForEvent(vars: GetPicksForEventVariables): QueryPromise<GetPicksForEventData, GetPicksForEventVariables>;
-export function getPicksForEvent(dc: DataConnect, vars: GetPicksForEventVariables): QueryPromise<GetPicksForEventData, GetPicksForEventVariables>;
-
-interface GetLeagueRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetLeagueVariables): QueryRef<GetLeagueData, GetLeagueVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetLeagueVariables): QueryRef<GetLeagueData, GetLeagueVariables>;
-  operationName: string;
-}
-export const getLeagueRef: GetLeagueRef;
-
-export function getLeague(vars: GetLeagueVariables): QueryPromise<GetLeagueData, GetLeagueVariables>;
-export function getLeague(dc: DataConnect, vars: GetLeagueVariables): QueryPromise<GetLeagueData, GetLeagueVariables>;
-
-interface GetCurrentEventRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetCurrentEventVariables): QueryRef<GetCurrentEventData, GetCurrentEventVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetCurrentEventVariables): QueryRef<GetCurrentEventData, GetCurrentEventVariables>;
-  operationName: string;
-}
-export const getCurrentEventRef: GetCurrentEventRef;
-
-export function getCurrentEvent(vars: GetCurrentEventVariables): QueryPromise<GetCurrentEventData, GetCurrentEventVariables>;
-export function getCurrentEvent(dc: DataConnect, vars: GetCurrentEventVariables): QueryPromise<GetCurrentEventData, GetCurrentEventVariables>;
-
-interface GetEventRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetEventVariables): QueryRef<GetEventData, GetEventVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetEventVariables): QueryRef<GetEventData, GetEventVariables>;
-  operationName: string;
-}
-export const getEventRef: GetEventRef;
-
-export function getEvent(vars: GetEventVariables): QueryPromise<GetEventData, GetEventVariables>;
-export function getEvent(dc: DataConnect, vars: GetEventVariables): QueryPromise<GetEventData, GetEventVariables>;
-
-interface GetSeasonEventsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetSeasonEventsVariables): QueryRef<GetSeasonEventsData, GetSeasonEventsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetSeasonEventsVariables): QueryRef<GetSeasonEventsData, GetSeasonEventsVariables>;
-  operationName: string;
-}
-export const getSeasonEventsRef: GetSeasonEventsRef;
-
-export function getSeasonEvents(vars: GetSeasonEventsVariables): QueryPromise<GetSeasonEventsData, GetSeasonEventsVariables>;
-export function getSeasonEvents(dc: DataConnect, vars: GetSeasonEventsVariables): QueryPromise<GetSeasonEventsData, GetSeasonEventsVariables>;
-
-interface GetEventsNeedingFinalizationRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetEventsNeedingFinalizationVariables): QueryRef<GetEventsNeedingFinalizationData, GetEventsNeedingFinalizationVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetEventsNeedingFinalizationVariables): QueryRef<GetEventsNeedingFinalizationData, GetEventsNeedingFinalizationVariables>;
-  operationName: string;
-}
-export const getEventsNeedingFinalizationRef: GetEventsNeedingFinalizationRef;
-
-export function getEventsNeedingFinalization(vars: GetEventsNeedingFinalizationVariables): QueryPromise<GetEventsNeedingFinalizationData, GetEventsNeedingFinalizationVariables>;
-export function getEventsNeedingFinalization(dc: DataConnect, vars: GetEventsNeedingFinalizationVariables): QueryPromise<GetEventsNeedingFinalizationData, GetEventsNeedingFinalizationVariables>;
-
-interface GetFinalizedEventsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetFinalizedEventsVariables): QueryRef<GetFinalizedEventsData, GetFinalizedEventsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetFinalizedEventsVariables): QueryRef<GetFinalizedEventsData, GetFinalizedEventsVariables>;
-  operationName: string;
-}
-export const getFinalizedEventsRef: GetFinalizedEventsRef;
-
-export function getFinalizedEvents(vars: GetFinalizedEventsVariables): QueryPromise<GetFinalizedEventsData, GetFinalizedEventsVariables>;
-export function getFinalizedEvents(dc: DataConnect, vars: GetFinalizedEventsVariables): QueryPromise<GetFinalizedEventsData, GetFinalizedEventsVariables>;
-
-interface GetEventFinalizationRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetEventFinalizationVariables): QueryRef<GetEventFinalizationData, GetEventFinalizationVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetEventFinalizationVariables): QueryRef<GetEventFinalizationData, GetEventFinalizationVariables>;
-  operationName: string;
-}
-export const getEventFinalizationRef: GetEventFinalizationRef;
-
-export function getEventFinalization(vars: GetEventFinalizationVariables): QueryPromise<GetEventFinalizationData, GetEventFinalizationVariables>;
-export function getEventFinalization(dc: DataConnect, vars: GetEventFinalizationVariables): QueryPromise<GetEventFinalizationData, GetEventFinalizationVariables>;
-
-interface GetTournamentRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetTournamentVariables): QueryRef<GetTournamentData, GetTournamentVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetTournamentVariables): QueryRef<GetTournamentData, GetTournamentVariables>;
-  operationName: string;
-}
-export const getTournamentRef: GetTournamentRef;
-
-export function getTournament(vars: GetTournamentVariables): QueryPromise<GetTournamentData, GetTournamentVariables>;
-export function getTournament(dc: DataConnect, vars: GetTournamentVariables): QueryPromise<GetTournamentData, GetTournamentVariables>;
-
-interface GetTournamentWithParticipantsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetTournamentWithParticipantsVariables): QueryRef<GetTournamentWithParticipantsData, GetTournamentWithParticipantsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetTournamentWithParticipantsVariables): QueryRef<GetTournamentWithParticipantsData, GetTournamentWithParticipantsVariables>;
-  operationName: string;
-}
-export const getTournamentWithParticipantsRef: GetTournamentWithParticipantsRef;
-
-export function getTournamentWithParticipants(vars: GetTournamentWithParticipantsVariables): QueryPromise<GetTournamentWithParticipantsData, GetTournamentWithParticipantsVariables>;
-export function getTournamentWithParticipants(dc: DataConnect, vars: GetTournamentWithParticipantsVariables): QueryPromise<GetTournamentWithParticipantsData, GetTournamentWithParticipantsVariables>;
-
-interface GetUserTournamentsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetUserTournamentsVariables): QueryRef<GetUserTournamentsData, GetUserTournamentsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetUserTournamentsVariables): QueryRef<GetUserTournamentsData, GetUserTournamentsVariables>;
-  operationName: string;
-}
-export const getUserTournamentsRef: GetUserTournamentsRef;
-
-export function getUserTournaments(vars: GetUserTournamentsVariables): QueryPromise<GetUserTournamentsData, GetUserTournamentsVariables>;
-export function getUserTournaments(dc: DataConnect, vars: GetUserTournamentsVariables): QueryPromise<GetUserTournamentsData, GetUserTournamentsVariables>;
-
-interface GetLeagueTournamentsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetLeagueTournamentsVariables): QueryRef<GetLeagueTournamentsData, GetLeagueTournamentsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetLeagueTournamentsVariables): QueryRef<GetLeagueTournamentsData, GetLeagueTournamentsVariables>;
-  operationName: string;
-}
-export const getLeagueTournamentsRef: GetLeagueTournamentsRef;
-
-export function getLeagueTournaments(vars: GetLeagueTournamentsVariables): QueryPromise<GetLeagueTournamentsData, GetLeagueTournamentsVariables>;
-export function getLeagueTournaments(dc: DataConnect, vars: GetLeagueTournamentsVariables): QueryPromise<GetLeagueTournamentsData, GetLeagueTournamentsVariables>;
-
-interface GetAllTournamentsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (): QueryRef<GetAllTournamentsData, undefined>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect): QueryRef<GetAllTournamentsData, undefined>;
-  operationName: string;
-}
-export const getAllTournamentsRef: GetAllTournamentsRef;
-
-export function getAllTournaments(): QueryPromise<GetAllTournamentsData, undefined>;
-export function getAllTournaments(dc: DataConnect): QueryPromise<GetAllTournamentsData, undefined>;
-
-interface GetTournamentRoundsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetTournamentRoundsVariables): QueryRef<GetTournamentRoundsData, GetTournamentRoundsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetTournamentRoundsVariables): QueryRef<GetTournamentRoundsData, GetTournamentRoundsVariables>;
-  operationName: string;
-}
-export const getTournamentRoundsRef: GetTournamentRoundsRef;
-
-export function getTournamentRounds(vars: GetTournamentRoundsVariables): QueryPromise<GetTournamentRoundsData, GetTournamentRoundsVariables>;
-export function getTournamentRounds(dc: DataConnect, vars: GetTournamentRoundsVariables): QueryPromise<GetTournamentRoundsData, GetTournamentRoundsVariables>;
-
-interface GetRoundRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetRoundVariables): QueryRef<GetRoundData, GetRoundVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetRoundVariables): QueryRef<GetRoundData, GetRoundVariables>;
-  operationName: string;
-}
-export const getRoundRef: GetRoundRef;
-
-export function getRound(vars: GetRoundVariables): QueryPromise<GetRoundData, GetRoundVariables>;
-export function getRound(dc: DataConnect, vars: GetRoundVariables): QueryPromise<GetRoundData, GetRoundVariables>;
-
-interface GetActiveRoundsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetActiveRoundsVariables): QueryRef<GetActiveRoundsData, GetActiveRoundsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetActiveRoundsVariables): QueryRef<GetActiveRoundsData, GetActiveRoundsVariables>;
-  operationName: string;
-}
-export const getActiveRoundsRef: GetActiveRoundsRef;
-
-export function getActiveRounds(vars: GetActiveRoundsVariables): QueryPromise<GetActiveRoundsData, GetActiveRoundsVariables>;
-export function getActiveRounds(dc: DataConnect, vars: GetActiveRoundsVariables): QueryPromise<GetActiveRoundsData, GetActiveRoundsVariables>;
-
-interface GetPendingActiveRoundsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetPendingActiveRoundsVariables): QueryRef<GetPendingActiveRoundsData, GetPendingActiveRoundsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetPendingActiveRoundsVariables): QueryRef<GetPendingActiveRoundsData, GetPendingActiveRoundsVariables>;
-  operationName: string;
-}
-export const getPendingActiveRoundsRef: GetPendingActiveRoundsRef;
-
-export function getPendingActiveRounds(vars: GetPendingActiveRoundsVariables): QueryPromise<GetPendingActiveRoundsData, GetPendingActiveRoundsVariables>;
-export function getPendingActiveRounds(dc: DataConnect, vars: GetPendingActiveRoundsVariables): QueryPromise<GetPendingActiveRoundsData, GetPendingActiveRoundsVariables>;
-
-interface GetRoundMatchesRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetRoundMatchesVariables): QueryRef<GetRoundMatchesData, GetRoundMatchesVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetRoundMatchesVariables): QueryRef<GetRoundMatchesData, GetRoundMatchesVariables>;
-  operationName: string;
-}
-export const getRoundMatchesRef: GetRoundMatchesRef;
-
-export function getRoundMatches(vars: GetRoundMatchesVariables): QueryPromise<GetRoundMatchesData, GetRoundMatchesVariables>;
-export function getRoundMatches(dc: DataConnect, vars: GetRoundMatchesVariables): QueryPromise<GetRoundMatchesData, GetRoundMatchesVariables>;
-
-interface GetMatchRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetMatchVariables): QueryRef<GetMatchData, GetMatchVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetMatchVariables): QueryRef<GetMatchData, GetMatchVariables>;
-  operationName: string;
-}
-export const getMatchRef: GetMatchRef;
-
-export function getMatch(vars: GetMatchVariables): QueryPromise<GetMatchData, GetMatchVariables>;
-export function getMatch(dc: DataConnect, vars: GetMatchVariables): QueryPromise<GetMatchData, GetMatchVariables>;
-
-interface GetMatchPicksRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetMatchPicksVariables): QueryRef<GetMatchPicksData, GetMatchPicksVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetMatchPicksVariables): QueryRef<GetMatchPicksData, GetMatchPicksVariables>;
-  operationName: string;
-}
-export const getMatchPicksRef: GetMatchPicksRef;
-
-export function getMatchPicks(vars: GetMatchPicksVariables): QueryPromise<GetMatchPicksData, GetMatchPicksVariables>;
-export function getMatchPicks(dc: DataConnect, vars: GetMatchPicksVariables): QueryPromise<GetMatchPicksData, GetMatchPicksVariables>;
-
-interface GetAllTournamentMatchPicksRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetAllTournamentMatchPicksVariables): QueryRef<GetAllTournamentMatchPicksData, GetAllTournamentMatchPicksVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetAllTournamentMatchPicksVariables): QueryRef<GetAllTournamentMatchPicksData, GetAllTournamentMatchPicksVariables>;
-  operationName: string;
-}
-export const getAllTournamentMatchPicksRef: GetAllTournamentMatchPicksRef;
-
-export function getAllTournamentMatchPicks(vars: GetAllTournamentMatchPicksVariables): QueryPromise<GetAllTournamentMatchPicksData, GetAllTournamentMatchPicksVariables>;
-export function getAllTournamentMatchPicks(dc: DataConnect, vars: GetAllTournamentMatchPicksVariables): QueryPromise<GetAllTournamentMatchPicksData, GetAllTournamentMatchPicksVariables>;
-
-interface GetUserMatchesRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetUserMatchesVariables): QueryRef<GetUserMatchesData, GetUserMatchesVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetUserMatchesVariables): QueryRef<GetUserMatchesData, GetUserMatchesVariables>;
-  operationName: string;
-}
-export const getUserMatchesRef: GetUserMatchesRef;
-
-export function getUserMatches(vars: GetUserMatchesVariables): QueryPromise<GetUserMatchesData, GetUserMatchesVariables>;
-export function getUserMatches(dc: DataConnect, vars: GetUserMatchesVariables): QueryPromise<GetUserMatchesData, GetUserMatchesVariables>;
-
-interface GetParticipantRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetParticipantVariables): QueryRef<GetParticipantData, GetParticipantVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetParticipantVariables): QueryRef<GetParticipantData, GetParticipantVariables>;
-  operationName: string;
-}
-export const getParticipantRef: GetParticipantRef;
-
-export function getParticipant(vars: GetParticipantVariables): QueryPromise<GetParticipantData, GetParticipantVariables>;
-export function getParticipant(dc: DataConnect, vars: GetParticipantVariables): QueryPromise<GetParticipantData, GetParticipantVariables>;
-
-interface GetActiveParticipantsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetActiveParticipantsVariables): QueryRef<GetActiveParticipantsData, GetActiveParticipantsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetActiveParticipantsVariables): QueryRef<GetActiveParticipantsData, GetActiveParticipantsVariables>;
-  operationName: string;
-}
-export const getActiveParticipantsRef: GetActiveParticipantsRef;
-
-export function getActiveParticipants(vars: GetActiveParticipantsVariables): QueryPromise<GetActiveParticipantsData, GetActiveParticipantsVariables>;
-export function getActiveParticipants(dc: DataConnect, vars: GetActiveParticipantsVariables): QueryPromise<GetActiveParticipantsData, GetActiveParticipantsVariables>;
-
-interface GetUserParticipationsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetUserParticipationsVariables): QueryRef<GetUserParticipationsData, GetUserParticipationsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetUserParticipationsVariables): QueryRef<GetUserParticipationsData, GetUserParticipationsVariables>;
-  operationName: string;
-}
-export const getUserParticipationsRef: GetUserParticipationsRef;
-
-export function getUserParticipations(vars: GetUserParticipationsVariables): QueryPromise<GetUserParticipationsData, GetUserParticipationsVariables>;
-export function getUserParticipations(dc: DataConnect, vars: GetUserParticipationsVariables): QueryPromise<GetUserParticipationsData, GetUserParticipationsVariables>;
-
-interface GetRoundsInEventRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetRoundsInEventVariables): QueryRef<GetRoundsInEventData, GetRoundsInEventVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetRoundsInEventVariables): QueryRef<GetRoundsInEventData, GetRoundsInEventVariables>;
-  operationName: string;
-}
-export const getRoundsInEventRef: GetRoundsInEventRef;
-
-export function getRoundsInEvent(vars: GetRoundsInEventVariables): QueryPromise<GetRoundsInEventData, GetRoundsInEventVariables>;
-export function getRoundsInEvent(dc: DataConnect, vars: GetRoundsInEventVariables): QueryPromise<GetRoundsInEventData, GetRoundsInEventVariables>;
-
-interface GetTournamentParticipantsWithUsersRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetTournamentParticipantsWithUsersVariables): QueryRef<GetTournamentParticipantsWithUsersData, GetTournamentParticipantsWithUsersVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetTournamentParticipantsWithUsersVariables): QueryRef<GetTournamentParticipantsWithUsersData, GetTournamentParticipantsWithUsersVariables>;
-  operationName: string;
-}
-export const getTournamentParticipantsWithUsersRef: GetTournamentParticipantsWithUsersRef;
-
-export function getTournamentParticipantsWithUsers(vars: GetTournamentParticipantsWithUsersVariables): QueryPromise<GetTournamentParticipantsWithUsersData, GetTournamentParticipantsWithUsersVariables>;
-export function getTournamentParticipantsWithUsers(dc: DataConnect, vars: GetTournamentParticipantsWithUsersVariables): QueryPromise<GetTournamentParticipantsWithUsersData, GetTournamentParticipantsWithUsersVariables>;
-
-interface GetExistingEmailQueueRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetExistingEmailQueueVariables): QueryRef<GetExistingEmailQueueData, GetExistingEmailQueueVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetExistingEmailQueueVariables): QueryRef<GetExistingEmailQueueData, GetExistingEmailQueueVariables>;
-  operationName: string;
-}
-export const getExistingEmailQueueRef: GetExistingEmailQueueRef;
-
-export function getExistingEmailQueue(vars: GetExistingEmailQueueVariables): QueryPromise<GetExistingEmailQueueData, GetExistingEmailQueueVariables>;
-export function getExistingEmailQueue(dc: DataConnect, vars: GetExistingEmailQueueVariables): QueryPromise<GetExistingEmailQueueData, GetExistingEmailQueueVariables>;
-
-interface GetEntryMatchPicksRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetEntryMatchPicksVariables): QueryRef<GetEntryMatchPicksData, GetEntryMatchPicksVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetEntryMatchPicksVariables): QueryRef<GetEntryMatchPicksData, GetEntryMatchPicksVariables>;
-  operationName: string;
-}
-export const getEntryMatchPicksRef: GetEntryMatchPicksRef;
-
-export function getEntryMatchPicks(vars: GetEntryMatchPicksVariables): QueryPromise<GetEntryMatchPicksData, GetEntryMatchPicksVariables>;
-export function getEntryMatchPicks(dc: DataConnect, vars: GetEntryMatchPicksVariables): QueryPromise<GetEntryMatchPicksData, GetEntryMatchPicksVariables>;
-
-interface GetUserVerdictMatchPicksRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetUserVerdictMatchPicksVariables): QueryRef<GetUserVerdictMatchPicksData, GetUserVerdictMatchPicksVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetUserVerdictMatchPicksVariables): QueryRef<GetUserVerdictMatchPicksData, GetUserVerdictMatchPicksVariables>;
-  operationName: string;
-}
-export const getUserVerdictMatchPicksRef: GetUserVerdictMatchPicksRef;
-
-export function getUserVerdictMatchPicks(vars: GetUserVerdictMatchPicksVariables): QueryPromise<GetUserVerdictMatchPicksData, GetUserVerdictMatchPicksVariables>;
-export function getUserVerdictMatchPicks(dc: DataConnect, vars: GetUserVerdictMatchPicksVariables): QueryPromise<GetUserVerdictMatchPicksData, GetUserVerdictMatchPicksVariables>;
-
-interface GetMatchParticipantsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetMatchParticipantsVariables): QueryRef<GetMatchParticipantsData, GetMatchParticipantsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetMatchParticipantsVariables): QueryRef<GetMatchParticipantsData, GetMatchParticipantsVariables>;
-  operationName: string;
-}
-export const getMatchParticipantsRef: GetMatchParticipantsRef;
-
-export function getMatchParticipants(vars: GetMatchParticipantsVariables): QueryPromise<GetMatchParticipantsData, GetMatchParticipantsVariables>;
-export function getMatchParticipants(dc: DataConnect, vars: GetMatchParticipantsVariables): QueryPromise<GetMatchParticipantsData, GetMatchParticipantsVariables>;
-
-interface GetPickScoresRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetPickScoresVariables): QueryRef<GetPickScoresData, GetPickScoresVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetPickScoresVariables): QueryRef<GetPickScoresData, GetPickScoresVariables>;
-  operationName: string;
-}
-export const getPickScoresRef: GetPickScoresRef;
-
-export function getPickScores(vars: GetPickScoresVariables): QueryPromise<GetPickScoresData, GetPickScoresVariables>;
-export function getPickScores(dc: DataConnect, vars: GetPickScoresVariables): QueryPromise<GetPickScoresData, GetPickScoresVariables>;
-
-interface GetRoundMatchesWithPriorityRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetRoundMatchesWithPriorityVariables): QueryRef<GetRoundMatchesWithPriorityData, GetRoundMatchesWithPriorityVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetRoundMatchesWithPriorityVariables): QueryRef<GetRoundMatchesWithPriorityData, GetRoundMatchesWithPriorityVariables>;
-  operationName: string;
-}
-export const getRoundMatchesWithPriorityRef: GetRoundMatchesWithPriorityRef;
-
-export function getRoundMatchesWithPriority(vars: GetRoundMatchesWithPriorityVariables): QueryPromise<GetRoundMatchesWithPriorityData, GetRoundMatchesWithPriorityVariables>;
-export function getRoundMatchesWithPriority(dc: DataConnect, vars: GetRoundMatchesWithPriorityVariables): QueryPromise<GetRoundMatchesWithPriorityData, GetRoundMatchesWithPriorityVariables>;
 

@@ -225,7 +225,7 @@ query GetTournament($id: UUID!) @auth(level: PUBLIC) {
 }
 
 # Get tournament with participants
-query GetTournamentWithParticipants($id: UUID!) @auth(level: PUBLIC) {
+query GetTournamentWithParticipants($id: UUID!, $participantLimit: Int = 10000) @auth(level: PUBLIC) {
   tournament(id: $id) {
     id
     fplLeagueId
@@ -239,7 +239,7 @@ query GetTournamentWithParticipants($id: UUID!) @auth(level: PUBLIC) {
     status
     winnerEntryId
   }
-  participants(where: { tournamentId: { eq: $id } }, orderBy: { seed: ASC }) {
+  participants(where: { tournamentId: { eq: $id } }, orderBy: { seed: ASC }, limit: $participantLimit) {
     tournamentId
     entryId
     teamName
@@ -389,6 +389,41 @@ query GetRoundMatches($tournamentId: UUID!, $roundNumber: Int!) @auth(level: PUB
   }
 }
 
+# Get matches in a position range for paginated bracket view
+# Used to show 8-4-2-1 match windows (15 matches total)
+query GetMatchesInRange(
+  $tournamentId: UUID!
+  $roundNumber: Int!
+  $startPosition: Int!
+  $endPosition: Int!
+) @auth(level: PUBLIC) {
+  matches(
+    where: {
+      tournamentId: { eq: $tournamentId }
+      roundNumber: { eq: $roundNumber }
+      positionInRound: { ge: $startPosition, le: $endPosition }
+    }
+    orderBy: { positionInRound: ASC }
+  ) {
+    matchId
+    roundNumber
+    positionInRound
+    status
+    winnerEntryId
+    isBye
+    qualifiesToMatchId
+    matchPicks_on_match {
+      entryId
+      slot
+      participant {
+        seed
+        teamName
+        managerName
+      }
+    }
+  }
+}
+
 # Get single match
 query GetMatch($tournamentId: UUID!, $matchId: Int!) @auth(level: PUBLIC) {
   matches(where: { tournamentId: { eq: $tournamentId }, matchId: { eq: $matchId } }, limit: 1) {
@@ -427,6 +462,7 @@ query GetMatchPicks($tournamentId: UUID!, $matchId: Int!) @auth(level: PUBLIC) {
 # Get ALL match picks for a tournament (single query instead of N queries)
 # This avoids rate limiting when loading large tournaments
 # Limit increased to 500 to handle large tournaments (default is 100)
+# Includes participant data for team name display (avoids separate participant lookup)
 query GetAllTournamentMatchPicks($tournamentId: UUID!) @auth(level: PUBLIC) {
   matchPicks(where: { tournamentId: { eq: $tournamentId } }, orderBy: [{ matchId: ASC }, { slot: ASC }], limit: 500) {
     matchId
@@ -437,6 +473,11 @@ query GetAllTournamentMatchPicks($tournamentId: UUID!) @auth(level: PUBLIC) {
       name
       playerFirstName
       playerLastName
+    }
+    participant {
+      seed
+      teamName
+      managerName
     }
   }
 }
@@ -454,6 +495,28 @@ query GetUserMatches($entryId: Int!) @auth(level: PUBLIC) {
 # =============================================================================
 # PARTICIPANT QUERIES
 # =============================================================================
+
+# Search participants by team name (for large tournament search)
+query SearchParticipants(
+  $tournamentId: UUID!
+  $searchTerm: String!
+  $limit: Int = 20
+) @auth(level: PUBLIC) {
+  participants(
+    where: {
+      tournamentId: { eq: $tournamentId }
+      teamName: { contains: $searchTerm }
+    }
+    orderBy: { seed: ASC }
+    limit: $limit
+  ) {
+    entryId
+    teamName
+    managerName
+    seed
+    status
+  }
+}
 
 # Get participant
 query GetParticipant($tournamentId: UUID!, $entryId: Int!) @auth(level: PUBLIC) {
@@ -578,6 +641,51 @@ query GetEntryMatchPicks($entryId: Int!) @auth(level: PUBLIC) {
 # VERDICT EMAIL QUERIES
 # =============================================================================
 
+# Get user's matches in a specific tournament with full details
+# Used for "Your Matches" section - includes opponent data via matchPicks_on_match
+# Note: Round event must be fetched separately via GetTournamentRounds
+query GetUserTournamentMatches(
+  $tournamentId: UUID!
+  $entryId: Int!
+) @auth(level: PUBLIC) {
+  matchPicks(
+    where: {
+      tournamentId: { eq: $tournamentId }
+      entryId: { eq: $entryId }
+    }
+    orderBy: { matchId: ASC }
+  ) {
+    matchId
+    entryId
+    slot
+    participant {
+      entryId
+      teamName
+      managerName
+      seed
+      status
+    }
+    match {
+      matchId
+      roundNumber
+      positionInRound
+      status
+      winnerEntryId
+      isBye
+      matchPicks_on_match {
+        entryId
+        slot
+        participant {
+          entryId
+          teamName
+          managerName
+          seed
+        }
+      }
+    }
+  }
+}
+
 # Get all match results for a user
 # Includes match data needed to build verdict email content
 # Note: Match doesn't have round relation, so we get roundNumber and cross-reference with rounds
@@ -663,6 +771,48 @@ query GetRoundMatchesWithPriority(
       participant {
         seed
         uid
+        teamName
+        managerName
+      }
+    }
+  }
+}
+
+# =============================================================================
+# USER PATH BRACKET QUERIES
+# =============================================================================
+
+# Get match histories for multiple opponents in a tournament
+# Used to show how opponents reached their current position
+query GetOpponentMatchHistories(
+  $tournamentId: UUID!
+  $entryIds: [Int!]!
+) @auth(level: PUBLIC) {
+  matchPicks(
+    where: {
+      tournamentId: { eq: $tournamentId }
+      entryId: { in: $entryIds }
+    }
+    orderBy: [{ entryId: ASC }, { matchId: ASC }]
+  ) {
+    entryId
+    slot
+    match {
+      matchId
+      roundNumber
+      positionInRound
+      status
+      winnerEntryId
+      isBye
+      matchPicks_on_match {
+        entryId
+        slot
+        participant {
+          entryId
+          teamName
+          managerName
+          seed
+        }
       }
     }
   }
