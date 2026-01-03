@@ -9,6 +9,8 @@ import {
   getAllTournamentMatchPicks,
   getPicksForEvent,
   getCurrentEvent,
+  getUserTournamentMatches,
+  getOpponentMatchHistories,
 } from '@knockoutfpl/dataconnect';
 import type { Tournament, Round, Match, Participant, MatchPlayer } from '../types/tournament';
 import type { UUIDString } from '@knockoutfpl/dataconnect';
@@ -193,19 +195,24 @@ export async function getTournamentByLeague(leagueId: number): Promise<Tournamen
           ? scoreMap.get(`${player2Pick.entryId}-${r.event}`) ?? null
           : null;
 
+        // Use participant data directly from match picks (avoids participant lookup limit issues)
         const player1: MatchPlayer | null = player1Pick
           ? {
               fplTeamId: player1Pick.entryId,
-              seed: participantMap.get(player1Pick.entryId)?.seed ?? 0,
+              seed: player1Pick.participant?.seed ?? participantMap.get(player1Pick.entryId)?.seed ?? 0,
               score: player1Score,
+              teamName: player1Pick.participant?.teamName ?? participantMap.get(player1Pick.entryId)?.fplTeamName,
+              managerName: player1Pick.participant?.managerName ?? participantMap.get(player1Pick.entryId)?.managerName,
             }
           : null;
 
         const player2: MatchPlayer | null = player2Pick
           ? {
               fplTeamId: player2Pick.entryId,
-              seed: participantMap.get(player2Pick.entryId)?.seed ?? 0,
+              seed: player2Pick.participant?.seed ?? participantMap.get(player2Pick.entryId)?.seed ?? 0,
               score: player2Score,
+              teamName: player2Pick.participant?.teamName ?? participantMap.get(player2Pick.entryId)?.fplTeamName,
+              managerName: player2Pick.participant?.managerName ?? participantMap.get(player2Pick.entryId)?.managerName,
             }
           : null;
 
@@ -542,4 +549,238 @@ export async function refreshVisibleMatches(
     console.warn('[WARN] Failed to refresh visible matches:', error);
     return null;
   }
+}
+
+// ============================================================================
+// User Match Fetching (for large tournaments)
+// ============================================================================
+
+export interface UserMatchInfo {
+  matchId: number;
+  roundNumber: number;
+  roundName: string;
+  gameweek: number;
+  yourTeamName: string;
+  yourFplTeamId: number;
+  yourSeed: number;
+  yourScore: number | null;
+  opponentTeamName: string | null;
+  opponentManagerName: string | null;
+  opponentFplTeamId: number | null;
+  opponentSeed: number | null;
+  opponentScore: number | null;
+  isBye: boolean;
+  status: 'pending' | 'active' | 'complete';
+  winnerId: number | null;
+  result: 'won' | 'lost' | 'pending';
+}
+
+/**
+ * Fetch user's matches in a tournament via API.
+ * Used for large tournaments where participants array is capped.
+ * Returns all matches the user is involved in with full details.
+ */
+export async function fetchUserTournamentMatches(
+  tournamentId: string,
+  entryId: number,
+  totalRounds: number,
+  currentGameweek: number
+): Promise<UserMatchInfo[]> {
+  // Fetch user's matches and rounds in parallel
+  const [matchesResult, roundsResult] = await Promise.all([
+    getUserTournamentMatches(dataConnect, {
+      tournamentId: tournamentId as UUIDString,
+      entryId,
+    }),
+    getTournamentRounds(dataConnect, {
+      tournamentId: tournamentId as UUIDString,
+    }),
+  ]);
+
+  // Build round event map: roundNumber -> event
+  const roundEventMap = new Map<number, number>();
+  const roundStatusMap = new Map<number, string>();
+  for (const round of roundsResult.data.rounds || []) {
+    roundEventMap.set(round.roundNumber, round.event);
+    roundStatusMap.set(round.roundNumber, round.status);
+  }
+
+  // Collect entry IDs and events for score fetching
+  const entryIdsForScores = new Set<number>();
+  const eventsForScores = new Set<number>();
+
+  for (const pick of matchesResult.data.matchPicks || []) {
+    const roundEvent = roundEventMap.get(pick.match.roundNumber);
+    if (roundEvent) eventsForScores.add(roundEvent);
+
+    entryIdsForScores.add(pick.entryId);
+    for (const oppPick of pick.match.matchPicks_on_match || []) {
+      if (oppPick.entryId !== pick.entryId) {
+        entryIdsForScores.add(oppPick.entryId);
+      }
+    }
+  }
+
+  // Fetch scores for all relevant entries and events
+  const scoreMap = new Map<string, number>();
+  if (eventsForScores.size > 0 && entryIdsForScores.size > 0) {
+    const picksResults = await Promise.all(
+      Array.from(eventsForScores).map((event) =>
+        getPicksForEvent(dataConnect, {
+          event,
+          entryIds: Array.from(entryIdsForScores),
+        })
+      )
+    );
+
+    for (let i = 0; i < picksResults.length; i++) {
+      const event = Array.from(eventsForScores)[i];
+      for (const pick of picksResults[i].data.picks || []) {
+        scoreMap.set(`${pick.entryId}-${event}`, pick.points);
+      }
+    }
+  }
+
+  // Build match info array
+  const matches: UserMatchInfo[] = [];
+
+  for (const pick of matchesResult.data.matchPicks || []) {
+    const match = pick.match;
+    const roundEvent = roundEventMap.get(match.roundNumber) ?? 0;
+    const roundStatus = roundStatusMap.get(match.roundNumber) ?? 'pending';
+
+    // Find opponent in matchPicks_on_match
+    const opponentPick = (match.matchPicks_on_match || []).find(
+      (p) => p.entryId !== pick.entryId
+    );
+
+    // Get scores
+    const yourScore = scoreMap.get(`${pick.entryId}-${roundEvent}`) ?? null;
+    const opponentScore = opponentPick
+      ? scoreMap.get(`${opponentPick.entryId}-${roundEvent}`) ?? null
+      : null;
+
+    // Determine result
+    let result: 'won' | 'lost' | 'pending' = 'pending';
+    if (match.winnerEntryId !== null) {
+      result = match.winnerEntryId === pick.entryId ? 'won' : 'lost';
+    }
+
+    // Determine status
+    let status: 'pending' | 'active' | 'complete';
+    if (match.status === 'complete' || roundStatus === 'completed') {
+      status = 'complete';
+    } else if (roundEvent <= currentGameweek) {
+      status = 'active';
+    } else {
+      status = 'pending';
+    }
+
+    matches.push({
+      matchId: match.matchId,
+      roundNumber: match.roundNumber,
+      roundName: getRoundName(match.roundNumber, totalRounds),
+      gameweek: roundEvent,
+      yourTeamName: pick.participant?.teamName ?? 'Unknown',
+      yourFplTeamId: pick.entryId,
+      yourSeed: pick.participant?.seed ?? 0,
+      yourScore,
+      opponentTeamName: opponentPick?.participant?.teamName ?? null,
+      opponentManagerName: opponentPick?.participant?.managerName ?? null,
+      opponentFplTeamId: opponentPick?.entryId ?? null,
+      opponentSeed: opponentPick?.participant?.seed ?? null,
+      opponentScore,
+      isBye: match.isBye,
+      status,
+      winnerId: match.winnerEntryId ?? null,
+      result,
+    });
+  }
+
+  // Sort by round number
+  return matches.sort((a, b) => a.roundNumber - b.roundNumber);
+}
+
+// ============================================================================
+// Opponent Match Histories (for User Path Bracket)
+// ============================================================================
+
+/**
+ * Match info for opponent history display
+ */
+export interface OpponentMatchInfo {
+  matchId: number;
+  roundNumber: number;
+  positionInRound: number;
+  entryId: number;
+  teamName: string;
+  managerName: string;
+  seed: number;
+  opponentTeamName: string | null;
+  opponentSeed: number | null;
+  status: 'pending' | 'active' | 'complete';
+  won: boolean | null; // null if not complete
+  isBye: boolean;
+}
+
+/**
+ * Fetch match histories for multiple opponents.
+ * Returns a map of entryId -> array of matches they played.
+ */
+export async function fetchOpponentHistories(
+  tournamentId: string,
+  opponentEntryIds: number[]
+): Promise<Map<number, OpponentMatchInfo[]>> {
+  if (opponentEntryIds.length === 0) {
+    return new Map();
+  }
+
+  const result = await getOpponentMatchHistories(dataConnect, {
+    tournamentId: tournamentId as UUIDString,
+    entryIds: opponentEntryIds,
+  });
+
+  const historyMap = new Map<number, OpponentMatchInfo[]>();
+
+  for (const pick of result.data.matchPicks || []) {
+    const match = pick.match;
+
+    // Find self in matchPicks_on_match to get participant data
+    const selfPick = match.matchPicks_on_match?.find(
+      (p) => p.entryId === pick.entryId
+    );
+
+    // Find opponent in this match
+    const opponentPick = match.matchPicks_on_match?.find(
+      (p) => p.entryId !== pick.entryId
+    );
+
+    const matchInfo: OpponentMatchInfo = {
+      matchId: match.matchId,
+      roundNumber: match.roundNumber,
+      positionInRound: match.positionInRound,
+      entryId: pick.entryId,
+      teamName: selfPick?.participant?.teamName ?? 'Unknown',
+      managerName: selfPick?.participant?.managerName ?? '',
+      seed: selfPick?.participant?.seed ?? 0,
+      opponentTeamName: opponentPick?.participant?.teamName ?? null,
+      opponentSeed: opponentPick?.participant?.seed ?? null,
+      status: match.status as 'pending' | 'active' | 'complete',
+      won: match.status === 'complete' ? match.winnerEntryId === pick.entryId : null,
+      isBye: match.isBye,
+    };
+
+    if (!historyMap.has(pick.entryId)) {
+      historyMap.set(pick.entryId, []);
+    }
+    historyMap.get(pick.entryId)!.push(matchInfo);
+  }
+
+  // Sort each entry's matches by round number
+  for (const [entryId, matches] of historyMap) {
+    matches.sort((a, b) => a.roundNumber - b.roundNumber);
+    historyMap.set(entryId, matches);
+  }
+
+  return historyMap;
 }
