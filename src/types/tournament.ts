@@ -26,6 +26,7 @@ export interface Match {
   player2?: MatchPlayer | null;
   winnerId: number | null; // FPL team ID
   isBye: boolean;
+  qualifiesTo?: string; // ID of the match this winner advances to (null in final)
   updatedAt?: string; // ISO timestamp of last score update
 }
 
