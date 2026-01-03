@@ -23,6 +23,7 @@ vi.mock('@knockoutfpl/dataconnect', () => ({
   getAllTournamentMatchPicks: vi.fn(),
   getPicksForEvent: vi.fn(),
   getCurrentEvent: vi.fn(),
+  getParticipantLeaguesForTournament: vi.fn(),
 }));
 
 // Mock Firebase Functions
@@ -704,5 +705,47 @@ describe('refreshVisibleMatches', () => {
     const result = await refreshVisibleMatches('tour-1', [1, 2]);
 
     expect(result).toBeNull();
+  });
+});
+
+describe('getParticipantLeaguesForTournament', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns participant leagues from DataConnect', async () => {
+    const { getParticipantLeaguesForTournament: getParticipantLeaguesForTournamentQuery } = await import('@knockoutfpl/dataconnect');
+    const { getParticipantLeaguesForTournament } = await import('./tournament');
+
+    const mockLeagues = [
+      { tournamentId: 'abc-123', entryId: 1001, leagueId: 100, leagueName: 'Work League', entryRank: 5 },
+      { tournamentId: 'abc-123', entryId: 1001, leagueId: 200, leagueName: 'Friends League', entryRank: 2 },
+      { tournamentId: 'abc-123', entryId: 1002, leagueId: 100, leagueName: 'Work League', entryRank: 8 },
+    ];
+
+    vi.mocked(getParticipantLeaguesForTournamentQuery).mockResolvedValue({
+      data: { participantLeagues: mockLeagues },
+    } as any);
+
+    const result = await getParticipantLeaguesForTournament('abc-123');
+
+    expect(result).toHaveLength(3);
+    expect(result[0]).toEqual({
+      entryId: 1001,
+      leagueId: 100,
+      leagueName: 'Work League',
+    });
+  });
+
+  it('returns empty array when no leagues found', async () => {
+    const { getParticipantLeaguesForTournament: getParticipantLeaguesForTournamentQuery } = await import('@knockoutfpl/dataconnect');
+    const { getParticipantLeaguesForTournament } = await import('./tournament');
+
+    vi.mocked(getParticipantLeaguesForTournamentQuery).mockResolvedValue({
+      data: { participantLeagues: [] },
+    } as any);
+
+    const result = await getParticipantLeaguesForTournament('no-leagues');
+    expect(result).toEqual([]);
   });
 });

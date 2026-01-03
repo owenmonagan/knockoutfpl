@@ -14,6 +14,7 @@ import {
   getHighestSeedRemaining,
   getMatchesInRange,
   getTournamentImportStatus as getTournamentImportStatusQuery,
+  getParticipantLeaguesForTournament as getParticipantLeaguesForTournamentQuery,
 } from '@knockoutfpl/dataconnect';
 import type { Tournament, Round, Match, Participant, MatchPlayer } from '../types/tournament';
 import type { UUIDString } from '@knockoutfpl/dataconnect';
@@ -972,4 +973,35 @@ export async function getTournamentImportStatus(
     totalCount: tournament.totalCount ?? null,
     importError: tournament.importError ?? null,
   };
+}
+
+// ============================================================================
+// Participant Leagues (for Friends Feature)
+// ============================================================================
+
+/**
+ * A participant's league membership (excludes tournamentId for client use)
+ */
+export interface ParticipantLeagueRecord {
+  entryId: number;
+  leagueId: number;
+  leagueName: string;
+}
+
+/**
+ * Get all participant league memberships for a tournament.
+ * Used to calculate "friends" - participants sharing leagues with the user.
+ */
+export async function getParticipantLeaguesForTournament(
+  tournamentId: string
+): Promise<ParticipantLeagueRecord[]> {
+  const result = await getParticipantLeaguesForTournamentQuery(dataConnect, {
+    tournamentId: tournamentId as UUIDString,
+  });
+
+  return (result.data.participantLeagues || []).map((pl) => ({
+    entryId: pl.entryId,
+    leagueId: pl.leagueId,
+    leagueName: pl.leagueName,
+  }));
 }
