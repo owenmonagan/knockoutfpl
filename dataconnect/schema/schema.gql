@@ -1,11 +1,11 @@
 # Knockout FPL Data Schema
 # Based on docs/business/technical/data/data-dictionary.md
 #
-# 12 tables across 4 layers:
+# 13 tables across 4 layers:
 # - FPL Cache (3): events, leagues, league_entries
 # - FPL Records (2): entries, picks
 # - User (2): users, email_queue
-# - Tournament (5): tournaments, rounds, participants, matches, match_picks
+# - Tournament (6): tournaments, tournament_entries, rounds, participants, matches, match_picks
 
 # =============================================================================
 # USER LAYER
@@ -191,6 +191,25 @@ type Tournament @table(name: "tournaments") {
 
   # Relations
   creator: User!
+}
+
+# Entry's participation in a tournament (slim junction table)
+type TournamentEntry @table(name: "tournament_entries", key: ["tournamentId", "entryId"]) {
+  tournamentId: UUID! @col(name: "tournament_id")
+  entryId: Int! @col(name: "entry_id")
+
+  seed: Int!
+  refreshId: UUID! @col(name: "refresh_id")  # Which league refresh seeded this
+
+  # Tournament state
+  status: String! @default(value: "active")
+  eliminationRound: Int @col(name: "elimination_round")
+  uid: String  # Firebase UID if user claimed this entry
+
+  # Relations
+  tournament: Tournament!
+  entry: Entry!
+  user: User
 }
 
 # Tournament rounds
