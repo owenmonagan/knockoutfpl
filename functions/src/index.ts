@@ -104,3 +104,9 @@ export { queueVerdicts } from './queueVerdicts';
 
 // Export Cloud Task handler for background tournament import
 export { processTournamentImport } from './processTournamentImport';
+
+// Export Cloud Task handler for background league import
+export { processLeagueImport } from './processLeagueImport';
+
+// Export callable function to import user's FPL leagues
+export { importUserLeagues } from './importUserLeagues';
