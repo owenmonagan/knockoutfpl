@@ -1,4 +1,6 @@
-import { getVisibleRounds } from './BracketTab';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { getVisibleRounds, EarlierRoundsPrompt } from './BracketTab';
 import type { Round } from '@/types/tournament';
 
 // Helper to create mock rounds
@@ -52,5 +54,31 @@ describe('getVisibleRounds', () => {
     const result = getVisibleRounds([]);
     expect(result.visibleRounds).toHaveLength(0);
     expect(result.hiddenCount).toBe(0);
+  });
+});
+
+describe('EarlierRoundsPrompt', () => {
+  it('renders correct singular text for 1 hidden round', () => {
+    const onViewMatches = vi.fn();
+    render(<EarlierRoundsPrompt hiddenCount={1} onViewMatches={onViewMatches} />);
+
+    expect(screen.getByText(/1 earlier round available/)).toBeInTheDocument();
+  });
+
+  it('renders correct plural text for multiple hidden rounds', () => {
+    const onViewMatches = vi.fn();
+    render(<EarlierRoundsPrompt hiddenCount={10} onViewMatches={onViewMatches} />);
+
+    expect(screen.getByText(/10 earlier rounds available/)).toBeInTheDocument();
+  });
+
+  it('calls onViewMatches when button clicked', async () => {
+    const onViewMatches = vi.fn();
+    const user = userEvent.setup();
+    render(<EarlierRoundsPrompt hiddenCount={5} onViewMatches={onViewMatches} />);
+
+    await user.click(screen.getByRole('button', { name: /View Matches/i }));
+
+    expect(onViewMatches).toHaveBeenCalledTimes(1);
   });
 });

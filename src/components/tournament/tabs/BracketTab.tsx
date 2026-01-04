@@ -1,5 +1,6 @@
 import { BracketLayout } from '../BracketLayout';
 import { UserPathBracket } from '../UserPathBracket';
+import { Button } from '@/components/ui/button';
 import type { Tournament, Round } from '@/types/tournament';
 
 export const MAX_BRACKET_ROUNDS = 5;
@@ -17,6 +18,30 @@ export function getVisibleRounds(rounds: Round[]): {
     visibleRounds: rounds.slice(startIndex),
     hiddenCount: startIndex,
   };
+}
+
+interface EarlierRoundsPromptProps {
+  hiddenCount: number;
+  onViewMatches: () => void;
+}
+
+export function EarlierRoundsPrompt({
+  hiddenCount,
+  onViewMatches,
+}: EarlierRoundsPromptProps) {
+  const roundWord = hiddenCount === 1 ? 'round' : 'rounds';
+
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/50 px-4 py-3">
+      <p className="text-sm text-muted-foreground">
+        Showing final 5 rounds. {hiddenCount} earlier {roundWord} available in
+        the Matches tab.
+      </p>
+      <Button variant="outline" size="sm" onClick={onViewMatches}>
+        View Matches →
+      </Button>
+    </div>
+  );
 }
 
 interface BracketTabProps {
