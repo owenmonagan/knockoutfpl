@@ -1,12 +1,12 @@
 // src/components/tournament/NWayMatchCard.tsx
 import { Badge } from '../ui/badge';
 import { Card, CardContent } from '../ui/card';
-import type { Match, Participant, MatchPlayer } from '../../types/tournament';
-import { getMatchPlayers } from '../../types/tournament';
+import type { Match, Participant, TournamentEntry, MatchPlayer } from '../../types/tournament';
+import { getMatchPlayers, getEntryId, isTournamentEntry, getTeamName } from '../../types/tournament';
 
 interface NWayMatchCardProps {
   match: Match;
-  participants: Participant[];
+  participants: Participant[] | TournamentEntry[];
   gameweek: number;
   isUserMatch?: boolean;
   userTeamId?: number;
@@ -27,8 +27,8 @@ export function NWayMatchCard({
 }: NWayMatchCardProps) {
   const players = getMatchPlayers(match);
 
-  const getParticipantById = (fplTeamId: number): Participant | undefined => {
-    return participants.find((p) => p.fplTeamId === fplTeamId);
+  const getParticipantById = (fplTeamId: number): Participant | TournamentEntry | undefined => {
+    return participants.find((p) => getEntryId(p) === fplTeamId);
   };
 
   // Sort players: by score (desc) if scores exist, otherwise by seed (asc)
@@ -57,6 +57,10 @@ export function NWayMatchCard({
       );
     }
 
+    const teamName = isTournamentEntry(participant)
+      ? getTeamName(participant)
+      : participant.fplTeamName;
+
     return (
       <div
         key={player.fplTeamId}
@@ -71,7 +75,7 @@ export function NWayMatchCard({
               {getRankLabel(rank)}
             </span>
           )}
-          <span data-testid="team-name">{participant.fplTeamName}</span>
+          <span data-testid="team-name">{teamName}</span>
           <span className="text-muted-foreground text-sm">({participant.seed})</span>
         </div>
         {player.score !== null && (
