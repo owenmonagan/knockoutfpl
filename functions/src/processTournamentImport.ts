@@ -3,12 +3,13 @@
 // Uses chunked processing with checkpointing for resilience
 //
 // Phases:
-// 1. importing                 - Populates LeagueEntry (shared) using refreshLeague
-// 2. creating_tournament_entries - Creates TournamentEntry from LeagueEntry
-// 3. creating_rounds           - Create round records (quick, single batch)
-// 4. creating_matches          - Create match records in batches
-// 5. creating_picks            - Create match_picks and handle byes in batches
-// 6. complete                  - Done
+// 1. importing                   - Check league freshness, import small leagues sync, spawn large
+// 2. awaiting_league_import      - Poll for large league import completion
+// 3. creating_tournament_entries - Creates TournamentEntry from LeagueEntry
+// 4. creating_rounds             - Create round records (quick, single batch)
+// 5. creating_matches            - Create match records in batches
+// 6. creating_picks              - Create match_picks and handle byes in batches
+// 7. complete                    - Done
 
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { getFunctions } from 'firebase-admin/functions';
@@ -27,16 +28,30 @@ import {
   generateBracketStructure,
   assignParticipantsToMatches,
 } from './bracketGenerator';
-import { refreshLeague } from './leagueRefresh';
+import {
+  refreshLeague,
+  isSmallLeague,
+  getLeagueImportStatus,
+} from './leagueRefresh';
+import { spawnLeagueImport } from './processLeagueImport';
 
 // Configuration
 const MATCHES_PER_BATCH = 5000;  // Matches to create per batch
 const PICKS_PER_BATCH = 5000;  // Match picks to create per batch
 const TOURNAMENT_ENTRIES_PER_BATCH = 1000;  // Tournament entries to create per batch
 const RESCHEDULE_DELAY_SECONDS = 2;  // Delay between batches
+const LEAGUE_IMPORT_POLL_DELAY_SECONDS = 5;  // Delay for polling league import status
+const LEAGUE_FRESHNESS_HOURS = 1;  // Consider league data fresh if refreshed within this time
 
 // Import phases
-type ImportPhase = 'importing' | 'creating_tournament_entries' | 'creating_rounds' | 'creating_matches' | 'creating_picks' | 'complete';
+type ImportPhase =
+  | 'importing'
+  | 'awaiting_league_import'
+  | 'creating_tournament_entries'
+  | 'creating_rounds'
+  | 'creating_matches'
+  | 'creating_picks'
+  | 'complete';
 
 // GraphQL mutations
 const UPDATE_IMPORT_CHECKPOINT = `
@@ -215,7 +230,8 @@ async function updateCheckpoint(
   error?: string
 ): Promise<void> {
   // Progress calculation based on phase:
-  // importing: 0-30%
+  // importing: 0-10%
+  // awaiting_league_import: 10-30% (maps to league import progress)
   // creating_tournament_entries: 30-50%
   // creating_rounds: 50-55%
   // creating_matches: 55-80%
@@ -223,7 +239,11 @@ async function updateCheckpoint(
   let progress = 0;
   switch (status) {
     case 'importing':
-      progress = Math.min(30, Math.round((importedCount / totalCount) * 30));
+      progress = Math.min(10, Math.round((importedCount / totalCount) * 10));
+      break;
+    case 'awaiting_league_import':
+      // cursor contains the league import progress (0-100), map to 10-30%
+      progress = 10 + Math.round((cursor / 100) * 20);
       break;
     case 'creating_tournament_entries':
       progress = 30 + Math.round((cursor / 100) * 20); // Approximate
@@ -264,13 +284,14 @@ async function rescheduleTask(
   leagueId: number,
   totalCount: number,
   phase: ImportPhase,
-  cursor: number
+  cursor: number,
+  delaySeconds: number = RESCHEDULE_DELAY_SECONDS
 ): Promise<void> {
   const isEmulator = process.env.FUNCTIONS_EMULATOR === 'true';
   const payload = { tournamentId, leagueId, totalCount, phase, cursor };
 
   if (isEmulator) {
-    console.log(`[Import] Emulator mode: scheduling ${phase} batch ${cursor} via HTTP`);
+    console.log(`[Import] Emulator mode: scheduling ${phase} batch ${cursor} via HTTP (delay=${delaySeconds}s)`);
 
     // Don't await - fire and forget after delay
     setTimeout(async () => {
@@ -283,18 +304,35 @@ async function rescheduleTask(
       } catch (error) {
         console.error('[Import] Failed to trigger next batch:', error);
       }
-    }, RESCHEDULE_DELAY_SECONDS * 1000);
+    }, delaySeconds * 1000);
   } else {
     const queue = getFunctions().taskQueue('processTournamentImport');
-    await queue.enqueue(payload, { scheduleDelaySeconds: RESCHEDULE_DELAY_SECONDS });
+    await queue.enqueue(payload, { scheduleDelaySeconds: delaySeconds });
   }
 
   console.log(`[Import] Rescheduled: phase=${phase}, cursor=${cursor}`);
 }
 
 /**
+ * Check if league data is fresh (refreshed within LEAGUE_FRESHNESS_HOURS).
+ */
+function isLeagueDataFresh(lastRefreshAt: string | null): boolean {
+  if (!lastRefreshAt) return false;
+
+  const refreshTime = new Date(lastRefreshAt).getTime();
+  const freshnessThreshold = LEAGUE_FRESHNESS_HOURS * 60 * 60 * 1000;
+  const isFresh = Date.now() - refreshTime < freshnessThreshold;
+
+  return isFresh;
+}
+
+/**
  * Phase: importing - Populates LeagueEntry (shared) using refreshLeague
- * This is now a single-step operation since refreshLeague handles all the pagination
+ *
+ * Logic:
+ * 1. Check if league data is fresh (refreshed < 1 hour ago) - skip to creating_tournament_entries
+ * 2. For small leagues (<=48): Use refreshLeague() synchronously
+ * 3. For large leagues (>48): Spawn processLeagueImport task and move to awaiting_league_import
  */
 async function processImportingPhase(
   tournamentId: string,
@@ -305,19 +343,133 @@ async function processImportingPhase(
 ): Promise<void> {
   const season = getCurrentSeason();
 
-  console.log(`[Import] Starting league refresh for league ${leagueId}, season ${season}`);
+  console.log(`[Import] Starting league import check for league ${leagueId}, season ${season}`);
 
-  // Use refreshLeague which handles all FPL API fetching and LeagueEntry creation
-  const refreshResult = await refreshLeague(leagueId, season);
+  // 1. Check if league data is already fresh
+  const leagueStatus = await getLeagueImportStatus(leagueId, season);
 
-  console.log(`[Import] League refreshed: ${refreshResult.entriesCount} entries, refreshId=${refreshResult.refreshId}`);
+  if (leagueStatus && isLeagueDataFresh(leagueStatus.lastRefreshAt)) {
+    console.log(`[Import] League ${leagueId} data is fresh (refreshed at ${leagueStatus.lastRefreshAt}), skipping to creating_tournament_entries`);
 
-  // Update checkpoint with actual count
-  await updateCheckpoint(tournamentId, 0, refreshResult.entriesCount, refreshResult.entriesCount, 'importing');
+    const entriesCount = leagueStatus.entriesCount || totalCount;
+    await updateCheckpoint(tournamentId, 0, entriesCount, entriesCount, 'importing');
+    await rescheduleTask(tournamentId, leagueId, entriesCount, 'creating_tournament_entries', 0);
+    return;
+  }
 
-  // Move to next phase: creating_tournament_entries
-  console.log(`[Import] League data imported, moving to creating_tournament_entries phase`);
-  await rescheduleTask(tournamentId, leagueId, refreshResult.entriesCount, 'creating_tournament_entries', 0);
+  // 2. Check if league is small enough for synchronous import
+  const isSmall = await isSmallLeague(leagueId);
+
+  if (isSmall) {
+    console.log(`[Import] League ${leagueId} is small, using synchronous refreshLeague()`);
+
+    // Use refreshLeague which handles all FPL API fetching and LeagueEntry creation
+    const refreshResult = await refreshLeague(leagueId, season);
+
+    console.log(`[Import] League refreshed: ${refreshResult.entriesCount} entries, refreshId=${refreshResult.refreshId}`);
+
+    // Update checkpoint with actual count
+    await updateCheckpoint(tournamentId, 0, refreshResult.entriesCount, refreshResult.entriesCount, 'importing');
+
+    // Move to next phase: creating_tournament_entries
+    console.log(`[Import] League data imported, moving to creating_tournament_entries phase`);
+    await rescheduleTask(tournamentId, leagueId, refreshResult.entriesCount, 'creating_tournament_entries', 0);
+    return;
+  }
+
+  // 3. Large league - spawn background import task
+  console.log(`[Import] League ${leagueId} is large, spawning processLeagueImport task`);
+
+  await spawnLeagueImport(leagueId, season);
+
+  // Update checkpoint to show we're waiting for league import
+  await updateCheckpoint(tournamentId, 0, totalCount, totalCount, 'awaiting_league_import');
+
+  // Move to awaiting_league_import phase to poll for completion
+  console.log(`[Import] Moving to awaiting_league_import phase to poll for league import completion`);
+  await rescheduleTask(
+    tournamentId,
+    leagueId,
+    totalCount,
+    'awaiting_league_import',
+    0,
+    LEAGUE_IMPORT_POLL_DELAY_SECONDS
+  );
+}
+
+/**
+ * Phase: awaiting_league_import - Polls for league import completion
+ *
+ * Logic:
+ * - Query league import status
+ * - If 'complete': Move to 'creating_tournament_entries' phase
+ * - If 'importing': Reschedule self to poll again in 5 seconds
+ * - If 'failed': Mark tournament as failed
+ */
+async function processAwaitingLeagueImportPhase(
+  tournamentId: string,
+  leagueId: number,
+  totalCount: number
+): Promise<void> {
+  const season = getCurrentSeason();
+
+  console.log(`[Import] Polling league import status for league ${leagueId}`);
+
+  const leagueStatus = await getLeagueImportStatus(leagueId, season);
+
+  if (!leagueStatus) {
+    throw new Error(`League ${leagueId} not found while awaiting import`);
+  }
+
+  const { importStatus, importProgress, entriesCount } = leagueStatus;
+
+  console.log(`[Import] League ${leagueId} import status: ${importStatus}, progress: ${importProgress}%`);
+
+  if (importStatus === 'complete') {
+    // League import is done, proceed to next phase
+    const count = entriesCount || totalCount;
+    console.log(`[Import] League import complete (${count} entries), moving to creating_tournament_entries`);
+
+    await updateCheckpoint(tournamentId, 100, count, count, 'awaiting_league_import');
+    await rescheduleTask(tournamentId, leagueId, count, 'creating_tournament_entries', 0);
+    return;
+  }
+
+  if (importStatus === 'failed') {
+    // League import failed, mark tournament as failed
+    const errorMsg = leagueStatus.importError || 'League import failed';
+    throw new Error(`League import failed: ${errorMsg}`);
+  }
+
+  if (importStatus === 'importing') {
+    // Still importing, update progress and poll again
+    const progress = importProgress || 0;
+    await updateCheckpoint(tournamentId, progress, totalCount, totalCount, 'awaiting_league_import');
+
+    console.log(`[Import] League still importing (${progress}%), polling again in ${LEAGUE_IMPORT_POLL_DELAY_SECONDS}s`);
+    await rescheduleTask(
+      tournamentId,
+      leagueId,
+      totalCount,
+      'awaiting_league_import',
+      progress,
+      LEAGUE_IMPORT_POLL_DELAY_SECONDS
+    );
+    return;
+  }
+
+  // Unknown status - treat as not started, spawn import
+  console.log(`[Import] League ${leagueId} has unknown status '${importStatus}', spawning new import`);
+  await spawnLeagueImport(leagueId, season);
+
+  await rescheduleTask(
+    tournamentId,
+    leagueId,
+    totalCount,
+    'awaiting_league_import',
+    0,
+    LEAGUE_IMPORT_POLL_DELAY_SECONDS
+  );
 }
 
 /**
@@ -652,12 +804,13 @@ async function processCreatingPicksPhase(
  * Cloud Task: Process tournament import in chunked batches.
  *
  * Phases:
- * 1. importing                 - Populates LeagueEntry (shared) using refreshLeague
- * 2. creating_tournament_entries - Creates TournamentEntry from LeagueEntry
- * 3. creating_rounds           - Create round records
- * 4. creating_matches          - Create match records in batches
- * 5. creating_picks            - Create match_picks and handle byes in batches
- * 6. complete                  - Done
+ * 1. importing                   - Check league freshness, import small leagues sync, spawn large leagues
+ * 2. awaiting_league_import      - Poll for large league import completion
+ * 3. creating_tournament_entries - Creates TournamentEntry from LeagueEntry
+ * 4. creating_rounds             - Create round records
+ * 5. creating_matches            - Create match records in batches
+ * 6. creating_picks              - Create match_picks and handle byes in batches
+ * 7. complete                    - Done
  */
 export const processTournamentImport = onTaskDispatched({
   region: 'europe-west1',
@@ -711,6 +864,10 @@ export const processTournamentImport = onTaskDispatched({
     switch (phase) {
       case 'importing':
         await processImportingPhase(tournamentId, tournament.fplLeagueId, totalCount, cursor, authClaims);
+        break;
+
+      case 'awaiting_league_import':
+        await processAwaitingLeagueImportPhase(tournamentId, tournament.fplLeagueId, totalCount);
         break;
 
       case 'creating_tournament_entries':
