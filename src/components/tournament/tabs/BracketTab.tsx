@@ -1,5 +1,5 @@
+import { useSearchParams } from 'react-router-dom';
 import { BracketLayout } from '../BracketLayout';
-import { UserPathBracket } from '../UserPathBracket';
 import { Button } from '@/components/ui/button';
 import type { Tournament, Round } from '@/types/tournament';
 
@@ -57,6 +57,8 @@ export function BracketTab({
   isAuthenticated,
   onClaimTeam,
 }: BracketTabProps) {
+  const [, setSearchParams] = useSearchParams();
+
   if (tournament.rounds.length === 0) {
     return (
       <p className="text-muted-foreground text-center py-8">
@@ -65,25 +67,28 @@ export function BracketTab({
     );
   }
 
-  // Use UserPathBracket for large tournaments (>64 participants)
-  if (tournament.participants.length > 64) {
-    return (
-      <UserPathBracket
-        tournament={tournament}
-        userFplTeamId={userFplTeamId}
-        isAuthenticated={isAuthenticated}
-        currentGameweek={tournament.currentGameweek}
-      />
-    );
-  }
+  const { visibleRounds, hiddenCount } = getVisibleRounds(tournament.rounds);
+
+  const handleViewMatches = () => {
+    setSearchParams({ tab: 'matches' }, { replace: true });
+  };
 
   return (
-    <BracketLayout
-      rounds={tournament.rounds}
-      participants={tournament.participants}
-      currentGameweek={tournament.currentGameweek}
-      isAuthenticated={isAuthenticated}
-      onClaimTeam={onClaimTeam}
-    />
+    <div className="space-y-4">
+      {hiddenCount > 0 && (
+        <EarlierRoundsPrompt
+          hiddenCount={hiddenCount}
+          onViewMatches={handleViewMatches}
+        />
+      )}
+
+      <BracketLayout
+        rounds={visibleRounds}
+        participants={tournament.participants}
+        currentGameweek={tournament.currentGameweek}
+        isAuthenticated={isAuthenticated}
+        onClaimTeam={onClaimTeam}
+      />
+    </div>
   );
 }

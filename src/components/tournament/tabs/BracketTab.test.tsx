@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { getVisibleRounds, EarlierRoundsPrompt } from './BracketTab';
-import type { Round } from '@/types/tournament';
+import { MemoryRouter } from 'react-router-dom';
+import { getVisibleRounds, EarlierRoundsPrompt, BracketTab } from './BracketTab';
+import type { Round, Tournament } from '@/types/tournament';
 
 // Helper to create mock rounds
 function createMockRounds(count: number): Round[] {
@@ -80,5 +81,52 @@ describe('EarlierRoundsPrompt', () => {
     await user.click(screen.getByRole('button', { name: /View Matches/i }));
 
     expect(onViewMatches).toHaveBeenCalledTimes(1);
+  });
+});
+
+// Helper to create a tournament with N rounds
+function createTournamentWithRounds(roundCount: number): Tournament {
+  return {
+    id: 'test-tournament',
+    fplLeagueId: 123,
+    fplLeagueName: 'Test League',
+    creatorUserId: 'user1',
+    startGameweek: 20,
+    currentRound: 1,
+    currentGameweek: 20,
+    totalRounds: roundCount,
+    status: 'active',
+    participants: [],
+    rounds: createMockRounds(roundCount),
+    winnerId: null,
+    createdAt: '2026-01-01',
+    updatedAt: '2026-01-01',
+  };
+}
+
+describe('BracketTab integration', () => {
+  it('shows all rounds when 5 or fewer', () => {
+    const tournament = createTournamentWithRounds(3);
+
+    render(
+      <MemoryRouter>
+        <BracketTab tournament={tournament} />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByText(/earlier rounds/i)).not.toBeInTheDocument();
+  });
+
+  it('shows prompt and only last 5 rounds when more than 5', () => {
+    const tournament = createTournamentWithRounds(10);
+
+    render(
+      <MemoryRouter>
+        <BracketTab tournament={tournament} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(/5 earlier rounds available/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /View Matches/i })).toBeInTheDocument();
   });
 });
