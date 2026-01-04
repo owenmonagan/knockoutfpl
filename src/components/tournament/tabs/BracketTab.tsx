@@ -1,6 +1,23 @@
 import { BracketLayout } from '../BracketLayout';
 import { UserPathBracket } from '../UserPathBracket';
-import type { Tournament } from '@/types/tournament';
+import type { Tournament, Round } from '@/types/tournament';
+
+export const MAX_BRACKET_ROUNDS = 5;
+
+export function getVisibleRounds(rounds: Round[]): {
+  visibleRounds: Round[];
+  hiddenCount: number;
+} {
+  if (rounds.length <= MAX_BRACKET_ROUNDS) {
+    return { visibleRounds: rounds, hiddenCount: 0 };
+  }
+
+  const startIndex = rounds.length - MAX_BRACKET_ROUNDS;
+  return {
+    visibleRounds: rounds.slice(startIndex),
+    hiddenCount: startIndex,
+  };
+}
 
 interface BracketTabProps {
   tournament: Tournament;
