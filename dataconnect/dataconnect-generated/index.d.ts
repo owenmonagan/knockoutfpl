@@ -197,6 +197,16 @@ export interface DeleteRoundsByTournamentVariables {
   tournamentId: UUIDString;
 }
 
+export interface DeleteStaleLeagueEntriesData {
+  leagueEntry_deleteMany: number;
+}
+
+export interface DeleteStaleLeagueEntriesVariables {
+  leagueId: number;
+  season: string;
+  currentRefreshId: UUIDString;
+}
+
 export interface DeleteTournamentByIdData {
   tournament_delete?: Tournament_Key | null;
 }
@@ -458,6 +468,28 @@ export interface GetFinalizedEventsVariables {
   season: string;
 }
 
+export interface GetFriendsInTournamentData {
+  userLeagues: ({
+    leagueId: number;
+  })[];
+    tournamentParticipants: ({
+      entryId: number;
+      seed: number;
+      status: string;
+      entry: {
+        name: string;
+        playerFirstName?: string | null;
+        playerLastName?: string | null;
+      };
+    })[];
+}
+
+export interface GetFriendsInTournamentVariables {
+  tournamentId: UUIDString;
+  userEntryId: number;
+  season: string;
+}
+
 export interface GetHighestSeedRemainingData {
   participants: ({
     entryId: number;
@@ -483,6 +515,51 @@ export interface GetLeagueData {
   } & League_Key)[];
 }
 
+export interface GetLeagueEntriesData {
+  leagueEntries: ({
+    entryId: number;
+    rank?: number | null;
+    refreshId: UUIDString;
+    entry: {
+      name: string;
+      playerFirstName?: string | null;
+      playerLastName?: string | null;
+    };
+  })[];
+}
+
+export interface GetLeagueEntriesForEntriesData {
+  leagueEntries: ({
+    entryId: number;
+    leagueId: number;
+  })[];
+}
+
+export interface GetLeagueEntriesForEntriesVariables {
+  entryIds: number[];
+  season: string;
+}
+
+export interface GetLeagueEntriesVariables {
+  leagueId: number;
+  season: string;
+}
+
+export interface GetLeagueRefreshStatusData {
+  leagues: ({
+    leagueId: number;
+    name: string;
+    entriesCount?: number | null;
+    lastRefreshId?: UUIDString | null;
+    lastRefreshAt?: TimestampString | null;
+  })[];
+}
+
+export interface GetLeagueRefreshStatusVariables {
+  leagueId: number;
+  season: string;
+}
+
 export interface GetLeagueTournamentsData {
   tournaments: ({
     id: UUIDString;
@@ -505,6 +582,18 @@ export interface GetLeagueTournamentsVariables {
 
 export interface GetLeagueVariables {
   leagueId: number;
+  season: string;
+}
+
+export interface GetLeaguesData {
+  leagues: ({
+    leagueId: number;
+    name: string;
+  })[];
+}
+
+export interface GetLeaguesVariables {
+  leagueIds: number[];
   season: string;
 }
 
@@ -753,12 +842,23 @@ export interface GetRoundMatchesData {
     isBye: boolean;
     completedAt?: TimestampString | null;
     qualifiesToMatchId?: number | null;
+    matchPicks_on_match: ({
+      entryId: number;
+      slot: number;
+      participant: {
+        seed: number;
+        teamName: string;
+        managerName: string;
+      };
+    })[];
   } & Match_Key)[];
 }
 
 export interface GetRoundMatchesVariables {
   tournamentId: UUIDString;
   roundNumber: number;
+  limit?: number | null;
+  offset?: number | null;
 }
 
 export interface GetRoundMatchesWithPriorityData {
@@ -841,6 +941,26 @@ export interface GetTournamentData {
       email: string;
     } & User_Key;
   } & Tournament_Key;
+}
+
+export interface GetTournamentEntriesData {
+  tournamentEntries: ({
+    entryId: number;
+    seed: number;
+    status: string;
+    eliminationRound?: number | null;
+    uid?: string | null;
+    entry: {
+      name: string;
+      playerFirstName?: string | null;
+      playerLastName?: string | null;
+      summaryOverallPoints?: number | null;
+    };
+  })[];
+}
+
+export interface GetTournamentEntriesVariables {
+  tournamentId: UUIDString;
 }
 
 export interface GetTournamentImportStatusData {
@@ -971,6 +1091,21 @@ export interface GetUserParticipationsVariables {
   uid: string;
 }
 
+export interface GetUserTournamentEntryData {
+  tournamentEntries: ({
+    entryId: number;
+    seed: number;
+    status: string;
+    eliminationRound?: number | null;
+    uid?: string | null;
+  })[];
+}
+
+export interface GetUserTournamentEntryVariables {
+  tournamentId: UUIDString;
+  entryId: number;
+}
+
 export interface GetUserTournamentMatchesData {
   matchPicks: ({
     matchId: number;
@@ -1064,6 +1199,13 @@ export interface GetUserVerdictMatchPicksVariables {
   entryId: number;
 }
 
+export interface LeagueEntry_Key {
+  leagueId: number;
+  entryId: number;
+  season: string;
+  __typename?: 'LeagueEntry_Key';
+}
+
 export interface League_Key {
   leagueId: number;
   season: string;
@@ -1131,6 +1273,12 @@ export interface SetTournamentWinnerData {
 export interface SetTournamentWinnerVariables {
   id: UUIDString;
   winnerEntryId: number;
+}
+
+export interface TournamentEntry_Key {
+  tournamentId: UUIDString;
+  entryId: number;
+  __typename?: 'TournamentEntry_Key';
 }
 
 export interface Tournament_Key {
@@ -1262,12 +1410,58 @@ export interface UpsertLeagueData {
   league_upsert: League_Key;
 }
 
+export interface UpsertLeagueEntriesBatchData {
+  leagueEntry_upsertMany: LeagueEntry_Key[];
+}
+
+export interface UpsertLeagueEntriesBatchVariables {
+  entries: ({
+    leagueId?: number | null;
+    leagueId_expr?: {
+    };
+      leagueId_update?: ({
+        inc?: number | null;
+        dec?: number | null;
+      })[];
+        entryId?: number | null;
+        entryId_expr?: {
+        };
+          entryId_update?: ({
+            inc?: number | null;
+            dec?: number | null;
+          })[];
+            season?: string | null;
+            season_expr?: {
+            };
+              entryEntryId?: number | null;
+              entryEntryId_expr?: {
+              };
+                entryEntryId_update?: ({
+                  inc?: number | null;
+                  dec?: number | null;
+                })[];
+                  entry?: Entry_Key | null;
+                  rank?: number | null;
+                  rank_expr?: {
+                  };
+                    rank_update?: ({
+                      inc?: number | null;
+                      dec?: number | null;
+                    })[];
+                      refreshId?: UUIDString | null;
+                      refreshId_expr?: {
+                      };
+  })[];
+}
+
 export interface UpsertLeagueVariables {
   leagueId: number;
   season: string;
   name: string;
   created?: TimestampString | null;
   adminEntry?: number | null;
+  entriesCount?: number | null;
+  refreshId?: UUIDString | null;
   rawJson: string;
 }
 
@@ -1373,6 +1567,30 @@ export const upsertLeagueRef: UpsertLeagueRef;
 
 export function upsertLeague(vars: UpsertLeagueVariables): MutationPromise<UpsertLeagueData, UpsertLeagueVariables>;
 export function upsertLeague(dc: DataConnect, vars: UpsertLeagueVariables): MutationPromise<UpsertLeagueData, UpsertLeagueVariables>;
+
+interface UpsertLeagueEntriesBatchRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertLeagueEntriesBatchVariables): MutationRef<UpsertLeagueEntriesBatchData, UpsertLeagueEntriesBatchVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpsertLeagueEntriesBatchVariables): MutationRef<UpsertLeagueEntriesBatchData, UpsertLeagueEntriesBatchVariables>;
+  operationName: string;
+}
+export const upsertLeagueEntriesBatchRef: UpsertLeagueEntriesBatchRef;
+
+export function upsertLeagueEntriesBatch(vars: UpsertLeagueEntriesBatchVariables): MutationPromise<UpsertLeagueEntriesBatchData, UpsertLeagueEntriesBatchVariables>;
+export function upsertLeagueEntriesBatch(dc: DataConnect, vars: UpsertLeagueEntriesBatchVariables): MutationPromise<UpsertLeagueEntriesBatchData, UpsertLeagueEntriesBatchVariables>;
+
+interface DeleteStaleLeagueEntriesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteStaleLeagueEntriesVariables): MutationRef<DeleteStaleLeagueEntriesData, DeleteStaleLeagueEntriesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: DeleteStaleLeagueEntriesVariables): MutationRef<DeleteStaleLeagueEntriesData, DeleteStaleLeagueEntriesVariables>;
+  operationName: string;
+}
+export const deleteStaleLeagueEntriesRef: DeleteStaleLeagueEntriesRef;
+
+export function deleteStaleLeagueEntries(vars: DeleteStaleLeagueEntriesVariables): MutationPromise<DeleteStaleLeagueEntriesData, DeleteStaleLeagueEntriesVariables>;
+export function deleteStaleLeagueEntries(dc: DataConnect, vars: DeleteStaleLeagueEntriesVariables): MutationPromise<DeleteStaleLeagueEntriesData, DeleteStaleLeagueEntriesVariables>;
 
 interface UpsertEventRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1757,6 +1975,66 @@ export const getLeagueRef: GetLeagueRef;
 
 export function getLeague(vars: GetLeagueVariables): QueryPromise<GetLeagueData, GetLeagueVariables>;
 export function getLeague(dc: DataConnect, vars: GetLeagueVariables): QueryPromise<GetLeagueData, GetLeagueVariables>;
+
+interface GetLeaguesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLeaguesVariables): QueryRef<GetLeaguesData, GetLeaguesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetLeaguesVariables): QueryRef<GetLeaguesData, GetLeaguesVariables>;
+  operationName: string;
+}
+export const getLeaguesRef: GetLeaguesRef;
+
+export function getLeagues(vars: GetLeaguesVariables): QueryPromise<GetLeaguesData, GetLeaguesVariables>;
+export function getLeagues(dc: DataConnect, vars: GetLeaguesVariables): QueryPromise<GetLeaguesData, GetLeaguesVariables>;
+
+interface GetLeagueRefreshStatusRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLeagueRefreshStatusVariables): QueryRef<GetLeagueRefreshStatusData, GetLeagueRefreshStatusVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetLeagueRefreshStatusVariables): QueryRef<GetLeagueRefreshStatusData, GetLeagueRefreshStatusVariables>;
+  operationName: string;
+}
+export const getLeagueRefreshStatusRef: GetLeagueRefreshStatusRef;
+
+export function getLeagueRefreshStatus(vars: GetLeagueRefreshStatusVariables): QueryPromise<GetLeagueRefreshStatusData, GetLeagueRefreshStatusVariables>;
+export function getLeagueRefreshStatus(dc: DataConnect, vars: GetLeagueRefreshStatusVariables): QueryPromise<GetLeagueRefreshStatusData, GetLeagueRefreshStatusVariables>;
+
+interface GetLeagueEntriesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLeagueEntriesVariables): QueryRef<GetLeagueEntriesData, GetLeagueEntriesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetLeagueEntriesVariables): QueryRef<GetLeagueEntriesData, GetLeagueEntriesVariables>;
+  operationName: string;
+}
+export const getLeagueEntriesRef: GetLeagueEntriesRef;
+
+export function getLeagueEntries(vars: GetLeagueEntriesVariables): QueryPromise<GetLeagueEntriesData, GetLeagueEntriesVariables>;
+export function getLeagueEntries(dc: DataConnect, vars: GetLeagueEntriesVariables): QueryPromise<GetLeagueEntriesData, GetLeagueEntriesVariables>;
+
+interface GetTournamentEntriesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTournamentEntriesVariables): QueryRef<GetTournamentEntriesData, GetTournamentEntriesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetTournamentEntriesVariables): QueryRef<GetTournamentEntriesData, GetTournamentEntriesVariables>;
+  operationName: string;
+}
+export const getTournamentEntriesRef: GetTournamentEntriesRef;
+
+export function getTournamentEntries(vars: GetTournamentEntriesVariables): QueryPromise<GetTournamentEntriesData, GetTournamentEntriesVariables>;
+export function getTournamentEntries(dc: DataConnect, vars: GetTournamentEntriesVariables): QueryPromise<GetTournamentEntriesData, GetTournamentEntriesVariables>;
+
+interface GetUserTournamentEntryRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserTournamentEntryVariables): QueryRef<GetUserTournamentEntryData, GetUserTournamentEntryVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUserTournamentEntryVariables): QueryRef<GetUserTournamentEntryData, GetUserTournamentEntryVariables>;
+  operationName: string;
+}
+export const getUserTournamentEntryRef: GetUserTournamentEntryRef;
+
+export function getUserTournamentEntry(vars: GetUserTournamentEntryVariables): QueryPromise<GetUserTournamentEntryData, GetUserTournamentEntryVariables>;
+export function getUserTournamentEntry(dc: DataConnect, vars: GetUserTournamentEntryVariables): QueryPromise<GetUserTournamentEntryData, GetUserTournamentEntryVariables>;
 
 interface GetCurrentEventRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -2213,4 +2491,28 @@ export const getParticipantLeaguesForTournamentRef: GetParticipantLeaguesForTour
 
 export function getParticipantLeaguesForTournament(vars: GetParticipantLeaguesForTournamentVariables): QueryPromise<GetParticipantLeaguesForTournamentData, GetParticipantLeaguesForTournamentVariables>;
 export function getParticipantLeaguesForTournament(dc: DataConnect, vars: GetParticipantLeaguesForTournamentVariables): QueryPromise<GetParticipantLeaguesForTournamentData, GetParticipantLeaguesForTournamentVariables>;
+
+interface GetLeagueEntriesForEntriesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLeagueEntriesForEntriesVariables): QueryRef<GetLeagueEntriesForEntriesData, GetLeagueEntriesForEntriesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetLeagueEntriesForEntriesVariables): QueryRef<GetLeagueEntriesForEntriesData, GetLeagueEntriesForEntriesVariables>;
+  operationName: string;
+}
+export const getLeagueEntriesForEntriesRef: GetLeagueEntriesForEntriesRef;
+
+export function getLeagueEntriesForEntries(vars: GetLeagueEntriesForEntriesVariables): QueryPromise<GetLeagueEntriesForEntriesData, GetLeagueEntriesForEntriesVariables>;
+export function getLeagueEntriesForEntries(dc: DataConnect, vars: GetLeagueEntriesForEntriesVariables): QueryPromise<GetLeagueEntriesForEntriesData, GetLeagueEntriesForEntriesVariables>;
+
+interface GetFriendsInTournamentRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetFriendsInTournamentVariables): QueryRef<GetFriendsInTournamentData, GetFriendsInTournamentVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetFriendsInTournamentVariables): QueryRef<GetFriendsInTournamentData, GetFriendsInTournamentVariables>;
+  operationName: string;
+}
+export const getFriendsInTournamentRef: GetFriendsInTournamentRef;
+
+export function getFriendsInTournament(vars: GetFriendsInTournamentVariables): QueryPromise<GetFriendsInTournamentData, GetFriendsInTournamentVariables>;
+export function getFriendsInTournament(dc: DataConnect, vars: GetFriendsInTournamentVariables): QueryPromise<GetFriendsInTournamentData, GetFriendsInTournamentVariables>;
 

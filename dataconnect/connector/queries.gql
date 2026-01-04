@@ -100,6 +100,15 @@ query GetLeague($leagueId: Int!, $season: String!) @auth(level: PUBLIC) {
   }
 }
 
+# Get multiple leagues by IDs
+# Used to fetch league names for friend display
+query GetLeagues($leagueIds: [Int!]!, $season: String!) @auth(level: PUBLIC) {
+  leagues(where: { leagueId: { in: $leagueIds }, season: { eq: $season } }) {
+    leagueId
+    name
+  }
+}
+
 # =============================================================================
 # LEAGUE ENTRY QUERIES
 # =============================================================================
@@ -441,11 +450,18 @@ query GetPendingActiveRounds($maxEvent: Int!) @auth(level: PUBLIC) {
 # MATCH QUERIES
 # =============================================================================
 
-# Get matches for a round
-query GetRoundMatches($tournamentId: UUID!, $roundNumber: Int!) @auth(level: PUBLIC) {
+# Get matches for a round (paginated)
+query GetRoundMatches(
+  $tournamentId: UUID!
+  $roundNumber: Int!
+  $limit: Int = 100
+  $offset: Int = 0
+) @auth(level: PUBLIC) {
   matches(
     where: { tournamentId: { eq: $tournamentId }, roundNumber: { eq: $roundNumber } }
     orderBy: { positionInRound: ASC }
+    limit: $limit
+    offset: $offset
   ) {
     tournamentId
     matchId
@@ -456,6 +472,15 @@ query GetRoundMatches($tournamentId: UUID!, $roundNumber: Int!) @auth(level: PUB
     isBye
     completedAt
     qualifiesToMatchId
+    matchPicks_on_match {
+      entryId
+      slot
+      participant {
+        seed
+        teamName
+        managerName
+      }
+    }
   }
 }
 
@@ -936,6 +961,25 @@ query GetParticipantLeaguesForTournament($tournamentId: UUID!) @auth(level: PUBL
     leagueId
     leagueName
     entryRank
+  }
+}
+
+# Get league entries for multiple entry IDs (for finding shared leagues)
+# Returns league memberships for all specified entries, excluding system leagues (id < 336)
+# Used to calculate friends - participants who share leagues with the user
+query GetLeagueEntriesForEntries(
+  $entryIds: [Int!]!
+  $season: String!
+) @auth(level: PUBLIC) {
+  leagueEntries(
+    where: {
+      entryId: { in: $entryIds }
+      season: { eq: $season }
+      leagueId: { ge: 336 }
+    }
+  ) {
+    entryId
+    leagueId
   }
 }
 

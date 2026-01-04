@@ -61,6 +61,28 @@ export function upsertLeague(dcOrVars, vars) {
   return executeMutation(upsertLeagueRef(dcOrVars, vars));
 }
 
+export const upsertLeagueEntriesBatchRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpsertLeagueEntriesBatch', inputVars);
+}
+upsertLeagueEntriesBatchRef.operationName = 'UpsertLeagueEntriesBatch';
+
+export function upsertLeagueEntriesBatch(dcOrVars, vars) {
+  return executeMutation(upsertLeagueEntriesBatchRef(dcOrVars, vars));
+}
+
+export const deleteStaleLeagueEntriesRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteStaleLeagueEntries', inputVars);
+}
+deleteStaleLeagueEntriesRef.operationName = 'DeleteStaleLeagueEntries';
+
+export function deleteStaleLeagueEntries(dcOrVars, vars) {
+  return executeMutation(deleteStaleLeagueEntriesRef(dcOrVars, vars));
+}
+
 export const upsertEventRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -411,6 +433,61 @@ getLeagueRef.operationName = 'GetLeague';
 
 export function getLeague(dcOrVars, vars) {
   return executeQuery(getLeagueRef(dcOrVars, vars));
+}
+
+export const getLeaguesRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetLeagues', inputVars);
+}
+getLeaguesRef.operationName = 'GetLeagues';
+
+export function getLeagues(dcOrVars, vars) {
+  return executeQuery(getLeaguesRef(dcOrVars, vars));
+}
+
+export const getLeagueRefreshStatusRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetLeagueRefreshStatus', inputVars);
+}
+getLeagueRefreshStatusRef.operationName = 'GetLeagueRefreshStatus';
+
+export function getLeagueRefreshStatus(dcOrVars, vars) {
+  return executeQuery(getLeagueRefreshStatusRef(dcOrVars, vars));
+}
+
+export const getLeagueEntriesRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetLeagueEntries', inputVars);
+}
+getLeagueEntriesRef.operationName = 'GetLeagueEntries';
+
+export function getLeagueEntries(dcOrVars, vars) {
+  return executeQuery(getLeagueEntriesRef(dcOrVars, vars));
+}
+
+export const getTournamentEntriesRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetTournamentEntries', inputVars);
+}
+getTournamentEntriesRef.operationName = 'GetTournamentEntries';
+
+export function getTournamentEntries(dcOrVars, vars) {
+  return executeQuery(getTournamentEntriesRef(dcOrVars, vars));
+}
+
+export const getUserTournamentEntryRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetUserTournamentEntry', inputVars);
+}
+getUserTournamentEntryRef.operationName = 'GetUserTournamentEntry';
+
+export function getUserTournamentEntry(dcOrVars, vars) {
+  return executeQuery(getUserTournamentEntryRef(dcOrVars, vars));
 }
 
 export const getCurrentEventRef = (dcOrVars, vars) => {
@@ -829,5 +906,27 @@ getParticipantLeaguesForTournamentRef.operationName = 'GetParticipantLeaguesForT
 
 export function getParticipantLeaguesForTournament(dcOrVars, vars) {
   return executeQuery(getParticipantLeaguesForTournamentRef(dcOrVars, vars));
+}
+
+export const getLeagueEntriesForEntriesRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetLeagueEntriesForEntries', inputVars);
+}
+getLeagueEntriesForEntriesRef.operationName = 'GetLeagueEntriesForEntries';
+
+export function getLeagueEntriesForEntries(dcOrVars, vars) {
+  return executeQuery(getLeagueEntriesForEntriesRef(dcOrVars, vars));
+}
+
+export const getFriendsInTournamentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetFriendsInTournament', inputVars);
+}
+getFriendsInTournamentRef.operationName = 'GetFriendsInTournament';
+
+export function getFriendsInTournament(dcOrVars, vars) {
+  return executeQuery(getFriendsInTournamentRef(dcOrVars, vars));
 }
 

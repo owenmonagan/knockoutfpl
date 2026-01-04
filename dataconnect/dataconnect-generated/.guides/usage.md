@@ -14,7 +14,7 @@ If a user is not using a supported framework, they can use the generated SDK dir
 Here's an example of how to use it with the first 5 operations:
 
 ```js
-import { upsertUser, connectFplEntry, upsertEntry, upsertPick, upsertLeague, upsertEvent, createTournament, createTournamentWithImportStatus, updateTournamentImportProgress, finalizeTournamentImport } from '@knockoutfpl/dataconnect';
+import { upsertUser, connectFplEntry, upsertEntry, upsertPick, upsertLeague, upsertLeagueEntriesBatch, deleteStaleLeagueEntries, upsertEvent, createTournament, createTournamentWithImportStatus } from '@knockoutfpl/dataconnect';
 
 
 // Operation UpsertUser:  For variables, look at type UpsertUserVars in ../index.d.ts
@@ -32,6 +32,12 @@ const { data } = await UpsertPick(dataConnect, upsertPickVars);
 // Operation UpsertLeague:  For variables, look at type UpsertLeagueVars in ../index.d.ts
 const { data } = await UpsertLeague(dataConnect, upsertLeagueVars);
 
+// Operation UpsertLeagueEntriesBatch:  For variables, look at type UpsertLeagueEntriesBatchVars in ../index.d.ts
+const { data } = await UpsertLeagueEntriesBatch(dataConnect, upsertLeagueEntriesBatchVars);
+
+// Operation DeleteStaleLeagueEntries:  For variables, look at type DeleteStaleLeagueEntriesVars in ../index.d.ts
+const { data } = await DeleteStaleLeagueEntries(dataConnect, deleteStaleLeagueEntriesVars);
+
 // Operation UpsertEvent:  For variables, look at type UpsertEventVars in ../index.d.ts
 const { data } = await UpsertEvent(dataConnect, upsertEventVars);
 
@@ -40,12 +46,6 @@ const { data } = await CreateTournament(dataConnect, createTournamentVars);
 
 // Operation CreateTournamentWithImportStatus:  For variables, look at type CreateTournamentWithImportStatusVars in ../index.d.ts
 const { data } = await CreateTournamentWithImportStatus(dataConnect, createTournamentWithImportStatusVars);
-
-// Operation UpdateTournamentImportProgress:  For variables, look at type UpdateTournamentImportProgressVars in ../index.d.ts
-const { data } = await UpdateTournamentImportProgress(dataConnect, updateTournamentImportProgressVars);
-
-// Operation FinalizeTournamentImport:  For variables, look at type FinalizeTournamentImportVars in ../index.d.ts
-const { data } = await FinalizeTournamentImport(dataConnect, finalizeTournamentImportVars);
 
 
 ```

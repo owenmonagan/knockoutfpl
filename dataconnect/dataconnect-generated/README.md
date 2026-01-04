@@ -14,6 +14,11 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetPick*](#getpick)
   - [*GetPicksForEvent*](#getpicksforevent)
   - [*GetLeague*](#getleague)
+  - [*GetLeagues*](#getleagues)
+  - [*GetLeagueRefreshStatus*](#getleaguerefreshstatus)
+  - [*GetLeagueEntries*](#getleagueentries)
+  - [*GetTournamentEntries*](#gettournamententries)
+  - [*GetUserTournamentEntry*](#getusertournamententry)
   - [*GetCurrentEvent*](#getcurrentevent)
   - [*GetEvent*](#getevent)
   - [*GetSeasonEvents*](#getseasonevents)
@@ -52,12 +57,16 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetHighestSeedRemaining*](#gethighestseedremaining)
   - [*GetTournamentImportStatus*](#gettournamentimportstatus)
   - [*GetParticipantLeaguesForTournament*](#getparticipantleaguesfortournament)
+  - [*GetLeagueEntriesForEntries*](#getleagueentriesforentries)
+  - [*GetFriendsInTournament*](#getfriendsintournament)
 - [**Mutations**](#mutations)
   - [*UpsertUser*](#upsertuser)
   - [*ConnectFplEntry*](#connectfplentry)
   - [*UpsertEntry*](#upsertentry)
   - [*UpsertPick*](#upsertpick)
   - [*UpsertLeague*](#upsertleague)
+  - [*UpsertLeagueEntriesBatch*](#upsertleagueentriesbatch)
+  - [*DeleteStaleLeagueEntries*](#deletestaleleagueentries)
   - [*UpsertEvent*](#upsertevent)
   - [*CreateTournament*](#createtournament)
   - [*CreateTournamentWithImportStatus*](#createtournamentwithimportstatus)
@@ -843,6 +852,599 @@ console.log(data.leagues);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.leagues);
+});
+```
+
+## GetLeagues
+You can execute the `GetLeagues` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getLeagues(vars: GetLeaguesVariables): QueryPromise<GetLeaguesData, GetLeaguesVariables>;
+
+interface GetLeaguesRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLeaguesVariables): QueryRef<GetLeaguesData, GetLeaguesVariables>;
+}
+export const getLeaguesRef: GetLeaguesRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getLeagues(dc: DataConnect, vars: GetLeaguesVariables): QueryPromise<GetLeaguesData, GetLeaguesVariables>;
+
+interface GetLeaguesRef {
+  ...
+  (dc: DataConnect, vars: GetLeaguesVariables): QueryRef<GetLeaguesData, GetLeaguesVariables>;
+}
+export const getLeaguesRef: GetLeaguesRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getLeaguesRef:
+```typescript
+const name = getLeaguesRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetLeagues` query requires an argument of type `GetLeaguesVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetLeaguesVariables {
+  leagueIds: number[];
+  season: string;
+}
+```
+### Return Type
+Recall that executing the `GetLeagues` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetLeaguesData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetLeaguesData {
+  leagues: ({
+    leagueId: number;
+    name: string;
+  })[];
+}
+```
+### Using `GetLeagues`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getLeagues, GetLeaguesVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetLeagues` query requires an argument of type `GetLeaguesVariables`:
+const getLeaguesVars: GetLeaguesVariables = {
+  leagueIds: ..., 
+  season: ..., 
+};
+
+// Call the `getLeagues()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getLeagues(getLeaguesVars);
+// Variables can be defined inline as well.
+const { data } = await getLeagues({ leagueIds: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getLeagues(dataConnect, getLeaguesVars);
+
+console.log(data.leagues);
+
+// Or, you can use the `Promise` API.
+getLeagues(getLeaguesVars).then((response) => {
+  const data = response.data;
+  console.log(data.leagues);
+});
+```
+
+### Using `GetLeagues`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getLeaguesRef, GetLeaguesVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetLeagues` query requires an argument of type `GetLeaguesVariables`:
+const getLeaguesVars: GetLeaguesVariables = {
+  leagueIds: ..., 
+  season: ..., 
+};
+
+// Call the `getLeaguesRef()` function to get a reference to the query.
+const ref = getLeaguesRef(getLeaguesVars);
+// Variables can be defined inline as well.
+const ref = getLeaguesRef({ leagueIds: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getLeaguesRef(dataConnect, getLeaguesVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.leagues);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.leagues);
+});
+```
+
+## GetLeagueRefreshStatus
+You can execute the `GetLeagueRefreshStatus` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getLeagueRefreshStatus(vars: GetLeagueRefreshStatusVariables): QueryPromise<GetLeagueRefreshStatusData, GetLeagueRefreshStatusVariables>;
+
+interface GetLeagueRefreshStatusRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLeagueRefreshStatusVariables): QueryRef<GetLeagueRefreshStatusData, GetLeagueRefreshStatusVariables>;
+}
+export const getLeagueRefreshStatusRef: GetLeagueRefreshStatusRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getLeagueRefreshStatus(dc: DataConnect, vars: GetLeagueRefreshStatusVariables): QueryPromise<GetLeagueRefreshStatusData, GetLeagueRefreshStatusVariables>;
+
+interface GetLeagueRefreshStatusRef {
+  ...
+  (dc: DataConnect, vars: GetLeagueRefreshStatusVariables): QueryRef<GetLeagueRefreshStatusData, GetLeagueRefreshStatusVariables>;
+}
+export const getLeagueRefreshStatusRef: GetLeagueRefreshStatusRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getLeagueRefreshStatusRef:
+```typescript
+const name = getLeagueRefreshStatusRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetLeagueRefreshStatus` query requires an argument of type `GetLeagueRefreshStatusVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetLeagueRefreshStatusVariables {
+  leagueId: number;
+  season: string;
+}
+```
+### Return Type
+Recall that executing the `GetLeagueRefreshStatus` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetLeagueRefreshStatusData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetLeagueRefreshStatusData {
+  leagues: ({
+    leagueId: number;
+    name: string;
+    entriesCount?: number | null;
+    lastRefreshId?: UUIDString | null;
+    lastRefreshAt?: TimestampString | null;
+  })[];
+}
+```
+### Using `GetLeagueRefreshStatus`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getLeagueRefreshStatus, GetLeagueRefreshStatusVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetLeagueRefreshStatus` query requires an argument of type `GetLeagueRefreshStatusVariables`:
+const getLeagueRefreshStatusVars: GetLeagueRefreshStatusVariables = {
+  leagueId: ..., 
+  season: ..., 
+};
+
+// Call the `getLeagueRefreshStatus()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getLeagueRefreshStatus(getLeagueRefreshStatusVars);
+// Variables can be defined inline as well.
+const { data } = await getLeagueRefreshStatus({ leagueId: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getLeagueRefreshStatus(dataConnect, getLeagueRefreshStatusVars);
+
+console.log(data.leagues);
+
+// Or, you can use the `Promise` API.
+getLeagueRefreshStatus(getLeagueRefreshStatusVars).then((response) => {
+  const data = response.data;
+  console.log(data.leagues);
+});
+```
+
+### Using `GetLeagueRefreshStatus`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getLeagueRefreshStatusRef, GetLeagueRefreshStatusVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetLeagueRefreshStatus` query requires an argument of type `GetLeagueRefreshStatusVariables`:
+const getLeagueRefreshStatusVars: GetLeagueRefreshStatusVariables = {
+  leagueId: ..., 
+  season: ..., 
+};
+
+// Call the `getLeagueRefreshStatusRef()` function to get a reference to the query.
+const ref = getLeagueRefreshStatusRef(getLeagueRefreshStatusVars);
+// Variables can be defined inline as well.
+const ref = getLeagueRefreshStatusRef({ leagueId: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getLeagueRefreshStatusRef(dataConnect, getLeagueRefreshStatusVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.leagues);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.leagues);
+});
+```
+
+## GetLeagueEntries
+You can execute the `GetLeagueEntries` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getLeagueEntries(vars: GetLeagueEntriesVariables): QueryPromise<GetLeagueEntriesData, GetLeagueEntriesVariables>;
+
+interface GetLeagueEntriesRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLeagueEntriesVariables): QueryRef<GetLeagueEntriesData, GetLeagueEntriesVariables>;
+}
+export const getLeagueEntriesRef: GetLeagueEntriesRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getLeagueEntries(dc: DataConnect, vars: GetLeagueEntriesVariables): QueryPromise<GetLeagueEntriesData, GetLeagueEntriesVariables>;
+
+interface GetLeagueEntriesRef {
+  ...
+  (dc: DataConnect, vars: GetLeagueEntriesVariables): QueryRef<GetLeagueEntriesData, GetLeagueEntriesVariables>;
+}
+export const getLeagueEntriesRef: GetLeagueEntriesRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getLeagueEntriesRef:
+```typescript
+const name = getLeagueEntriesRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetLeagueEntries` query requires an argument of type `GetLeagueEntriesVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetLeagueEntriesVariables {
+  leagueId: number;
+  season: string;
+}
+```
+### Return Type
+Recall that executing the `GetLeagueEntries` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetLeagueEntriesData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetLeagueEntriesData {
+  leagueEntries: ({
+    entryId: number;
+    rank?: number | null;
+    refreshId: UUIDString;
+    entry: {
+      name: string;
+      playerFirstName?: string | null;
+      playerLastName?: string | null;
+    };
+  })[];
+}
+```
+### Using `GetLeagueEntries`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getLeagueEntries, GetLeagueEntriesVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetLeagueEntries` query requires an argument of type `GetLeagueEntriesVariables`:
+const getLeagueEntriesVars: GetLeagueEntriesVariables = {
+  leagueId: ..., 
+  season: ..., 
+};
+
+// Call the `getLeagueEntries()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getLeagueEntries(getLeagueEntriesVars);
+// Variables can be defined inline as well.
+const { data } = await getLeagueEntries({ leagueId: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getLeagueEntries(dataConnect, getLeagueEntriesVars);
+
+console.log(data.leagueEntries);
+
+// Or, you can use the `Promise` API.
+getLeagueEntries(getLeagueEntriesVars).then((response) => {
+  const data = response.data;
+  console.log(data.leagueEntries);
+});
+```
+
+### Using `GetLeagueEntries`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getLeagueEntriesRef, GetLeagueEntriesVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetLeagueEntries` query requires an argument of type `GetLeagueEntriesVariables`:
+const getLeagueEntriesVars: GetLeagueEntriesVariables = {
+  leagueId: ..., 
+  season: ..., 
+};
+
+// Call the `getLeagueEntriesRef()` function to get a reference to the query.
+const ref = getLeagueEntriesRef(getLeagueEntriesVars);
+// Variables can be defined inline as well.
+const ref = getLeagueEntriesRef({ leagueId: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getLeagueEntriesRef(dataConnect, getLeagueEntriesVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.leagueEntries);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.leagueEntries);
+});
+```
+
+## GetTournamentEntries
+You can execute the `GetTournamentEntries` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getTournamentEntries(vars: GetTournamentEntriesVariables): QueryPromise<GetTournamentEntriesData, GetTournamentEntriesVariables>;
+
+interface GetTournamentEntriesRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTournamentEntriesVariables): QueryRef<GetTournamentEntriesData, GetTournamentEntriesVariables>;
+}
+export const getTournamentEntriesRef: GetTournamentEntriesRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getTournamentEntries(dc: DataConnect, vars: GetTournamentEntriesVariables): QueryPromise<GetTournamentEntriesData, GetTournamentEntriesVariables>;
+
+interface GetTournamentEntriesRef {
+  ...
+  (dc: DataConnect, vars: GetTournamentEntriesVariables): QueryRef<GetTournamentEntriesData, GetTournamentEntriesVariables>;
+}
+export const getTournamentEntriesRef: GetTournamentEntriesRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getTournamentEntriesRef:
+```typescript
+const name = getTournamentEntriesRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetTournamentEntries` query requires an argument of type `GetTournamentEntriesVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetTournamentEntriesVariables {
+  tournamentId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `GetTournamentEntries` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetTournamentEntriesData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetTournamentEntriesData {
+  tournamentEntries: ({
+    entryId: number;
+    seed: number;
+    status: string;
+    eliminationRound?: number | null;
+    uid?: string | null;
+    entry: {
+      name: string;
+      playerFirstName?: string | null;
+      playerLastName?: string | null;
+      summaryOverallPoints?: number | null;
+    };
+  })[];
+}
+```
+### Using `GetTournamentEntries`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getTournamentEntries, GetTournamentEntriesVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetTournamentEntries` query requires an argument of type `GetTournamentEntriesVariables`:
+const getTournamentEntriesVars: GetTournamentEntriesVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `getTournamentEntries()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getTournamentEntries(getTournamentEntriesVars);
+// Variables can be defined inline as well.
+const { data } = await getTournamentEntries({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getTournamentEntries(dataConnect, getTournamentEntriesVars);
+
+console.log(data.tournamentEntries);
+
+// Or, you can use the `Promise` API.
+getTournamentEntries(getTournamentEntriesVars).then((response) => {
+  const data = response.data;
+  console.log(data.tournamentEntries);
+});
+```
+
+### Using `GetTournamentEntries`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getTournamentEntriesRef, GetTournamentEntriesVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetTournamentEntries` query requires an argument of type `GetTournamentEntriesVariables`:
+const getTournamentEntriesVars: GetTournamentEntriesVariables = {
+  tournamentId: ..., 
+};
+
+// Call the `getTournamentEntriesRef()` function to get a reference to the query.
+const ref = getTournamentEntriesRef(getTournamentEntriesVars);
+// Variables can be defined inline as well.
+const ref = getTournamentEntriesRef({ tournamentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getTournamentEntriesRef(dataConnect, getTournamentEntriesVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.tournamentEntries);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.tournamentEntries);
+});
+```
+
+## GetUserTournamentEntry
+You can execute the `GetUserTournamentEntry` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getUserTournamentEntry(vars: GetUserTournamentEntryVariables): QueryPromise<GetUserTournamentEntryData, GetUserTournamentEntryVariables>;
+
+interface GetUserTournamentEntryRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserTournamentEntryVariables): QueryRef<GetUserTournamentEntryData, GetUserTournamentEntryVariables>;
+}
+export const getUserTournamentEntryRef: GetUserTournamentEntryRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getUserTournamentEntry(dc: DataConnect, vars: GetUserTournamentEntryVariables): QueryPromise<GetUserTournamentEntryData, GetUserTournamentEntryVariables>;
+
+interface GetUserTournamentEntryRef {
+  ...
+  (dc: DataConnect, vars: GetUserTournamentEntryVariables): QueryRef<GetUserTournamentEntryData, GetUserTournamentEntryVariables>;
+}
+export const getUserTournamentEntryRef: GetUserTournamentEntryRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getUserTournamentEntryRef:
+```typescript
+const name = getUserTournamentEntryRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetUserTournamentEntry` query requires an argument of type `GetUserTournamentEntryVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetUserTournamentEntryVariables {
+  tournamentId: UUIDString;
+  entryId: number;
+}
+```
+### Return Type
+Recall that executing the `GetUserTournamentEntry` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetUserTournamentEntryData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetUserTournamentEntryData {
+  tournamentEntries: ({
+    entryId: number;
+    seed: number;
+    status: string;
+    eliminationRound?: number | null;
+    uid?: string | null;
+  })[];
+}
+```
+### Using `GetUserTournamentEntry`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getUserTournamentEntry, GetUserTournamentEntryVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetUserTournamentEntry` query requires an argument of type `GetUserTournamentEntryVariables`:
+const getUserTournamentEntryVars: GetUserTournamentEntryVariables = {
+  tournamentId: ..., 
+  entryId: ..., 
+};
+
+// Call the `getUserTournamentEntry()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getUserTournamentEntry(getUserTournamentEntryVars);
+// Variables can be defined inline as well.
+const { data } = await getUserTournamentEntry({ tournamentId: ..., entryId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getUserTournamentEntry(dataConnect, getUserTournamentEntryVars);
+
+console.log(data.tournamentEntries);
+
+// Or, you can use the `Promise` API.
+getUserTournamentEntry(getUserTournamentEntryVars).then((response) => {
+  const data = response.data;
+  console.log(data.tournamentEntries);
+});
+```
+
+### Using `GetUserTournamentEntry`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getUserTournamentEntryRef, GetUserTournamentEntryVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetUserTournamentEntry` query requires an argument of type `GetUserTournamentEntryVariables`:
+const getUserTournamentEntryVars: GetUserTournamentEntryVariables = {
+  tournamentId: ..., 
+  entryId: ..., 
+};
+
+// Call the `getUserTournamentEntryRef()` function to get a reference to the query.
+const ref = getUserTournamentEntryRef(getUserTournamentEntryVars);
+// Variables can be defined inline as well.
+const ref = getUserTournamentEntryRef({ tournamentId: ..., entryId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getUserTournamentEntryRef(dataConnect, getUserTournamentEntryVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.tournamentEntries);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.tournamentEntries);
 });
 ```
 
@@ -2673,6 +3275,8 @@ The `GetRoundMatches` query requires an argument of type `GetRoundMatchesVariabl
 export interface GetRoundMatchesVariables {
   tournamentId: UUIDString;
   roundNumber: number;
+  limit?: number | null;
+  offset?: number | null;
 }
 ```
 ### Return Type
@@ -2691,6 +3295,15 @@ export interface GetRoundMatchesData {
     isBye: boolean;
     completedAt?: TimestampString | null;
     qualifiesToMatchId?: number | null;
+    matchPicks_on_match: ({
+      entryId: number;
+      slot: number;
+      participant: {
+        seed: number;
+        teamName: string;
+        managerName: string;
+      };
+    })[];
   } & Match_Key)[];
 }
 ```
@@ -2704,13 +3317,15 @@ import { connectorConfig, getRoundMatches, GetRoundMatchesVariables } from '@kno
 const getRoundMatchesVars: GetRoundMatchesVariables = {
   tournamentId: ..., 
   roundNumber: ..., 
+  limit: ..., // optional
+  offset: ..., // optional
 };
 
 // Call the `getRoundMatches()` function to execute the query.
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await getRoundMatches(getRoundMatchesVars);
 // Variables can be defined inline as well.
-const { data } = await getRoundMatches({ tournamentId: ..., roundNumber: ..., });
+const { data } = await getRoundMatches({ tournamentId: ..., roundNumber: ..., limit: ..., offset: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -2735,12 +3350,14 @@ import { connectorConfig, getRoundMatchesRef, GetRoundMatchesVariables } from '@
 const getRoundMatchesVars: GetRoundMatchesVariables = {
   tournamentId: ..., 
   roundNumber: ..., 
+  limit: ..., // optional
+  offset: ..., // optional
 };
 
 // Call the `getRoundMatchesRef()` function to get a reference to the query.
 const ref = getRoundMatchesRef(getRoundMatchesVars);
 // Variables can be defined inline as well.
-const ref = getRoundMatchesRef({ tournamentId: ..., roundNumber: ..., });
+const ref = getRoundMatchesRef({ tournamentId: ..., roundNumber: ..., limit: ..., offset: ..., });
 
 // You can also pass in a `DataConnect` instance to the `QueryRef` function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -5452,6 +6069,252 @@ executeQuery(ref).then((response) => {
 });
 ```
 
+## GetLeagueEntriesForEntries
+You can execute the `GetLeagueEntriesForEntries` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getLeagueEntriesForEntries(vars: GetLeagueEntriesForEntriesVariables): QueryPromise<GetLeagueEntriesForEntriesData, GetLeagueEntriesForEntriesVariables>;
+
+interface GetLeagueEntriesForEntriesRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLeagueEntriesForEntriesVariables): QueryRef<GetLeagueEntriesForEntriesData, GetLeagueEntriesForEntriesVariables>;
+}
+export const getLeagueEntriesForEntriesRef: GetLeagueEntriesForEntriesRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getLeagueEntriesForEntries(dc: DataConnect, vars: GetLeagueEntriesForEntriesVariables): QueryPromise<GetLeagueEntriesForEntriesData, GetLeagueEntriesForEntriesVariables>;
+
+interface GetLeagueEntriesForEntriesRef {
+  ...
+  (dc: DataConnect, vars: GetLeagueEntriesForEntriesVariables): QueryRef<GetLeagueEntriesForEntriesData, GetLeagueEntriesForEntriesVariables>;
+}
+export const getLeagueEntriesForEntriesRef: GetLeagueEntriesForEntriesRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getLeagueEntriesForEntriesRef:
+```typescript
+const name = getLeagueEntriesForEntriesRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetLeagueEntriesForEntries` query requires an argument of type `GetLeagueEntriesForEntriesVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetLeagueEntriesForEntriesVariables {
+  entryIds: number[];
+  season: string;
+}
+```
+### Return Type
+Recall that executing the `GetLeagueEntriesForEntries` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetLeagueEntriesForEntriesData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetLeagueEntriesForEntriesData {
+  leagueEntries: ({
+    entryId: number;
+    leagueId: number;
+  })[];
+}
+```
+### Using `GetLeagueEntriesForEntries`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getLeagueEntriesForEntries, GetLeagueEntriesForEntriesVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetLeagueEntriesForEntries` query requires an argument of type `GetLeagueEntriesForEntriesVariables`:
+const getLeagueEntriesForEntriesVars: GetLeagueEntriesForEntriesVariables = {
+  entryIds: ..., 
+  season: ..., 
+};
+
+// Call the `getLeagueEntriesForEntries()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getLeagueEntriesForEntries(getLeagueEntriesForEntriesVars);
+// Variables can be defined inline as well.
+const { data } = await getLeagueEntriesForEntries({ entryIds: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getLeagueEntriesForEntries(dataConnect, getLeagueEntriesForEntriesVars);
+
+console.log(data.leagueEntries);
+
+// Or, you can use the `Promise` API.
+getLeagueEntriesForEntries(getLeagueEntriesForEntriesVars).then((response) => {
+  const data = response.data;
+  console.log(data.leagueEntries);
+});
+```
+
+### Using `GetLeagueEntriesForEntries`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getLeagueEntriesForEntriesRef, GetLeagueEntriesForEntriesVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetLeagueEntriesForEntries` query requires an argument of type `GetLeagueEntriesForEntriesVariables`:
+const getLeagueEntriesForEntriesVars: GetLeagueEntriesForEntriesVariables = {
+  entryIds: ..., 
+  season: ..., 
+};
+
+// Call the `getLeagueEntriesForEntriesRef()` function to get a reference to the query.
+const ref = getLeagueEntriesForEntriesRef(getLeagueEntriesForEntriesVars);
+// Variables can be defined inline as well.
+const ref = getLeagueEntriesForEntriesRef({ entryIds: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getLeagueEntriesForEntriesRef(dataConnect, getLeagueEntriesForEntriesVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.leagueEntries);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.leagueEntries);
+});
+```
+
+## GetFriendsInTournament
+You can execute the `GetFriendsInTournament` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getFriendsInTournament(vars: GetFriendsInTournamentVariables): QueryPromise<GetFriendsInTournamentData, GetFriendsInTournamentVariables>;
+
+interface GetFriendsInTournamentRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetFriendsInTournamentVariables): QueryRef<GetFriendsInTournamentData, GetFriendsInTournamentVariables>;
+}
+export const getFriendsInTournamentRef: GetFriendsInTournamentRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getFriendsInTournament(dc: DataConnect, vars: GetFriendsInTournamentVariables): QueryPromise<GetFriendsInTournamentData, GetFriendsInTournamentVariables>;
+
+interface GetFriendsInTournamentRef {
+  ...
+  (dc: DataConnect, vars: GetFriendsInTournamentVariables): QueryRef<GetFriendsInTournamentData, GetFriendsInTournamentVariables>;
+}
+export const getFriendsInTournamentRef: GetFriendsInTournamentRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getFriendsInTournamentRef:
+```typescript
+const name = getFriendsInTournamentRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetFriendsInTournament` query requires an argument of type `GetFriendsInTournamentVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetFriendsInTournamentVariables {
+  tournamentId: UUIDString;
+  userEntryId: number;
+  season: string;
+}
+```
+### Return Type
+Recall that executing the `GetFriendsInTournament` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetFriendsInTournamentData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetFriendsInTournamentData {
+  userLeagues: ({
+    leagueId: number;
+  })[];
+    tournamentParticipants: ({
+      entryId: number;
+      seed: number;
+      status: string;
+      entry: {
+        name: string;
+        playerFirstName?: string | null;
+        playerLastName?: string | null;
+      };
+    })[];
+}
+```
+### Using `GetFriendsInTournament`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getFriendsInTournament, GetFriendsInTournamentVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetFriendsInTournament` query requires an argument of type `GetFriendsInTournamentVariables`:
+const getFriendsInTournamentVars: GetFriendsInTournamentVariables = {
+  tournamentId: ..., 
+  userEntryId: ..., 
+  season: ..., 
+};
+
+// Call the `getFriendsInTournament()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getFriendsInTournament(getFriendsInTournamentVars);
+// Variables can be defined inline as well.
+const { data } = await getFriendsInTournament({ tournamentId: ..., userEntryId: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getFriendsInTournament(dataConnect, getFriendsInTournamentVars);
+
+console.log(data.userLeagues);
+console.log(data.tournamentParticipants);
+
+// Or, you can use the `Promise` API.
+getFriendsInTournament(getFriendsInTournamentVars).then((response) => {
+  const data = response.data;
+  console.log(data.userLeagues);
+  console.log(data.tournamentParticipants);
+});
+```
+
+### Using `GetFriendsInTournament`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getFriendsInTournamentRef, GetFriendsInTournamentVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetFriendsInTournament` query requires an argument of type `GetFriendsInTournamentVariables`:
+const getFriendsInTournamentVars: GetFriendsInTournamentVariables = {
+  tournamentId: ..., 
+  userEntryId: ..., 
+  season: ..., 
+};
+
+// Call the `getFriendsInTournamentRef()` function to get a reference to the query.
+const ref = getFriendsInTournamentRef(getFriendsInTournamentVars);
+// Variables can be defined inline as well.
+const ref = getFriendsInTournamentRef({ tournamentId: ..., userEntryId: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getFriendsInTournamentRef(dataConnect, getFriendsInTournamentVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.userLeagues);
+console.log(data.tournamentParticipants);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.userLeagues);
+  console.log(data.tournamentParticipants);
+});
+```
+
 # Mutations
 
 There are two ways to execute a Data Connect Mutation using the generated Web SDK:
@@ -6005,6 +6868,8 @@ export interface UpsertLeagueVariables {
   name: string;
   created?: TimestampString | null;
   adminEntry?: number | null;
+  entriesCount?: number | null;
+  refreshId?: UUIDString | null;
   rawJson: string;
 }
 ```
@@ -6030,6 +6895,8 @@ const upsertLeagueVars: UpsertLeagueVariables = {
   name: ..., 
   created: ..., // optional
   adminEntry: ..., // optional
+  entriesCount: ..., // optional
+  refreshId: ..., // optional
   rawJson: ..., 
 };
 
@@ -6037,7 +6904,7 @@ const upsertLeagueVars: UpsertLeagueVariables = {
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await upsertLeague(upsertLeagueVars);
 // Variables can be defined inline as well.
-const { data } = await upsertLeague({ leagueId: ..., season: ..., name: ..., created: ..., adminEntry: ..., rawJson: ..., });
+const { data } = await upsertLeague({ leagueId: ..., season: ..., name: ..., created: ..., adminEntry: ..., entriesCount: ..., refreshId: ..., rawJson: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -6065,13 +6932,15 @@ const upsertLeagueVars: UpsertLeagueVariables = {
   name: ..., 
   created: ..., // optional
   adminEntry: ..., // optional
+  entriesCount: ..., // optional
+  refreshId: ..., // optional
   rawJson: ..., 
 };
 
 // Call the `upsertLeagueRef()` function to get a reference to the mutation.
 const ref = upsertLeagueRef(upsertLeagueVars);
 // Variables can be defined inline as well.
-const ref = upsertLeagueRef({ leagueId: ..., season: ..., name: ..., created: ..., adminEntry: ..., rawJson: ..., });
+const ref = upsertLeagueRef({ leagueId: ..., season: ..., name: ..., created: ..., adminEntry: ..., entriesCount: ..., refreshId: ..., rawJson: ..., });
 
 // You can also pass in a `DataConnect` instance to the `MutationRef` function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -6087,6 +6956,266 @@ console.log(data.league_upsert);
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.league_upsert);
+});
+```
+
+## UpsertLeagueEntriesBatch
+You can execute the `UpsertLeagueEntriesBatch` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+upsertLeagueEntriesBatch(vars: UpsertLeagueEntriesBatchVariables): MutationPromise<UpsertLeagueEntriesBatchData, UpsertLeagueEntriesBatchVariables>;
+
+interface UpsertLeagueEntriesBatchRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertLeagueEntriesBatchVariables): MutationRef<UpsertLeagueEntriesBatchData, UpsertLeagueEntriesBatchVariables>;
+}
+export const upsertLeagueEntriesBatchRef: UpsertLeagueEntriesBatchRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+upsertLeagueEntriesBatch(dc: DataConnect, vars: UpsertLeagueEntriesBatchVariables): MutationPromise<UpsertLeagueEntriesBatchData, UpsertLeagueEntriesBatchVariables>;
+
+interface UpsertLeagueEntriesBatchRef {
+  ...
+  (dc: DataConnect, vars: UpsertLeagueEntriesBatchVariables): MutationRef<UpsertLeagueEntriesBatchData, UpsertLeagueEntriesBatchVariables>;
+}
+export const upsertLeagueEntriesBatchRef: UpsertLeagueEntriesBatchRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the upsertLeagueEntriesBatchRef:
+```typescript
+const name = upsertLeagueEntriesBatchRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `UpsertLeagueEntriesBatch` mutation requires an argument of type `UpsertLeagueEntriesBatchVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface UpsertLeagueEntriesBatchVariables {
+  entries: ({
+    leagueId?: number | null;
+    leagueId_expr?: {
+    };
+      leagueId_update?: ({
+        inc?: number | null;
+        dec?: number | null;
+      })[];
+        entryId?: number | null;
+        entryId_expr?: {
+        };
+          entryId_update?: ({
+            inc?: number | null;
+            dec?: number | null;
+          })[];
+            season?: string | null;
+            season_expr?: {
+            };
+              entryEntryId?: number | null;
+              entryEntryId_expr?: {
+              };
+                entryEntryId_update?: ({
+                  inc?: number | null;
+                  dec?: number | null;
+                })[];
+                  entry?: Entry_Key | null;
+                  rank?: number | null;
+                  rank_expr?: {
+                  };
+                    rank_update?: ({
+                      inc?: number | null;
+                      dec?: number | null;
+                    })[];
+                      refreshId?: UUIDString | null;
+                      refreshId_expr?: {
+                      };
+  })[];
+}
+```
+### Return Type
+Recall that executing the `UpsertLeagueEntriesBatch` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `UpsertLeagueEntriesBatchData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface UpsertLeagueEntriesBatchData {
+  leagueEntry_upsertMany: LeagueEntry_Key[];
+}
+```
+### Using `UpsertLeagueEntriesBatch`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, upsertLeagueEntriesBatch, UpsertLeagueEntriesBatchVariables } from '@knockoutfpl/dataconnect';
+
+// The `UpsertLeagueEntriesBatch` mutation requires an argument of type `UpsertLeagueEntriesBatchVariables`:
+const upsertLeagueEntriesBatchVars: UpsertLeagueEntriesBatchVariables = {
+  entries: ..., 
+};
+
+// Call the `upsertLeagueEntriesBatch()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await upsertLeagueEntriesBatch(upsertLeagueEntriesBatchVars);
+// Variables can be defined inline as well.
+const { data } = await upsertLeagueEntriesBatch({ entries: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await upsertLeagueEntriesBatch(dataConnect, upsertLeagueEntriesBatchVars);
+
+console.log(data.leagueEntry_upsertMany);
+
+// Or, you can use the `Promise` API.
+upsertLeagueEntriesBatch(upsertLeagueEntriesBatchVars).then((response) => {
+  const data = response.data;
+  console.log(data.leagueEntry_upsertMany);
+});
+```
+
+### Using `UpsertLeagueEntriesBatch`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, upsertLeagueEntriesBatchRef, UpsertLeagueEntriesBatchVariables } from '@knockoutfpl/dataconnect';
+
+// The `UpsertLeagueEntriesBatch` mutation requires an argument of type `UpsertLeagueEntriesBatchVariables`:
+const upsertLeagueEntriesBatchVars: UpsertLeagueEntriesBatchVariables = {
+  entries: ..., 
+};
+
+// Call the `upsertLeagueEntriesBatchRef()` function to get a reference to the mutation.
+const ref = upsertLeagueEntriesBatchRef(upsertLeagueEntriesBatchVars);
+// Variables can be defined inline as well.
+const ref = upsertLeagueEntriesBatchRef({ entries: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = upsertLeagueEntriesBatchRef(dataConnect, upsertLeagueEntriesBatchVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.leagueEntry_upsertMany);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.leagueEntry_upsertMany);
+});
+```
+
+## DeleteStaleLeagueEntries
+You can execute the `DeleteStaleLeagueEntries` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+deleteStaleLeagueEntries(vars: DeleteStaleLeagueEntriesVariables): MutationPromise<DeleteStaleLeagueEntriesData, DeleteStaleLeagueEntriesVariables>;
+
+interface DeleteStaleLeagueEntriesRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteStaleLeagueEntriesVariables): MutationRef<DeleteStaleLeagueEntriesData, DeleteStaleLeagueEntriesVariables>;
+}
+export const deleteStaleLeagueEntriesRef: DeleteStaleLeagueEntriesRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+deleteStaleLeagueEntries(dc: DataConnect, vars: DeleteStaleLeagueEntriesVariables): MutationPromise<DeleteStaleLeagueEntriesData, DeleteStaleLeagueEntriesVariables>;
+
+interface DeleteStaleLeagueEntriesRef {
+  ...
+  (dc: DataConnect, vars: DeleteStaleLeagueEntriesVariables): MutationRef<DeleteStaleLeagueEntriesData, DeleteStaleLeagueEntriesVariables>;
+}
+export const deleteStaleLeagueEntriesRef: DeleteStaleLeagueEntriesRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteStaleLeagueEntriesRef:
+```typescript
+const name = deleteStaleLeagueEntriesRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `DeleteStaleLeagueEntries` mutation requires an argument of type `DeleteStaleLeagueEntriesVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface DeleteStaleLeagueEntriesVariables {
+  leagueId: number;
+  season: string;
+  currentRefreshId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `DeleteStaleLeagueEntries` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `DeleteStaleLeagueEntriesData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface DeleteStaleLeagueEntriesData {
+  leagueEntry_deleteMany: number;
+}
+```
+### Using `DeleteStaleLeagueEntries`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, deleteStaleLeagueEntries, DeleteStaleLeagueEntriesVariables } from '@knockoutfpl/dataconnect';
+
+// The `DeleteStaleLeagueEntries` mutation requires an argument of type `DeleteStaleLeagueEntriesVariables`:
+const deleteStaleLeagueEntriesVars: DeleteStaleLeagueEntriesVariables = {
+  leagueId: ..., 
+  season: ..., 
+  currentRefreshId: ..., 
+};
+
+// Call the `deleteStaleLeagueEntries()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await deleteStaleLeagueEntries(deleteStaleLeagueEntriesVars);
+// Variables can be defined inline as well.
+const { data } = await deleteStaleLeagueEntries({ leagueId: ..., season: ..., currentRefreshId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await deleteStaleLeagueEntries(dataConnect, deleteStaleLeagueEntriesVars);
+
+console.log(data.leagueEntry_deleteMany);
+
+// Or, you can use the `Promise` API.
+deleteStaleLeagueEntries(deleteStaleLeagueEntriesVars).then((response) => {
+  const data = response.data;
+  console.log(data.leagueEntry_deleteMany);
+});
+```
+
+### Using `DeleteStaleLeagueEntries`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, deleteStaleLeagueEntriesRef, DeleteStaleLeagueEntriesVariables } from '@knockoutfpl/dataconnect';
+
+// The `DeleteStaleLeagueEntries` mutation requires an argument of type `DeleteStaleLeagueEntriesVariables`:
+const deleteStaleLeagueEntriesVars: DeleteStaleLeagueEntriesVariables = {
+  leagueId: ..., 
+  season: ..., 
+  currentRefreshId: ..., 
+};
+
+// Call the `deleteStaleLeagueEntriesRef()` function to get a reference to the mutation.
+const ref = deleteStaleLeagueEntriesRef(deleteStaleLeagueEntriesVars);
+// Variables can be defined inline as well.
+const ref = deleteStaleLeagueEntriesRef({ leagueId: ..., season: ..., currentRefreshId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = deleteStaleLeagueEntriesRef(dataConnect, deleteStaleLeagueEntriesVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.leagueEntry_deleteMany);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.leagueEntry_deleteMany);
 });
 ```
 

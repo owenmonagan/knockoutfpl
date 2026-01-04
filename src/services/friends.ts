@@ -1,8 +1,11 @@
 // src/services/friends.ts
-import { getUserMiniLeagues } from './fpl';
-import { getParticipantLeaguesForTournament } from './tournament';
+import { dataConnect, getFriendsInTournament, getLeagueEntriesForEntries, getLeagues } from '@knockoutfpl/dataconnect';
 import type { Participant, TournamentEntry } from '@/types/tournament';
 import { getManagerName, getTeamName } from '@/types/tournament';
+import type { UUIDString } from '@knockoutfpl/dataconnect';
+
+// Current FPL season - should match the season used in tournament creation
+const CURRENT_SEASON = '2024-25';
 
 /**
  * A friend is a manager who shares at least 1 mini-league with the user,
@@ -63,7 +66,7 @@ function normalizeParticipant(participant: Participant): NormalizedParticipant {
 /**
  * Find all participants who share mini-leagues with the user (beyond the tournament league).
  *
- * Supports both legacy Participant array and new TournamentEntry array.
+ * Uses LeagueEntry table to find shared leagues between users.
  *
  * @param tournamentId - Tournament ID
  * @param tournamentLeagueId - FPL league ID for this tournament (excluded from friend calculation)
@@ -87,44 +90,104 @@ export async function getTournamentFriends(
     return normalizeParticipant(p as Participant);
   });
 
-  // 1. Get user's leagues from FPL API
-  const userLeagues = await getUserMiniLeagues(userFplTeamId);
-  const userLeagueIds = new Set(userLeagues.map((l) => l.id));
+  // 1. Get user's leagues from LeagueEntry table
+  const friendsData = await getFriendsInTournament(dataConnect, {
+    tournamentId: tournamentId as UUIDString,
+    userEntryId: userFplTeamId,
+    season: CURRENT_SEASON,
+  });
 
-  // 2. Query ParticipantLeague table (cached from tournament creation)
-  const participantLeagues = await getParticipantLeaguesForTournament(tournamentId);
+  const userLeagueIds = new Set(friendsData.data.userLeagues.map((l) => l.leagueId));
 
-  // 3. For each participant, find shared leagues (excluding tournament league)
-  const friends: FriendInTournament[] = [];
+  // If user has no leagues, they can't have friends
+  if (userLeagueIds.size === 0) {
+    return [];
+  }
+
+  // 2. Get all participant entry IDs (excluding self)
+  const otherParticipantIds = normalizedParticipants
+    .filter((p) => p.entryId !== userFplTeamId)
+    .map((p) => p.entryId);
+
+  if (otherParticipantIds.length === 0) {
+    return [];
+  }
+
+  // 3. Query LeagueEntry for all participants' league memberships
+  const participantLeaguesResult = await getLeagueEntriesForEntries(dataConnect, {
+    entryIds: otherParticipantIds,
+    season: CURRENT_SEASON,
+  });
+
+  // Build a map of entryId -> leagueIds
+  const participantLeagueMap = new Map<number, number[]>();
+  for (const le of participantLeaguesResult.data.leagueEntries) {
+    const existing = participantLeagueMap.get(le.entryId) || [];
+    existing.push(le.leagueId);
+    participantLeagueMap.set(le.entryId, existing);
+  }
+
+  // 4. Collect all shared league IDs for league name lookup
+  const sharedLeagueIdsSet = new Set<number>();
+  const participantSharedLeagues = new Map<number, number[]>();
 
   for (const participant of normalizedParticipants) {
-    // Skip self
     if (participant.entryId === userFplTeamId) continue;
 
-    // Get their leagues, excluding the tournament league
-    const theirLeagues = participantLeagues
-      .filter((pl) => pl.entryId === participant.entryId)
-      .filter((pl) => pl.leagueId !== tournamentLeagueId);
+    const theirLeagues = participantLeagueMap.get(participant.entryId) || [];
 
-    // Find shared leagues
-    const sharedLeagues = theirLeagues.filter((pl) => userLeagueIds.has(pl.leagueId));
+    // Find shared leagues (excluding tournament league)
+    const sharedLeagues = theirLeagues.filter(
+      (leagueId) => leagueId !== tournamentLeagueId && userLeagueIds.has(leagueId)
+    );
 
-    // If they share at least 1 league (excluding tournament), they're a friend
-    if (sharedLeagues.length >= 1) {
-      friends.push({
-        fplTeamId: participant.entryId,
-        teamName: participant.teamName,
-        managerName: participant.managerName,
-        sharedLeagueCount: sharedLeagues.length,
-        sharedLeagueNames: sharedLeagues.map((l) => l.leagueName),
-        seed: participant.seed,
-        status: participant.status === 'eliminated' ? 'eliminated' : 'in',
-        eliminatedRound: participant.eliminationRound,
-      });
+    if (sharedLeagues.length > 0) {
+      participantSharedLeagues.set(participant.entryId, sharedLeagues);
+      sharedLeagues.forEach((id) => sharedLeagueIdsSet.add(id));
     }
   }
 
-  // 4. Sort by shared count desc, then alphabetically by team name
+  // If no shared leagues found, return empty
+  if (sharedLeagueIdsSet.size === 0) {
+    return [];
+  }
+
+  // 5. Fetch league names for all shared leagues
+  const leagueNameMap = new Map<number, string>();
+  const sharedLeagueIds = Array.from(sharedLeagueIdsSet);
+
+  // Query leagues in batches to get names
+  const leaguesResult = await getLeagues(dataConnect, {
+    leagueIds: sharedLeagueIds,
+    season: CURRENT_SEASON,
+  });
+
+  for (const league of leaguesResult.data.leagues) {
+    leagueNameMap.set(league.leagueId, league.name);
+  }
+
+  // 6. Build friend objects
+  const friends: FriendInTournament[] = [];
+
+  for (const participant of normalizedParticipants) {
+    const sharedLeagues = participantSharedLeagues.get(participant.entryId);
+    if (!sharedLeagues || sharedLeagues.length === 0) continue;
+
+    friends.push({
+      fplTeamId: participant.entryId,
+      teamName: participant.teamName,
+      managerName: participant.managerName,
+      sharedLeagueCount: sharedLeagues.length,
+      sharedLeagueNames: sharedLeagues
+        .map((id) => leagueNameMap.get(id) || `League ${id}`)
+        .sort(),
+      seed: participant.seed,
+      status: participant.status === 'eliminated' ? 'eliminated' : 'in',
+      eliminatedRound: participant.eliminationRound,
+    });
+  }
+
+  // 7. Sort by shared count desc, then alphabetically by team name
   return friends.sort((a, b) => {
     if (b.sharedLeagueCount !== a.sharedLeagueCount) {
       return b.sharedLeagueCount - a.sharedLeagueCount;
