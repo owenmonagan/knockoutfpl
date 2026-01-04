@@ -13,7 +13,7 @@ import { YourMatchesSection } from '@/components/dashboard/YourMatchesSection';
 import { OverviewTab, MatchesTab, ParticipantsTab, BracketTab } from './tabs';
 import { useTournamentFriends } from '@/hooks/useTournamentFriends';
 import type { Participant, Tournament } from '@/types/tournament';
-import { getMatchPlayers } from '@/types/tournament';
+import { getEntryId, getMatchPlayers } from '@/types/tournament';
 import type { MatchSummaryCardProps } from '@/components/dashboard/MatchSummaryCard';
 
 interface TournamentViewProps {
@@ -33,7 +33,7 @@ function buildMatchesForTeam(
   fplTeamId: number
 ): MatchSummaryCardProps[] {
   const participantMap = new Map<number, Participant>(
-    tournament.participants.map((p) => [p.fplTeamId, p])
+    tournament.participants.map((p) => [getEntryId(p), p])
   );
 
   const yourParticipant = participantMap.get(fplTeamId);
@@ -149,7 +149,7 @@ export function TournamentView({
   // Check if the authenticated user is a participant in this tournament
   const userIsParticipant = useMemo(() => {
     if (!isAuthenticated || !userFplTeamId) return false;
-    return tournament.participants.some((p) => p.fplTeamId === userFplTeamId);
+    return tournament.participants.some((p) => getEntryId(p) === userFplTeamId);
   }, [isAuthenticated, userFplTeamId, tournament.participants]);
 
   // State for previewed team (unauthenticated users only)
@@ -182,7 +182,7 @@ export function TournamentView({
   const previewedParticipant = useMemo(() => {
     if (!previewedTeamId) return null;
     return tournament.participants.find(
-      (p) => p.fplTeamId === previewedTeamId
+      (p) => getEntryId(p) === previewedTeamId
     );
   }, [tournament.participants, previewedTeamId]);
 
@@ -201,7 +201,7 @@ export function TournamentView({
   const userParticipant = useMemo(() => {
     if (!userIsParticipant || !userFplTeamId) return null;
     return tournament.participants.find(
-      (p) => p.fplTeamId === userFplTeamId
+      (p) => getEntryId(p) === userFplTeamId
     );
   }, [tournament.participants, userIsParticipant, userFplTeamId]);
 
