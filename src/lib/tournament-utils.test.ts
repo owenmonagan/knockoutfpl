@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { findSiblingMatch, calculateRemainingParticipants, getUserStatus } from './tournament-utils';
+import {
+  findSiblingMatch,
+  calculateRemainingParticipants,
+  getUserStatus,
+  getRoundStatus,
+  getRoundStatusDisplay,
+} from './tournament-utils';
 import type { Match, Round } from '@/types/tournament';
 
 describe('tournament-utils', () => {
@@ -209,6 +215,52 @@ describe('tournament-utils', () => {
     it('returns eliminated even if tournament complete when user was eliminated', () => {
       const result = getUserStatus(2, true);
       expect(result).toBe('eliminated');
+    });
+  });
+
+  describe('getRoundStatus', () => {
+    it('returns complete when isComplete is true', () => {
+      const result = getRoundStatus(15, 20, true);
+      expect(result).toBe('complete');
+    });
+
+    it('returns complete when isComplete is true even if gameweek matches current', () => {
+      const result = getRoundStatus(20, 20, true);
+      expect(result).toBe('complete');
+    });
+
+    it('returns complete when round gameweek is before current gameweek', () => {
+      const result = getRoundStatus(15, 20, false);
+      expect(result).toBe('complete');
+    });
+
+    it('returns live when round gameweek equals current gameweek', () => {
+      const result = getRoundStatus(20, 20, false);
+      expect(result).toBe('live');
+    });
+
+    it('returns upcoming when round gameweek is after current gameweek', () => {
+      const result = getRoundStatus(25, 20, false);
+      expect(result).toBe('upcoming');
+    });
+
+    it('returns upcoming for future gameweeks', () => {
+      const result = getRoundStatus(38, 1, false);
+      expect(result).toBe('upcoming');
+    });
+  });
+
+  describe('getRoundStatusDisplay', () => {
+    it('returns Live for live status', () => {
+      expect(getRoundStatusDisplay('live')).toBe('Live');
+    });
+
+    it('returns Complete for complete status', () => {
+      expect(getRoundStatusDisplay('complete')).toBe('Complete');
+    });
+
+    it('returns Upcoming for upcoming status', () => {
+      expect(getRoundStatusDisplay('upcoming')).toBe('Upcoming');
     });
   });
 });

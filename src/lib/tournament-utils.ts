@@ -1,6 +1,43 @@
 import type { Round, Match } from '@/types/tournament';
 import { getMatchPlayers } from '@/types/tournament';
 
+export type RoundStatus = 'upcoming' | 'live' | 'complete';
+
+/**
+ * Determines the status of a round based on gameweek and completion.
+ */
+export function getRoundStatus(
+  roundGameweek: number,
+  currentGameweek: number,
+  isComplete: boolean
+): RoundStatus {
+  if (isComplete) {
+    return 'complete';
+  }
+  if (roundGameweek < currentGameweek) {
+    // Past gameweek but not marked complete - treat as complete
+    return 'complete';
+  }
+  if (roundGameweek === currentGameweek) {
+    return 'live';
+  }
+  return 'upcoming';
+}
+
+/**
+ * Returns display text for round status.
+ */
+export function getRoundStatusDisplay(status: RoundStatus): string {
+  switch (status) {
+    case 'live':
+      return 'Live';
+    case 'complete':
+      return 'Complete';
+    case 'upcoming':
+      return 'Upcoming';
+  }
+}
+
 /**
  * Find the sibling match that feeds into the same next-round match.
  * Uses bracket position math: matches at positions 2n and 2n+1 feed into position n.
