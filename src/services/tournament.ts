@@ -15,8 +15,9 @@ import {
   getMatchesInRange,
   getTournamentImportStatus as getTournamentImportStatusQuery,
   getParticipantLeaguesForTournament as getParticipantLeaguesForTournamentQuery,
+  getTournamentEntries as getTournamentEntriesQuery,
 } from '@knockoutfpl/dataconnect';
-import type { Tournament, Round, Match, Participant, MatchPlayer } from '../types/tournament';
+import type { Tournament, Round, Match, Participant, MatchPlayer, TournamentEntry } from '../types/tournament';
 import type { UUIDString } from '@knockoutfpl/dataconnect';
 
 // ============================================================================
@@ -973,6 +974,36 @@ export async function getTournamentImportStatus(
     totalCount: tournament.totalCount ?? null,
     importError: tournament.importError ?? null,
   };
+}
+
+// ============================================================================
+// Tournament Entries (new data model)
+// ============================================================================
+
+/**
+ * Fetch tournament entries using the new TournamentEntry data model.
+ * Returns entries with full Entry details (name, playerFirstName, playerLastName).
+ * Handles nullable firstName/lastName fields from the database.
+ */
+export async function getTournamentEntries(
+  tournamentId: string
+): Promise<TournamentEntry[]> {
+  const result = await getTournamentEntriesQuery(dataConnect, {
+    tournamentId: tournamentId as UUIDString,
+  });
+
+  return (result.data.tournamentEntries || []).map((te) => ({
+    entryId: te.entryId,
+    seed: te.seed,
+    status: te.status as 'active' | 'eliminated',
+    eliminationRound: te.eliminationRound ?? undefined,
+    entry: {
+      name: te.entry.name,
+      // Handle nullable fields from database with empty string default
+      playerFirstName: te.entry.playerFirstName ?? '',
+      playerLastName: te.entry.playerLastName ?? '',
+    },
+  }));
 }
 
 // ============================================================================
