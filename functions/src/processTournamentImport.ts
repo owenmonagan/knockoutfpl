@@ -3,39 +3,40 @@
 // Uses chunked processing with checkpointing for resilience
 //
 // Phases:
-// 1. importing     - Fetch participants from FPL API in batches
-// 2. creating_rounds - Create round records (quick, single batch)
-// 3. creating_matches - Create match records in batches
-// 4. creating_picks  - Create match_picks and handle byes in batches
-// 5. complete       - Done
+// 1. importing                 - Populates LeagueEntry (shared) using refreshLeague
+// 2. creating_tournament_entries - Creates TournamentEntry from LeagueEntry
+// 3. creating_rounds           - Create round records (quick, single batch)
+// 4. creating_matches          - Create match records in batches
+// 5. creating_picks            - Create match_picks and handle byes in batches
+// 6. complete                  - Done
 
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { getFunctions } from 'firebase-admin/functions';
 import { dataConnectAdmin } from './dataconnect-admin';
 import {
-  upsertEntriesBatch,
   createRoundsBatch,
-  createParticipantsBatch,
+  createTournamentEntriesBatch,
   createMatchesBatch,
   updateMatchesBatch,
   createMatchPicksBatch,
-  AuthClaims,
+  upsertPicksBatch,
+  type AuthClaims,
 } from './dataconnect-mutations';
 import {
   calculateBracketSize,
   generateBracketStructure,
   assignParticipantsToMatches,
 } from './bracketGenerator';
+import { refreshLeague } from './leagueRefresh';
 
 // Configuration
-const PAGES_PER_BATCH = 40;  // ~40 pages × ~100ms = ~4s fetching, leaves room for DB writes
 const MATCHES_PER_BATCH = 5000;  // Matches to create per batch
 const PICKS_PER_BATCH = 5000;  // Match picks to create per batch
+const TOURNAMENT_ENTRIES_PER_BATCH = 1000;  // Tournament entries to create per batch
 const RESCHEDULE_DELAY_SECONDS = 2;  // Delay between batches
-const FPL_API_BASE = 'https://fantasy.premierleague.com/api';
 
 // Import phases
-type ImportPhase = 'importing' | 'creating_rounds' | 'creating_matches' | 'creating_picks' | 'complete';
+type ImportPhase = 'importing' | 'creating_tournament_entries' | 'creating_rounds' | 'creating_matches' | 'creating_picks' | 'complete';
 
 // GraphQL mutations
 const UPDATE_IMPORT_CHECKPOINT = `
@@ -84,6 +85,7 @@ const GET_TOURNAMENT_FOR_IMPORT = `
   query GetTournamentForImport($id: UUID!) {
     tournament(id: $id) {
       id
+      fplLeagueId
       startEvent
       matchSize
       creatorUid
@@ -95,17 +97,48 @@ const GET_TOURNAMENT_FOR_IMPORT = `
   }
 `;
 
-const GET_ALL_PARTICIPANTS = `
-  query GetAllParticipants($tournamentId: UUID!, $limit: Int!) {
-    participants(where: { tournamentId: { eq: $tournamentId } }, orderBy: [{ seed: ASC }], limit: $limit) {
+const GET_ALL_TOURNAMENT_ENTRIES = `
+  query GetAllTournamentEntries($tournamentId: UUID!, $limit: Int!) {
+    tournamentEntries(where: { tournamentId: { eq: $tournamentId } }, orderBy: [{ seed: ASC }], limit: $limit) {
       entryId
       seed
     }
   }
 `;
 
+const GET_LEAGUE_ENTRIES = `
+  query GetLeagueEntries($leagueId: Int!, $season: String!, $limit: Int!, $offset: Int!) {
+    leagueEntries(
+      where: { leagueId: { eq: $leagueId }, season: { eq: $season } }
+      orderBy: [{ rank: ASC }]
+      limit: $limit
+      offset: $offset
+    ) {
+      entryId
+      rank
+      entry {
+        name
+        playerFirstName
+        playerLastName
+      }
+    }
+  }
+`;
+
+const GET_LEAGUE_REFRESH_ID = `
+  query GetLeagueRefreshId($leagueId: Int!, $season: String!) {
+    leagues(
+      where: { leagueId: { eq: $leagueId }, season: { eq: $season } }
+      limit: 1
+    ) {
+      lastRefreshId
+    }
+  }
+`;
+
 interface TournamentImportData {
   id: string;
+  fplLeagueId: number;
   startEvent: number;
   matchSize: number;
   creatorUid: string;
@@ -115,18 +148,13 @@ interface TournamentImportData {
   totalCount: number;
 }
 
-interface StandingsResult {
-  entry: number;
-  entry_name: string;
-  player_name: string;
-  rank: number;
-  total: number;
-}
-
-interface StandingsPage {
-  standings: {
-    has_next: boolean;
-    results: StandingsResult[];
+interface LeagueEntryData {
+  entryId: number;
+  rank: number | null;
+  entry: {
+    name: string;
+    playerFirstName: string | null;
+    playerLastName: string | null;
   };
 }
 
@@ -159,49 +187,20 @@ interface ByeUpdate {
 }
 
 /**
- * Fetches a single page with retry and exponential backoff for 429s.
+ * Get the current FPL season string (e.g., "2024-25")
  */
-async function fetchPageWithRetry(
-  leagueId: number,
-  page: number,
-  maxRetries = 3
-): Promise<StandingsPage | null> {
-  const url = `${FPL_API_BASE}/leagues-classic/${leagueId}/standings/?page_standings=${page}`;
-  let delay = 2000; // Start with 2s backoff
+function getCurrentSeason(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-indexed
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    const response = await fetch(url);
-
-    if (response.status === 429) {
-      console.warn(`[Import] Rate limited on page ${page}, attempt ${attempt}/${maxRetries}, waiting ${delay}ms`);
-      await sleep(delay);
-      delay *= 2; // Exponential backoff: 2s, 4s, 8s
-      continue;
-    }
-
-    if (response.status === 404) {
-      return null; // Page doesn't exist
-    }
-
-    if (!response.ok) {
-      throw new Error(`FPL API error: ${response.status} on page ${page}`);
-    }
-
-    const data = await response.json() as StandingsPage;
-
-    // Empty results means we've gone past the last page
-    if (data.standings.results.length === 0) {
-      return null;
-    }
-
-    return data;
+  // FPL season runs Aug-May
+  // If we're in Jan-Jul, we're in the previous year's season
+  if (month < 7) { // Jan-Jul
+    return `${year - 1}-${year.toString().slice(-2)}`;
   }
-
-  throw new Error(`Rate limit retries exhausted for page ${page}`);
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  // Aug-Dec, we're in this year's season
+  return `${year}-${(year + 1).toString().slice(-2)}`;
 }
 
 /**
@@ -216,14 +215,18 @@ async function updateCheckpoint(
   error?: string
 ): Promise<void> {
   // Progress calculation based on phase:
-  // importing: 0-50%
+  // importing: 0-30%
+  // creating_tournament_entries: 30-50%
   // creating_rounds: 50-55%
   // creating_matches: 55-80%
   // creating_picks: 80-100%
   let progress = 0;
   switch (status) {
     case 'importing':
-      progress = Math.min(50, Math.round((importedCount / totalCount) * 50));
+      progress = Math.min(30, Math.round((importedCount / totalCount) * 30));
+      break;
+    case 'creating_tournament_entries':
+      progress = 30 + Math.round((cursor / 100) * 20); // Approximate
       break;
     case 'creating_rounds':
       progress = 52;
@@ -249,47 +252,6 @@ async function updateCheckpoint(
       importError: error || null
     }
   });
-}
-
-/**
- * Writes a batch of entries and participants to the database.
- */
-async function writeParticipantBatch(
-  tournamentId: string,
-  participants: StandingsResult[],
-  startingSeed: number,
-  authClaims: AuthClaims
-): Promise<void> {
-  const currentYear = new Date().getFullYear();
-  const season = `${currentYear}-${(currentYear + 1).toString().slice(-2)}`;
-
-  // Create Entry records
-  const entries = participants.map(p => {
-    const nameParts = (p.player_name || '').split(' ');
-    return {
-      entryId: p.entry,
-      season,
-      name: p.entry_name,
-      playerFirstName: nameParts[0] || '',
-      playerLastName: nameParts.slice(1).join(' ') || '',
-      summaryOverallPoints: p.total,
-      rawJson: JSON.stringify(p),
-    };
-  });
-  await upsertEntriesBatch(entries, authClaims);
-
-  // Create Participant records
-  const participantRecords = participants.map((p, index) => ({
-    tournamentId,
-    entryId: p.entry,
-    teamName: p.entry_name,
-    managerName: p.player_name,
-    seed: startingSeed + index,
-    leagueRank: p.rank,
-    leaguePoints: p.total,
-    rawJson: JSON.stringify(p),
-  }));
-  await createParticipantsBatch(participantRecords, authClaims);
 }
 
 /**
@@ -331,57 +293,125 @@ async function rescheduleTask(
 }
 
 /**
- * Phase: importing - Fetch participants from FPL API
+ * Phase: importing - Populates LeagueEntry (shared) using refreshLeague
+ * This is now a single-step operation since refreshLeague handles all the pagination
  */
 async function processImportingPhase(
   tournamentId: string,
   leagueId: number,
   totalCount: number,
+  _cursor: number,
+  _authClaims: AuthClaims
+): Promise<void> {
+  const season = getCurrentSeason();
+
+  console.log(`[Import] Starting league refresh for league ${leagueId}, season ${season}`);
+
+  // Use refreshLeague which handles all FPL API fetching and LeagueEntry creation
+  const refreshResult = await refreshLeague(leagueId, season);
+
+  console.log(`[Import] League refreshed: ${refreshResult.entriesCount} entries, refreshId=${refreshResult.refreshId}`);
+
+  // Update checkpoint with actual count
+  await updateCheckpoint(tournamentId, 0, refreshResult.entriesCount, refreshResult.entriesCount, 'importing');
+
+  // Move to next phase: creating_tournament_entries
+  console.log(`[Import] League data imported, moving to creating_tournament_entries phase`);
+  await rescheduleTask(tournamentId, leagueId, refreshResult.entriesCount, 'creating_tournament_entries', 0);
+}
+
+/**
+ * Phase: creating_tournament_entries - Creates TournamentEntry from LeagueEntry
+ * Processes in batches and creates Pick placeholders
+ */
+async function processCreatingTournamentEntriesPhase(
+  tournamentId: string,
+  leagueId: number,
+  totalCount: number,
   cursor: number,
+  tournament: TournamentImportData,
   authClaims: AuthClaims
 ): Promise<void> {
-  let currentPage = cursor;
-  let pagesThisBatch = 0;
-  let importedThisBatch = 0;
-  let hasMore = true;
-  const batchParticipants: StandingsResult[] = [];
+  const season = getCurrentSeason();
+  const offset = cursor * TOURNAMENT_ENTRIES_PER_BATCH;
 
-  while (pagesThisBatch < PAGES_PER_BATCH && hasMore) {
-    const pageData = await fetchPageWithRetry(leagueId, currentPage);
+  console.log(`[Import] Creating tournament entries batch ${cursor}, offset=${offset}`);
 
-    if (!pageData) {
-      hasMore = false;
-      break;
+  // Fetch a batch of league entries
+  const leagueEntriesResult = await dataConnectAdmin.executeGraphql(GET_LEAGUE_ENTRIES, {
+    variables: {
+      leagueId,
+      season,
+      limit: TOURNAMENT_ENTRIES_PER_BATCH,
+      offset,
     }
+  }) as { data: { leagueEntries: LeagueEntryData[] } };
 
-    batchParticipants.push(...pageData.standings.results);
-    importedThisBatch += pageData.standings.results.length;
-    hasMore = pageData.standings.has_next;
-    currentPage++;
-    pagesThisBatch++;
+  const leagueEntries = leagueEntriesResult.data.leagueEntries;
 
-    if (hasMore && pagesThisBatch < PAGES_PER_BATCH) {
-      await sleep(50);
-    }
+  if (leagueEntries.length === 0) {
+    // All entries created, move to next phase
+    console.log(`[Import] All tournament entries created, moving to creating_rounds phase`);
+    await updateCheckpoint(tournamentId, 100, totalCount, totalCount, 'creating_tournament_entries');
+    await rescheduleTask(tournamentId, leagueId, totalCount, 'creating_rounds', 0);
+    return;
   }
 
-  const previouslyImported = (cursor - 1) * 50;
-  const totalImported = previouslyImported + importedThisBatch;
-  const startingSeed = previouslyImported + 1;
+  // Get the league's refreshId
+  const leagueResult = await dataConnectAdmin.executeGraphql(GET_LEAGUE_REFRESH_ID, {
+    variables: { leagueId, season }
+  }) as { data: { leagues: Array<{ lastRefreshId: string }> } };
 
-  console.log(`[Import] Fetched ${pagesThisBatch} pages, ${importedThisBatch} participants, ${totalImported} total`);
-
-  if (batchParticipants.length > 0) {
-    await writeParticipantBatch(tournamentId, batchParticipants, startingSeed, authClaims);
+  const refreshId = leagueResult.data.leagues[0]?.lastRefreshId;
+  if (!refreshId) {
+    throw new Error(`League ${leagueId} not found or has no refreshId`);
   }
 
-  await updateCheckpoint(tournamentId, currentPage, totalImported, totalCount, 'importing');
+  // Create tournament entry records (seed = offset + index + 1)
+  const tournamentEntryRecords = leagueEntries.map((le, index) => ({
+    tournamentId,
+    entryId: le.entryId,
+    seed: offset + index + 1,
+    refreshId,
+    status: 'active',
+  }));
 
-  if (hasMore) {
-    await rescheduleTask(tournamentId, leagueId, totalCount, 'importing', currentPage);
+  await createTournamentEntriesBatch(tournamentEntryRecords, authClaims);
+
+  // Create placeholder picks for tournament gameweeks for this batch
+  const { startEvent, totalRounds } = tournament;
+  const pickRecords = leagueEntries.flatMap(le => {
+    const picks = [];
+    for (let r = 0; r < totalRounds; r++) {
+      picks.push({
+        entryId: le.entryId,
+        event: startEvent + r,
+        points: 0,
+        rawJson: '{}',
+        isFinal: false,
+      });
+    }
+    return picks;
+  });
+
+  if (pickRecords.length > 0) {
+    await upsertPicksBatch(pickRecords, authClaims);
+  }
+
+  console.log(`[Import] Created ${tournamentEntryRecords.length} tournament entries, ${pickRecords.length} placeholder picks`);
+
+  // Calculate progress and update checkpoint
+  const totalProcessed = offset + leagueEntries.length;
+  const progressPercent = Math.round((totalProcessed / totalCount) * 100);
+  await updateCheckpoint(tournamentId, progressPercent, totalProcessed, totalCount, 'creating_tournament_entries');
+
+  // Check if we need more batches
+  if (leagueEntries.length === TOURNAMENT_ENTRIES_PER_BATCH) {
+    // More entries to process
+    await rescheduleTask(tournamentId, leagueId, totalCount, 'creating_tournament_entries', cursor + 1);
   } else {
-    // Move to next phase
-    console.log(`[Import] All pages fetched, moving to creating_rounds phase`);
+    // All entries created, move to next phase
+    console.log(`[Import] All tournament entries created, moving to creating_rounds phase`);
     await rescheduleTask(tournamentId, leagueId, totalCount, 'creating_rounds', 0);
   }
 }
@@ -429,12 +459,12 @@ async function processCreatingMatchesPhase(
   tournament: TournamentImportData,
   authClaims: AuthClaims
 ): Promise<void> {
-  // Fetch participants to calculate bracket size
-  const participantsResult = await dataConnectAdmin.executeGraphql(GET_ALL_PARTICIPANTS, {
+  // Fetch tournament entries to calculate bracket size
+  const entriesResult = await dataConnectAdmin.executeGraphql(GET_ALL_TOURNAMENT_ENTRIES, {
     variables: { tournamentId, limit: totalCount + 1000 }
-  }) as { data: { participants: Array<{ entryId: number; seed: number }> } };
+  }) as { data: { tournamentEntries: Array<{ entryId: number; seed: number }> } };
 
-  const participantCount = participantsResult.data.participants.length;
+  const participantCount = entriesResult.data.tournamentEntries.length;
 
   if (tournament.matchSize !== 2) {
     console.warn(`[Import] N-way brackets (matchSize=${tournament.matchSize}) not yet supported`);
@@ -494,13 +524,13 @@ async function processCreatingPicksPhase(
   tournament: TournamentImportData,
   authClaims: AuthClaims
 ): Promise<void> {
-  // Fetch participants
-  const participantsResult = await dataConnectAdmin.executeGraphql(GET_ALL_PARTICIPANTS, {
+  // Fetch tournament entries
+  const entriesResult = await dataConnectAdmin.executeGraphql(GET_ALL_TOURNAMENT_ENTRIES, {
     variables: { tournamentId, limit: totalCount + 1000 }
-  }) as { data: { participants: Array<{ entryId: number; seed: number }> } };
+  }) as { data: { tournamentEntries: Array<{ entryId: number; seed: number }> } };
 
-  const participants = participantsResult.data.participants;
-  const participantCount = participants.length;
+  const tournamentEntries = entriesResult.data.tournamentEntries;
+  const participantCount = tournamentEntries.length;
 
   const bracketSize = calculateBracketSize(participantCount);
   const allMatches = generateBracketStructure(bracketSize);
@@ -508,7 +538,7 @@ async function processCreatingPicksPhase(
 
   // Build lookup maps
   const seedToEntry = new Map<number, number>();
-  participants.forEach(p => seedToEntry.set(p.seed, p.entryId));
+  tournamentEntries.forEach(te => seedToEntry.set(te.seed, te.entryId));
 
   const matchLookup = new Map<number, { matchId: number; qualifiesToMatchId: number | null; roundNumber: number; positionInRound: number }>();
   allMatches.forEach(m => {
@@ -622,11 +652,12 @@ async function processCreatingPicksPhase(
  * Cloud Task: Process tournament import in chunked batches.
  *
  * Phases:
- * 1. importing      - Fetch participants from FPL API in batches
- * 2. creating_rounds - Create round records
- * 3. creating_matches - Create match records in batches
- * 4. creating_picks  - Create match_picks and handle byes in batches
- * 5. complete       - Done
+ * 1. importing                 - Populates LeagueEntry (shared) using refreshLeague
+ * 2. creating_tournament_entries - Creates TournamentEntry from LeagueEntry
+ * 3. creating_rounds           - Create round records
+ * 4. creating_matches          - Create match records in batches
+ * 5. creating_picks            - Create match_picks and handle byes in batches
+ * 6. complete                  - Done
  */
 export const processTournamentImport = onTaskDispatched({
   region: 'europe-west1',
@@ -642,7 +673,7 @@ export const processTournamentImport = onTaskDispatched({
 }, async (request) => {
   const {
     tournamentId,
-    leagueId,
+    leagueId: _leagueId, // Kept for backward compatibility, now use tournament.fplLeagueId
     totalCount,
     phase = 'importing',
     cursor = 1
@@ -679,19 +710,23 @@ export const processTournamentImport = onTaskDispatched({
     // Route to appropriate phase handler
     switch (phase) {
       case 'importing':
-        await processImportingPhase(tournamentId, leagueId, totalCount, cursor, authClaims);
+        await processImportingPhase(tournamentId, tournament.fplLeagueId, totalCount, cursor, authClaims);
+        break;
+
+      case 'creating_tournament_entries':
+        await processCreatingTournamentEntriesPhase(tournamentId, tournament.fplLeagueId, totalCount, cursor, tournament, authClaims);
         break;
 
       case 'creating_rounds':
-        await processCreatingRoundsPhase(tournamentId, leagueId, totalCount, tournament, authClaims);
+        await processCreatingRoundsPhase(tournamentId, tournament.fplLeagueId, totalCount, tournament, authClaims);
         break;
 
       case 'creating_matches':
-        await processCreatingMatchesPhase(tournamentId, leagueId, totalCount, cursor, tournament, authClaims);
+        await processCreatingMatchesPhase(tournamentId, tournament.fplLeagueId, totalCount, cursor, tournament, authClaims);
         break;
 
       case 'creating_picks':
-        await processCreatingPicksPhase(tournamentId, leagueId, totalCount, cursor, tournament, authClaims);
+        await processCreatingPicksPhase(tournamentId, tournament.fplLeagueId, totalCount, cursor, tournament, authClaims);
         break;
 
       case 'complete':
