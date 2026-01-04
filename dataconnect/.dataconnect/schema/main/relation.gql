@@ -762,6 +762,51 @@ extend type League {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "League.entriesCount", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `League` table where the `importError` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  importError_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "League.importError", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `League` table where the `importLockId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  importLockId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "League.importLockId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `League` table where the `importProgress` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  importProgress_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "League.importProgress", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `League` table where the `importStartedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  importStartedAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "League.importStartedAt", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `League` table where the `importStatus` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  importStatus_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "League.importStatus", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `League` table where the `lastRefreshAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   lastRefreshAt_count(
@@ -834,6 +879,15 @@ extend type League {
     distinct: Boolean = false
   ): Int @fdc_generated(from: "League.entriesCount", purpose: QUERY_SUM)
   """
+  ✨ Sum the `importProgress` field in the `League` table.
+  """
+  importProgress_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "League.importProgress", purpose: QUERY_SUM)
+  """
   ✨ Sum the `leagueId` field in the `League` table.
   """
   leagueId_sum(
@@ -861,6 +915,15 @@ extend type League {
     distinct: Boolean = false
   ): Float @fdc_generated(from: "League.entriesCount", purpose: QUERY_AVG)
   """
+  ✨ Average the `importProgress` field in the `League` table.
+  """
+  importProgress_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "League.importProgress", purpose: QUERY_AVG)
+  """
   ✨ Average the `leagueId` field in the `League` table.
   """
   leagueId_avg(
@@ -886,6 +949,14 @@ extend type League {
   """
   entriesCount_min: Int @fdc_generated(from: "League.entriesCount", purpose: QUERY_MIN)
   """
+  ✨ Minimum of the `importProgress` field in the `League` table.
+  """
+  importProgress_min: Int @fdc_generated(from: "League.importProgress", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `importStartedAt` field in the `League` table.
+  """
+  importStartedAt_min: Timestamp @fdc_generated(from: "League.importStartedAt", purpose: QUERY_MIN)
+  """
   ✨ Minimum of the `lastRefreshAt` field in the `League` table.
   """
   lastRefreshAt_min: Timestamp @fdc_generated(from: "League.lastRefreshAt", purpose: QUERY_MIN)
@@ -909,6 +980,14 @@ extend type League {
   ✨ Maximum of the `entriesCount` field in the `League` table.
   """
   entriesCount_max: Int @fdc_generated(from: "League.entriesCount", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `importProgress` field in the `League` table.
+  """
+  importProgress_max: Int @fdc_generated(from: "League.importProgress", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `importStartedAt` field in the `League` table.
+  """
+  importStartedAt_max: Timestamp @fdc_generated(from: "League.importStartedAt", purpose: QUERY_MAX)
   """
   ✨ Maximum of the `lastRefreshAt` field in the `League` table.
   """

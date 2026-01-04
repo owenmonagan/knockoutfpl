@@ -337,79 +337,136 @@ Compact card optimized for lists:
 
 ### Purpose
 
-Browse all teams in the tournament with their current status.
+Browse all teams in the tournament with their seed and current status. Primary use case is casual browsing of the field.
+
+### Core Interaction Model
+
+**Three controls:**
+1. **Search bar** — Filters the list as you type (team name or manager name)
+2. **Sort toggle** — "Best seeds" (1, 2, 3...) or "Worst seeds" (...48K, 48K-1, 48K-2)
+3. **Scroll** — Infinite scroll with 100-item pagination (same pattern as Matches tab)
+
+**Two sections:**
+1. **YOU** — Pinned at top, always visible (if user is identified + in tournament)
+2. **ALL PARTICIPANTS** — Everyone else in current sort order, filtered by search
+
+**Tap action:** Opens FPL team history page in new tab (`fantasy.premierleague.com/entry/{fplTeamId}/history`)
 
 ### Layout (Mobile-First)
 
 ```
-┌─────────────────────────────────┐
-│ Overview  Matches  [Participants]│
-├─────────────────────────────────┤
-│                                 │
-│  49,152 participants            │
-│  6,144 remaining                │
-│                                 │
-│  YOU                            │
-│  ┌───────────────────────────┐  │
-│  │ Your Team Name             │  │
-│  │ #847 seed • Still in       │  │
-│  │ Won 6 matches              │  │
-│  └───────────────────────────┘  │
-│                                 │
-│  FRIENDS (5)                    │
-│  ┌───────────────────────────┐  │
-│  │ Mike's Team                │  │
-│  │ #234 seed • Still in       │  │
-│  └───────────────────────────┘  │
-│  ┌───────────────────────────┐  │
-│  │ Sarah's Team               │  │
-│  │ #1,203 seed • Still in     │  │
-│  └───────────────────────────┘  │
-│  ┌───────────────────────────┐  │
-│  │ Dave's Team                │  │
-│  │ #8,421 seed • Out R3       │  │
-│  └───────────────────────────┘  │
-│                                 │
-│  EVERYONE ELSE                  │
-│  ┌───────────────────────────┐  │
-│  │ Top Seed FC                │  │
-│  │ #1 seed • Still in         │  │
-│  └───────────────────────────┘  │
-│           ...                   │
-│  ┌───────────────────────────┐  │
-│  │      Load More (50)        │  │
-│  └───────────────────────────┘  │
-│                                 │
-└─────────────────────────────────┘
+┌─────────────────────────────────────┐
+│ Overview  Matches  [Participants]   │  ← Tab bar
+├─────────────────────────────────────┤
+│ 🔍 Search teams...                  │  ← Search input
+├─────────────────────────────────────┤
+│ [Best seeds ▼]  [Worst seeds]       │  ← Sort toggle (segmented control)
+├─────────────────────────────────────┤
+│ YOU                                 │  ← Section header
+│ ┌─────────────────────────────────┐ │
+│ │ #847  Your Team Name            │ │
+│ │       Your Name • Still in      │ │
+│ └─────────────────────────────────┘ │
+├─────────────────────────────────────┤
+│ ALL PARTICIPANTS (48,152)           │  ← Count in header
+│ ┌─────────────────────────────────┐ │
+│ │ #1   Top Seed FC                │ │
+│ │      John Smith • Still in      │ │
+│ └─────────────────────────────────┘ │
+│ ┌─────────────────────────────────┐ │
+│ │ #2   Runner Up United           │ │
+│ │      Jane Doe • Still in        │ │
+│ └─────────────────────────────────┘ │
+│ ...                                 │
+│ ┌─────────────────────────────────┐ │
+│ │        Loading more...          │ │  ← Sentinel / loading indicator
+│ └─────────────────────────────────┘ │
+└─────────────────────────────────────┘
 ```
 
 ### Participant Card Component
 
+Two-line card design:
+
 ```
-┌───────────────────────────────┐
-│ Team Name Here                │  ← Team name (tappable)
-│ #847 seed • Still in          │  ← Seed + status
-└───────────────────────────────┘
+┌─────────────────────────────────────┐
+│ #847  Team Name Here                │  ← Seed (bold) + Team name
+│       Manager Name • Still in       │  ← Manager + Status
+└─────────────────────────────────────┘
 ```
+
+**Card elements:**
+- **Seed** — Bold, left-aligned (e.g., `#1`, `#847`, `#48,152`)
+- **Team name** — Primary text, truncates if long
+- **Manager name** — Secondary/muted text
+- **Status** — Appended after manager with bullet separator
+
+**YOUR card variant:** Same layout but with subtle accent background/border to distinguish.
+
+**Touch target:** Full card is tappable (opens FPL history). Minimum 48px height.
 
 ### Status Display
 
-| Status | Display |
-|--------|---------|
-| Still in | `Still in` |
-| Eliminated | `Out R3` (shows round eliminated) |
-| Winner | `Champion` |
+| State | Display | Color |
+|-------|---------|-------|
+| Still in | `Still in` | Default/green |
+| Eliminated | `Out R3` | Muted/red |
+| Champion | `Champion` | Gold/accent |
 
-### Sort Order
+### Behaviors
 
-"Everyone Else" section sorted by:
-1. Still in first, eliminated last
-2. Within still-in: by seed ascending (#1, #2, #3...)
-3. Within eliminated: by round eliminated descending (lasted longest first)
+**Reset triggers:**
+- Sort direction changes → reset offset, clear list, reload
+- Search query changes → reset offset, clear list, reload (debounced 300ms)
 
-### Tap Action
+**Search filtering:**
+- Filters in place (list shrinks as you type)
+- YOUR card hides if it doesn't match the search
+- Searches both team name and manager name
 
-Tapping a participant card → navigates to Matches tab filtered/scrolled to that team's current/last match.
+**Empty states:**
+- No search results: "No teams match your search"
+- User not in tournament: Hide YOU section entirely
+
+### Data Loading
+
+**Query:** `GetTournamentParticipants`
+
+```graphql
+query GetTournamentParticipants(
+  $tournamentId: UUID!,
+  $limit: Int = 100,
+  $offset: Int = 0,
+  $orderByDirection: OrderDirection = ASC  # ASC = best seeds, DESC = worst
+) @auth(level: PUBLIC) {
+  tournamentEntries(
+    where: { tournamentId: { eq: $tournamentId } }
+    orderBy: { seed: $orderByDirection }
+    limit: $limit
+    offset: $offset
+  ) {
+    fplTeamId
+    fplTeamName
+    managerName
+    seed
+    eliminatedInRound
+  }
+}
+```
+
+**State management:** Same pattern as Matches tab (see `docs/plans/2026-01-03-matches-tab-pagination.md`)
+
+```tsx
+const PAGE_SIZE = 100;
+const [participants, setParticipants] = useState<Participant[]>([]);
+const [offset, setOffset] = useState(0);
+const [hasMore, setHasMore] = useState(true);
+const [isLoading, setIsLoading] = useState(false);
+const [sortDirection, setSortDirection] = useState<'ASC' | 'DESC'>('ASC');
+const [searchQuery, setSearchQuery] = useState('');
+```
+
+**User's entry:** Fetched from existing tournament context (already loaded for Overview tab).
 
 ---
 

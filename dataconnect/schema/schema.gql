@@ -116,6 +116,13 @@ type League @table(name: "leagues", key: ["leagueId", "season"]) {
   lastRefreshId: UUID @col(name: "last_refresh_id")
   lastRefreshAt: Timestamp @col(name: "last_refresh_at")
 
+  # Import tracking (for background task coordination)
+  importStatus: String @col(name: "import_status")        # 'idle' | 'importing' | 'complete' | 'failed'
+  importProgress: Int @col(name: "import_progress")       # 0-100
+  importLockId: UUID @col(name: "import_lock_id")         # Optimistic lock for task coordination
+  importStartedAt: Timestamp @col(name: "import_started_at")
+  importError: String @col(name: "import_error")
+
   # Raw API response (complete data, future-proof)
   rawJson: String! @col(name: "raw_json")
 

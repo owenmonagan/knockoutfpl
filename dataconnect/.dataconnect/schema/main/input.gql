@@ -1652,6 +1652,58 @@ input League_Data {
   """
   entriesCount_update: [Int_Update!]
   """
+  ✨ Generated from Field `League`.`importError` of type `String`
+  """
+  importError: String
+  """
+  ✨ `_expr` server value variant of `importError` (✨ Generated from Field `League`.`importError` of type `String`)
+  """
+  importError_expr: String_Expr
+  """
+  ✨ Generated from Field `League`.`importLockId` of type `UUID`
+  """
+  importLockId: UUID
+  """
+  ✨ `_expr` server value variant of `importLockId` (✨ Generated from Field `League`.`importLockId` of type `UUID`)
+  """
+  importLockId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `League`.`importProgress` of type `Int`
+  """
+  importProgress: Int
+  """
+  ✨ `_expr` server value variant of `importProgress` (✨ Generated from Field `League`.`importProgress` of type `Int`)
+  """
+  importProgress_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `importProgress` (✨ Generated from Field `League`.`importProgress` of type `Int`)
+  """
+  importProgress_update: [Int_Update!]
+  """
+  ✨ Generated from Field `League`.`importStartedAt` of type `Timestamp`
+  """
+  importStartedAt: Timestamp
+  """
+  ✨ `_expr` server value variant of `importStartedAt` (✨ Generated from Field `League`.`importStartedAt` of type `Timestamp`)
+  """
+  importStartedAt_expr: Timestamp_Expr
+  """
+  ✨ `_time` server value variant of `importStartedAt` (✨ Generated from Field `League`.`importStartedAt` of type `Timestamp`)
+  """
+  importStartedAt_time: Timestamp_Relative
+  """
+  ✨ `_update` server value variant of `importStartedAt` (✨ Generated from Field `League`.`importStartedAt` of type `Timestamp`)
+  """
+  importStartedAt_update: [Timestamp_Update!]
+  """
+  ✨ Generated from Field `League`.`importStatus` of type `String`
+  """
+  importStatus: String
+  """
+  ✨ `_expr` server value variant of `importStatus` (✨ Generated from Field `League`.`importStatus` of type `String`)
+  """
+  importStatus_expr: String_Expr
+  """
   ✨ Generated from Field `League`.`lastRefreshAt` of type `Timestamp`
   """
   lastRefreshAt: Timestamp
@@ -1733,6 +1785,26 @@ input League_Filter {
   """
   entriesCount: Int_Filter
   """
+  ✨ Generated from Field `League`.`importError` of type `String`
+  """
+  importError: String_Filter
+  """
+  ✨ Generated from Field `League`.`importLockId` of type `UUID`
+  """
+  importLockId: UUID_Filter
+  """
+  ✨ Generated from Field `League`.`importProgress` of type `Int`
+  """
+  importProgress: Int_Filter
+  """
+  ✨ Generated from Field `League`.`importStartedAt` of type `Timestamp`
+  """
+  importStartedAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `League`.`importStatus` of type `String`
+  """
+  importStatus: String_Filter
+  """
   ✨ Generated from Field `League`.`lastRefreshAt` of type `Timestamp`
   """
   lastRefreshAt: Timestamp_Filter
@@ -1803,6 +1875,26 @@ input League_Having {
   """
   entriesCount_count: Int_Filter
   """
+  ✨ Generated from Field `League`.`importError_count` of type `Int!`
+  """
+  importError_count: Int_Filter
+  """
+  ✨ Generated from Field `League`.`importLockId_count` of type `Int!`
+  """
+  importLockId_count: Int_Filter
+  """
+  ✨ Generated from Field `League`.`importProgress_count` of type `Int!`
+  """
+  importProgress_count: Int_Filter
+  """
+  ✨ Generated from Field `League`.`importStartedAt_count` of type `Int!`
+  """
+  importStartedAt_count: Int_Filter
+  """
+  ✨ Generated from Field `League`.`importStatus_count` of type `Int!`
+  """
+  importStatus_count: Int_Filter
+  """
   ✨ Generated from Field `League`.`lastRefreshAt_count` of type `Int!`
   """
   lastRefreshAt_count: Int_Filter
@@ -1835,6 +1927,10 @@ input League_Having {
   """
   entriesCount_sum: Int_Filter
   """
+  ✨ Generated from Field `League`.`importProgress_sum` of type `Int`
+  """
+  importProgress_sum: Int_Filter
+  """
   ✨ Generated from Field `League`.`leagueId_sum` of type `Int`
   """
   leagueId_sum: Int_Filter
@@ -1846,6 +1942,10 @@ input League_Having {
   ✨ Generated from Field `League`.`entriesCount_avg` of type `Float`
   """
   entriesCount_avg: Float_Filter
+  """
+  ✨ Generated from Field `League`.`importProgress_avg` of type `Float`
+  """
+  importProgress_avg: Float_Filter
   """
   ✨ Generated from Field `League`.`leagueId_avg` of type `Float`
   """
@@ -1866,6 +1966,14 @@ input League_Having {
   ✨ Generated from Field `League`.`entriesCount_min` of type `Int`
   """
   entriesCount_min: Int_Filter
+  """
+  ✨ Generated from Field `League`.`importProgress_min` of type `Int`
+  """
+  importProgress_min: Int_Filter
+  """
+  ✨ Generated from Field `League`.`importStartedAt_min` of type `Timestamp`
+  """
+  importStartedAt_min: Timestamp_Filter
   """
   ✨ Generated from Field `League`.`lastRefreshAt_min` of type `Timestamp`
   """
@@ -1890,6 +1998,14 @@ input League_Having {
   ✨ Generated from Field `League`.`entriesCount_max` of type `Int`
   """
   entriesCount_max: Int_Filter
+  """
+  ✨ Generated from Field `League`.`importProgress_max` of type `Int`
+  """
+  importProgress_max: Int_Filter
+  """
+  ✨ Generated from Field `League`.`importStartedAt_max` of type `Timestamp`
+  """
+  importStartedAt_max: Timestamp_Filter
   """
   ✨ Generated from Field `League`.`lastRefreshAt_max` of type `Timestamp`
   """
@@ -1962,6 +2078,26 @@ input League_Order {
   """
   entriesCount: OrderDirection
   """
+  ✨ Generated from Field `League`.`importError` of type `String`
+  """
+  importError: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importLockId` of type `UUID`
+  """
+  importLockId: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importProgress` of type `Int`
+  """
+  importProgress: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importStartedAt` of type `Timestamp`
+  """
+  importStartedAt: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importStatus` of type `String`
+  """
+  importStatus: OrderDirection
+  """
   ✨ Generated from Field `League`.`lastRefreshAt` of type `Timestamp`
   """
   lastRefreshAt: OrderDirection
@@ -1998,6 +2134,26 @@ input League_Order {
   """
   entriesCount_count: OrderDirection
   """
+  ✨ Generated from Field `League`.`importError_count` of type `Int!`
+  """
+  importError_count: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importLockId_count` of type `Int!`
+  """
+  importLockId_count: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importProgress_count` of type `Int!`
+  """
+  importProgress_count: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importStartedAt_count` of type `Int!`
+  """
+  importStartedAt_count: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importStatus_count` of type `Int!`
+  """
+  importStatus_count: OrderDirection
+  """
   ✨ Generated from Field `League`.`lastRefreshAt_count` of type `Int!`
   """
   lastRefreshAt_count: OrderDirection
@@ -2030,6 +2186,10 @@ input League_Order {
   """
   entriesCount_sum: OrderDirection
   """
+  ✨ Generated from Field `League`.`importProgress_sum` of type `Int`
+  """
+  importProgress_sum: OrderDirection
+  """
   ✨ Generated from Field `League`.`leagueId_sum` of type `Int`
   """
   leagueId_sum: OrderDirection
@@ -2041,6 +2201,10 @@ input League_Order {
   ✨ Generated from Field `League`.`entriesCount_avg` of type `Float`
   """
   entriesCount_avg: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importProgress_avg` of type `Float`
+  """
+  importProgress_avg: OrderDirection
   """
   ✨ Generated from Field `League`.`leagueId_avg` of type `Float`
   """
@@ -2061,6 +2225,14 @@ input League_Order {
   ✨ Generated from Field `League`.`entriesCount_min` of type `Int`
   """
   entriesCount_min: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importProgress_min` of type `Int`
+  """
+  importProgress_min: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importStartedAt_min` of type `Timestamp`
+  """
+  importStartedAt_min: OrderDirection
   """
   ✨ Generated from Field `League`.`lastRefreshAt_min` of type `Timestamp`
   """
@@ -2085,6 +2257,14 @@ input League_Order {
   ✨ Generated from Field `League`.`entriesCount_max` of type `Int`
   """
   entriesCount_max: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importProgress_max` of type `Int`
+  """
+  importProgress_max: OrderDirection
+  """
+  ✨ Generated from Field `League`.`importStartedAt_max` of type `Timestamp`
+  """
+  importStartedAt_max: OrderDirection
   """
   ✨ Generated from Field `League`.`lastRefreshAt_max` of type `Timestamp`
   """
