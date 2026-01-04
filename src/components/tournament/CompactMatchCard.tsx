@@ -1,27 +1,29 @@
-// src/components/tournament/BracketMatchCard.tsx
+// src/components/tournament/CompactMatchCard.tsx
 import { Card } from '../ui/card';
 import type { Match, Participant } from '../../types/tournament';
 import { cn } from '../../lib/utils';
 import { getFplTeamUrl } from '../../lib/fpl-urls';
 import { ClaimTeamButton } from './ClaimTeamButton';
 
-interface BracketMatchCardProps {
+interface CompactMatchCardProps {
   match: Match;
   participants: Participant[];
   roundStarted: boolean;
   gameweek: number;
   isAuthenticated?: boolean;
   onClaimTeam?: (fplTeamId: number) => void;
+  className?: string;
 }
 
-export function BracketMatchCard({
+export function CompactMatchCard({
   match,
   participants,
   roundStarted,
   gameweek,
   isAuthenticated = false,
   onClaimTeam,
-}: BracketMatchCardProps) {
+  className,
+}: CompactMatchCardProps) {
   const getParticipant = (fplTeamId: number | null): Participant | null => {
     if (!fplTeamId) return null;
     return participants.find((p) => p.fplTeamId === fplTeamId) || null;
@@ -107,7 +109,7 @@ export function BracketMatchCard({
   };
 
   return (
-    <Card className="w-44 overflow-hidden">
+    <Card className={cn("overflow-hidden", className)}>
       {renderPlayerSlot(match.player1, player1)}
       <div className="border-t" />
       {match.isBye && !match.player2

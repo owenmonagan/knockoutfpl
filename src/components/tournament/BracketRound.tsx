@@ -1,6 +1,6 @@
 // src/components/tournament/BracketRound.tsx
 import { Badge } from '../ui/badge';
-import { BracketMatchCard } from './BracketMatchCard';
+import { CompactMatchCard } from './CompactMatchCard';
 import type { Round, Participant } from '../../types/tournament';
 
 interface BracketRoundProps {
@@ -35,7 +35,7 @@ export function BracketRound({
 
       <div className="flex flex-col justify-around flex-1 gap-2">
         {round.matches.map((match) => (
-          <BracketMatchCard
+          <CompactMatchCard
             key={match.id}
             match={match}
             participants={participants}
@@ -43,6 +43,7 @@ export function BracketRound({
             gameweek={round.gameweek}
             isAuthenticated={isAuthenticated}
             onClaimTeam={onClaimTeam}
+            className="w-44"
           />
         ))}
       </div>

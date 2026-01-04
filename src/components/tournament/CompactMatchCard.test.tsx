@@ -1,10 +1,10 @@
-// src/components/tournament/BracketMatchCard.test.tsx
+// src/components/tournament/CompactMatchCard.test.tsx
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { BracketMatchCard } from './BracketMatchCard';
+import { CompactMatchCard } from './CompactMatchCard';
 import type { Match, Participant } from '../../types/tournament';
 
-describe('BracketMatchCard', () => {
+describe('CompactMatchCard', () => {
   const mockParticipants: Participant[] = [
     { fplTeamId: 1, fplTeamName: 'Team A', managerName: 'Manager A', seed: 1 },
     { fplTeamId: 2, fplTeamName: 'Team B', managerName: 'Manager B', seed: 2 },
@@ -19,7 +19,7 @@ describe('BracketMatchCard', () => {
   };
 
   it('renders both player names', () => {
-    render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+    render(<CompactMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     expect(screen.getByText('Team A')).toBeInTheDocument();
     expect(screen.getByText('Team B')).toBeInTheDocument();
@@ -33,21 +33,21 @@ describe('BracketMatchCard', () => {
       winnerId: null,
       isBye: false,
     };
-    render(<BracketMatchCard match={matchWithoutScores} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+    render(<CompactMatchCard match={matchWithoutScores} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     expect(screen.getByText('(1)')).toBeInTheDocument();
     expect(screen.getByText('(2)')).toBeInTheDocument();
   });
 
   it('hides seeds when scores are available and round started', () => {
-    render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+    render(<CompactMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     expect(screen.queryByText('(1)')).not.toBeInTheDocument();
     expect(screen.queryByText('(2)')).not.toBeInTheDocument();
   });
 
   it('renders scores when available and round started', () => {
-    render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+    render(<CompactMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     expect(screen.getByText('65')).toBeInTheDocument();
     expect(screen.getByText('58')).toBeInTheDocument();
@@ -61,7 +61,7 @@ describe('BracketMatchCard', () => {
       winnerId: null,
       isBye: false,
     };
-    render(<BracketMatchCard match={matchWithZeroScores} participants={mockParticipants} roundStarted={false} gameweek={15} />);
+    render(<CompactMatchCard match={matchWithZeroScores} participants={mockParticipants} roundStarted={false} gameweek={15} />);
 
     // Should show seeds, not scores
     expect(screen.getByText('(1)')).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe('BracketMatchCard', () => {
   });
 
   it('highlights winner', () => {
-    render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+    render(<CompactMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     const winnerRow = screen.getByText('Team A').closest('[data-winner]');
     expect(winnerRow).toHaveAttribute('data-winner', 'true');
@@ -84,7 +84,7 @@ describe('BracketMatchCard', () => {
       winnerId: 1,
       isBye: true,
     };
-    render(<BracketMatchCard match={byeMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+    render(<CompactMatchCard match={byeMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     expect(screen.getByText('Team A')).toBeInTheDocument();
     expect(screen.getByText('BYE')).toBeInTheDocument();
@@ -98,14 +98,14 @@ describe('BracketMatchCard', () => {
       winnerId: null,
       isBye: false,
     };
-    render(<BracketMatchCard match={emptyMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+    render(<CompactMatchCard match={emptyMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
     expect(screen.getAllByText('TBD')).toHaveLength(2);
   });
 
   describe('clickable player rows', () => {
     it('links to FPL gameweek page when round has started', () => {
-      render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+      render(<CompactMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
       const links = screen.getAllByRole('link');
       expect(links).toHaveLength(2);
@@ -124,7 +124,7 @@ describe('BracketMatchCard', () => {
         winnerId: null,
         isBye: false,
       };
-      render(<BracketMatchCard match={matchWithoutScores} participants={mockParticipants} roundStarted={false} gameweek={15} />);
+      render(<CompactMatchCard match={matchWithoutScores} participants={mockParticipants} roundStarted={false} gameweek={15} />);
 
       const links = screen.getAllByRole('link');
       expect(links).toHaveLength(2);
@@ -135,7 +135,7 @@ describe('BracketMatchCard', () => {
     });
 
     it('opens links in new tab with security attributes', () => {
-      render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+      render(<CompactMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
       const links = screen.getAllByRole('link');
 
@@ -153,7 +153,7 @@ describe('BracketMatchCard', () => {
         winnerId: null,
         isBye: false,
       };
-      render(<BracketMatchCard match={emptyMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+      render(<CompactMatchCard match={emptyMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
     });
@@ -166,7 +166,7 @@ describe('BracketMatchCard', () => {
         winnerId: 1,
         isBye: true,
       };
-      render(<BracketMatchCard match={byeMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+      render(<CompactMatchCard match={byeMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
       // Only player1 should have a link, BYE slot should not
       const links = screen.getAllByRole('link');
@@ -175,7 +175,7 @@ describe('BracketMatchCard', () => {
     });
 
     it('player row links have cursor-pointer class', () => {
-      render(<BracketMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
+      render(<CompactMatchCard match={mockMatch} participants={mockParticipants} roundStarted={true} gameweek={10} />);
 
       const links = screen.getAllByRole('link');
 
@@ -190,7 +190,7 @@ describe('BracketMatchCard', () => {
       const handleClaim = vi.fn();
 
       render(
-        <BracketMatchCard
+        <CompactMatchCard
           match={mockMatch}
           participants={mockParticipants}
           roundStarted={false}
@@ -208,7 +208,7 @@ describe('BracketMatchCard', () => {
       const handleClaim = vi.fn();
 
       render(
-        <BracketMatchCard
+        <CompactMatchCard
           match={mockMatch}
           participants={mockParticipants}
           roundStarted={false}
@@ -232,7 +232,7 @@ describe('BracketMatchCard', () => {
       };
 
       render(
-        <BracketMatchCard
+        <CompactMatchCard
           match={matchWithTBD}
           participants={mockParticipants}
           roundStarted={false}
@@ -248,7 +248,7 @@ describe('BracketMatchCard', () => {
 
     it('does not show claim button when onClaimTeam not provided', () => {
       render(
-        <BracketMatchCard
+        <CompactMatchCard
           match={mockMatch}
           participants={mockParticipants}
           roundStarted={false}
