@@ -3,12 +3,13 @@ import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '../ui/badge';
 import { Card, CardContent } from '../ui/card';
 import { cn } from '@/lib/utils';
-import type { Match, Participant } from '../../types/tournament';
+import type { Match, Participant, TournamentEntry } from '../../types/tournament';
+import { getEntryId, isTournamentEntry, getTeamName } from '../../types/tournament';
 import { getStakesCallout } from '../../lib/stakes';
 
 interface MatchCardProps {
   match: Match;
-  participants: Participant[];
+  participants: Participant[] | TournamentEntry[];
   gameweek: number;
   isUserMatch?: boolean;
   userTeamId?: number;
@@ -44,9 +45,9 @@ function StalenessIndicator({
 }
 
 export function MatchCard({ match, participants, gameweek, isUserMatch, userTeamId, isGameweekActive }: MatchCardProps) {
-  const getParticipantById = (fplTeamId: number | null): Participant | null => {
+  const getParticipantById = (fplTeamId: number | null): Participant | TournamentEntry | null => {
     if (!fplTeamId) return null;
-    return participants.find((p) => p.fplTeamId === fplTeamId) || null;
+    return participants.find((p) => getEntryId(p) === fplTeamId) || null;
   };
 
   const player1 = match.player1 ? getParticipantById(match.player1.fplTeamId) : null;
@@ -62,7 +63,7 @@ export function MatchCard({ match, participants, gameweek, isUserMatch, userTeam
 
   const renderPlayerRow = (
     player: typeof match.player1,
-    participant: Participant | null,
+    participant: Participant | TournamentEntry | null,
     isWinner: boolean,
     isLoser: boolean
   ) => {
@@ -74,10 +75,14 @@ export function MatchCard({ match, participants, gameweek, isUserMatch, userTeam
       );
     }
 
+    const teamName = isTournamentEntry(participant)
+      ? getTeamName(participant)
+      : participant.fplTeamName;
+
     return (
       <div className={`flex justify-between items-center py-2 ${isWinner ? 'font-semibold' : ''} ${isLoser ? 'opacity-50' : ''}`}>
         <div className="flex items-center gap-2">
-          <span>{participant.fplTeamName}</span>
+          <span>{teamName}</span>
           <span className="text-muted-foreground text-sm">({participant.seed})</span>
         </div>
         {player.score !== null && (
