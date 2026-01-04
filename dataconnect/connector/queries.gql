@@ -133,6 +133,44 @@ query GetLeagueEntries($leagueId: Int!, $season: String!) @auth(level: PUBLIC) {
 }
 
 # =============================================================================
+# TOURNAMENT ENTRY QUERIES
+# =============================================================================
+
+# Get tournament entries with entry details (for participant lists)
+query GetTournamentEntries($tournamentId: UUID!) @auth(level: PUBLIC) {
+  tournamentEntries(
+    where: { tournamentId: { eq: $tournamentId } }
+    orderBy: { seed: ASC }
+  ) {
+    entryId
+    seed
+    status
+    eliminationRound
+    uid
+    entry {
+      name
+      playerFirstName
+      playerLastName
+      summaryOverallPoints
+    }
+  }
+}
+
+# Get tournament entry for a specific entry in a tournament
+query GetUserTournamentEntry($tournamentId: UUID!, $entryId: Int!) @auth(level: PUBLIC) {
+  tournamentEntries(
+    where: { tournamentId: { eq: $tournamentId }, entryId: { eq: $entryId } }
+    limit: 1
+  ) {
+    entryId
+    seed
+    status
+    eliminationRound
+    uid
+  }
+}
+
+# =============================================================================
 # EVENT QUERIES
 # =============================================================================
 
