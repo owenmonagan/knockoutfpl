@@ -2,11 +2,59 @@
 
 export type TournamentStatus = 'active' | 'completed';
 
+export type TournamentEntryStatus = 'active' | 'eliminated';
+
+/**
+ * @deprecated Use TournamentEntry instead. Will be removed in Phase 6.
+ */
 export interface Participant {
   fplTeamId: number;
   fplTeamName: string;
   managerName: string;
   seed: number; // 1 = top seed (best league rank)
+}
+
+/**
+ * Represents a participant's entry in a tournament.
+ * Maps to the TournamentEntry table in the database schema.
+ */
+export interface TournamentEntry {
+  entryId: number;
+  seed: number;
+  status: TournamentEntryStatus;
+  eliminationRound?: number;
+  // Entry details fetched via relation from the Entry table
+  entry: {
+    name: string;
+    playerFirstName: string;
+    playerLastName: string;
+  };
+}
+
+/**
+ * Get the full manager name from a TournamentEntry
+ */
+export function getManagerName(entry: TournamentEntry): string {
+  return `${entry.entry.playerFirstName} ${entry.entry.playerLastName}`.trim();
+}
+
+/**
+ * Get the team name from a TournamentEntry
+ */
+export function getTeamName(entry: TournamentEntry): string {
+  return entry.entry.name;
+}
+
+/**
+ * Convert a TournamentEntry to the legacy Participant format for backward compatibility
+ */
+export function tournamentEntryToParticipant(entry: TournamentEntry): Participant {
+  return {
+    fplTeamId: entry.entryId,
+    fplTeamName: entry.entry.name,
+    managerName: getManagerName(entry),
+    seed: entry.seed,
+  };
 }
 
 export interface MatchPlayer {

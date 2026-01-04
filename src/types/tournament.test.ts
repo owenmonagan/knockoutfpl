@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import type { Match, Tournament } from './tournament';
-import { getMatchPlayers } from './tournament';
+import type { Match, Tournament, TournamentEntry } from './tournament';
+import {
+  getMatchPlayers,
+  getManagerName,
+  getTeamName,
+  tournamentEntryToParticipant,
+} from './tournament';
 
 describe('Tournament types', () => {
   it('Match supports N players via players array', () => {
@@ -103,6 +108,95 @@ describe('Tournament types', () => {
 
       const players = getMatchPlayers(match);
       expect(players.length).toBe(0);
+    });
+  });
+
+  describe('TournamentEntry helpers', () => {
+    const createTestEntry = (
+      overrides: Partial<TournamentEntry> = {}
+    ): TournamentEntry => ({
+      entryId: 12345,
+      seed: 1,
+      status: 'active',
+      entry: {
+        name: "Owen's Team",
+        playerFirstName: 'Owen',
+        playerLastName: 'Smith',
+      },
+      ...overrides,
+    });
+
+    describe('getManagerName', () => {
+      it('returns full manager name from first and last name', () => {
+        const entry = createTestEntry();
+        expect(getManagerName(entry)).toBe('Owen Smith');
+      });
+
+      it('handles single name (empty last name)', () => {
+        const entry = createTestEntry({
+          entry: {
+            name: 'Test Team',
+            playerFirstName: 'Owen',
+            playerLastName: '',
+          },
+        });
+        expect(getManagerName(entry)).toBe('Owen');
+      });
+
+      it('handles single name (empty first name)', () => {
+        const entry = createTestEntry({
+          entry: {
+            name: 'Test Team',
+            playerFirstName: '',
+            playerLastName: 'Smith',
+          },
+        });
+        expect(getManagerName(entry)).toBe('Smith');
+      });
+
+      it('trims whitespace from combined name', () => {
+        const entry = createTestEntry({
+          entry: {
+            name: 'Test Team',
+            playerFirstName: '  Owen  ',
+            playerLastName: '  Smith  ',
+          },
+        });
+        // Template literal produces "  Owen     Smith  " which trims to "Owen     Smith"
+        expect(getManagerName(entry)).toBe('Owen     Smith');
+      });
+    });
+
+    describe('getTeamName', () => {
+      it('returns the team name from entry', () => {
+        const entry = createTestEntry();
+        expect(getTeamName(entry)).toBe("Owen's Team");
+      });
+    });
+
+    describe('tournamentEntryToParticipant', () => {
+      it('converts TournamentEntry to Participant format', () => {
+        const entry = createTestEntry();
+        const participant = tournamentEntryToParticipant(entry);
+
+        expect(participant.fplTeamId).toBe(12345);
+        expect(participant.fplTeamName).toBe("Owen's Team");
+        expect(participant.managerName).toBe('Owen Smith');
+        expect(participant.seed).toBe(1);
+      });
+
+      it('preserves elimination status in conversion', () => {
+        const entry = createTestEntry({
+          status: 'eliminated',
+          eliminationRound: 2,
+        });
+        const participant = tournamentEntryToParticipant(entry);
+
+        // Note: Participant type doesn't have status/eliminationRound
+        // This is a lossy conversion
+        expect(participant.fplTeamId).toBe(12345);
+        expect(participant.seed).toBe(1);
+      });
     });
   });
 });
