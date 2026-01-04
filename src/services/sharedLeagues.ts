@@ -53,26 +53,62 @@ export function computeSharedLeagueCounts(
 }
 
 /**
- * Sorts participants by shared league count (descending).
- * Participants with more shared leagues ("friends") appear first.
+ * Minimal interface for sortable items
+ */
+interface Sortable {
+  entryId: number;
+  teamName: string;
+}
+
+/**
+ * Sorts items by shared league count (descending).
+ * Items with more shared leagues ("friends") appear first.
  * Falls back to alphabetical order by team name for ties.
  *
- * @param participants - Array of participants to sort
- * @param sharedCounts - Map from FPL team ID to shared league count
+ * @param items - Array of items to sort (must have entryId and teamName)
+ * @param sharedCounts - Map from entry ID to shared league count
  * @returns New sorted array (does not mutate original)
  *
  * @example
  * ```typescript
- * const participants = [
- *   { fplTeamId: 1, fplTeamName: 'Team A', ... },
- *   { fplTeamId: 2, fplTeamName: 'Team B', ... },
+ * const items = [
+ *   { entryId: 1, teamName: 'Team A', ... },
+ *   { entryId: 2, teamName: 'Team B', ... },
  * ];
  * const sharedCounts = new Map([[1, 1], [2, 3]]);
  *
- * const sorted = sortParticipantsByFriendship(participants, sharedCounts);
- * // sorted[0].fplTeamId === 2 (has 3 shared leagues)
- * // sorted[1].fplTeamId === 1 (has 1 shared league)
+ * const sorted = sortByFriendship(items, sharedCounts);
+ * // sorted[0].entryId === 2 (has 3 shared leagues)
+ * // sorted[1].entryId === 1 (has 1 shared league)
  * ```
+ */
+export function sortByFriendship<T extends Sortable>(
+  items: T[],
+  sharedCounts: Map<number, number>
+): T[] {
+  return [...items].sort((a, b) => {
+    const aCount = sharedCounts.get(a.entryId) || 0;
+    const bCount = sharedCounts.get(b.entryId) || 0;
+
+    // Higher shared count first
+    if (bCount !== aCount) {
+      return bCount - aCount;
+    }
+
+    // Alphabetical fallback
+    return a.teamName.localeCompare(b.teamName);
+  });
+}
+
+/**
+ * Sorts participants by shared league count (descending).
+ * Participants with more shared leagues ("friends") appear first.
+ * Falls back to alphabetical order by team name for ties.
+ *
+ * @deprecated Use sortByFriendship instead. Will be removed in Phase 6.
+ * @param participants - Array of participants to sort
+ * @param sharedCounts - Map from FPL team ID to shared league count
+ * @returns New sorted array (does not mutate original)
  */
 export function sortParticipantsByFriendship<T extends Participant>(
   participants: T[],

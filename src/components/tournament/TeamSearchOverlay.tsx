@@ -4,11 +4,50 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { sortParticipantsByFriendship } from '../../services/sharedLeagues';
-import type { Participant } from '../../types/tournament';
+import { sortByFriendship } from '../../services/sharedLeagues';
+import type { Participant, TournamentEntry } from '../../types/tournament';
+import { getManagerName, getTeamName } from '../../types/tournament';
+
+/**
+ * Normalized search result for display.
+ * Works with both legacy Participant and new TournamentEntry types.
+ */
+interface SearchResult {
+  entryId: number;
+  teamName: string;
+  managerName: string;
+}
+
+/**
+ * Type guard to check if an item is a TournamentEntry
+ */
+function isTournamentEntry(
+  item: Participant | TournamentEntry
+): item is TournamentEntry {
+  return 'entryId' in item && 'entry' in item;
+}
+
+/**
+ * Normalize a participant to common search result format
+ */
+function normalizeToSearchResult(item: Participant | TournamentEntry): SearchResult {
+  if (isTournamentEntry(item)) {
+    return {
+      entryId: item.entryId,
+      teamName: getTeamName(item),
+      managerName: getManagerName(item),
+    };
+  }
+  return {
+    entryId: item.fplTeamId,
+    teamName: item.fplTeamName,
+    managerName: item.managerName,
+  };
+}
 
 export interface TeamSearchOverlayProps {
-  participants: Participant[];
+  /** Accepts both legacy Participant[] and new TournamentEntry[] formats */
+  participants: Participant[] | TournamentEntry[];
   sharedCounts?: Map<number, number>;
   onConfirm: (fplTeamId: number) => void;
   onClose: () => void;
@@ -33,20 +72,22 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 function searchParticipants(
-  participants: Participant[],
+  participants: (Participant | TournamentEntry)[],
   query: string
-): Participant[] {
+): SearchResult[] {
   if (!query.trim()) {
     return [];
   }
 
   const lowerQuery = query.toLowerCase().trim();
 
-  return participants.filter(
-    (p) =>
-      p.fplTeamName.toLowerCase().includes(lowerQuery) ||
-      p.managerName.toLowerCase().includes(lowerQuery)
-  );
+  return participants
+    .map(normalizeToSearchResult)
+    .filter(
+      (p) =>
+        p.teamName.toLowerCase().includes(lowerQuery) ||
+        p.managerName.toLowerCase().includes(lowerQuery)
+    );
 }
 
 export function TeamSearchOverlay({
@@ -64,7 +105,7 @@ export function TeamSearchOverlay({
   const results = useMemo(() => {
     const filtered = searchParticipants(participants, debouncedQuery);
     return sharedCounts
-      ? sortParticipantsByFriendship(filtered, sharedCounts)
+      ? sortByFriendship(filtered, sharedCounts)
       : filtered;
   }, [participants, debouncedQuery, sharedCounts]);
 
@@ -124,9 +165,9 @@ export function TeamSearchOverlay({
             aria-label="Search results"
           >
             {hasResults ? (
-              results.map((participant) => (
+              results.map((result) => (
                 <li
-                  key={participant.fplTeamId}
+                  key={result.entryId}
                   role="option"
                   aria-selected="false"
                   className="flex items-center justify-between p-3 rounded-md border bg-card hover:bg-accent transition-colors"
@@ -134,26 +175,26 @@ export function TeamSearchOverlay({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-foreground truncate">
-                        {participant.fplTeamName}
+                        {result.teamName}
                       </p>
                       {sharedCounts &&
-                        (sharedCounts.get(participant.fplTeamId) ?? 0) > 0 && (
+                        (sharedCounts.get(result.entryId) ?? 0) > 0 && (
                           <Badge variant="secondary" className="flex-shrink-0">
-                            {sharedCounts.get(participant.fplTeamId)} shared{' '}
-                            {sharedCounts.get(participant.fplTeamId) === 1
+                            {sharedCounts.get(result.entryId)} shared{' '}
+                            {sharedCounts.get(result.entryId) === 1
                               ? 'league'
                               : 'leagues'}
                           </Badge>
                         )}
                     </div>
                     <p className="text-sm text-muted-foreground truncate">
-                      {participant.managerName}
+                      {result.managerName}
                     </p>
                   </div>
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={() => handleConfirm(participant.fplTeamId)}
+                    onClick={() => handleConfirm(result.entryId)}
                     className="ml-3 flex-shrink-0"
                   >
                     This is me

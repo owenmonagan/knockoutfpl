@@ -1,5 +1,6 @@
 // src/services/friends.ts
-import { dataConnect, getFriendsInTournament, getLeagueEntriesForEntries, getLeagues } from '@knockoutfpl/dataconnect';
+import { getFriendsInTournament, getLeagueEntriesForEntries, getLeagues } from '@knockoutfpl/dataconnect';
+import { dataConnect } from '@/lib/firebase';
 import type { Participant, TournamentEntry } from '@/types/tournament';
 import { getManagerName, getTeamName } from '@/types/tournament';
 import type { UUIDString } from '@knockoutfpl/dataconnect';

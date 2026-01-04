@@ -1,4 +1,5 @@
 // src/components/tournament/ParticipantsTable.tsx
+import { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -8,10 +9,59 @@ import {
   TableHeader,
   TableRow,
 } from '../ui/table';
-import type { Participant } from '../../types/tournament';
+import type { Participant, TournamentEntry } from '../../types/tournament';
+import { getManagerName, getTeamName } from '../../types/tournament';
+
+/**
+ * Normalized row data for display.
+ * Works with both legacy Participant and new TournamentEntry types.
+ */
+interface ParticipantRow {
+  entryId: number;
+  teamName: string;
+  managerName: string;
+  seed: number;
+  status: 'active' | 'eliminated';
+  eliminationRound?: number;
+}
+
+/**
+ * Type guard to check if an item is a TournamentEntry
+ */
+function isTournamentEntry(
+  item: Participant | TournamentEntry
+): item is TournamentEntry {
+  return 'entryId' in item && 'entry' in item;
+}
+
+/**
+ * Normalize participants to a common display format
+ */
+function normalizeToRow(item: Participant | TournamentEntry): ParticipantRow {
+  if (isTournamentEntry(item)) {
+    return {
+      entryId: item.entryId,
+      teamName: getTeamName(item),
+      managerName: getManagerName(item),
+      seed: item.seed,
+      status: item.status,
+      eliminationRound: item.eliminationRound,
+    };
+  }
+  // Legacy Participant format
+  return {
+    entryId: item.fplTeamId,
+    teamName: item.fplTeamName,
+    managerName: item.managerName,
+    seed: item.seed,
+    status: 'active', // Legacy format doesn't have status
+    eliminationRound: undefined,
+  };
+}
 
 interface ParticipantsTableProps {
-  participants: Participant[];
+  /** Accepts both legacy Participant[] and new TournamentEntry[] formats */
+  participants: Participant[] | TournamentEntry[];
   seedingGameweek: number;
   friendIds?: Set<number>;
 }
@@ -21,7 +71,12 @@ export function ParticipantsTable({
   seedingGameweek,
   friendIds = new Set(),
 }: ParticipantsTableProps) {
-  const sortedParticipants = [...participants].sort((a, b) => a.seed - b.seed);
+  // Normalize and sort participants
+  const sortedRows = useMemo(() => {
+    return participants
+      .map(normalizeToRow)
+      .sort((a, b) => a.seed - b.seed);
+  }, [participants]);
 
   return (
     <div>
@@ -38,21 +93,26 @@ export function ParticipantsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedParticipants.map((participant) => (
-            <TableRow key={participant.fplTeamId}>
-              <TableCell className="font-medium">{participant.seed}</TableCell>
+          {sortedRows.map((row) => (
+            <TableRow key={row.entryId}>
+              <TableCell className="font-medium">{row.seed}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <span>{participant.fplTeamName}</span>
-                  {friendIds.has(participant.fplTeamId) && (
+                  <span>{row.teamName}</span>
+                  {friendIds.has(row.entryId) && (
                     <Badge variant="outline" className="text-xs">
                       Friend
+                    </Badge>
+                  )}
+                  {row.status === 'eliminated' && (
+                    <Badge variant="secondary" className="text-xs">
+                      Out R{row.eliminationRound}
                     </Badge>
                   )}
                 </div>
               </TableCell>
               <TableCell className="text-muted-foreground">
-                {participant.managerName}
+                {row.managerName}
               </TableCell>
             </TableRow>
           ))}

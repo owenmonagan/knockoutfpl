@@ -2,13 +2,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getTournamentFriends } from '@/services/friends';
 import type { FriendInTournament } from '@/services/friends';
-import type { Participant } from '@/types/tournament';
+import type { Participant, TournamentEntry } from '@/types/tournament';
 
 interface UseTournamentFriendsOptions {
   tournamentId: string;
   tournamentLeagueId: number;
   userFplTeamId: number | null | undefined;
-  participants: Participant[];
+  /** Accepts both legacy Participant[] and new TournamentEntry[] formats */
+  participants: Participant[] | TournamentEntry[];
   enabled?: boolean;
 }
 

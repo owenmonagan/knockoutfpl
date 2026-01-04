@@ -1,9 +1,10 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { ParticipantsTable } from '../ParticipantsTable';
-import type { Participant } from '@/types/tournament';
+import type { Participant, TournamentEntry } from '@/types/tournament';
 
 interface ParticipantsTabProps {
-  participants: Participant[];
+  /** Accepts both legacy Participant[] and new TournamentEntry[] formats */
+  participants: Participant[] | TournamentEntry[];
   seedingGameweek: number;
   friendIds?: Set<number>;
 }
