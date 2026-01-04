@@ -228,6 +228,7 @@ type Round @table(name: "rounds", key: ["tournamentId", "roundNumber"]) {
   tournament: Tournament!
 }
 
+# @deprecated - Use TournamentEntry instead. Remove after migration.
 # Tournament participants (snapshot from league standings)
 type Participant @table(name: "participants", key: ["tournamentId", "entryId"]) {
   tournamentId: UUID! @col(name: "tournament_id")
@@ -254,6 +255,7 @@ type Participant @table(name: "participants", key: ["tournamentId", "entryId"]) 
   user: User
 }
 
+# @deprecated - Use LeagueEntry instead. Remove after migration.
 # Mini-league memberships for each tournament participant
 # Used to calculate "friend proximity" - shared mini-leagues between users
 type ParticipantLeague @table(name: "participant_leagues", key: ["tournamentId", "entryId", "leagueId"]) {
