@@ -151,6 +151,40 @@ extend type EmailQueue {
 }
 extend type Entry {
   """
+  ✨ List `LeagueEntry` objects in a one-to-many relationship (where `LeagueEntry`.`entry` is this object).
+  """
+  leagueEntries_on_entry(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: LeagueEntry_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [LeagueEntry_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: LeagueEntry_Having
+  ): [LeagueEntry!]! @fdc_generated(from: "LeagueEntry.entry", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
   ✨ List `MatchPick` objects in a one-to-many relationship (where `MatchPick`.`entry` is this object).
   """
   matchPicks_on_entry(
@@ -685,6 +719,33 @@ extend type League {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "League.created", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `League` table where the `entriesCount` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  entriesCount_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "League.entriesCount", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `League` table where the `lastRefreshAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  lastRefreshAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "League.lastRefreshAt", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `League` table where the `lastRefreshId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  lastRefreshId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "League.lastRefreshId", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `League` table where the `leagueId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   leagueId_count(
@@ -730,6 +791,15 @@ extend type League {
     distinct: Boolean = false
   ): Int @fdc_generated(from: "League.adminEntry", purpose: QUERY_SUM)
   """
+  ✨ Sum the `entriesCount` field in the `League` table.
+  """
+  entriesCount_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "League.entriesCount", purpose: QUERY_SUM)
+  """
   ✨ Sum the `leagueId` field in the `League` table.
   """
   leagueId_sum(
@@ -747,6 +817,15 @@ extend type League {
     """
     distinct: Boolean = false
   ): Float @fdc_generated(from: "League.adminEntry", purpose: QUERY_AVG)
+  """
+  ✨ Average the `entriesCount` field in the `League` table.
+  """
+  entriesCount_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "League.entriesCount", purpose: QUERY_AVG)
   """
   ✨ Average the `leagueId` field in the `League` table.
   """
@@ -769,6 +848,14 @@ extend type League {
   """
   created_min: Timestamp @fdc_generated(from: "League.created", purpose: QUERY_MIN)
   """
+  ✨ Minimum of the `entriesCount` field in the `League` table.
+  """
+  entriesCount_min: Int @fdc_generated(from: "League.entriesCount", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `lastRefreshAt` field in the `League` table.
+  """
+  lastRefreshAt_min: Timestamp @fdc_generated(from: "League.lastRefreshAt", purpose: QUERY_MIN)
+  """
   ✨ Minimum of the `leagueId` field in the `League` table.
   """
   leagueId_min: Int @fdc_generated(from: "League.leagueId", purpose: QUERY_MIN)
@@ -785,9 +872,185 @@ extend type League {
   """
   created_max: Timestamp @fdc_generated(from: "League.created", purpose: QUERY_MAX)
   """
+  ✨ Maximum of the `entriesCount` field in the `League` table.
+  """
+  entriesCount_max: Int @fdc_generated(from: "League.entriesCount", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `lastRefreshAt` field in the `League` table.
+  """
+  lastRefreshAt_max: Timestamp @fdc_generated(from: "League.lastRefreshAt", purpose: QUERY_MAX)
+  """
   ✨ Maximum of the `leagueId` field in the `League` table.
   """
   leagueId_max: Int @fdc_generated(from: "League.leagueId", purpose: QUERY_MAX)
+}
+extend type LeagueEntry {
+  """
+  Implicit metadata field that cannot be written. It provides extra information about query results.
+  """
+  _metadata: _Metadata @fdc_generated(from: "LeagueEntry", purpose: METADATA_FIELD)
+  """
+  ✨ Count the number of rows in the `LeagueEntry` table.
+  """
+  _count: Int! @fdc_generated(from: "LeagueEntry.", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `LeagueEntry` table where the `entryEntryId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  entryEntryId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "LeagueEntry.entryEntryId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `LeagueEntry` table where the `entryId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  entryId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "LeagueEntry.entryId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `LeagueEntry` table where the `leagueId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  leagueId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "LeagueEntry.leagueId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `LeagueEntry` table where the `rank` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  rank_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "LeagueEntry.rank", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `LeagueEntry` table where the `refreshId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  refreshId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "LeagueEntry.refreshId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `LeagueEntry` table where the `season` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  season_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "LeagueEntry.season", purpose: QUERY_COUNT)
+  """
+  ✨ Sum the `entryEntryId` field in the `LeagueEntry` table.
+  """
+  entryEntryId_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "LeagueEntry.entryEntryId", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `entryId` field in the `LeagueEntry` table.
+  """
+  entryId_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "LeagueEntry.entryId", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `leagueId` field in the `LeagueEntry` table.
+  """
+  leagueId_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "LeagueEntry.leagueId", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `rank` field in the `LeagueEntry` table.
+  """
+  rank_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "LeagueEntry.rank", purpose: QUERY_SUM)
+  """
+  ✨ Average the `entryEntryId` field in the `LeagueEntry` table.
+  """
+  entryEntryId_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "LeagueEntry.entryEntryId", purpose: QUERY_AVG)
+  """
+  ✨ Average the `entryId` field in the `LeagueEntry` table.
+  """
+  entryId_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "LeagueEntry.entryId", purpose: QUERY_AVG)
+  """
+  ✨ Average the `leagueId` field in the `LeagueEntry` table.
+  """
+  leagueId_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "LeagueEntry.leagueId", purpose: QUERY_AVG)
+  """
+  ✨ Average the `rank` field in the `LeagueEntry` table.
+  """
+  rank_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "LeagueEntry.rank", purpose: QUERY_AVG)
+  """
+  ✨ Minimum of the `entryEntryId` field in the `LeagueEntry` table.
+  """
+  entryEntryId_min: Int @fdc_generated(from: "LeagueEntry.entryEntryId", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `entryId` field in the `LeagueEntry` table.
+  """
+  entryId_min: Int @fdc_generated(from: "LeagueEntry.entryId", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `leagueId` field in the `LeagueEntry` table.
+  """
+  leagueId_min: Int @fdc_generated(from: "LeagueEntry.leagueId", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `rank` field in the `LeagueEntry` table.
+  """
+  rank_min: Int @fdc_generated(from: "LeagueEntry.rank", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `entryEntryId` field in the `LeagueEntry` table.
+  """
+  entryEntryId_max: Int @fdc_generated(from: "LeagueEntry.entryEntryId", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `entryId` field in the `LeagueEntry` table.
+  """
+  entryId_max: Int @fdc_generated(from: "LeagueEntry.entryId", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `leagueId` field in the `LeagueEntry` table.
+  """
+  leagueId_max: Int @fdc_generated(from: "LeagueEntry.leagueId", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `rank` field in the `LeagueEntry` table.
+  """
+  rank_max: Int @fdc_generated(from: "LeagueEntry.rank", purpose: QUERY_MAX)
 }
 extend type Match {
   """

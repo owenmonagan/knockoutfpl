@@ -61,6 +61,20 @@ extend type Query {
     first: League_FirstRow
   ): League @fdc_generated(from: "League", purpose: QUERY_SINGLE)
   """
+  ✨ Look up a single `LeagueEntry` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  leagueEntry(
+    """
+    The key used to identify the object.
+    """
+    key: LeagueEntry_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: LeagueEntry_FirstRow
+  ): LeagueEntry @fdc_generated(from: "LeagueEntry", purpose: QUERY_SINGLE)
+  """
   ✨ Look up a single `Match` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
   """
   match(
@@ -313,6 +327,40 @@ extend type Query {
     """
     having: League_Having
   ): [League!]! @fdc_generated(from: "League", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `LeagueEntry` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  leagueEntries(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: LeagueEntry_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [LeagueEntry_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: LeagueEntry_Having
+  ): [LeagueEntry!]! @fdc_generated(from: "LeagueEntry", purpose: QUERY_MULTIPLE)
   """
   ✨ List `Match` objects in the table and return selected fields, optionally filtered by `where` conditions
   """

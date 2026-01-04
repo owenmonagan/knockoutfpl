@@ -1,8 +1,8 @@
 # Knockout FPL Data Schema
 # Based on docs/business/technical/data/data-dictionary.md
 #
-# 11 tables across 4 layers:
-# - FPL Cache (2): events, leagues
+# 12 tables across 4 layers:
+# - FPL Cache (3): events, leagues, league_entries
 # - FPL Records (2): entries, picks
 # - User (2): users, email_queue
 # - Tournament (5): tournaments, rounds, participants, matches, match_picks
@@ -120,6 +120,20 @@ type League @table(name: "leagues", key: ["leagueId", "season"]) {
   rawJson: String! @col(name: "raw_json")
 
   cachedAt: Timestamp! @col(name: "cached_at") @default(expr: "request.time")
+}
+
+# Entry's membership in a league (1 row per entry x league, shared across tournaments)
+type LeagueEntry @table(name: "league_entries", key: ["leagueId", "entryId", "season"]) {
+  leagueId: Int! @col(name: "league_id")
+  entryId: Int! @col(name: "entry_id")
+  season: String!
+
+  # Refresh tracking
+  refreshId: UUID! @col(name: "refresh_id")
+  rank: Int
+
+  # Relations
+  entry: Entry!
 }
 
 # Cached FPL event/gameweek data

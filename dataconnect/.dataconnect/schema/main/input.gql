@@ -23,6 +23,12 @@ It has the same format as `League_Key`, but is only used as mutation return valu
 """
 scalar League_KeyOutput
 """
+✨ `LeagueEntry_KeyOutput` returns the primary key fields of table type `LeagueEntry`.
+
+It has the same format as `LeagueEntry_Key`, but is only used as mutation return value.
+"""
+scalar LeagueEntry_KeyOutput
+"""
 ✨ `Match_KeyOutput` returns the primary key fields of table type `Match`.
 
 It has the same format as `Match_Key`, but is only used as mutation return value.
@@ -706,6 +712,10 @@ input Entry_Filter {
   ✨ Generated from Field `Entry`.`summaryOverallRank` of type `Int`
   """
   summaryOverallRank: Int_Filter
+  """
+  ✨ Generated from Field `Entry`.`leagueEntries_on_entry` of type `[LeagueEntry!]!`
+  """
+  leagueEntries_on_entry: LeagueEntry_ListFilter
   """
   ✨ Generated from Field `Entry`.`matchPicks_on_entry` of type `[MatchPick!]!`
   """
@@ -1620,6 +1630,42 @@ input League_Data {
   """
   created_update: [Timestamp_Update!]
   """
+  ✨ Generated from Field `League`.`entriesCount` of type `Int`
+  """
+  entriesCount: Int
+  """
+  ✨ `_expr` server value variant of `entriesCount` (✨ Generated from Field `League`.`entriesCount` of type `Int`)
+  """
+  entriesCount_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `entriesCount` (✨ Generated from Field `League`.`entriesCount` of type `Int`)
+  """
+  entriesCount_update: [Int_Update!]
+  """
+  ✨ Generated from Field `League`.`lastRefreshAt` of type `Timestamp`
+  """
+  lastRefreshAt: Timestamp
+  """
+  ✨ `_expr` server value variant of `lastRefreshAt` (✨ Generated from Field `League`.`lastRefreshAt` of type `Timestamp`)
+  """
+  lastRefreshAt_expr: Timestamp_Expr
+  """
+  ✨ `_time` server value variant of `lastRefreshAt` (✨ Generated from Field `League`.`lastRefreshAt` of type `Timestamp`)
+  """
+  lastRefreshAt_time: Timestamp_Relative
+  """
+  ✨ `_update` server value variant of `lastRefreshAt` (✨ Generated from Field `League`.`lastRefreshAt` of type `Timestamp`)
+  """
+  lastRefreshAt_update: [Timestamp_Update!]
+  """
+  ✨ Generated from Field `League`.`lastRefreshId` of type `UUID`
+  """
+  lastRefreshId: UUID
+  """
+  ✨ `_expr` server value variant of `lastRefreshId` (✨ Generated from Field `League`.`lastRefreshId` of type `UUID`)
+  """
+  lastRefreshId_expr: UUID_Expr
+  """
   ✨ Generated from Field `League`.`name` of type `String!`
   """
   name: String
@@ -1672,6 +1718,18 @@ input League_Filter {
   ✨ Generated from Field `League`.`created` of type `Timestamp`
   """
   created: Timestamp_Filter
+  """
+  ✨ Generated from Field `League`.`entriesCount` of type `Int`
+  """
+  entriesCount: Int_Filter
+  """
+  ✨ Generated from Field `League`.`lastRefreshAt` of type `Timestamp`
+  """
+  lastRefreshAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `League`.`lastRefreshId` of type `UUID`
+  """
+  lastRefreshId: UUID_Filter
   """
   ✨ Generated from Field `League`.`name` of type `String!`
   """
@@ -1731,6 +1789,18 @@ input League_Having {
   """
   created_count: Int_Filter
   """
+  ✨ Generated from Field `League`.`entriesCount_count` of type `Int!`
+  """
+  entriesCount_count: Int_Filter
+  """
+  ✨ Generated from Field `League`.`lastRefreshAt_count` of type `Int!`
+  """
+  lastRefreshAt_count: Int_Filter
+  """
+  ✨ Generated from Field `League`.`lastRefreshId_count` of type `Int!`
+  """
+  lastRefreshId_count: Int_Filter
+  """
   ✨ Generated from Field `League`.`leagueId_count` of type `Int!`
   """
   leagueId_count: Int_Filter
@@ -1751,6 +1821,10 @@ input League_Having {
   """
   adminEntry_sum: Int_Filter
   """
+  ✨ Generated from Field `League`.`entriesCount_sum` of type `Int`
+  """
+  entriesCount_sum: Int_Filter
+  """
   ✨ Generated from Field `League`.`leagueId_sum` of type `Int`
   """
   leagueId_sum: Int_Filter
@@ -1758,6 +1832,10 @@ input League_Having {
   ✨ Generated from Field `League`.`adminEntry_avg` of type `Float`
   """
   adminEntry_avg: Float_Filter
+  """
+  ✨ Generated from Field `League`.`entriesCount_avg` of type `Float`
+  """
+  entriesCount_avg: Float_Filter
   """
   ✨ Generated from Field `League`.`leagueId_avg` of type `Float`
   """
@@ -1775,6 +1853,14 @@ input League_Having {
   """
   created_min: Timestamp_Filter
   """
+  ✨ Generated from Field `League`.`entriesCount_min` of type `Int`
+  """
+  entriesCount_min: Int_Filter
+  """
+  ✨ Generated from Field `League`.`lastRefreshAt_min` of type `Timestamp`
+  """
+  lastRefreshAt_min: Timestamp_Filter
+  """
   ✨ Generated from Field `League`.`leagueId_min` of type `Int`
   """
   leagueId_min: Int_Filter
@@ -1790,6 +1876,14 @@ input League_Having {
   ✨ Generated from Field `League`.`created_max` of type `Timestamp`
   """
   created_max: Timestamp_Filter
+  """
+  ✨ Generated from Field `League`.`entriesCount_max` of type `Int`
+  """
+  entriesCount_max: Int_Filter
+  """
+  ✨ Generated from Field `League`.`lastRefreshAt_max` of type `Timestamp`
+  """
+  lastRefreshAt_max: Timestamp_Filter
   """
   ✨ Generated from Field `League`.`leagueId_max` of type `Int`
   """
@@ -1854,6 +1948,18 @@ input League_Order {
   """
   created: OrderDirection
   """
+  ✨ Generated from Field `League`.`entriesCount` of type `Int`
+  """
+  entriesCount: OrderDirection
+  """
+  ✨ Generated from Field `League`.`lastRefreshAt` of type `Timestamp`
+  """
+  lastRefreshAt: OrderDirection
+  """
+  ✨ Generated from Field `League`.`lastRefreshId` of type `UUID`
+  """
+  lastRefreshId: OrderDirection
+  """
   ✨ Generated from Field `League`.`name` of type `String!`
   """
   name: OrderDirection
@@ -1878,6 +1984,18 @@ input League_Order {
   """
   created_count: OrderDirection
   """
+  ✨ Generated from Field `League`.`entriesCount_count` of type `Int!`
+  """
+  entriesCount_count: OrderDirection
+  """
+  ✨ Generated from Field `League`.`lastRefreshAt_count` of type `Int!`
+  """
+  lastRefreshAt_count: OrderDirection
+  """
+  ✨ Generated from Field `League`.`lastRefreshId_count` of type `Int!`
+  """
+  lastRefreshId_count: OrderDirection
+  """
   ✨ Generated from Field `League`.`leagueId_count` of type `Int!`
   """
   leagueId_count: OrderDirection
@@ -1898,6 +2016,10 @@ input League_Order {
   """
   adminEntry_sum: OrderDirection
   """
+  ✨ Generated from Field `League`.`entriesCount_sum` of type `Int`
+  """
+  entriesCount_sum: OrderDirection
+  """
   ✨ Generated from Field `League`.`leagueId_sum` of type `Int`
   """
   leagueId_sum: OrderDirection
@@ -1905,6 +2027,10 @@ input League_Order {
   ✨ Generated from Field `League`.`adminEntry_avg` of type `Float`
   """
   adminEntry_avg: OrderDirection
+  """
+  ✨ Generated from Field `League`.`entriesCount_avg` of type `Float`
+  """
+  entriesCount_avg: OrderDirection
   """
   ✨ Generated from Field `League`.`leagueId_avg` of type `Float`
   """
@@ -1922,6 +2048,14 @@ input League_Order {
   """
   created_min: OrderDirection
   """
+  ✨ Generated from Field `League`.`entriesCount_min` of type `Int`
+  """
+  entriesCount_min: OrderDirection
+  """
+  ✨ Generated from Field `League`.`lastRefreshAt_min` of type `Timestamp`
+  """
+  lastRefreshAt_min: OrderDirection
+  """
   ✨ Generated from Field `League`.`leagueId_min` of type `Int`
   """
   leagueId_min: OrderDirection
@@ -1938,9 +2072,428 @@ input League_Order {
   """
   created_max: OrderDirection
   """
+  ✨ Generated from Field `League`.`entriesCount_max` of type `Int`
+  """
+  entriesCount_max: OrderDirection
+  """
+  ✨ Generated from Field `League`.`lastRefreshAt_max` of type `Timestamp`
+  """
+  lastRefreshAt_max: OrderDirection
+  """
   ✨ Generated from Field `League`.`leagueId_max` of type `Int`
   """
   leagueId_max: OrderDirection
+}
+"""
+✨ Generated data input type for table 'LeagueEntry'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input LeagueEntry_Data {
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId` of type `Int!`
+  """
+  leagueId: Int
+  """
+  ✨ `_expr` server value variant of `leagueId` (✨ Generated from Field `LeagueEntry`.`leagueId` of type `Int!`)
+  """
+  leagueId_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `leagueId` (✨ Generated from Field `LeagueEntry`.`leagueId` of type `Int!`)
+  """
+  leagueId_update: [Int_Update!]
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId` of type `Int!`
+  """
+  entryId: Int
+  """
+  ✨ `_expr` server value variant of `entryId` (✨ Generated from Field `LeagueEntry`.`entryId` of type `Int!`)
+  """
+  entryId_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `entryId` (✨ Generated from Field `LeagueEntry`.`entryId` of type `Int!`)
+  """
+  entryId_update: [Int_Update!]
+  """
+  ✨ Generated from Field `LeagueEntry`.`season` of type `String!`
+  """
+  season: String
+  """
+  ✨ `_expr` server value variant of `season` (✨ Generated from Field `LeagueEntry`.`season` of type `String!`)
+  """
+  season_expr: String_Expr
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId` of type `Int!`
+  """
+  entryEntryId: Int
+  """
+  ✨ `_expr` server value variant of `entryEntryId` (✨ Generated from Field `LeagueEntry`.`entryEntryId` of type `Int!`)
+  """
+  entryEntryId_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `entryEntryId` (✨ Generated from Field `LeagueEntry`.`entryEntryId` of type `Int!`)
+  """
+  entryEntryId_update: [Int_Update!]
+  """
+  ✨ Generated from Field `LeagueEntry`.`entry` of type `Entry!`
+  """
+  entry: Entry_Key
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank` of type `Int`
+  """
+  rank: Int
+  """
+  ✨ `_expr` server value variant of `rank` (✨ Generated from Field `LeagueEntry`.`rank` of type `Int`)
+  """
+  rank_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `rank` (✨ Generated from Field `LeagueEntry`.`rank` of type `Int`)
+  """
+  rank_update: [Int_Update!]
+  """
+  ✨ Generated from Field `LeagueEntry`.`refreshId` of type `UUID!`
+  """
+  refreshId: UUID
+  """
+  ✨ `_expr` server value variant of `refreshId` (✨ Generated from Field `LeagueEntry`.`refreshId` of type `UUID!`)
+  """
+  refreshId_expr: UUID_Expr
+}
+"""
+✨ Generated filter input type for table 'LeagueEntry'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input LeagueEntry_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [LeagueEntry_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: LeagueEntry_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [LeagueEntry_Filter!]
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId` of type `Int!`
+  """
+  leagueId: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId` of type `Int!`
+  """
+  entryId: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`season` of type `String!`
+  """
+  season: String_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId` of type `Int!`
+  """
+  entryEntryId: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entry` of type `Entry!`
+  """
+  entry: Entry_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank` of type `Int`
+  """
+  rank: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`refreshId` of type `UUID!`
+  """
+  refreshId: UUID_Filter
+}
+"""
+✨ Generated first-row input type for table 'LeagueEntry'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input LeagueEntry_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [LeagueEntry_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: LeagueEntry_Filter
+}
+"""
+✨ Generated having input type for table 'LeagueEntry'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input LeagueEntry_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [LeagueEntry_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: LeagueEntry_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [LeagueEntry_Having!]
+  """
+  ✨ Generated from Field `LeagueEntry`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId_count` of type `Int!`
+  """
+  entryEntryId_count: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId_count` of type `Int!`
+  """
+  entryId_count: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId_count` of type `Int!`
+  """
+  leagueId_count: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank_count` of type `Int!`
+  """
+  rank_count: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`refreshId_count` of type `Int!`
+  """
+  refreshId_count: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`season_count` of type `Int!`
+  """
+  season_count: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId_sum` of type `Int`
+  """
+  entryEntryId_sum: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId_sum` of type `Int`
+  """
+  entryId_sum: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId_sum` of type `Int`
+  """
+  leagueId_sum: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank_sum` of type `Int`
+  """
+  rank_sum: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId_avg` of type `Float`
+  """
+  entryEntryId_avg: Float_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId_avg` of type `Float`
+  """
+  entryId_avg: Float_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId_avg` of type `Float`
+  """
+  leagueId_avg: Float_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank_avg` of type `Float`
+  """
+  rank_avg: Float_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId_min` of type `Int`
+  """
+  entryEntryId_min: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId_min` of type `Int`
+  """
+  entryId_min: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId_min` of type `Int`
+  """
+  leagueId_min: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank_min` of type `Int`
+  """
+  rank_min: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId_max` of type `Int`
+  """
+  entryEntryId_max: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId_max` of type `Int`
+  """
+  entryId_max: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId_max` of type `Int`
+  """
+  leagueId_max: Int_Filter
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank_max` of type `Int`
+  """
+  rank_max: Int_Filter
+}
+"""
+✨ Generated key input type for table 'LeagueEntry'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input LeagueEntry_Key {
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId` of type `Int!`
+  """
+  leagueId: Int
+  """
+  ✨ `_expr` server value variant of `leagueId` (✨ Generated from Field `LeagueEntry`.`leagueId` of type `Int!`)
+  """
+  leagueId_expr: Int_Expr
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId` of type `Int!`
+  """
+  entryId: Int
+  """
+  ✨ `_expr` server value variant of `entryId` (✨ Generated from Field `LeagueEntry`.`entryId` of type `Int!`)
+  """
+  entryId_expr: Int_Expr
+  """
+  ✨ Generated from Field `LeagueEntry`.`season` of type `String!`
+  """
+  season: String
+  """
+  ✨ `_expr` server value variant of `season` (✨ Generated from Field `LeagueEntry`.`season` of type `String!`)
+  """
+  season_expr: String_Expr
+}
+"""
+✨ Generated list filter input type for table 'LeagueEntry'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input LeagueEntry_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: LeagueEntry_Filter
+}
+"""
+✨ Generated order input type for table 'LeagueEntry'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input LeagueEntry_Order {
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId` of type `Int!`
+  """
+  leagueId: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId` of type `Int!`
+  """
+  entryId: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`season` of type `String!`
+  """
+  season: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId` of type `Int!`
+  """
+  entryEntryId: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entry` of type `Entry!`
+  """
+  entry: Entry_Order
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank` of type `Int`
+  """
+  rank: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`refreshId` of type `UUID!`
+  """
+  refreshId: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId_count` of type `Int!`
+  """
+  entryEntryId_count: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId_count` of type `Int!`
+  """
+  entryId_count: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId_count` of type `Int!`
+  """
+  leagueId_count: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank_count` of type `Int!`
+  """
+  rank_count: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`refreshId_count` of type `Int!`
+  """
+  refreshId_count: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`season_count` of type `Int!`
+  """
+  season_count: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId_sum` of type `Int`
+  """
+  entryEntryId_sum: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId_sum` of type `Int`
+  """
+  entryId_sum: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId_sum` of type `Int`
+  """
+  leagueId_sum: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank_sum` of type `Int`
+  """
+  rank_sum: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId_avg` of type `Float`
+  """
+  entryEntryId_avg: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId_avg` of type `Float`
+  """
+  entryId_avg: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId_avg` of type `Float`
+  """
+  leagueId_avg: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank_avg` of type `Float`
+  """
+  rank_avg: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId_min` of type `Int`
+  """
+  entryEntryId_min: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId_min` of type `Int`
+  """
+  entryId_min: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId_min` of type `Int`
+  """
+  leagueId_min: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank_min` of type `Int`
+  """
+  rank_min: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryEntryId_max` of type `Int`
+  """
+  entryEntryId_max: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`entryId_max` of type `Int`
+  """
+  entryId_max: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`leagueId_max` of type `Int`
+  """
+  leagueId_max: OrderDirection
+  """
+  ✨ Generated from Field `LeagueEntry`.`rank_max` of type `Int`
+  """
+  rank_max: OrderDirection
 }
 """
 ✨ Generated data input type for table 'Match'. It includes all necessary fields for creating or upserting rows into table.
