@@ -962,14 +962,17 @@ query GetFriendsInTournament(
   }
 
   # Get all tournament participants with entry details
-  tournamentParticipants: participants(
+  tournamentParticipants: tournamentEntries(
     where: { tournamentId: { eq: $tournamentId } }
     orderBy: { seed: ASC }
   ) {
     entryId
     seed
     status
-    teamName
-    managerName
+    entry {
+      name
+      playerFirstName
+      playerLastName
+    }
   }
 }
