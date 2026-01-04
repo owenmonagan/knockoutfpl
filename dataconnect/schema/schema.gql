@@ -111,6 +111,11 @@ type League @table(name: "leagues", key: ["leagueId", "season"]) {
   created: Timestamp
   adminEntry: Int @col(name: "admin_entry")
 
+  # Refresh tracking (for shared entry model)
+  entriesCount: Int @col(name: "entries_count")
+  lastRefreshId: UUID @col(name: "last_refresh_id")
+  lastRefreshAt: Timestamp @col(name: "last_refresh_at")
+
   # Raw API response (complete data, future-proof)
   rawJson: String! @col(name: "raw_json")
 
