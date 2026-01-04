@@ -417,7 +417,13 @@ export function TournamentView({
         </TabsContent>
 
         <TabsContent value="matches" className="mt-6">
-          <MatchesTab />
+          <MatchesTab
+            tournament={tournament}
+            participants={tournament.participants}
+            userFplTeamId={userFplTeamId ?? undefined}
+            isAuthenticated={isAuthenticated}
+            onClaimTeam={onClaimTeam}
+          />
         </TabsContent>
 
         <TabsContent value="participants" className="mt-6">
