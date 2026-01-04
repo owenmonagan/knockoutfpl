@@ -101,6 +101,38 @@ query GetLeague($leagueId: Int!, $season: String!) @auth(level: PUBLIC) {
 }
 
 # =============================================================================
+# LEAGUE ENTRY QUERIES
+# =============================================================================
+
+# Check if league needs refresh (compare entriesCount, check lastRefreshAt)
+query GetLeagueRefreshStatus($leagueId: Int!, $season: String!) @auth(level: PUBLIC) {
+  leagues(where: { leagueId: { eq: $leagueId }, season: { eq: $season } }, limit: 1) {
+    leagueId
+    name
+    entriesCount
+    lastRefreshId
+    lastRefreshAt
+  }
+}
+
+# Get all entries for a league (to compare with FPL API data)
+query GetLeagueEntries($leagueId: Int!, $season: String!) @auth(level: PUBLIC) {
+  leagueEntries(
+    where: { leagueId: { eq: $leagueId }, season: { eq: $season } }
+    orderBy: { rank: ASC }
+  ) {
+    entryId
+    rank
+    refreshId
+    entry {
+      name
+      playerFirstName
+      playerLastName
+    }
+  }
+}
+
+# =============================================================================
 # EVENT QUERIES
 # =============================================================================
 
