@@ -545,6 +545,26 @@ export interface GetLeagueEntriesVariables {
   season: string;
 }
 
+export interface GetLeagueImportStatusData {
+  leagues: ({
+    leagueId: number;
+    name: string;
+    entriesCount?: number | null;
+    importStatus?: string | null;
+    importProgress?: number | null;
+    importLockId?: UUIDString | null;
+    importStartedAt?: TimestampString | null;
+    importError?: string | null;
+    lastRefreshId?: UUIDString | null;
+    lastRefreshAt?: TimestampString | null;
+  })[];
+}
+
+export interface GetLeagueImportStatusVariables {
+  leagueId: number;
+  season: string;
+}
+
 export interface GetLeagueRefreshStatusData {
   leagues: ({
     leagueId: number;
@@ -2479,6 +2499,18 @@ export const getTournamentImportStatusRef: GetTournamentImportStatusRef;
 
 export function getTournamentImportStatus(vars: GetTournamentImportStatusVariables): QueryPromise<GetTournamentImportStatusData, GetTournamentImportStatusVariables>;
 export function getTournamentImportStatus(dc: DataConnect, vars: GetTournamentImportStatusVariables): QueryPromise<GetTournamentImportStatusData, GetTournamentImportStatusVariables>;
+
+interface GetLeagueImportStatusRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLeagueImportStatusVariables): QueryRef<GetLeagueImportStatusData, GetLeagueImportStatusVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetLeagueImportStatusVariables): QueryRef<GetLeagueImportStatusData, GetLeagueImportStatusVariables>;
+  operationName: string;
+}
+export const getLeagueImportStatusRef: GetLeagueImportStatusRef;
+
+export function getLeagueImportStatus(vars: GetLeagueImportStatusVariables): QueryPromise<GetLeagueImportStatusData, GetLeagueImportStatusVariables>;
+export function getLeagueImportStatus(dc: DataConnect, vars: GetLeagueImportStatusVariables): QueryPromise<GetLeagueImportStatusData, GetLeagueImportStatusVariables>;
 
 interface GetParticipantLeaguesForTournamentRef {
   /* Allow users to create refs without passing in DataConnect */

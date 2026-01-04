@@ -56,6 +56,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetOpponentMatchHistories*](#getopponentmatchhistories)
   - [*GetHighestSeedRemaining*](#gethighestseedremaining)
   - [*GetTournamentImportStatus*](#gettournamentimportstatus)
+  - [*GetLeagueImportStatus*](#getleagueimportstatus)
   - [*GetParticipantLeaguesForTournament*](#getparticipantleaguesfortournament)
   - [*GetLeagueEntriesForEntries*](#getleagueentriesforentries)
   - [*GetFriendsInTournament*](#getfriendsintournament)
@@ -5951,6 +5952,129 @@ console.log(data.tournament);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.tournament);
+});
+```
+
+## GetLeagueImportStatus
+You can execute the `GetLeagueImportStatus` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getLeagueImportStatus(vars: GetLeagueImportStatusVariables): QueryPromise<GetLeagueImportStatusData, GetLeagueImportStatusVariables>;
+
+interface GetLeagueImportStatusRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLeagueImportStatusVariables): QueryRef<GetLeagueImportStatusData, GetLeagueImportStatusVariables>;
+}
+export const getLeagueImportStatusRef: GetLeagueImportStatusRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getLeagueImportStatus(dc: DataConnect, vars: GetLeagueImportStatusVariables): QueryPromise<GetLeagueImportStatusData, GetLeagueImportStatusVariables>;
+
+interface GetLeagueImportStatusRef {
+  ...
+  (dc: DataConnect, vars: GetLeagueImportStatusVariables): QueryRef<GetLeagueImportStatusData, GetLeagueImportStatusVariables>;
+}
+export const getLeagueImportStatusRef: GetLeagueImportStatusRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getLeagueImportStatusRef:
+```typescript
+const name = getLeagueImportStatusRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetLeagueImportStatus` query requires an argument of type `GetLeagueImportStatusVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetLeagueImportStatusVariables {
+  leagueId: number;
+  season: string;
+}
+```
+### Return Type
+Recall that executing the `GetLeagueImportStatus` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetLeagueImportStatusData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetLeagueImportStatusData {
+  leagues: ({
+    leagueId: number;
+    name: string;
+    entriesCount?: number | null;
+    importStatus?: string | null;
+    importProgress?: number | null;
+    importLockId?: UUIDString | null;
+    importStartedAt?: TimestampString | null;
+    importError?: string | null;
+    lastRefreshId?: UUIDString | null;
+    lastRefreshAt?: TimestampString | null;
+  })[];
+}
+```
+### Using `GetLeagueImportStatus`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getLeagueImportStatus, GetLeagueImportStatusVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetLeagueImportStatus` query requires an argument of type `GetLeagueImportStatusVariables`:
+const getLeagueImportStatusVars: GetLeagueImportStatusVariables = {
+  leagueId: ..., 
+  season: ..., 
+};
+
+// Call the `getLeagueImportStatus()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getLeagueImportStatus(getLeagueImportStatusVars);
+// Variables can be defined inline as well.
+const { data } = await getLeagueImportStatus({ leagueId: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getLeagueImportStatus(dataConnect, getLeagueImportStatusVars);
+
+console.log(data.leagues);
+
+// Or, you can use the `Promise` API.
+getLeagueImportStatus(getLeagueImportStatusVars).then((response) => {
+  const data = response.data;
+  console.log(data.leagues);
+});
+```
+
+### Using `GetLeagueImportStatus`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getLeagueImportStatusRef, GetLeagueImportStatusVariables } from '@knockoutfpl/dataconnect';
+
+// The `GetLeagueImportStatus` query requires an argument of type `GetLeagueImportStatusVariables`:
+const getLeagueImportStatusVars: GetLeagueImportStatusVariables = {
+  leagueId: ..., 
+  season: ..., 
+};
+
+// Call the `getLeagueImportStatusRef()` function to get a reference to the query.
+const ref = getLeagueImportStatusRef(getLeagueImportStatusVars);
+// Variables can be defined inline as well.
+const ref = getLeagueImportStatusRef({ leagueId: ..., season: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getLeagueImportStatusRef(dataConnect, getLeagueImportStatusVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.leagues);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.leagues);
 });
 ```
 

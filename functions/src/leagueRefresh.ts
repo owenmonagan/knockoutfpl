@@ -478,3 +478,73 @@ export async function getLeagueRefreshStatus(
 
   return result.data.leagues[0] || null;
 }
+
+/**
+ * Quick check if league is small (≤48 entries) without fetching all pages.
+ * Used to decide whether to import synchronously or spawn a background task.
+ *
+ * @param leagueId - FPL league ID
+ * @returns true if league has ≤48 entries (can be imported synchronously)
+ */
+export async function isSmallLeague(leagueId: number): Promise<boolean> {
+  const page1 = await fetchStandingsPage(leagueId, 1);
+
+  if (!page1) {
+    throw new Error(`League ${leagueId} not found`);
+  }
+
+  // If no next page and ≤48 results, it's small enough for sync import
+  if (!page1.standings.has_next) {
+    return page1.standings.results.length <= 48;
+  }
+
+  // Has multiple pages = large league
+  return false;
+}
+
+/**
+ * Get league import status including import progress fields.
+ */
+export interface LeagueImportStatus extends LeagueRefreshStatus {
+  importStatus: string | null;
+  importProgress: number | null;
+  importLockId: string | null;
+  importStartedAt: string | null;
+  importError: string | null;
+}
+
+const GET_LEAGUE_IMPORT_STATUS_QUERY = `
+  query GetLeagueImportStatus($leagueId: Int!, $season: String!) {
+    leagues(
+      where: { leagueId: { eq: $leagueId }, season: { eq: $season } }
+      limit: 1
+    ) {
+      leagueId
+      name
+      entriesCount
+      lastRefreshId
+      lastRefreshAt
+      importStatus
+      importProgress
+      importLockId
+      importStartedAt
+      importError
+    }
+  }
+`;
+
+/**
+ * Get full league import status including progress fields.
+ */
+export async function getLeagueImportStatus(
+  leagueId: number,
+  season: string
+): Promise<LeagueImportStatus | null> {
+  const result = await dataConnectAdmin.executeGraphql<{
+    leagues: LeagueImportStatus[];
+  }, { leagueId: number; season: string }>(GET_LEAGUE_IMPORT_STATUS_QUERY, {
+    variables: { leagueId, season },
+  });
+
+  return result.data.leagues[0] || null;
+}

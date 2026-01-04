@@ -979,6 +979,18 @@ exports.getTournamentImportStatus = function getTournamentImportStatus(dcOrVars,
   return executeQuery(getTournamentImportStatusRef(dcOrVars, vars));
 };
 
+const getLeagueImportStatusRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetLeagueImportStatus', inputVars);
+}
+getLeagueImportStatusRef.operationName = 'GetLeagueImportStatus';
+exports.getLeagueImportStatusRef = getLeagueImportStatusRef;
+
+exports.getLeagueImportStatus = function getLeagueImportStatus(dcOrVars, vars) {
+  return executeQuery(getLeagueImportStatusRef(dcOrVars, vars));
+};
+
 const getParticipantLeaguesForTournamentRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();

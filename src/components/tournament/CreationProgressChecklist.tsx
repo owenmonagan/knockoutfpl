@@ -26,7 +26,9 @@ const SMALL_TOURNAMENT_STEPS: CreationStep[] = [
 // Steps for large tournaments (backend status-based)
 const LARGE_TOURNAMENT_STEPS: CreationStep[] = [
   { id: 'pending', label: 'Initializing import...', duration: 0 },
-  { id: 'importing', label: 'Importing players from FPL', duration: 0 },
+  { id: 'importing', label: 'Checking league data', duration: 0 },
+  { id: 'awaiting_league_import', label: 'Importing league data from FPL', duration: 0 },
+  { id: 'creating_tournament_entries', label: 'Creating tournament entries', duration: 0 },
   { id: 'creating_rounds', label: 'Creating tournament rounds', duration: 0 },
   { id: 'creating_matches', label: 'Building bracket structure', duration: 0 },
   { id: 'creating_picks', label: 'Finalizing match assignments', duration: 0 },
@@ -40,14 +42,18 @@ function getStepIndexFromStatus(status: string | null): number {
       return 0;
     case 'importing':
       return 1;
-    case 'creating_rounds':
+    case 'awaiting_league_import':
       return 2;
-    case 'creating_matches':
+    case 'creating_tournament_entries':
       return 3;
-    case 'creating_picks':
+    case 'creating_rounds':
       return 4;
-    case 'complete':
+    case 'creating_matches':
       return 5;
+    case 'creating_picks':
+      return 6;
+    case 'complete':
+      return 7;
     default:
       return 0;
   }
@@ -203,12 +209,19 @@ export function CreationProgressChecklist({
     }
   }, [isActive, isComplete, error, isLargeTournament, steps]);
 
-  // Get step label with count for importing step
+  // Get step label with count for importing steps
   const getStepLabel = (step: CreationStep, index: number): string => {
-    if (isLargeTournament && step.id === 'importing' && backendStatus) {
-      const { importedCount, totalCount } = backendStatus;
-      if (importedCount !== null && totalCount !== null && totalCount > 0) {
-        return `Importing players from FPL (${importedCount} of ${totalCount})`;
+    if (isLargeTournament && backendStatus) {
+      const { importedCount, totalCount, importProgress } = backendStatus;
+
+      // Show progress for league import step
+      if (step.id === 'awaiting_league_import' && importProgress !== null) {
+        return `Importing league data from FPL (${importProgress}%)`;
+      }
+
+      // Show count for tournament entries step
+      if (step.id === 'creating_tournament_entries' && importedCount !== null && totalCount !== null && totalCount > 0) {
+        return `Creating tournament entries (${importedCount} of ${totalCount})`;
       }
     }
     return step.label;

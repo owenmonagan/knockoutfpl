@@ -92,6 +92,11 @@ export const importUserLeagues = onCall<{ entryId: number }, Promise<ImportUserL
     timeoutSeconds: 120, // Small leagues should import quickly, but allow time for multiple
   },
   async (request) => {
+    // Require authentication
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Must be logged in to import leagues');
+    }
+
     const { entryId } = request.data;
 
     if (!entryId || typeof entryId !== 'number') {

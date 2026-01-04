@@ -948,6 +948,22 @@ query GetTournamentImportStatus($id: UUID!) @auth(level: PUBLIC) {
   }
 }
 
+# Get league import status for polling during large league import
+query GetLeagueImportStatus($leagueId: Int!, $season: String!) @auth(level: PUBLIC) {
+  leagues(where: { leagueId: { eq: $leagueId }, season: { eq: $season } }, limit: 1) {
+    leagueId
+    name
+    entriesCount
+    importStatus
+    importProgress
+    importLockId
+    importStartedAt
+    importError
+    lastRefreshId
+    lastRefreshAt
+  }
+}
+
 # =============================================================================
 # PARTICIPANT LEAGUE QUERIES (Friends Feature)
 # =============================================================================
