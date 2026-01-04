@@ -938,3 +938,38 @@ query GetParticipantLeaguesForTournament($tournamentId: UUID!) @auth(level: PUBL
     entryRank
   }
 }
+
+# Get data needed to compute friends in a tournament
+# Friends are participants who share mini-leagues with the user (excluding system leagues)
+# The Cloud Function uses this data to:
+# 1. Get user's league memberships (filtered by season, excluding system leagues id < 336)
+# 2. Get all tournament participants with entry details
+# The Cloud Function then queries LeagueEntry for each participant to find shared leagues
+query GetFriendsInTournament(
+  $tournamentId: UUID!
+  $userEntryId: Int!
+  $season: String!
+) @auth(level: PUBLIC) {
+  # Get user's league memberships (system leagues have id < 336, so filter ge: 336)
+  userLeagues: leagueEntries(
+    where: {
+      entryId: { eq: $userEntryId }
+      season: { eq: $season }
+      leagueId: { ge: 336 }
+    }
+  ) {
+    leagueId
+  }
+
+  # Get all tournament participants with entry details
+  tournamentParticipants: participants(
+    where: { tournamentId: { eq: $tournamentId } }
+    orderBy: { seed: ASC }
+  ) {
+    entryId
+    seed
+    status
+    teamName
+    managerName
+  }
+}
