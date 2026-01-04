@@ -253,7 +253,7 @@ export function MatchesTab({
               />
             ))}
           </div>
-        ) : !isLoading ? (
+        ) : !isLoading && !hasMore ? (
           <p className="text-sm text-muted-foreground">No matches in this round.</p>
         ) : null}
 
