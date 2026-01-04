@@ -19,28 +19,18 @@ import {
 } from './nWayBracket';
 import {
   createTournamentAdmin,
-  upsertEntriesBatch,
   upsertPicksBatch,
   createRoundsBatch,
-  createParticipantsBatch,
+  createTournamentEntriesBatch,
   createMatchesBatch,
   updateMatchesBatch,
   createMatchPicksBatch,
   AuthClaims,
   UpdateMatchInput,
 } from './dataconnect-mutations';
+import { refreshLeague } from './leagueRefresh';
 
 // Database entity types (matching Data Connect schema)
-interface EntryRecord {
-  entryId: number;
-  season: string;
-  name: string;
-  playerFirstName?: string;
-  playerLastName?: string;
-  summaryOverallPoints?: number;
-  rawJson: string;
-}
-
 interface TournamentRecord {
   fplLeagueId: number;
   fplLeagueName: string;
@@ -59,15 +49,12 @@ interface RoundRecord {
   status: string;
 }
 
-interface ParticipantRecord {
+interface TournamentEntryRecord {
   tournamentId: string;
   entryId: number;
-  teamName: string;
-  managerName: string;
   seed: number;
-  leagueRank: number;
-  leaguePoints: number;
-  rawJson: string;
+  refreshId: string;
+  status: string;
 }
 
 interface MatchRecord {
@@ -92,6 +79,23 @@ export interface CreateTournamentRequest {
   fplLeagueId: number;
   startEvent?: number;  // Optional, defaults to currentGW + 1
   matchSize?: number;   // Optional, defaults to 2 (1v1)
+}
+
+/**
+ * Get the current FPL season string (e.g., "2024-25")
+ */
+export function getCurrentSeason(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-indexed
+
+  // FPL season runs Aug-May
+  // If we're in Jan-Jul, we're in the previous year's season
+  if (month < 7) { // Jan-Jul
+    return `${year - 1}-${year.toString().slice(-2)}`;
+  }
+  // Aug-Dec, we're in this year's season
+  return `${year}-${(year + 1).toString().slice(-2)}`;
 }
 
 export interface CreateTournamentResponse {
@@ -173,39 +177,17 @@ export function buildTournamentRecords(
   startEvent: number,
   matches: BracketMatch[],
   matchAssignments: MatchAssignment[],
-  matchSize: number = 2
+  matchSize: number = 2,
+  refreshId: string = ''
 ): {
-  entries: EntryRecord[];
   tournament: TournamentRecord;
   rounds: RoundRecord[];
-  participants: ParticipantRecord[];
+  tournamentEntries: TournamentEntryRecord[];
   matchRecords: MatchRecord[];
   matchPicks: MatchPickRecord[];
 } {
   const leagueData = standings.league;
   const standingsResults = standings.standings.results;
-
-  // Get current season (e.g., "2024-25")
-  const currentYear = new Date().getFullYear();
-  const season = `${currentYear}-${(currentYear + 1).toString().slice(-2)}`;
-
-  // Entries (FPL team data from league standings)
-  const entries: EntryRecord[] = standingsResults.map((p: any) => {
-    // Parse player name into first/last
-    const nameParts = (p.player_name || '').split(' ');
-    const playerFirstName = nameParts[0] || '';
-    const playerLastName = nameParts.slice(1).join(' ') || '';
-
-    return {
-      entryId: p.entry,
-      season,
-      name: p.entry_name,
-      playerFirstName,
-      playerLastName,
-      summaryOverallPoints: p.total,
-      rawJson: JSON.stringify(p),
-    };
-  });
 
   // Tournament
   const tournament: TournamentRecord = {
@@ -230,21 +212,18 @@ export function buildTournamentRecords(
     });
   }
 
-  // Participants (seed = rank in league)
-  const participants: ParticipantRecord[] = standingsResults.map((p: any, index: number) => ({
+  // TournamentEntries (seed = index + 1, based on league standings order)
+  const tournamentEntries: TournamentEntryRecord[] = standingsResults.map((p: any, index: number) => ({
     tournamentId,
     entryId: p.entry,
-    teamName: p.entry_name,
-    managerName: p.player_name,
     seed: index + 1,
-    leagueRank: p.rank,
-    leaguePoints: p.total,
-    rawJson: JSON.stringify(p),
+    refreshId,
+    status: 'active',
   }));
 
   // Create entry lookup by seed
   const seedToEntry = new Map<number, number>();
-  participants.forEach(p => seedToEntry.set(p.seed, p.entryId));
+  tournamentEntries.forEach(te => seedToEntry.set(te.seed, te.entryId));
 
   // Matches
   const matchRecords: MatchRecord[] = matches.map(m => ({
@@ -304,7 +283,7 @@ export function buildTournamentRecords(
     }
   }
 
-  return { entries, tournament, rounds, participants, matchRecords, matchPicks };
+  return { tournament, rounds, tournamentEntries, matchRecords, matchPicks };
 }
 
 /**
@@ -319,38 +298,17 @@ export function buildNWayTournamentRecords(
   startEvent: number,
   matches: NWayBracketMatch[],
   matchAssignments: NWayMatchAssignment[],
-  matchSize: number
+  matchSize: number,
+  refreshId: string = ''
 ): {
-  entries: EntryRecord[];
   tournament: TournamentRecord;
   rounds: RoundRecord[];
-  participants: ParticipantRecord[];
+  tournamentEntries: TournamentEntryRecord[];
   matchRecords: MatchRecord[];
   matchPicks: MatchPickRecord[];
 } {
   const leagueData = standings.league;
   const standingsResults = standings.standings.results;
-
-  // Get current season (e.g., "2024-25")
-  const currentYear = new Date().getFullYear();
-  const season = `${currentYear}-${(currentYear + 1).toString().slice(-2)}`;
-
-  // Entries (FPL team data from league standings)
-  const entries: EntryRecord[] = standingsResults.map((p: any) => {
-    const nameParts = (p.player_name || '').split(' ');
-    const playerFirstName = nameParts[0] || '';
-    const playerLastName = nameParts.slice(1).join(' ') || '';
-
-    return {
-      entryId: p.entry,
-      season,
-      name: p.entry_name,
-      playerFirstName,
-      playerLastName,
-      summaryOverallPoints: p.total,
-      rawJson: JSON.stringify(p),
-    };
-  });
 
   // Tournament
   const tournament: TournamentRecord = {
@@ -375,21 +333,18 @@ export function buildNWayTournamentRecords(
     });
   }
 
-  // Participants (seed = rank in league)
-  const participants: ParticipantRecord[] = standingsResults.map((p: any, index: number) => ({
+  // TournamentEntries (seed = index + 1, based on league standings order)
+  const tournamentEntries: TournamentEntryRecord[] = standingsResults.map((p: any, index: number) => ({
     tournamentId,
     entryId: p.entry,
-    teamName: p.entry_name,
-    managerName: p.player_name,
     seed: index + 1,
-    leagueRank: p.rank,
-    leaguePoints: p.total,
-    rawJson: JSON.stringify(p),
+    refreshId,
+    status: 'active',
   }));
 
   // Create entry lookup by seed
   const seedToEntry = new Map<number, number>();
-  participants.forEach(p => seedToEntry.set(p.seed, p.entryId));
+  tournamentEntries.forEach(te => seedToEntry.set(te.seed, te.entryId));
 
   // Matches (from N-way structure)
   const matchRecords: MatchRecord[] = matches.map(m => ({
@@ -453,11 +408,12 @@ export function buildNWayTournamentRecords(
     }
   }
 
-  return { entries, tournament, rounds, participants, matchRecords, matchPicks };
+  return { tournament, rounds, tournamentEntries, matchRecords, matchPicks };
 }
 
 /**
  * Write tournament records to database using Data Connect Admin SDK with impersonation
+ * Note: Entry and Pick records are created by refreshLeague before this function is called
  */
 async function writeTournamentToDatabase(
   tournamentId: string,
@@ -466,34 +422,19 @@ async function writeTournamentToDatabase(
 ): Promise<void> {
   console.log('[createTournament] Writing to database (batched):', {
     tournamentId,
-    entryCount: records.entries.length,
     roundCount: records.rounds.length,
-    participantCount: records.participants.length,
+    tournamentEntryCount: records.tournamentEntries.length,
     matchCount: records.matchRecords.length,
     matchPickCount: records.matchPicks.length,
   });
 
-  // 1. Create entries first (participants have FK to entries)
-  console.log(`[createTournament] Batch upserting ${records.entries.length} entries...`);
-  await upsertEntriesBatch(
-    records.entries.map(entry => ({
-      entryId: entry.entryId,
-      season: entry.season,
-      name: entry.name,
-      playerFirstName: entry.playerFirstName,
-      playerLastName: entry.playerLastName,
-      summaryOverallPoints: entry.summaryOverallPoints,
-      rawJson: entry.rawJson,
-    })),
-    authClaims
-  );
-
-  // 2. Create placeholder picks for tournament gameweeks
-  const pickCount = records.entries.length * records.rounds.length;
+  // 1. Create placeholder picks for tournament gameweeks
+  // Note: Entry records are already created by refreshLeague
+  const pickCount = records.tournamentEntries.length * records.rounds.length;
   console.log(`[createTournament] Batch upserting ${pickCount} placeholder picks...`);
-  const allPicks = records.entries.flatMap(entry =>
+  const allPicks = records.tournamentEntries.flatMap(te =>
     records.rounds.map(round => ({
-      entryId: entry.entryId,
+      entryId: te.entryId,
       event: round.event,
       points: 0,
       rawJson: '{}',
@@ -502,7 +443,7 @@ async function writeTournamentToDatabase(
   );
   await upsertPicksBatch(allPicks, authClaims);
 
-  // 3. Create tournament (must exist before rounds/participants reference it)
+  // 2. Create tournament (must exist before rounds/tournamentEntries reference it)
   console.log('[createTournament] Creating tournament record...');
   await createTournamentAdmin(
     {
@@ -519,7 +460,7 @@ async function writeTournamentToDatabase(
     authClaims
   );
 
-  // 4. Create rounds (batch)
+  // 3. Create rounds (batch)
   console.log(`[createTournament] Batch creating ${records.rounds.length} rounds...`);
   await createRoundsBatch(
     records.rounds.map(round => ({
@@ -531,23 +472,20 @@ async function writeTournamentToDatabase(
     authClaims
   );
 
-  // 5. Create participants (batch)
-  console.log(`[createTournament] Batch creating ${records.participants.length} participants...`);
-  await createParticipantsBatch(
-    records.participants.map(participant => ({
+  // 4. Create tournament entries (batch)
+  console.log(`[createTournament] Batch creating ${records.tournamentEntries.length} tournament entries...`);
+  await createTournamentEntriesBatch(
+    records.tournamentEntries.map(te => ({
       tournamentId,
-      entryId: participant.entryId,
-      teamName: participant.teamName,
-      managerName: participant.managerName,
-      seed: participant.seed,
-      leagueRank: participant.leagueRank,
-      leaguePoints: participant.leaguePoints,
-      rawJson: participant.rawJson,
+      entryId: te.entryId,
+      seed: te.seed,
+      refreshId: te.refreshId,
+      status: te.status,
     })),
     authClaims
   );
 
-  // 6. Create matches (batch)
+  // 5. Create matches (batch)
   console.log(`[createTournament] Batch creating ${records.matchRecords.length} matches...`);
   await createMatchesBatch(
     records.matchRecords.map(match => ({
@@ -563,7 +501,7 @@ async function writeTournamentToDatabase(
   );
   console.log(`[createTournament] Matches created successfully`);
 
-  // 6b. Update bye matches with winners (batch)
+  // 5b. Update bye matches with winners (batch)
   const byeMatchUpdates: UpdateMatchInput[] = records.matchRecords
     .filter(match => match.isBye && match.winnerEntryId)
     .map(match => ({
@@ -583,17 +521,15 @@ async function writeTournamentToDatabase(
     console.log(`[createTournament] Bye matches updated successfully`);
   }
 
-  // 7. Create match picks (batch)
+  // 6. Create match picks (batch)
   console.log(`[createTournament] Batch creating ${records.matchPicks.length} match picks...`);
 
   // Verify all matchPick references are valid
   const matchIdSet = new Set(records.matchRecords.map(m => m.matchId));
-  const entryIdSet = new Set(records.entries.map(e => e.entryId));
-  const participantKeySet = new Set(records.participants.map(p => `${p.entryId}`));
+  const entryIdSet = new Set(records.tournamentEntries.map(te => te.entryId));
 
   const invalidMatchRefs = records.matchPicks.filter(p => !matchIdSet.has(p.matchId));
   const invalidEntryRefs = records.matchPicks.filter(p => !entryIdSet.has(p.entryId));
-  const invalidParticipantRefs = records.matchPicks.filter(p => !participantKeySet.has(`${p.entryId}`));
 
   if (invalidMatchRefs.length > 0) {
     console.error(`[createTournament] INVALID MATCH REFS: ${JSON.stringify(invalidMatchRefs)}`);
@@ -601,9 +537,6 @@ async function writeTournamentToDatabase(
   }
   if (invalidEntryRefs.length > 0) {
     console.error(`[createTournament] INVALID ENTRY REFS: ${JSON.stringify(invalidEntryRefs)}`);
-  }
-  if (invalidParticipantRefs.length > 0) {
-    console.error(`[createTournament] INVALID PARTICIPANT REFS: ${JSON.stringify(invalidParticipantRefs)}`);
   }
 
   // Log detailed matchPicks info for debugging
@@ -813,7 +746,13 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
 
   console.log(`[createTournament] Bracket: ${participantCount} participants, matchSize=${matchSize}, ${totalRounds} rounds`);
 
-  // 6. Generate bracket and build records
+  // 7a. Refresh league data (creates/updates Entry and LeagueEntry records)
+  const season = getCurrentSeason();
+  console.log(`[createTournament] Refreshing league ${fplLeagueId} for season ${season}...`);
+  const refreshResult = await refreshLeague(fplLeagueId, season);
+  console.log(`[createTournament] League refreshed: refreshId=${refreshResult.refreshId}, entries=${refreshResult.entriesUpdated}`);
+
+  // 8. Generate bracket and build records
   const tournamentId = crypto.randomUUID();
   let records: ReturnType<typeof buildTournamentRecords>;
 
@@ -830,7 +769,8 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
       startEvent,
       matches,
       matchAssignments,
-      matchSize
+      matchSize,
+      refreshResult.refreshId
     );
   } else {
     // N-way bracket (3-way, 4-way, etc.)
@@ -845,11 +785,12 @@ export const createTournament = onCall(async (request: CallableRequest<CreateTou
       startEvent,
       matches,
       matchAssignments,
-      matchSize
+      matchSize,
+      refreshResult.refreshId
     );
   }
 
-  // 8. Write to database with impersonation
+  // 9. Write to database with impersonation
   await writeTournamentToDatabase(tournamentId, records, authClaims);
 
   return {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateTournamentRequest, validateLeagueStandings, getCurrentGameweek, buildTournamentRecords, buildNWayTournamentRecords } from './createTournament';
+import { validateTournamentRequest, validateLeagueStandings, getCurrentGameweek, getCurrentSeason, buildTournamentRecords, buildNWayTournamentRecords } from './createTournament';
 import { generateBracketStructure, assignParticipantsToMatches, calculateBracketSize, calculateTotalRounds } from './bracketGenerator';
 import { calculateNWayBracket, generateNWayBracketStructure, assignParticipantsToNWayMatches } from './nWayBracket';
 
@@ -149,6 +149,13 @@ describe('createTournament', () => {
     });
   });
 
+  describe('getCurrentSeason', () => {
+    it('returns current season in format YYYY-YY', () => {
+      const season = getCurrentSeason();
+      expect(season).toMatch(/^\d{4}-\d{2}$/);
+    });
+  });
+
   describe('buildTournamentRecords', () => {
     const mockStandings = {
       league: { id: 12345, name: 'Test League' },
@@ -161,6 +168,8 @@ describe('createTournament', () => {
         ]
       }
     };
+
+    const testRefreshId = 'test-refresh-id-123';
 
     it('builds correct tournament record', () => {
       const bracketSize = calculateBracketSize(4);
@@ -176,7 +185,9 @@ describe('createTournament', () => {
         totalRounds,
         10, // startEvent
         matches,
-        assignments
+        assignments,
+        2,
+        testRefreshId
       );
 
       expect(records.tournament.fplLeagueId).toBe(12345);
@@ -192,25 +203,27 @@ describe('createTournament', () => {
       const matches = generateBracketStructure(bracketSize);
       const assignments = assignParticipantsToMatches(bracketSize, 4);
 
-      const records = buildTournamentRecords('test-uuid', 'user-123', mockStandings, bracketSize, totalRounds, 10, matches, assignments);
+      const records = buildTournamentRecords('test-uuid', 'user-123', mockStandings, bracketSize, totalRounds, 10, matches, assignments, 2, testRefreshId);
 
       expect(records.rounds).toHaveLength(2);
       expect(records.rounds[0].status).toBe('active');
       expect(records.rounds[1].status).toBe('pending');
     });
 
-    it('creates participants with correct seeds', () => {
+    it('creates tournamentEntries with correct seeds and refreshId', () => {
       const bracketSize = calculateBracketSize(4);
       const totalRounds = calculateTotalRounds(bracketSize);
       const matches = generateBracketStructure(bracketSize);
       const assignments = assignParticipantsToMatches(bracketSize, 4);
 
-      const records = buildTournamentRecords('test-uuid', 'user-123', mockStandings, bracketSize, totalRounds, 10, matches, assignments);
+      const records = buildTournamentRecords('test-uuid', 'user-123', mockStandings, bracketSize, totalRounds, 10, matches, assignments, 2, testRefreshId);
 
-      expect(records.participants).toHaveLength(4);
-      expect(records.participants[0].seed).toBe(1);
-      expect(records.participants[0].entryId).toBe(100);
-      expect(records.participants[3].seed).toBe(4);
+      expect(records.tournamentEntries).toHaveLength(4);
+      expect(records.tournamentEntries[0].seed).toBe(1);
+      expect(records.tournamentEntries[0].entryId).toBe(100);
+      expect(records.tournamentEntries[0].refreshId).toBe(testRefreshId);
+      expect(records.tournamentEntries[0].status).toBe('active');
+      expect(records.tournamentEntries[3].seed).toBe(4);
     });
 
     it('creates match picks for round 1', () => {
@@ -219,7 +232,7 @@ describe('createTournament', () => {
       const matches = generateBracketStructure(bracketSize);
       const assignments = assignParticipantsToMatches(bracketSize, 4);
 
-      const records = buildTournamentRecords('test-uuid', 'user-123', mockStandings, bracketSize, totalRounds, 10, matches, assignments);
+      const records = buildTournamentRecords('test-uuid', 'user-123', mockStandings, bracketSize, totalRounds, 10, matches, assignments, 2, testRefreshId);
 
       // 4 participants = 2 matches = 4 match picks
       expect(records.matchPicks).toHaveLength(4);
@@ -243,7 +256,7 @@ describe('createTournament', () => {
       const matches = generateBracketStructure(bracketSize);
       const assignments = assignParticipantsToMatches(bracketSize, 3);
 
-      const records = buildTournamentRecords('test-uuid', 'user-123', threePlayerStandings, bracketSize, totalRounds, 10, matches, assignments);
+      const records = buildTournamentRecords('test-uuid', 'user-123', threePlayerStandings, bracketSize, totalRounds, 10, matches, assignments, 2, testRefreshId);
 
       // One match should be a bye
       const byeMatches = records.matchRecords.filter(m => m.isBye);
@@ -280,12 +293,14 @@ describe('createTournament', () => {
         totalRounds,
         20,
         matches,
-        assignments
+        assignments,
+        2,
+        testRefreshId
       );
 
       // Document expected counts for Data Connect writes
       expect(records.rounds).toHaveLength(3); // 8 -> 4 -> 2 -> 1
-      expect(records.participants).toHaveLength(8);
+      expect(records.tournamentEntries).toHaveLength(8);
       expect(records.matchRecords).toHaveLength(7); // 4 + 2 + 1
       expect(records.matchPicks).toHaveLength(8); // 4 matches * 2 picks each
 
@@ -308,6 +323,8 @@ describe('createTournament', () => {
       }
     };
 
+    const testRefreshId = 'nway-refresh-id-456';
+
     it('builds correct 4-way tournament with 4 participants (1 match final)', () => {
       const matchSize = 4;
       const { rounds, totalSlots } = calculateNWayBracket(4, matchSize);
@@ -323,13 +340,14 @@ describe('createTournament', () => {
         10, // startEvent
         matches,
         assignments,
-        matchSize
+        matchSize,
+        testRefreshId
       );
 
       expect(records.tournament.fplLeagueId).toBe(12345);
       expect(records.tournament.matchSize).toBe(4);
       expect(records.tournament.totalRounds).toBe(1); // 4 people = 1 round (all in final)
-      expect(records.participants).toHaveLength(4);
+      expect(records.tournamentEntries).toHaveLength(4);
       expect(records.matchRecords).toHaveLength(1); // Single 4-way final
       expect(records.matchPicks).toHaveLength(4); // 4 picks for 1 match
     });
@@ -362,12 +380,13 @@ describe('createTournament', () => {
         20,
         matches,
         assignments,
-        matchSize
+        matchSize,
+        testRefreshId
       );
 
       expect(records.tournament.matchSize).toBe(4);
       expect(records.tournament.totalRounds).toBe(2); // 16 -> 4 -> 1
-      expect(records.participants).toHaveLength(16);
+      expect(records.tournamentEntries).toHaveLength(16);
       expect(records.matchRecords).toHaveLength(5); // 4 round1 + 1 final
       expect(records.rounds).toHaveLength(2);
     });
@@ -400,12 +419,13 @@ describe('createTournament', () => {
         15,
         matches,
         assignments,
-        matchSize
+        matchSize,
+        testRefreshId
       );
 
       expect(records.tournament.matchSize).toBe(3);
       expect(records.tournament.totalRounds).toBe(2); // 9 -> 3 -> 1
-      expect(records.participants).toHaveLength(9);
+      expect(records.tournamentEntries).toHaveLength(9);
       expect(records.matchRecords).toHaveLength(4); // 3 round1 + 1 final
       expect(records.matchPicks).toHaveLength(9); // 9 participants in round 1
     });
@@ -441,11 +461,12 @@ describe('createTournament', () => {
         25,
         matches,
         assignments,
-        matchSize
+        matchSize,
+        testRefreshId
       );
 
       expect(records.tournament.matchSize).toBe(4);
-      expect(records.participants).toHaveLength(10);
+      expect(records.tournamentEntries).toHaveLength(10);
       // 6 byes distributed across 4 groups: each group has 2-3 real players
       // No group has only 1 player, so no auto-advance bye matches
       expect(records.matchRecords).toHaveLength(5); // 4 round1 + 1 final
@@ -483,12 +504,36 @@ describe('createTournament', () => {
         30,
         matches,
         assignments,
-        matchSize
+        matchSize,
+        testRefreshId
       );
 
       // All 4 round 1 matches should be byes (only 1 real player each)
       const byeMatches = records.matchRecords.filter(m => m.isBye);
       expect(byeMatches.length).toBe(4);
+    });
+
+    it('includes refreshId in tournamentEntries', () => {
+      const matchSize = 4;
+      const { rounds, totalSlots } = calculateNWayBracket(4, matchSize);
+      const matches = generateNWayBracketStructure(matchSize, rounds);
+      const assignments = assignParticipantsToNWayMatches(matchSize, totalSlots, 4);
+
+      const records = buildNWayTournamentRecords(
+        'test-uuid',
+        'user-123',
+        mockStandings,
+        totalSlots,
+        rounds,
+        10,
+        matches,
+        assignments,
+        matchSize,
+        testRefreshId
+      );
+
+      expect(records.tournamentEntries[0].refreshId).toBe(testRefreshId);
+      expect(records.tournamentEntries[0].status).toBe('active');
     });
   });
 });

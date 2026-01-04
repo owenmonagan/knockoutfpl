@@ -1813,9 +1813,18 @@ export interface CreateParticipantLeagueInput {
   entryRank: number | null;
 }
 
+export interface CreateTournamentEntryInput {
+  tournamentId: string;
+  entryId: number;
+  seed: number;
+  refreshId: string;
+  status?: string;
+}
+
 /**
  * Batch creates participant league records.
  * Used to store mini-league memberships for tournament participants.
+ * @deprecated Use LeagueEntry instead. This will be removed after migration.
  */
 export async function createParticipantLeaguesBatch(
   leagues: CreateParticipantLeagueInput[]
@@ -1836,6 +1845,35 @@ export async function createParticipantLeaguesBatch(
     `).join('\n');
 
     const batchMutation = `mutation CreateParticipantLeaguesBatch { ${mutations} }`;
+    await dataConnectAdmin.executeGraphql(batchMutation, {});
+  }
+}
+
+/**
+ * Batch create tournament entries - reduces N calls to ceil(N/BATCH_SIZE) calls
+ * Creates TournamentEntry records linking tournaments to entries from a league refresh
+ */
+export async function createTournamentEntriesBatch(
+  entries: CreateTournamentEntryInput[],
+  _authClaims: AuthClaims
+): Promise<void> {
+  if (entries.length === 0) return;
+
+  for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+    const batch = entries.slice(i, i + BATCH_SIZE);
+
+    const mutations = batch.map((entry, idx) => `
+      te${idx}: tournamentEntry_insert(data: {
+        tournamentId: "${entry.tournamentId}"
+        entryId: ${entry.entryId}
+        seed: ${entry.seed}
+        refreshId: "${entry.refreshId}"
+        status: "${entry.status ?? 'active'}"
+        entryEntryId: ${entry.entryId}
+      })
+    `).join('\n');
+
+    const batchMutation = `mutation BatchCreateTournamentEntries { ${mutations} }`;
     await dataConnectAdmin.executeGraphql(batchMutation, {});
   }
 }
