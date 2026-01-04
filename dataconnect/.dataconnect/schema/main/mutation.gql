@@ -108,6 +108,15 @@ extend type Mutation {
     data: Tournament_Data!
   ): Tournament_KeyOutput! @fdc_generated(from: "Tournament", purpose: INSERT_SINGLE)
   """
+  ✨ Insert a single `TournamentEntry` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  tournamentEntry_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: TournamentEntry_Data!
+  ): TournamentEntry_KeyOutput! @fdc_generated(from: "TournamentEntry", purpose: INSERT_SINGLE)
+  """
   ✨ Insert a single `User` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
   user_insert(
@@ -224,6 +233,15 @@ extend type Mutation {
     """
     data: [Tournament_Data!]!
   ): [Tournament_KeyOutput!]! @fdc_generated(from: "Tournament", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `TournamentEntry` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  tournamentEntry_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [TournamentEntry_Data!]!
+  ): [TournamentEntry_KeyOutput!]! @fdc_generated(from: "TournamentEntry", purpose: INSERT_MULTIPLE)
   """
   ✨ Insert `User` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
@@ -342,6 +360,15 @@ extend type Mutation {
     data: Tournament_Data!
   ): Tournament_KeyOutput! @fdc_generated(from: "Tournament", purpose: UPSERT_SINGLE)
   """
+  ✨ Insert or update a single `TournamentEntry` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `TournamentEntry`.
+  """
+  tournamentEntry_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: TournamentEntry_Data!
+  ): TournamentEntry_KeyOutput! @fdc_generated(from: "TournamentEntry", purpose: UPSERT_SINGLE)
+  """
   ✨ Insert or update a single `User` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `User`.
   """
   user_upsert(
@@ -458,6 +485,15 @@ extend type Mutation {
     """
     data: [Tournament_Data!]!
   ): [Tournament_KeyOutput!]! @fdc_generated(from: "Tournament", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `TournamentEntry` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `TournamentEntry`.
+  """
+  tournamentEntry_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [TournamentEntry_Data!]!
+  ): [TournamentEntry_KeyOutput!]! @fdc_generated(from: "TournamentEntry", purpose: UPSERT_MULTIPLE)
   """
   ✨ Insert or update `User` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `User`.
   """
@@ -706,6 +742,25 @@ extend type Mutation {
     data: Tournament_Data!
   ): Tournament_KeyOutput @fdc_generated(from: "Tournament", purpose: UPDATE_SINGLE)
   """
+  ✨ Update a single `TournamentEntry` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `TournamentEntry` or `null` if not found.
+  """
+  tournamentEntry_update(
+    """
+    The key used to identify the object.
+    """
+    key: TournamentEntry_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: TournamentEntry_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: TournamentEntry_Data!
+  ): TournamentEntry_KeyOutput @fdc_generated(from: "TournamentEntry", purpose: UPDATE_SINGLE)
+  """
   ✨ Update a single `User` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `User` or `null` if not found.
   """
   user_update(
@@ -953,6 +1008,25 @@ extend type Mutation {
     data: Tournament_Data!
   ): Int! @fdc_generated(from: "Tournament", purpose: UPDATE_MULTIPLE)
   """
+  ✨ Update `TournamentEntry` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  tournamentEntry_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: TournamentEntry_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: TournamentEntry_Data!
+  ): Int! @fdc_generated(from: "TournamentEntry", purpose: UPDATE_MULTIPLE)
+  """
   ✨ Update `User` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
   """
   user_updateMany(
@@ -1150,6 +1224,20 @@ extend type Mutation {
     first: Tournament_FirstRow
   ): Tournament_KeyOutput @fdc_generated(from: "Tournament", purpose: DELETE_SINGLE)
   """
+  ✨ Delete a single `TournamentEntry` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  tournamentEntry_delete(
+    """
+    The key used to identify the object.
+    """
+    key: TournamentEntry_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: TournamentEntry_FirstRow
+  ): TournamentEntry_KeyOutput @fdc_generated(from: "TournamentEntry", purpose: DELETE_SINGLE)
+  """
   ✨ Delete a single `User` based on `id`, `key` or `first` and return its key (or `null` if not found).
   """
   user_delete(
@@ -1331,6 +1419,20 @@ extend type Mutation {
     """
     all: Boolean = false
   ): Int! @fdc_generated(from: "Tournament", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `TournamentEntry` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  tournamentEntry_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: TournamentEntry_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "TournamentEntry", purpose: DELETE_MULTIPLE)
   """
   ✨ Delete `User` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
   """

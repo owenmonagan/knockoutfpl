@@ -26,3 +26,13 @@ extend type Pick {
   """
   entryEntryId: Int! @fdc_generated(from: "Pick.entry", purpose: IMPLICIT_REF_FIELD)
 }
+extend type TournamentEntry {
+  """
+  ✨ Implicit foreign key field based on `TournamentEntry`.`entry`. It must match the value of `Entry`.`entryId`. See `@ref` for how to customize it.
+  """
+  entryEntryId: Int! @fdc_generated(from: "TournamentEntry.entry", purpose: IMPLICIT_REF_FIELD)
+  """
+  ✨ Implicit foreign key field based on `TournamentEntry`.`user`. It must match the value of `User`.`uid`. See `@ref` for how to customize it.
+  """
+  userUid: String @fdc_generated(from: "TournamentEntry.user", purpose: IMPLICIT_REF_FIELD)
+}

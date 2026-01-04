@@ -287,6 +287,40 @@ extend type Entry {
     having: Pick_Having
   ): [Pick!]! @fdc_generated(from: "Pick.entry", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
   """
+  ✨ List `TournamentEntry` objects in a one-to-many relationship (where `TournamentEntry`.`entry` is this object).
+  """
+  tournamentEntries_on_entry(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: TournamentEntry_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [TournamentEntry_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: TournamentEntry_Having
+  ): [TournamentEntry!]! @fdc_generated(from: "TournamentEntry.entry", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
   Implicit metadata field that cannot be written. It provides extra information about query results.
   """
   _metadata: _Metadata @fdc_generated(from: "Entry", purpose: METADATA_FIELD)
@@ -2664,6 +2698,40 @@ extend type Tournament {
     having: Round_Having
   ): [Round!]! @fdc_generated(from: "Round.tournament", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
   """
+  ✨ List `TournamentEntry` objects in a one-to-many relationship (where `TournamentEntry`.`tournament` is this object).
+  """
+  tournamentEntries_on_tournament(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: TournamentEntry_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [TournamentEntry_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: TournamentEntry_Having
+  ): [TournamentEntry!]! @fdc_generated(from: "TournamentEntry.tournament", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
   Implicit metadata field that cannot be written. It provides extra information about query results.
   """
   _metadata: _Metadata @fdc_generated(from: "Tournament", purpose: METADATA_FIELD)
@@ -3172,6 +3240,201 @@ extend type Tournament {
   """
   winnerEntryId_max: Int @fdc_generated(from: "Tournament.winnerEntryId", purpose: QUERY_MAX)
 }
+extend type TournamentEntry {
+  """
+  Implicit metadata field that cannot be written. It provides extra information about query results.
+  """
+  _metadata: _Metadata @fdc_generated(from: "TournamentEntry", purpose: METADATA_FIELD)
+  """
+  ✨ Count the number of rows in the `TournamentEntry` table.
+  """
+  _count: Int! @fdc_generated(from: "TournamentEntry.", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `TournamentEntry` table where the `eliminationRound` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  eliminationRound_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "TournamentEntry.eliminationRound", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `TournamentEntry` table where the `entryEntryId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  entryEntryId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "TournamentEntry.entryEntryId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `TournamentEntry` table where the `entryId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  entryId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "TournamentEntry.entryId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `TournamentEntry` table where the `refreshId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  refreshId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "TournamentEntry.refreshId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `TournamentEntry` table where the `seed` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  seed_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "TournamentEntry.seed", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `TournamentEntry` table where the `status` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  status_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "TournamentEntry.status", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `TournamentEntry` table where the `tournamentId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  tournamentId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "TournamentEntry.tournamentId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `TournamentEntry` table where the `uid` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  uid_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "TournamentEntry.uid", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `TournamentEntry` table where the `userUid` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  userUid_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "TournamentEntry.userUid", purpose: QUERY_COUNT)
+  """
+  ✨ Sum the `eliminationRound` field in the `TournamentEntry` table.
+  """
+  eliminationRound_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "TournamentEntry.eliminationRound", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `entryEntryId` field in the `TournamentEntry` table.
+  """
+  entryEntryId_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "TournamentEntry.entryEntryId", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `entryId` field in the `TournamentEntry` table.
+  """
+  entryId_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "TournamentEntry.entryId", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `seed` field in the `TournamentEntry` table.
+  """
+  seed_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "TournamentEntry.seed", purpose: QUERY_SUM)
+  """
+  ✨ Average the `eliminationRound` field in the `TournamentEntry` table.
+  """
+  eliminationRound_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "TournamentEntry.eliminationRound", purpose: QUERY_AVG)
+  """
+  ✨ Average the `entryEntryId` field in the `TournamentEntry` table.
+  """
+  entryEntryId_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "TournamentEntry.entryEntryId", purpose: QUERY_AVG)
+  """
+  ✨ Average the `entryId` field in the `TournamentEntry` table.
+  """
+  entryId_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "TournamentEntry.entryId", purpose: QUERY_AVG)
+  """
+  ✨ Average the `seed` field in the `TournamentEntry` table.
+  """
+  seed_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "TournamentEntry.seed", purpose: QUERY_AVG)
+  """
+  ✨ Minimum of the `eliminationRound` field in the `TournamentEntry` table.
+  """
+  eliminationRound_min: Int @fdc_generated(from: "TournamentEntry.eliminationRound", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `entryEntryId` field in the `TournamentEntry` table.
+  """
+  entryEntryId_min: Int @fdc_generated(from: "TournamentEntry.entryEntryId", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `entryId` field in the `TournamentEntry` table.
+  """
+  entryId_min: Int @fdc_generated(from: "TournamentEntry.entryId", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `seed` field in the `TournamentEntry` table.
+  """
+  seed_min: Int @fdc_generated(from: "TournamentEntry.seed", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `eliminationRound` field in the `TournamentEntry` table.
+  """
+  eliminationRound_max: Int @fdc_generated(from: "TournamentEntry.eliminationRound", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `entryEntryId` field in the `TournamentEntry` table.
+  """
+  entryEntryId_max: Int @fdc_generated(from: "TournamentEntry.entryEntryId", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `entryId` field in the `TournamentEntry` table.
+  """
+  entryId_max: Int @fdc_generated(from: "TournamentEntry.entryId", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `seed` field in the `TournamentEntry` table.
+  """
+  seed_max: Int @fdc_generated(from: "TournamentEntry.seed", purpose: QUERY_MAX)
+}
 extend type User {
   """
   ✨ List `EmailQueue` objects in a one-to-many relationship (where `EmailQueue`.`user` is this object).
@@ -3275,6 +3538,40 @@ extend type User {
     """
     having: Tournament_Having
   ): [Tournament!]! @fdc_generated(from: "Tournament.creator", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
+  ✨ List `TournamentEntry` objects in a one-to-many relationship (where `TournamentEntry`.`user` is this object).
+  """
+  tournamentEntries_on_user(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: TournamentEntry_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [TournamentEntry_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: TournamentEntry_Having
+  ): [TournamentEntry!]! @fdc_generated(from: "TournamentEntry.user", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
   """
   Implicit metadata field that cannot be written. It provides extra information about query results.
   """

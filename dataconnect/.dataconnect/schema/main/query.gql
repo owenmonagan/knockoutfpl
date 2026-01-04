@@ -178,6 +178,20 @@ extend type Query {
     first: Tournament_FirstRow
   ): Tournament @fdc_generated(from: "Tournament", purpose: QUERY_SINGLE)
   """
+  ✨ Look up a single `TournamentEntry` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  tournamentEntry(
+    """
+    The key used to identify the object.
+    """
+    key: TournamentEntry_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: TournamentEntry_FirstRow
+  ): TournamentEntry @fdc_generated(from: "TournamentEntry", purpose: QUERY_SINGLE)
+  """
   ✨ Look up a single `User` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
   """
   user(
@@ -599,6 +613,40 @@ extend type Query {
     """
     having: Tournament_Having
   ): [Tournament!]! @fdc_generated(from: "Tournament", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `TournamentEntry` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  tournamentEntries(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: TournamentEntry_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [TournamentEntry_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: TournamentEntry_Having
+  ): [TournamentEntry!]! @fdc_generated(from: "TournamentEntry", purpose: QUERY_MULTIPLE)
   """
   ✨ List `User` objects in the table and return selected fields, optionally filtered by `where` conditions
   """

@@ -1,5 +1,5 @@
 // src/components/tournament/tabs/MatchesTab.tsx
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   Select,
   SelectContent,
@@ -10,7 +10,11 @@ import {
 import { CompactMatchCard } from '../CompactMatchCard';
 import { getRoundStatus, getRoundStatusDisplay } from '@/lib/tournament-utils';
 import { cn } from '@/lib/utils';
-import type { Tournament, Participant } from '@/types/tournament';
+import { Spinner } from '@/components/ui/spinner';
+import { getRoundMatches } from '@knockoutfpl/dataconnect';
+import type { Tournament, Participant, Match } from '@/types/tournament';
+
+const PAGE_SIZE = 100;
 
 interface MatchesTabProps {
   tournament: Tournament;
@@ -32,29 +36,132 @@ export function MatchesTab({
     tournament.currentRound
   );
 
-  // Get selected round data
+  // Pagination state for "Everyone Else" section
+  const [paginatedMatches, setPaginatedMatches] = useState<Match[]>([]);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Get selected round data (for round info like gameweek)
   const selectedRound = useMemo(() => {
     return tournament.rounds.find((r) => r.roundNumber === selectedRoundNumber);
   }, [tournament.rounds, selectedRoundNumber]);
 
-  // Get matches for selected round
-  const matches = selectedRound?.matches ?? [];
-
-  // Find user's match in this round
+  // Find user's match from preloaded tournament data (always visible in "You" section)
   const userMatch = useMemo(() => {
     if (!userFplTeamId) return null;
-    return matches.find(
+    const round = tournament.rounds.find((r) => r.roundNumber === selectedRoundNumber);
+    return round?.matches.find(
       (match) =>
         match.player1?.fplTeamId === userFplTeamId ||
         match.player2?.fplTeamId === userFplTeamId
-    );
-  }, [matches, userFplTeamId]);
+    ) ?? null;
+  }, [tournament.rounds, selectedRoundNumber, userFplTeamId]);
 
-  // Everyone else = all matches except user's
-  const otherMatches = useMemo(() => {
-    if (!userMatch) return matches;
-    return matches.filter((match) => match.id !== userMatch.id);
-  }, [matches, userMatch]);
+  // Transform API response to Match type
+  const transformApiMatch = useCallback((apiMatch: {
+    matchId: number;
+    tournamentId: string;
+    status: string;
+    winnerEntryId?: number | null;
+    isBye: boolean;
+    qualifiesToMatchId?: number | null;
+    matchPicks_on_match: Array<{
+      entryId: number;
+      slot: number;
+      participant: {
+        seed: number;
+        teamName: string;
+        managerName: string;
+      };
+    }>;
+  }): Match => {
+    // Sort by slot to ensure player1 = slot 1, player2 = slot 2
+    const sortedPicks = [...apiMatch.matchPicks_on_match].sort((a, b) => a.slot - b.slot);
+    const pick1 = sortedPicks[0];
+    const pick2 = sortedPicks[1];
+
+    return {
+      id: `${apiMatch.tournamentId}-${apiMatch.matchId}`,
+      player1: pick1 ? {
+        fplTeamId: pick1.entryId,
+        seed: pick1.participant.seed,
+        score: null, // Score not included in this query
+        teamName: pick1.participant.teamName,
+        managerName: pick1.participant.managerName,
+      } : null,
+      player2: pick2 ? {
+        fplTeamId: pick2.entryId,
+        seed: pick2.participant.seed,
+        score: null,
+        teamName: pick2.participant.teamName,
+        managerName: pick2.participant.managerName,
+      } : null,
+      winnerId: apiMatch.winnerEntryId ?? null,
+      isBye: apiMatch.isBye,
+      qualifiesTo: apiMatch.qualifiesToMatchId
+        ? `${apiMatch.tournamentId}-${apiMatch.qualifiesToMatchId}`
+        : undefined,
+    };
+  }, []);
+
+  // Load more matches
+  const loadMore = useCallback(async () => {
+    if (isLoading || !hasMore) return;
+
+    setIsLoading(true);
+    try {
+      const result = await getRoundMatches({
+        tournamentId: tournament.id,
+        roundNumber: selectedRoundNumber,
+        limit: PAGE_SIZE,
+        offset,
+      });
+
+      const newMatches = result.data.matches.map(transformApiMatch);
+      setPaginatedMatches((prev) => [...prev, ...newMatches]);
+      setOffset((prev) => prev + newMatches.length);
+      setHasMore(newMatches.length === PAGE_SIZE);
+    } catch (error) {
+      console.error('Failed to load matches:', error);
+      setHasMore(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading, hasMore, offset, tournament.id, selectedRoundNumber, transformApiMatch]);
+
+  // Reset pagination when round changes
+  useEffect(() => {
+    setPaginatedMatches([]);
+    setOffset(0);
+    setHasMore(true);
+  }, [selectedRoundNumber]);
+
+  // Initial load when round changes or after reset
+  useEffect(() => {
+    if (paginatedMatches.length === 0 && hasMore && !isLoading) {
+      loadMore();
+    }
+  }, [selectedRoundNumber, paginatedMatches.length, hasMore, isLoading, loadMore]);
+
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, isLoading, loadMore]);
 
   // Round status for display
   const roundStatus = selectedRound
@@ -131,9 +238,9 @@ export function MatchesTab({
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
           {userMatch ? 'Everyone Else' : 'All Matches'}
         </h3>
-        {otherMatches.length > 0 ? (
+        {paginatedMatches.length > 0 ? (
           <div className="space-y-2">
-            {otherMatches.map((match) => (
+            {paginatedMatches.map((match) => (
               <CompactMatchCard
                 key={match.id}
                 match={match}
@@ -146,8 +253,15 @@ export function MatchesTab({
               />
             ))}
           </div>
-        ) : (
+        ) : !isLoading ? (
           <p className="text-sm text-muted-foreground">No matches in this round.</p>
+        ) : null}
+
+        {/* Sentinel for infinite scroll */}
+        {hasMore && (
+          <div ref={sentinelRef} className="h-10 flex items-center justify-center">
+            {isLoading && <Spinner className="size-5" />}
+          </div>
         )}
       </section>
     </div>

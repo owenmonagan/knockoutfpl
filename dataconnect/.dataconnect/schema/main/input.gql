@@ -71,6 +71,12 @@ It has the same format as `Tournament_Key`, but is only used as mutation return 
 """
 scalar Tournament_KeyOutput
 """
+✨ `TournamentEntry_KeyOutput` returns the primary key fields of table type `TournamentEntry`.
+
+It has the same format as `TournamentEntry_Key`, but is only used as mutation return value.
+"""
+scalar TournamentEntry_KeyOutput
+"""
 ✨ `User_KeyOutput` returns the primary key fields of table type `User`.
 
 It has the same format as `User_Key`, but is only used as mutation return value.
@@ -728,6 +734,10 @@ input Entry_Filter {
   ✨ Generated from Field `Entry`.`picks_on_entry` of type `[Pick!]!`
   """
   picks_on_entry: Pick_ListFilter
+  """
+  ✨ Generated from Field `Entry`.`tournamentEntries_on_entry` of type `[TournamentEntry!]!`
+  """
+  tournamentEntries_on_entry: TournamentEntry_ListFilter
 }
 """
 ✨ Generated first-row input type for table 'Entry'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
@@ -6050,6 +6060,10 @@ input Tournament_Filter {
   ✨ Generated from Field `Tournament`.`rounds_on_tournament` of type `[Round!]!`
   """
   rounds_on_tournament: Round_ListFilter
+  """
+  ✨ Generated from Field `Tournament`.`tournamentEntries_on_tournament` of type `[TournamentEntry!]!`
+  """
+  tournamentEntries_on_tournament: TournamentEntry_ListFilter
 }
 """
 ✨ Generated first-row input type for table 'Tournament'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
@@ -6777,6 +6791,505 @@ input Tournament_Order {
   winnerEntryId_max: OrderDirection
 }
 """
+✨ Generated data input type for table 'TournamentEntry'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input TournamentEntry_Data {
+  """
+  ✨ Generated from Field `TournamentEntry`.`tournamentId` of type `UUID!`
+  """
+  tournamentId: UUID
+  """
+  ✨ `_expr` server value variant of `tournamentId` (✨ Generated from Field `TournamentEntry`.`tournamentId` of type `UUID!`)
+  """
+  tournamentId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId` of type `Int!`
+  """
+  entryId: Int
+  """
+  ✨ `_expr` server value variant of `entryId` (✨ Generated from Field `TournamentEntry`.`entryId` of type `Int!`)
+  """
+  entryId_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `entryId` (✨ Generated from Field `TournamentEntry`.`entryId` of type `Int!`)
+  """
+  entryId_update: [Int_Update!]
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId` of type `Int!`
+  """
+  entryEntryId: Int
+  """
+  ✨ `_expr` server value variant of `entryEntryId` (✨ Generated from Field `TournamentEntry`.`entryEntryId` of type `Int!`)
+  """
+  entryEntryId_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `entryEntryId` (✨ Generated from Field `TournamentEntry`.`entryEntryId` of type `Int!`)
+  """
+  entryEntryId_update: [Int_Update!]
+  """
+  ✨ Generated from Field `TournamentEntry`.`userUid` of type `String`
+  """
+  userUid: String
+  """
+  ✨ `_expr` server value variant of `userUid` (✨ Generated from Field `TournamentEntry`.`userUid` of type `String`)
+  """
+  userUid_expr: String_Expr
+  """
+  ✨ Generated from Field `TournamentEntry`.`entry` of type `Entry!`
+  """
+  entry: Entry_Key
+  """
+  ✨ Generated from Field `TournamentEntry`.`tournament` of type `Tournament!`
+  """
+  tournament: Tournament_Key
+  """
+  ✨ Generated from Field `TournamentEntry`.`user` of type `User`
+  """
+  user: User_Key
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound` of type `Int`
+  """
+  eliminationRound: Int
+  """
+  ✨ `_expr` server value variant of `eliminationRound` (✨ Generated from Field `TournamentEntry`.`eliminationRound` of type `Int`)
+  """
+  eliminationRound_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `eliminationRound` (✨ Generated from Field `TournamentEntry`.`eliminationRound` of type `Int`)
+  """
+  eliminationRound_update: [Int_Update!]
+  """
+  ✨ Generated from Field `TournamentEntry`.`refreshId` of type `UUID!`
+  """
+  refreshId: UUID
+  """
+  ✨ `_expr` server value variant of `refreshId` (✨ Generated from Field `TournamentEntry`.`refreshId` of type `UUID!`)
+  """
+  refreshId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed` of type `Int!`
+  """
+  seed: Int
+  """
+  ✨ `_expr` server value variant of `seed` (✨ Generated from Field `TournamentEntry`.`seed` of type `Int!`)
+  """
+  seed_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `seed` (✨ Generated from Field `TournamentEntry`.`seed` of type `Int!`)
+  """
+  seed_update: [Int_Update!]
+  """
+  ✨ Generated from Field `TournamentEntry`.`status` of type `String!`
+  """
+  status: String
+  """
+  ✨ `_expr` server value variant of `status` (✨ Generated from Field `TournamentEntry`.`status` of type `String!`)
+  """
+  status_expr: String_Expr
+  """
+  ✨ Generated from Field `TournamentEntry`.`uid` of type `String`
+  """
+  uid: String
+  """
+  ✨ `_expr` server value variant of `uid` (✨ Generated from Field `TournamentEntry`.`uid` of type `String`)
+  """
+  uid_expr: String_Expr
+}
+"""
+✨ Generated filter input type for table 'TournamentEntry'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input TournamentEntry_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [TournamentEntry_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: TournamentEntry_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [TournamentEntry_Filter!]
+  """
+  ✨ Generated from Field `TournamentEntry`.`tournamentId` of type `UUID!`
+  """
+  tournamentId: UUID_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId` of type `Int!`
+  """
+  entryId: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId` of type `Int!`
+  """
+  entryEntryId: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`userUid` of type `String`
+  """
+  userUid: String_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entry` of type `Entry!`
+  """
+  entry: Entry_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`tournament` of type `Tournament!`
+  """
+  tournament: Tournament_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`user` of type `User`
+  """
+  user: User_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound` of type `Int`
+  """
+  eliminationRound: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`refreshId` of type `UUID!`
+  """
+  refreshId: UUID_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed` of type `Int!`
+  """
+  seed: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`status` of type `String!`
+  """
+  status: String_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`uid` of type `String`
+  """
+  uid: String_Filter
+}
+"""
+✨ Generated first-row input type for table 'TournamentEntry'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input TournamentEntry_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [TournamentEntry_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: TournamentEntry_Filter
+}
+"""
+✨ Generated having input type for table 'TournamentEntry'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input TournamentEntry_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [TournamentEntry_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: TournamentEntry_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [TournamentEntry_Having!]
+  """
+  ✨ Generated from Field `TournamentEntry`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound_count` of type `Int!`
+  """
+  eliminationRound_count: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId_count` of type `Int!`
+  """
+  entryEntryId_count: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId_count` of type `Int!`
+  """
+  entryId_count: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`refreshId_count` of type `Int!`
+  """
+  refreshId_count: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed_count` of type `Int!`
+  """
+  seed_count: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`status_count` of type `Int!`
+  """
+  status_count: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`tournamentId_count` of type `Int!`
+  """
+  tournamentId_count: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`uid_count` of type `Int!`
+  """
+  uid_count: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`userUid_count` of type `Int!`
+  """
+  userUid_count: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound_sum` of type `Int`
+  """
+  eliminationRound_sum: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId_sum` of type `Int`
+  """
+  entryEntryId_sum: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId_sum` of type `Int`
+  """
+  entryId_sum: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed_sum` of type `Int`
+  """
+  seed_sum: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound_avg` of type `Float`
+  """
+  eliminationRound_avg: Float_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId_avg` of type `Float`
+  """
+  entryEntryId_avg: Float_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId_avg` of type `Float`
+  """
+  entryId_avg: Float_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed_avg` of type `Float`
+  """
+  seed_avg: Float_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound_min` of type `Int`
+  """
+  eliminationRound_min: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId_min` of type `Int`
+  """
+  entryEntryId_min: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId_min` of type `Int`
+  """
+  entryId_min: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed_min` of type `Int`
+  """
+  seed_min: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound_max` of type `Int`
+  """
+  eliminationRound_max: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId_max` of type `Int`
+  """
+  entryEntryId_max: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId_max` of type `Int`
+  """
+  entryId_max: Int_Filter
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed_max` of type `Int`
+  """
+  seed_max: Int_Filter
+}
+"""
+✨ Generated key input type for table 'TournamentEntry'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input TournamentEntry_Key {
+  """
+  ✨ Generated from Field `TournamentEntry`.`tournamentId` of type `UUID!`
+  """
+  tournamentId: UUID
+  """
+  ✨ `_expr` server value variant of `tournamentId` (✨ Generated from Field `TournamentEntry`.`tournamentId` of type `UUID!`)
+  """
+  tournamentId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId` of type `Int!`
+  """
+  entryId: Int
+  """
+  ✨ `_expr` server value variant of `entryId` (✨ Generated from Field `TournamentEntry`.`entryId` of type `Int!`)
+  """
+  entryId_expr: Int_Expr
+}
+"""
+✨ Generated list filter input type for table 'TournamentEntry'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input TournamentEntry_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: TournamentEntry_Filter
+}
+"""
+✨ Generated order input type for table 'TournamentEntry'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input TournamentEntry_Order {
+  """
+  ✨ Generated from Field `TournamentEntry`.`tournamentId` of type `UUID!`
+  """
+  tournamentId: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId` of type `Int!`
+  """
+  entryId: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId` of type `Int!`
+  """
+  entryEntryId: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`userUid` of type `String`
+  """
+  userUid: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entry` of type `Entry!`
+  """
+  entry: Entry_Order
+  """
+  ✨ Generated from Field `TournamentEntry`.`tournament` of type `Tournament!`
+  """
+  tournament: Tournament_Order
+  """
+  ✨ Generated from Field `TournamentEntry`.`user` of type `User`
+  """
+  user: User_Order
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound` of type `Int`
+  """
+  eliminationRound: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`refreshId` of type `UUID!`
+  """
+  refreshId: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed` of type `Int!`
+  """
+  seed: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`status` of type `String!`
+  """
+  status: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`uid` of type `String`
+  """
+  uid: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound_count` of type `Int!`
+  """
+  eliminationRound_count: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId_count` of type `Int!`
+  """
+  entryEntryId_count: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId_count` of type `Int!`
+  """
+  entryId_count: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`refreshId_count` of type `Int!`
+  """
+  refreshId_count: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed_count` of type `Int!`
+  """
+  seed_count: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`status_count` of type `Int!`
+  """
+  status_count: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`tournamentId_count` of type `Int!`
+  """
+  tournamentId_count: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`uid_count` of type `Int!`
+  """
+  uid_count: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`userUid_count` of type `Int!`
+  """
+  userUid_count: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound_sum` of type `Int`
+  """
+  eliminationRound_sum: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId_sum` of type `Int`
+  """
+  entryEntryId_sum: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId_sum` of type `Int`
+  """
+  entryId_sum: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed_sum` of type `Int`
+  """
+  seed_sum: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound_avg` of type `Float`
+  """
+  eliminationRound_avg: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId_avg` of type `Float`
+  """
+  entryEntryId_avg: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId_avg` of type `Float`
+  """
+  entryId_avg: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed_avg` of type `Float`
+  """
+  seed_avg: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound_min` of type `Int`
+  """
+  eliminationRound_min: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId_min` of type `Int`
+  """
+  entryEntryId_min: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId_min` of type `Int`
+  """
+  entryId_min: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed_min` of type `Int`
+  """
+  seed_min: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`eliminationRound_max` of type `Int`
+  """
+  eliminationRound_max: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryEntryId_max` of type `Int`
+  """
+  entryEntryId_max: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`entryId_max` of type `Int`
+  """
+  entryId_max: OrderDirection
+  """
+  ✨ Generated from Field `TournamentEntry`.`seed_max` of type `Int`
+  """
+  seed_max: OrderDirection
+}
+"""
 ✨ Generated data input type for table 'User'. It includes all necessary fields for creating or upserting rows into table.
 """
 input User_Data {
@@ -6889,6 +7402,10 @@ input User_Filter {
   ✨ Generated from Field `User`.`tournaments_on_creator` of type `[Tournament!]!`
   """
   tournaments_on_creator: Tournament_ListFilter
+  """
+  ✨ Generated from Field `User`.`tournamentEntries_on_user` of type `[TournamentEntry!]!`
+  """
+  tournamentEntries_on_user: TournamentEntry_ListFilter
 }
 """
 ✨ Generated first-row input type for table 'User'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
