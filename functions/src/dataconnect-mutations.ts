@@ -1819,6 +1819,8 @@ export interface CreateTournamentEntryInput {
   seed: number;
   refreshId: string;
   status?: string;
+  eliminationRound?: number;
+  uid?: string;
 }
 
 /**
@@ -1863,12 +1865,14 @@ export async function createTournamentEntriesBatch(
     const batch = entries.slice(i, i + BATCH_SIZE);
 
     const mutations = batch.map((entry, idx) => `
-      te${idx}: tournamentEntry_insert(data: {
+      te${idx}: tournamentEntry_upsert(data: {
         tournamentId: "${entry.tournamentId}"
         entryId: ${entry.entryId}
         seed: ${entry.seed}
         refreshId: "${entry.refreshId}"
         status: "${entry.status ?? 'active'}"
+        eliminationRound: ${entry.eliminationRound ?? 'null'}
+        uid: ${entry.uid ? JSON.stringify(entry.uid) : 'null'}
         entryEntryId: ${entry.entryId}
       })
     `).join('\n');
