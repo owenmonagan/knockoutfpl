@@ -1,11 +1,11 @@
 // src/components/tournament/BracketRound.tsx
 import { Badge } from '../ui/badge';
 import { CompactMatchCard } from './CompactMatchCard';
-import type { Round, Participant } from '../../types/tournament';
+import type { Round, Participant, TournamentEntry } from '../../types/tournament';
 
 interface BracketRoundProps {
   round: Round;
-  participants: Participant[];
+  participants: Participant[] | TournamentEntry[];
   currentGameweek: number;
   isAuthenticated?: boolean;
   onClaimTeam?: (fplTeamId: number) => void;

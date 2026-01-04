@@ -1,10 +1,10 @@
 // src/components/tournament/BracketLayout.tsx
-import type { Round, Participant } from '../../types/tournament';
+import type { Round, Participant, TournamentEntry } from '../../types/tournament';
 import { BracketRound } from './BracketRound';
 
 interface BracketLayoutProps {
   rounds: Round[];
-  participants: Participant[];
+  participants: Participant[] | TournamentEntry[];
   currentGameweek: number;
   isAuthenticated?: boolean;
   onClaimTeam?: (fplTeamId: number) => void;

@@ -1,11 +1,11 @@
 // src/components/tournament/RoundSection.tsx
 import { Badge } from '../ui/badge';
 import { MatchCard } from './MatchCard';
-import type { Round, Participant } from '../../types/tournament';
+import type { Round, Participant, TournamentEntry } from '../../types/tournament';
 
 interface RoundSectionProps {
   round: Round;
-  participants: Participant[];
+  participants: Participant[] | TournamentEntry[];
 }
 
 export function RoundSection({ round, participants }: RoundSectionProps) {
