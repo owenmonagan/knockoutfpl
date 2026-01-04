@@ -1,13 +1,45 @@
 // src/components/tournament/CompactMatchCard.tsx
 import { Card } from '../ui/card';
-import type { Match, Participant } from '../../types/tournament';
+import type { Match, Participant, TournamentEntry } from '../../types/tournament';
+import { isTournamentEntry, getTeamName, getManagerName } from '../../types/tournament';
 import { cn } from '../../lib/utils';
 import { getFplTeamUrl } from '../../lib/fpl-urls';
 import { ClaimTeamButton } from './ClaimTeamButton';
 
+/**
+ * Normalized participant data for display
+ */
+interface NormalizedParticipant {
+  fplTeamId: number;
+  fplTeamName: string;
+  managerName: string;
+  seed: number;
+}
+
+/**
+ * Normalize a participant to a common format for lookup
+ */
+function normalizeParticipant(item: Participant | TournamentEntry): NormalizedParticipant {
+  if (isTournamentEntry(item)) {
+    return {
+      fplTeamId: item.entryId,
+      fplTeamName: getTeamName(item),
+      managerName: getManagerName(item),
+      seed: item.seed,
+    };
+  }
+  return {
+    fplTeamId: item.fplTeamId,
+    fplTeamName: item.fplTeamName,
+    managerName: item.managerName,
+    seed: item.seed,
+  };
+}
+
 interface CompactMatchCardProps {
   match: Match;
-  participants: Participant[];
+  /** Accepts both legacy Participant[] and new TournamentEntry[] formats */
+  participants: Participant[] | TournamentEntry[];
   roundStarted: boolean;
   gameweek: number;
   isAuthenticated?: boolean;
@@ -24,9 +56,13 @@ export function CompactMatchCard({
   onClaimTeam,
   className,
 }: CompactMatchCardProps) {
-  const getParticipant = (fplTeamId: number | null): Participant | null => {
+  const getParticipant = (fplTeamId: number | null): NormalizedParticipant | null => {
     if (!fplTeamId) return null;
-    return participants.find((p) => p.fplTeamId === fplTeamId) || null;
+    const found = participants.find((p) => {
+      const id = isTournamentEntry(p) ? p.entryId : p.fplTeamId;
+      return id === fplTeamId;
+    });
+    return found ? normalizeParticipant(found) : null;
   };
 
   const player1 = match.player1 ? getParticipant(match.player1.fplTeamId) : null;
@@ -34,7 +70,7 @@ export function CompactMatchCard({
 
   const renderPlayerSlot = (
     player: typeof match.player1,
-    participant: Participant | null,
+    participant: NormalizedParticipant | null,
     isBye: boolean = false
   ) => {
     const isWinner = match.winnerId !== null && player?.fplTeamId === match.winnerId;

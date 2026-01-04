@@ -12,13 +12,14 @@ import { getRoundStatus, getRoundStatusDisplay } from '@/lib/tournament-utils';
 import { cn } from '@/lib/utils';
 import { Spinner } from '@/components/ui/spinner';
 import { getRoundMatches } from '@knockoutfpl/dataconnect';
-import type { Tournament, Participant, Match } from '@/types/tournament';
+import type { Tournament, Participant, TournamentEntry, Match } from '@/types/tournament';
 
 const PAGE_SIZE = 100;
 
 interface MatchesTabProps {
   tournament: Tournament;
-  participants: Participant[];
+  /** Accepts both legacy Participant[] and new TournamentEntry[] formats */
+  participants: Participant[] | TournamentEntry[];
   userFplTeamId?: number;
   isAuthenticated?: boolean;
   onClaimTeam?: (fplTeamId: number) => void;
@@ -42,6 +43,8 @@ export function MatchesTab({
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  // Ref to prevent race conditions - state updates are async, but ref is synchronous
+  const isLoadingRef = useRef(false);
 
   // Get selected round data (for round info like gameweek)
   const selectedRound = useMemo(() => {
@@ -108,8 +111,10 @@ export function MatchesTab({
 
   // Load more matches
   const loadMore = useCallback(async () => {
-    if (isLoading || !hasMore) return;
+    // Use ref for synchronous check to prevent race conditions
+    if (isLoadingRef.current || !hasMore) return;
 
+    isLoadingRef.current = true;
     setIsLoading(true);
     try {
       const result = await getRoundMatches({
@@ -127,12 +132,14 @@ export function MatchesTab({
       console.error('Failed to load matches:', error);
       setHasMore(false);
     } finally {
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [isLoading, hasMore, offset, tournament.id, selectedRoundNumber, transformApiMatch]);
+  }, [hasMore, offset, tournament.id, selectedRoundNumber, transformApiMatch]);
 
   // Reset pagination when round changes
   useEffect(() => {
+    isLoadingRef.current = false;
     setPaginatedMatches([]);
     setOffset(0);
     setHasMore(true);
@@ -140,10 +147,10 @@ export function MatchesTab({
 
   // Initial load when round changes or after reset
   useEffect(() => {
-    if (paginatedMatches.length === 0 && hasMore && !isLoading) {
+    if (paginatedMatches.length === 0 && hasMore && !isLoading && offset === 0) {
       loadMore();
     }
-  }, [selectedRoundNumber, paginatedMatches.length, hasMore, isLoading, loadMore]);
+  }, [paginatedMatches.length, hasMore, isLoading, offset, loadMore]);
 
   // IntersectionObserver for infinite scroll
   useEffect(() => {
@@ -152,7 +159,8 @@ export function MatchesTab({
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoading) {
+        // Use ref for synchronous check - state may be stale in callback
+        if (entries[0].isIntersecting && hasMore && !isLoadingRef.current) {
           loadMore();
         }
       },
@@ -161,7 +169,7 @@ export function MatchesTab({
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, isLoading, loadMore]);
+  }, [hasMore, loadMore]);
 
   // Round status for display
   const roundStatus = selectedRound

@@ -57,6 +57,22 @@ export function tournamentEntryToParticipant(entry: TournamentEntry): Participan
   };
 }
 
+/**
+ * Type guard to check if an item is a TournamentEntry
+ */
+export function isTournamentEntry(
+  item: Participant | TournamentEntry
+): item is TournamentEntry {
+  return 'entryId' in item && 'entry' in item;
+}
+
+/**
+ * Get the entry ID from either a Participant or TournamentEntry
+ */
+export function getEntryId(item: Participant | TournamentEntry): number {
+  return isTournamentEntry(item) ? item.entryId : item.fplTeamId;
+}
+
 export interface MatchPlayer {
   fplTeamId: number;
   seed: number;
@@ -97,7 +113,8 @@ export interface Tournament {
   totalRounds: number; // Calculated from participant count
   matchSize?: number; // NEW: 2 = 1v1, 3 = 3-way, etc. (optional, defaults to 2)
   status: TournamentStatus;
-  participants: Participant[];
+  /** Accepts both legacy Participant[] and new TournamentEntry[] formats */
+  participants: Participant[] | TournamentEntry[];
   rounds: Round[];
   winnerId: number | null; // FPL team ID of winner
   createdAt: string;
