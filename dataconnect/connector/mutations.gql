@@ -97,13 +97,15 @@ mutation UpsertPick(
 # LEAGUE MUTATIONS
 # =============================================================================
 
-# Upsert league from FPL API
+# Upsert league from FPL API with refresh tracking
 mutation UpsertLeague(
   $leagueId: Int!
   $season: String!
   $name: String!
   $created: Timestamp
   $adminEntry: Int
+  $entriesCount: Int
+  $refreshId: UUID
   $rawJson: String!
 ) @auth(level: PUBLIC) {
   league_upsert(
@@ -113,7 +115,30 @@ mutation UpsertLeague(
       name: $name
       created: $created
       adminEntry: $adminEntry
+      entriesCount: $entriesCount
+      lastRefreshId: $refreshId
+      lastRefreshAt_expr: "request.time"
       rawJson: $rawJson
+    }
+  )
+}
+
+# Batch upsert league entries
+mutation UpsertLeagueEntriesBatch($entries: [LeagueEntry_Data!]!) @auth(level: PUBLIC) {
+  leagueEntry_upsertMany(data: $entries)
+}
+
+# Delete stale league entries (from old refresh)
+mutation DeleteStaleLeagueEntries(
+  $leagueId: Int!
+  $season: String!
+  $currentRefreshId: UUID!
+) @auth(level: PUBLIC) {
+  leagueEntry_deleteMany(
+    where: {
+      leagueId: { eq: $leagueId }
+      season: { eq: $season }
+      refreshId: { ne: $currentRefreshId }
     }
   )
 }
