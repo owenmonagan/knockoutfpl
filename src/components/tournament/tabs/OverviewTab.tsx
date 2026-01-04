@@ -8,7 +8,7 @@ import { FriendsActivity } from '../FriendsActivity';
 import type { MatchSummaryCardProps } from '@/components/dashboard/MatchSummaryCard';
 import type { Tournament, Participant } from '@/types/tournament';
 import type { FriendInTournament } from '@/services/friends';
-import { getMatchPlayers } from '@/types/tournament';
+import { getMatchPlayers, getEntryId } from '@/types/tournament';
 import {
   findSiblingMatch,
   calculateRemainingParticipants,
@@ -84,7 +84,7 @@ export function OverviewTab({
     }
 
     const opponentParticipant = opponent
-      ? tournament.participants.find((p) => p.fplTeamId === opponent.fplTeamId)
+      ? tournament.participants.find((p) => getEntryId(p) === opponent.fplTeamId)
       : null;
 
     return {
@@ -149,7 +149,7 @@ export function OverviewTab({
     // Handle bye match - single player advances automatically
     if (siblingMatch.isBye || players.length === 1) {
       const byeRecipient = tournament.participants.find(
-        (p) => p.fplTeamId === players[0]?.fplTeamId
+        (p) => getEntryId(p) === players[0]?.fplTeamId
       );
       if (!byeRecipient) return null;
 
@@ -169,8 +169,8 @@ export function OverviewTab({
 
     if (players.length < 2) return null;
 
-    const team1 = tournament.participants.find((p) => p.fplTeamId === players[0]?.fplTeamId);
-    const team2 = tournament.participants.find((p) => p.fplTeamId === players[1]?.fplTeamId);
+    const team1 = tournament.participants.find((p) => getEntryId(p) === players[0]?.fplTeamId);
+    const team2 = tournament.participants.find((p) => getEntryId(p) === players[1]?.fplTeamId);
 
     if (!team1 || !team2) return null;
 
